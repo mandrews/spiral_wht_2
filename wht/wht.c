@@ -1,11 +1,13 @@
 #include "wht.h"
 #include "scanner.h"
 
+#if 0
 int
 yywrap()
 {
   return -1;
 }
+#endif
 
 int
 wht_read_int()
@@ -36,6 +38,15 @@ wht_require(char c)
     wht_error("expected '%c'.", c); 
 }
 
+int
+wht_check(char c)
+{
+  char x;
+  x = yylex();
+  wht_unput(x);
+
+  return (x == c);
+}
 
 Wht *
 wht_parse_helper()
@@ -68,7 +79,7 @@ wht_parse(char *in)
 int
 main(void)
 {
-  char s[20] = "small[2]\0";
+  char s[40] = "split[small[2],small[2]]\0";
   Wht *W;
 
   W = wht_parse(s);

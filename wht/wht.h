@@ -47,6 +47,8 @@ void wht_free(void *p);
 
 int is2power(long n);
 
+#define wht_apply(wht, S, D, x) ((wht->apply)(wht, S, D, x))
+
 #define wht_error(format, args...)  \
   {\
     fprintf (stderr, "error, "); \
@@ -61,13 +63,15 @@ int is2power(long n);
 
 #include "small.h"
 
-#define REGISTERED_CODELETS 1
+Wht * parse_split();
+#define REGISTERED_CODELETS 2
 
 typedef Wht * (*parse_callback) (void);
 
 static
 parse_callback callbacks[REGISTERED_CODELETS] = { 
-  &parse_small 
+  &parse_small,
+  &parse_split,
 };
 
 union {
@@ -79,5 +83,7 @@ int wht_read_int();
 void wht_next_codelet();
 int wht_is_codelet(char *f);
 void wht_require(char c);
+int wht_check(char c);
+Wht * wht_parse_helper();
 
 #endif/* WHT_H */

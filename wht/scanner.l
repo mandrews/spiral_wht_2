@@ -1,5 +1,7 @@
 %{
 #include "wht.h"
+
+void wht_unput(char x);
 %}
 
 %%
@@ -18,3 +20,9 @@
             }
 .           { return yytext[0];   }
 %%
+
+void 
+wht_unput(char x) 
+{ 
+  unput(x); 
+}

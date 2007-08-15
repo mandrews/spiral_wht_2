@@ -9,14 +9,14 @@ CFLAGS = -std=c99 -g -O2 $(INCLUDES)
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 
-SRC = small.c utils.c 
+SRC = small.c utils.c split.c
 OBJ = $(addsuffix .o, $(basename $(SRC)))
 
 .PHONY: all
 all: wht
 
 scanner.c: scanner.l
-	flex -X --header-file=scanner.h -o scanner.c scanner.l
+	flex --header-file=scanner.h -o scanner.c scanner.l
 
 scanner.o: scanner.c 
 
