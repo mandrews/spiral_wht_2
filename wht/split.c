@@ -19,6 +19,8 @@
 
 #include "wht.h"
 
+Wht *wht_new_split(int nn, Wht *Ws[]);
+
 Wht *
 parse_split()
 {
@@ -28,17 +30,21 @@ parse_split()
   if (wht_is_codelet("split")) {
     wht_require('[');
     nn = 0;
-    wht_parse_helper(Ws[0]); 
+    Ws[0] = wht_parse_helper();
     nn++;
     while (wht_check(',')) {
       if (nn == SPLIT_MAX_FACTORS)
         wht_error("too many arguments for split[ ] in wht_parse()");
       wht_require(',');
-      wht_parse_helper(Ws[nn]);
+      Ws[nn] = wht_parse_helper();
       nn++;
     }
     wht_require(']');
+
+    return wht_new_split(nn, Ws);
   }
+
+  return NULL;
 }
 
 
