@@ -89,17 +89,17 @@ usage() {
 int
 main (int argc, char **argv)
 {
-  char *wht;
+  char *wht_plan;
   int c;
 
-  wht = NULL;
+  wht_plan = NULL;
 
   opterr = 0;
 
   while ((c = getopt (argc, argv, "hw:")) != -1)
     switch (c) {
       case 'w':
-        wht = optarg;
+        wht_plan = optarg;
         break;
       case 'h':
         usage();
@@ -107,12 +107,23 @@ main (int argc, char **argv)
         usage();
     }
 
-  if (wht == NULL)
+  if (wht_plan == NULL)
     usage();
 
   Wht *W;
+  wht_value *x;
+  long N;
+  int i;
 
-  W = wht_parse(wht);
+  W = wht_parse(wht_plan);
+
+  N = W->N;
+
+  x = (wht_value *) malloc(N * sizeof(wht_value));
+  for (i = 0; i < N; i++)
+    x[i] = 0.0;
+
+  wht_apply(W,1,0,x);
 
   return 0;
 }
