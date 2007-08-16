@@ -1,5 +1,9 @@
 #include "wht.h"
+
 #include "scanner.h"
+
+#include "getopt.h"
+
 
 #if 0
 int
@@ -76,13 +80,39 @@ wht_parse(char *in)
   return wht_parse_helper();
 }
 
+static void
+usage() {
+  printf("wht: -w PLAN\n");
+  exit(1);
+}
+
 int
-main(void)
+main (int argc, char **argv)
 {
-  char s[40] = "split[small[2],small[2]]\0";
+  char *wht;
+  int c;
+
+  wht = NULL;
+
+  opterr = 0;
+
+  while ((c = getopt (argc, argv, "hw:")) != -1)
+    switch (c) {
+      case 'w':
+        wht = optarg;
+        break;
+      case 'h':
+        usage();
+      default:
+        usage();
+    }
+
+  if (wht == NULL)
+    usage();
+
   Wht *W;
 
-  W = wht_parse(s);
+  W = wht_parse(wht);
 
   return 0;
 }
