@@ -46,7 +46,7 @@ wht_init_small(int n) {
   W->free      = wht_free_small;
   W->to_string = wht_to_string_small;
   W->apply     = wht_get_codelet(buf);
-  W->apply(NULL,0,0,0);
+  W->nILNumber = 1;
 
   return W;  
 }
