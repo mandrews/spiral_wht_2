@@ -5,13 +5,11 @@
 #include "getopt.h"
 
 
-#if 0
 int
 yywrap()
 {
   return -1;
 }
-#endif
 
 int
 wht_read_int()

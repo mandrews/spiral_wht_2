@@ -38,7 +38,7 @@ wht_init_small(int n) {
   if (n > MAX_UNROLLED)
     wht_error("%d > %d too large", n, MAX_UNROLLED);
 
-  snprintf(buf,13,"apply_small%d\0",n);
+  snprintf(buf,13,"apply_small%d",n);
 
   W            = (Wht *) wht_malloc(sizeof(Wht));
   W->N         = (long) pow((double) 2, (double) n);
@@ -47,6 +47,9 @@ wht_init_small(int n) {
   W->to_string = wht_to_string_small;
   W->apply     = wht_get_codelet(buf);
   W->nILNumber = 1;
+
+  if (W->apply == NULL)
+    wht_error("Could not find codelet %s.", buf);
 
   return W;  
 }

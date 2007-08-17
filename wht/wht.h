@@ -21,6 +21,8 @@
 #define WHT_NUMBER    1
 #define WHT_CODELET   2
 
+#define CODELET_CALL_MAX_SIZE 40
+
 /* data type for the signal */
 typedef double wht_value;
 
@@ -85,5 +87,13 @@ int wht_is_codelet(char *f);
 void wht_require(char c);
 int wht_check(char c);
 Wht * wht_parse_helper();
+
+
+typedef void (*codelet)(Wht *W, long S, long D, wht_value *x);
+
+typedef struct {
+  char    name[CODELET_CALL_MAX_SIZE];
+  codelet call;
+} codelet_entry;
 
 #endif/* WHT_H */
