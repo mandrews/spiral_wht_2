@@ -141,22 +141,22 @@ let stride input i k n =
 let permute input m =
   let nm = (Array.length input) in
   let rec _permute p =
-    let x = Array.of_list [(stride input p m nm)] in
+    let x = [(stride input p m nm)] in
     if p = 0 then
       x
     else
-      Array.append (_permute (p-1)) x
+      List.append (_permute (p-1)) x
   in _permute (m-1)
 
 (* Partition array into blocks of size k *)
 let partition input k =
   let nm = (Array.length input) in
   let rec _partition p =
-    let x = Array.of_list [ (Array.sub input p k) ] in
+    let x = [ (Array.sub input p k) ] in
     if p =  (nm - k) then
       x
     else
-      Array.append (_partition (p+k)) x
+      List.append x (_partition (p+k))
   in (_partition 0)
 
 let wht_to_code wht n =
@@ -178,11 +178,11 @@ let wht_to_code wht n =
     match wht with
     | W n -> ((kernel n) input)
     | Tensor (I k, x) ->  
-      let iks = (Array.map (fun p -> encode x p) (partition input (m/k))) in
-        Array.fold_left (vertical_merge) empty_chunk iks
+      let iks = (List.map (fun p -> encode x p) (partition input (m/k))) in
+        List.fold_left (vertical_merge) empty_chunk (List.rev iks)
     | Tensor (x, I k) ->  
-      let iks = (Array.map (fun p -> encode x p) (permute input k)) in
-        Array.fold_left (vertical_merge) empty_chunk iks
+      let iks = (List.map (fun p -> encode x p) (permute input k)) in
+        List.fold_left (vertical_merge) empty_chunk iks
     | Product (a,b) -> 
       begin
         let x = (encode b input) in
@@ -210,7 +210,7 @@ let wht_to_code wht n =
   (horizontal_merge z (horizontal_merge y x))
   ;;
 
-let n = 8 in
+let n = 16 in
 let wht = derive (W n) in
   begin
     print_string (wht_to_string wht); printf "\n";
