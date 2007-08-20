@@ -29,6 +29,12 @@ type chunk =
     block  : code     list
   }
 
+let empty_chunk =
+  {
+    output = Array.of_list [];
+    block  = []
+  }
+
 let rec range a b s =
   if a >= b then []
   else a :: range (a+s) b s
@@ -116,9 +122,6 @@ let kernel n  =
   | 4 -> kernel_4 
   | n -> failwith "No kernel for this size."
 
-let stride input i k n =
-  Array.map (fun x -> (Array.get input x)) (Array.of_list (range i n k))
-
 let vertical_merge y x =
   {
     output = (Array.append x.output y.output);
@@ -131,27 +134,30 @@ let horizontal_merge y x =
     block  = x.block @ y.block
   }
 
-let i_tensor_w code input n k =
-  let m = n*k in
-  let rec _i_tensor_w code input n k =
-    if k = 1 then
-      (code (Array.sub input 0 n))
-    else
-      let y = (code (Array.sub input (m/k) n))
-      and x = (_i_tensor_w code input n (k-1)) in
-      (vertical_merge y x)
-  in (_i_tensor_w code input n k)
+let stride input i k n =
+  Array.map (fun x -> (Array.get input x)) (Array.of_list (range i n k))
 
-let w_tensor_i code input n k =
-  let m = n*k in
-  let rec _w_tensor_i code input i =
-    if i = 0 then
-      (code (stride input 0 k m)) 
+(* Permute array input by m *)
+let permute input m =
+  let nm = (Array.length input) in
+  let rec _permute p =
+    let x = Array.of_list [(stride input p m nm)] in
+    if p = 0 then
+      x
     else
-      let y = (code (stride input i k m)) 
-      and x = (_w_tensor_i code input (i-1)) in
-      (vertical_merge y x)
-  in (_w_tensor_i code input (n+1))
+      Array.append (_permute (p-1)) x
+  in _permute (m-1)
+
+(* Partition array into blocks of size k *)
+let partition input k =
+  let nm = (Array.length input) in
+  let rec _partition p =
+    let x = Array.of_list [ (Array.sub input p k) ] in
+    if p =  (nm - k) then
+      x
+    else
+      Array.append (_partition (p+k)) x
+  in (_partition 0)
 
 let wht_to_code wht n =
   let rec loads i =
@@ -168,10 +174,15 @@ let wht_to_code wht n =
   in 
 
   let rec encode wht input =
+    let m = (Array.length input) in
     match wht with
     | W n -> ((kernel n) input)
-    | Tensor (I k, W n) ->  (i_tensor_w (kernel n) input n k)
-    | Tensor (W n, I k) ->  (w_tensor_i (kernel n) input n k)
+    | Tensor (I k, x) ->  
+      let iks = (Array.map (fun p -> encode x p) (partition input (m/k))) in
+        Array.fold_left (vertical_merge) empty_chunk iks
+    | Tensor (x, I k) ->  
+      let iks = (Array.map (fun p -> encode x p) (permute input k)) in
+        Array.fold_left (vertical_merge) empty_chunk iks
     | Product (a,b) -> 
       begin
         let x = (encode b input) in
@@ -199,10 +210,16 @@ let wht_to_code wht n =
   (horizontal_merge z (horizontal_merge y x))
   ;;
 
-let n = 16 in
+let n = 8 in
 let wht = derive (W n) in
   begin
     print_string (wht_to_string wht); printf "\n";
     let code = (wht_to_code wht n) in 
       print_string (code_to_string code.block)
   end
+
+(*
+let a = (Array.of_list [0;1;2;3;4;5;6;7]) in
+  let b = (partition a 4) in
+  Array.iter (fun x -> Array.iter (fun y -> printf "%d " y) x; (printf "\n")) b
+*)
