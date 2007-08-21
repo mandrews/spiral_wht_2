@@ -3,6 +3,7 @@ open Printf
 type wht =
   | W of int
   | I of int
+  | L of int * int
   | Tensor  of wht * wht
   | Product of wht * wht
 
@@ -54,6 +55,48 @@ let rec derive w =
   | W n -> (Product (Tensor (W 2, I (n/2)), Tensor (I 2, derive (W (n/2)))))
   | other -> other
 
+let rec wht_size w =
+  match w with
+  | W n -> n
+  | I k -> k
+  | L (nm,m) -> nm
+  | Tensor (a,b) -> (wht_size a) * (wht_size b)
+  | Product (a,b) -> (wht_size a)
+
+let rec derive_v w =
+  let v = 2 in
+  match w with
+  (* Specific Base cases *)
+  | Tensor (I m, W 4) as base -> base
+  (* Base cases *)
+  | Tensor (W n, I m) as base when m = v -> base
+  | L (nm,m) as base when (m = 2 && nm = 2*v) -> base
+  | L (nm,m) as base when (m = v && nm = 2*v) -> base
+  (* Recursive cases *)
+  | Tensor (a, I m) when m mod v = 0 && m <> 2 ->
+    derive_v (Tensor (Tensor (a, I v), I (m/v)))
+  (*
+  | I mn when (mn mod v = 0) -> 
+    derive_v (Tensor (I v, I (mn/v)))
+  | I mn when (mn mod v = 0) -> 
+    derive_v (Tensor (I (mn/v), I v))
+  *)
+  (*
+  | Tensor (I m,a) ->
+    let n = (wht_size a) in
+    (Product (Product (L (m*n,m), Tensor (a, I m)), L (m*n,m)))
+  *)
+  | Tensor (a,I m) ->
+    let n = (wht_size a) in
+    derive_v (Product (Product (L (m*n,m), Tensor (I m,a)), L (m*n,n)))
+  | W n -> derive_v (Product (Tensor (W 2, I (n/2)), Tensor (I 2, W (n/2))))
+  (* Stop cases *)
+  (*
+  | Tensor  (a,b) -> Tensor (derive_v a, derive_v b)
+  *)
+  | Product (a,b) -> Product (derive_v a, derive_v b)
+  | other -> other
+
 let rec expr_to_string x =
   match x with
   | Times (a,b)  -> (expr_to_string a) ^ "*" ^ (expr_to_string b)
@@ -65,7 +108,8 @@ let rec wht_to_string wht =
   match wht with
   | W n -> sprintf "W(%d)" n
   | I n -> sprintf "I(%d)" n
-  | Tensor  (x,y) -> (wht_to_string x) ^ " X " ^ (wht_to_string y)
+  | L (nm,m) -> sprintf "L(%d,%d)" nm m
+  | Tensor  (x,y) -> (wht_to_string x) ^ " X " ^ (wht_to_string y) 
   | Product (x,y) -> "(" ^ (wht_to_string x) ^ ")(" ^ (wht_to_string y) ^ ")"
 
 let rec code_to_string code =
@@ -80,7 +124,7 @@ let rec code_to_string code =
   | x :: xs -> (_code_to_string x) ^ (code_to_string xs)
   | [] -> ""
 
-let kernel_2 input =
+let scalar_w_2 input =
   assert ((Array.length input) = 2);
   let t1 = make_tmp () 
   and t2 = make_tmp ()
@@ -92,7 +136,7 @@ let kernel_2 input =
       ]
     }
 
-let kernel_4 input =
+let scalar_w_4 input =
   assert ((Array.length input) = 4);
   let t1 = make_tmp () 
   and t2 = make_tmp ()
@@ -116,11 +160,25 @@ let kernel_4 input =
       ]
     }
 
-let kernel n  =
-  match n with
-  | 2 -> kernel_2
-  | 4 -> kernel_4 
-  | n -> failwith "No kernel for this size."
+let sse2_w_2 input = empty_chunk
+let sse2_w_4 input = empty_chunk
+let sse2_l_2 input = empty_chunk
+let sse2_l_4 input = empty_chunk
+
+let scalar_kernels t n  =
+  match (t,n) with
+  | ('W',2) -> scalar_w_2
+  | ('W',4) -> scalar_w_4 
+  | ('W',n) -> failwith "No WHT kernel for this size."
+  | other -> failwith "No kernel for this type."
+
+let sse2_kernels t n =
+  match (t,n) with
+  | ('W',4) -> sse2_w_2
+  | ('W',4) -> sse2_w_4
+  | ('L',2) -> sse2_l_2
+  | ('L',4) -> sse2_l_4
+  | other -> failwith "No kernel for this type."
 
 let vertical_merge y x =
   {
@@ -159,10 +217,10 @@ let partition input k =
       List.append x (_partition (p+k))
   in (_partition 0)
 
-let wht_to_code wht n =
+let wht_to_code wht size klookup =
   let rec loads i =
     let t = make_tmp() 
-    and m = n - i in
+    and m = size - i in
     let x = {
       output  = (Array.of_list [ t ]);
       block   = [ Load  (t,"x",Times (Constant m, Variable "S")) ]
@@ -176,7 +234,8 @@ let wht_to_code wht n =
   let rec encode wht input =
     let m = (Array.length input) in
     match wht with
-    | W n -> ((kernel n) input)
+    | W n -> (klookup 'W' n) input
+    | L (mn,m) -> (klookup 'L' m) input
     | Tensor (I k, x) ->  
       let iks = (List.map (fun p -> encode x p) (partition input (m/k))) in
         List.fold_left (vertical_merge) empty_chunk (List.rev iks)
@@ -204,22 +263,28 @@ let wht_to_code wht n =
       (vertical_merge x (stores input (i-1)))
   in
 
-  let x = (loads n) in
+  let x = (loads size) in
   let y = (encode wht x.output) in
-  let z = (stores y.output n) in
+  let z = (stores y.output size) in
   (horizontal_merge z (horizontal_merge y x))
   ;;
 
+(*
 let n = 16 in
 let wht = derive (W n) in
   begin
     print_string (wht_to_string wht); printf "\n";
-    let code = (wht_to_code wht n) in 
+    let code = (wht_to_code wht n scalar_kernels) in 
+      print_string (code_to_string code.block)
+  end
+*)
+
+let n = 8 
+and v = 2 in
+let wht = derive_v (W n) in
+  begin
+    print_string (wht_to_string wht); printf "\n";
+    let code = (wht_to_code wht (n/v) sse2_kernels) in 
       print_string (code_to_string code.block)
   end
 
-(*
-let a = (Array.of_list [0;1;2;3;4;5;6;7]) in
-  let b = (partition a 4) in
-  Array.iter (fun x -> Array.iter (fun y -> printf "%d " y) x; (printf "\n")) b
-*)
