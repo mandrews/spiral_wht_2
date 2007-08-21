@@ -18,11 +18,14 @@ type expr =
 
 type offset = expr
 
+type mask = int list
+
 type code =
   | Add   of register * register * register
   | Sub   of register * register * register
   | Load  of register * variable * offset
   | Store of register * variable * offset
+  | Shuf  of register * register * register * mask
 
 type chunk = 
   {
@@ -59,7 +62,7 @@ let rec wht_size w =
   match w with
   | W n -> n
   | I k -> k
-  | L (nm,m) -> nm
+  | L (mn,m) -> mn
   | Tensor (a,b) -> (wht_size a) * (wht_size b)
   | Product (a,b) -> (wht_size a)
 
@@ -70,30 +73,19 @@ let rec derive_v w =
   | Tensor (I m, W 4) as base -> base
   (* Base cases *)
   | Tensor (W n, I m) as base when m = v -> base
-  | L (nm,m) as base when (m = 2 && nm = 2*v) -> base
-  | L (nm,m) as base when (m = v && nm = 2*v) -> base
+  | L (mn,m) as base when (m = 2 && mn = 2*v) -> base
+  | L (mn,m) as base when (m = v && mn = 2*v) -> base
   (* Recursive cases *)
   | Tensor (a, I m) when m mod v = 0 && m <> 2 ->
-    derive_v (Tensor (Tensor (a, I v), I (m/v)))
-  (*
-  | I mn when (mn mod v = 0) -> 
-    derive_v (Tensor (I v, I (mn/v)))
-  | I mn when (mn mod v = 0) -> 
-    derive_v (Tensor (I (mn/v), I v))
-  *)
-  (*
-  | Tensor (I m,a) ->
-    let n = (wht_size a) in
-    (Product (Product (L (m*n,m), Tensor (a, I m)), L (m*n,m)))
-  *)
+    (* m*v should be n = (wht_size a) *)
+    let l1 = L (m*v,v) 
+    and l2 = L (m*v,m)
+    and i1 = Tensor (a, I v)
+    in derive_v (Tensor (I (m/v), Product(l1, Product(i1,l2))))
   | Tensor (a,I m) ->
     let n = (wht_size a) in
     derive_v (Product (Product (L (m*n,m), Tensor (I m,a)), L (m*n,n)))
   | W n -> derive_v (Product (Tensor (W 2, I (n/2)), Tensor (I 2, W (n/2))))
-  (* Stop cases *)
-  (*
-  | Tensor  (a,b) -> Tensor (derive_v a, derive_v b)
-  *)
   | Product (a,b) -> Product (derive_v a, derive_v b)
   | other -> other
 
@@ -104,21 +96,29 @@ let rec expr_to_string x =
   | Constant a   -> sprintf "%d" a 
   | Variable a   -> a
 
+let rec mask_to_string x =
+  match x with
+  | [] -> ""
+  | x :: [] -> sprintf "%d" x
+  | x :: xs -> (sprintf "%d, " x) ^ (mask_to_string xs)
+
 let rec wht_to_string wht =
   match wht with
   | W n -> sprintf "W(%d)" n
   | I n -> sprintf "I(%d)" n
-  | L (nm,m) -> sprintf "L(%d,%d)" nm m
+  | L (mn,m) -> sprintf "L(%d,%d)" mn m
   | Tensor  (x,y) -> (wht_to_string x) ^ " X " ^ (wht_to_string y) 
   | Product (x,y) -> "(" ^ (wht_to_string x) ^ ")(" ^ (wht_to_string y) ^ ")"
 
 let rec code_to_string code =
   let _code_to_string x =
     match x with
-    | Load  (r,v,o) -> (sprintf "t%d = %s[%s]\n" r v (expr_to_string o))
-    | Add   (r,a,b) -> (sprintf "t%d = t%d + t%d;\n" r a b)
-    | Sub   (r,a,b) -> (sprintf "t%d = t%d - t%d;\n" r a b)
-    | Store (r,v,o) -> (sprintf "%s[%s] = t%d\n" v (expr_to_string o) r)
+    | Load  (r,v,o)   -> sprintf "t%d = %s[%s]\n" r v (expr_to_string o)
+    | Add   (r,a,b)   -> sprintf "t%d = t%d + t%d;\n" r a b
+    | Sub   (r,a,b)   -> sprintf "t%d = t%d - t%d;\n" r a b
+    | Store (r,v,o)   -> sprintf "%s[%s] = t%d\n" v (expr_to_string o) r
+    | Shuf  (r,a,b,m) -> sprintf "shuf(t%d,t%d,t%d,%s);\n" r a b (mask_to_string m)
+    (*| other -> sprintf "/* undefined */\n" *)
   in
   match code with
   | x :: xs -> (_code_to_string x) ^ (code_to_string xs)
@@ -160,25 +160,59 @@ let scalar_w_4 input =
       ]
     }
 
-let sse2_w_2 input = empty_chunk
-let sse2_w_4 input = empty_chunk
-let sse2_l_2 input = empty_chunk
-let sse2_l_4 input = empty_chunk
+let sse2_w_4 input = 
+  assert ((Array.length input) = 2);
+  let t1 = make_tmp () 
+  and t2 = make_tmp ()
+  and t3 = make_tmp () 
+  and t4 = make_tmp ()
+  and t5 = make_tmp () 
+  and t6 = make_tmp ()
+  in {
+    output = (Array.of_list [t3;t4]);
+    block  =
+      [ Add  (t1,(Array.get input 0),(Array.get input 1));
+        Sub  (t2,(Array.get input 0),(Array.get input 1));
+        Shuf (t3, t1, t2, [0;0]);
+        Shuf (t4, t1, t2, [1;1]);
+        Add  (t5, t3, t4);
+        Sub  (t6, t3, t4);
+        Shuf (t3, t5, t6, [0;0]);
+        Shuf (t4, t5, t6, [1;1]);
+      ]
+    }
 
-let scalar_kernels t n  =
-  match (t,n) with
-  | ('W',2) -> scalar_w_2
-  | ('W',4) -> scalar_w_4 
-  | ('W',n) -> failwith "No WHT kernel for this size."
-  | other -> failwith "No kernel for this type."
+let sse2_l_2 input = 
+  assert ((Array.length input) = 4);
+  let t1 = make_tmp () 
+  and t2 = make_tmp ()
+  and t3 = make_tmp () 
+  and t4 = make_tmp () in
+  {
+    output = (Array.of_list [t1;t3;t2;t4]);
+    block  = 
+      [ Shuf (t1, (Array.get input 0), (Array.get input 1), [0;0]);
+        Shuf (t2, (Array.get input 0), (Array.get input 1), [1;1]);
+        Shuf (t3, (Array.get input 2), (Array.get input 3), [0;0]);
+        Shuf (t4, (Array.get input 2), (Array.get input 3), [1;1]);
+      ]
+  }
 
-let sse2_kernels t n =
-  match (t,n) with
-  | ('W',4) -> sse2_w_2
-  | ('W',4) -> sse2_w_4
-  | ('L',2) -> sse2_l_2
-  | ('L',4) -> sse2_l_4
-  | other -> failwith "No kernel for this type."
+let sse2_l_4 input = 
+  assert ((Array.length input) = 4);
+  let t1 = make_tmp () 
+  and t2 = make_tmp () 
+  and t3 = make_tmp () 
+  and t4 = make_tmp () in
+  {
+    output = (Array.of_list [t1;t2;t3;t4]);
+    block  = 
+      [ Shuf (t1, (Array.get input 0), (Array.get input 2), [0;0]);
+        Shuf (t2, (Array.get input 0), (Array.get input 2), [1;1]);
+        Shuf (t3, (Array.get input 1), (Array.get input 3), [0;0]);
+        Shuf (t4, (Array.get input 1), (Array.get input 3), [1;1]);
+      ]
+  }
 
 let vertical_merge y x =
   {
@@ -197,9 +231,9 @@ let stride input i k n =
 
 (* Permute array input by m *)
 let permute input m =
-  let nm = (Array.length input) in
+  let mn = (Array.length input) in
   let rec _permute p =
-    let x = [(stride input p m nm)] in
+    let x = [(stride input p m mn)] in
     if p = 0 then
       x
     else
@@ -208,16 +242,56 @@ let permute input m =
 
 (* Partition array into blocks of size k *)
 let partition input k =
-  let nm = (Array.length input) in
+  let mn = (Array.length input) in
   let rec _partition p =
     let x = [ (Array.sub input p k) ] in
-    if p =  (nm - k) then
+    if p =  (mn - k) then
       x
     else
       List.append x (_partition (p+k))
   in (_partition 0)
 
-let wht_to_code wht size klookup =
+let i_tensor_a m a input apply =
+  let n = wht_size a in
+  let ims = (List.map (fun p -> apply a p) (partition input (n/m))) in
+    List.fold_left (vertical_merge) empty_chunk (List.rev ims)
+
+let a_tensor_i m a input apply =
+  let ims = (List.map (fun p -> apply a p) (permute input m)) in
+    List.fold_left (vertical_merge) empty_chunk ims
+
+let sse2_w_n_tensor_i_2 input = 
+  let whts = List.map (fun p -> scalar_w_2 p) (permute input 2) in
+    List.fold_left (vertical_merge) empty_chunk whts
+
+let rec wht_to_code_rules wht input apply =
+  (printf "wht_to_code_rules: %s\n" (wht_to_string wht));
+  match wht with
+  | Tensor (I m, a) ->  i_tensor_a m a input apply
+  | Tensor (a, I m) ->  a_tensor_i m a input apply
+  | Product (a,b) -> 
+    begin
+      let x = (apply b input) in
+      let y = (apply a x.output) in
+      (horizontal_merge y x)
+    end
+  | other -> failwith "No encoding" 
+
+let rec scalar_kernels wht input =
+  match wht with
+  | W 2 -> scalar_w_2 input
+  | W 4 -> scalar_w_4 input
+  | other -> wht_to_code_rules wht input scalar_kernels
+
+let rec sse2_kernels wht input =
+  match wht with
+  | W 4 -> sse2_w_4 input 
+  | Tensor (W n, I 2) -> sse2_w_n_tensor_i_2 input
+  | L (mn,2) -> sse2_l_2 input
+  | L (mn,4) -> sse2_l_4 input
+  | other -> wht_to_code_rules wht input sse2_kernels
+
+let wht_to_code wht size specific_rules =
   let rec loads i =
     let t = make_tmp() 
     and m = size - i in
@@ -229,26 +303,6 @@ let wht_to_code wht size klookup =
       x
     else 
       (vertical_merge (loads (i-1)) x)
-  in 
-
-  let rec encode wht input =
-    let m = (Array.length input) in
-    match wht with
-    | W n -> (klookup 'W' n) input
-    | L (mn,m) -> (klookup 'L' m) input
-    | Tensor (I k, x) ->  
-      let iks = (List.map (fun p -> encode x p) (partition input (m/k))) in
-        List.fold_left (vertical_merge) empty_chunk (List.rev iks)
-    | Tensor (x, I k) ->  
-      let iks = (List.map (fun p -> encode x p) (permute input k)) in
-        List.fold_left (vertical_merge) empty_chunk iks
-    | Product (a,b) -> 
-      begin
-        let x = (encode b input) in
-        let y = (encode a x.output) in
-        (horizontal_merge y x)
-      end
-    | other -> failwith "No encoding" 
   in 
 
   let rec stores input i =
@@ -264,13 +318,13 @@ let wht_to_code wht size klookup =
   in
 
   let x = (loads size) in
-  let y = (encode wht x.output) in
+  let y = (specific_rules wht x.output) in
   let z = (stores y.output size) in
   (horizontal_merge z (horizontal_merge y x))
   ;;
 
 (*
-let n = 16 in
+let n = 8 in
 let wht = derive (W n) in
   begin
     print_string (wht_to_string wht); printf "\n";
@@ -287,4 +341,3 @@ let wht = derive_v (W n) in
     let code = (wht_to_code wht (n/v) sse2_kernels) in 
       print_string (code_to_string code.block)
   end
-
