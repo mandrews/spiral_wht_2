@@ -1,5 +1,9 @@
+Bugs:
+  verify -w 'split[small[2],small[2]]'
+
+  doesn't work because codelets are not generated with stride parameter
 
 For Maintainers:
-libtoolize
-autoreconf
-automake --add-missing
+  libtoolize
+  autoreconf
+  automake --add-missing
