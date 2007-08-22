@@ -50,6 +50,7 @@ AC_CHECK_LIB(m, pow)
 AC_CHECK_PROG(OCAMLC, ocamlc, ocamlc)
 AC_CHECK_PROG(OCAMLOPT, ocamlopt, ocamlopt)
 AC_CHECK_PROG(OCAMLDEP, ocamldep, ocamldep)
+AC_CHECK_PROG(PERL,perl,perl)
 
 AC_SUBST(OCAMLCFLAGS)
 AC_SUBST(OCAMLOPTCFLAGS)

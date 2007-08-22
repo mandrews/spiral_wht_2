@@ -60,7 +60,7 @@ wht_parse_helper()
 
   wht_next_codelet();
   for (i=0; i< REGISTERED_CODELETS;i++) {
-    W = (callbacks[i])();
+    W = (codelets[i])();
     if (W) 
       return W;
   }

@@ -12,6 +12,7 @@
 #define WHT_H
 
 #include "config.h"
+#include "wht_vector.h"
 
 #include "stdlib.h"
 #include "stdio.h"
@@ -63,15 +64,15 @@ int is2power(long n);
  * Place new codelet interfaces here
  */
 
-#include "small.h"
-
-Wht * parse_split();
 #define REGISTERED_CODELETS 2
 
-typedef Wht * (*parse_callback) (void);
+Wht * parse_split();
+Wht * parse_small();
+
+typedef Wht * (*parse_codelet) (void);
 
 static
-parse_callback callbacks[REGISTERED_CODELETS] = { 
+parse_codelet codelets[REGISTERED_CODELETS] = { 
   &parse_small,
   &parse_split,
 };

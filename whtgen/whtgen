@@ -82,32 +82,36 @@ def mk_tmp(k)
 end
 
 def scalar_stack_to_string p
-  return "" if p.empty?
-  x = p.shift
-  r,a,b = x[:out],x[:in][0],x[:in][1]
-  s = case x[:type]
-    when :add   then "t#{r} = t#{a} + t#{b};\n"
-    when :sub   then "t#{r} = t#{a} - t#{b};\n"
-    when :load  then "t#{r} = #{a}[#{b}];\n"
-    when :store then "#{a}[#{b}] = t#{r};\n"
-    else "/* undefined. */\n"
+  s = ""
+  p.each do |x|
+    r,a,b = x[:out],x[:in][0],x[:in][1]
+    s += IDENT
+    s += case x[:type]
+      when :add   then "t#{r} = t#{a} + t#{b};\n"
+      when :sub   then "t#{r} = t#{a} - t#{b};\n"
+      when :load  then "t#{r} = #{a}[#{b}];\n"
+      when :store then "#{a}[#{b}] = t#{r};\n"
+      else "/* undefined. */\n"
+    end
   end
-  IDENT + s + scalar_stack_to_string(p)
+  s
 end
 
 def vector_stack_to_string p
-  return "" if p.empty?
-  x = p.shift
-  r,a,b,v,m = x[:out],x[:in][0],x[:in][1],x[:vsize],x[:mask]
-  s = case x[:type]
-    when :add   then "vadd#{v}(t#{r},t#{a},t#{b});\n"
-    when :sub   then "vsub#{v}(t#{r},t#{a},t#{b});\n"
-    when :load  then "vload#{v}(t#{r},#{a}[#{b}]);\n"
-    when :store then "vstore#{v}(t#{r},#{a}[#{b}]);\n"
-    when :shuf  then "vshuf#{v}(t#{r},t#{a},t#{b},[#{m.join(',')}]);\n"
-    else "/* undefined. */\n"
+  s = ""
+  p.each do |x|
+    r,a,b,v,m = x[:out],x[:in][0],x[:in][1],x[:vsize],x[:mask]
+    s += IDENT
+    s += case x[:type]
+      when :add   then "vadd#{v}(t#{r},t#{a},t#{b});\n"
+      when :sub   then "vsub#{v}(t#{r},t#{a},t#{b});\n"
+      when :load  then "vload#{v}(t#{r},#{a}[#{b}]);\n"
+      when :store then "vstore#{v}(t#{r},#{a}[#{b}]);\n"
+      when :shuf  then "vshuf#{v}(t#{r},t#{a},t#{b},#{m.join(',')});\n"
+      else "/* undefined. */\n"
+    end
   end
-  IDENT + s + vector_stack_to_string(p)
+  s
 end
 
 def die(msg)
@@ -153,6 +157,8 @@ class Options
 
     die unless @params.has_key?(:n)
     die unless @params.has_key?(:v)
+
+    @params[:n] = 2**@params[:n]
     unless @params[:n] > @params[:v]
       die("Size must be greater than vector size.")
     end
@@ -165,6 +171,7 @@ opts.parse(ARGV)
 
 n = opts.params[:n]
 v = opts.params[:v]
+m = (Math.log(n) / Math.log(2)).to_i
 
 x = {}
 y = {}
@@ -184,11 +191,11 @@ end
 
 if v > 1
   type = "wht_vector#{v}" 
-  name = "apply_small#{n}_v#{v}"
+  name = "apply_small#{m}_v#{v}"
   body = vector_stack_to_string(@stack) 
 else
   type = "wht_value"
-  name = "apply_small#{n}"
+  name = "apply_small#{m}"
   body = scalar_stack_to_string(@stack) 
 end
 
@@ -197,7 +204,7 @@ header = "#include \"wht.h\"\n\n" +
 
 decls = ""
 @tmp.times do |i|
-  decls += IDENT + type + " t#{i};\n"
+  decls += IDENT + type + " t#{i+1};\n"
 end
 
 puts header + decls + body + "}\n"
