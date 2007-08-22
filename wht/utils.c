@@ -24,6 +24,19 @@ wht_free(void *p) {
   free(p);
 }
 
+wht_value *
+wht_random(size_t n)
+{
+  wht_value *x;
+  int i;
+  
+  x = (wht_value *) wht_malloc(n * sizeof(wht_value));
+  for (i = 0; i < n; i++) 
+    x[i] = ((wht_value) (rand() + 1.0L))/RAND_MAX;
+
+  return x;
+}
+
 
 /* Auxiliary Functions 
    ===================

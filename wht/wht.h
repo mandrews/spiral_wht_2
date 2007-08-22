@@ -50,6 +50,10 @@ void wht_free(void *p);
 
 int is2power(long n);
 
+wht_value * wht_random(size_t n);
+
+Wht * wht_direct(int n);
+
 #define wht_apply(wht, S, D, x) ((wht->apply)(wht, S, D, x))
 
 #define wht_error(format, args...)  \
@@ -90,6 +94,7 @@ int wht_is_codelet(char *f);
 void wht_require(char c);
 int wht_check(char c);
 Wht * wht_parse_helper();
+Wht * wht_parse(char *s);
 
 
 typedef void (*codelet)(Wht *W, long S, long D, wht_value *x);
