@@ -10,6 +10,8 @@ BUILT_SOURCES= $(ALL_CODELETS)
 libwht_codelets_la_SOURCES = codelets.c codelets.h $(BUILT_SOURCES)
 
 if MAINTAINER_MODE
-s_%.c:  $(WHTGEN)
-	$(WHTGEN) -n $* > $@
+s_1.c:  $(WHTGEN)
+	$(WHTGEN) -n 1 > $@
+s_2.c:  $(WHTGEN)
+	$(WHTGEN) -n 2 > $@
 endif # MAINTAINER_MODE

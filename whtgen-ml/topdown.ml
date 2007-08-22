@@ -3,7 +3,6 @@ open Printf
 type wht =
   | W of int
   | I of int
-  | L of int * int
   | Tensor  of wht * wht
   | Product of wht * wht
 
@@ -62,32 +61,8 @@ let rec wht_size w =
   match w with
   | W n -> n
   | I k -> k
-  | L (mn,m) -> mn
   | Tensor (a,b) -> (wht_size a) * (wht_size b)
   | Product (a,b) -> (wht_size a)
-
-let rec derive_v w =
-  let v = 2 in
-  match w with
-  (* Specific Base cases *)
-  | Tensor (I m, W 4) as base -> base
-  (* Base cases *)
-  | Tensor (W n, I m) as base when m = v -> base
-  | L (mn,m) as base when (m = 2 && mn = 2*v) -> base
-  | L (mn,m) as base when (m = v && mn = 2*v) -> base
-  (* Recursive cases *)
-  | Tensor (a, I m) when m mod v = 0 && m <> 2 ->
-    (* m*v should be n = (wht_size a) *)
-    let l1 = L (m*v,v) 
-    and l2 = L (m*v,m)
-    and i1 = Tensor (a, I v)
-    in derive_v (Tensor (I (m/v), Product(l1, Product(i1,l2))))
-  | Tensor (a,I m) ->
-    let n = (wht_size a) in
-    derive_v (Product (Product (L (m*n,m), Tensor (I m,a)), L (m*n,n)))
-  | W n -> derive_v (Product (Tensor (W 2, I (n/2)), Tensor (I 2, W (n/2))))
-  | Product (a,b) -> Product (derive_v a, derive_v b)
-  | other -> other
 
 let rec expr_to_string x =
   match x with
@@ -106,7 +81,6 @@ let rec wht_to_string wht =
   match wht with
   | W n -> sprintf "W(%d)" n
   | I n -> sprintf "I(%d)" n
-  | L (mn,m) -> sprintf "L(%d,%d)" mn m
   | Tensor  (x,y) -> (wht_to_string x) ^ " X " ^ (wht_to_string y) 
   | Product (x,y) -> "(" ^ (wht_to_string x) ^ ")(" ^ (wht_to_string y) ^ ")"
 
@@ -182,38 +156,6 @@ let sse2_w_4 input =
       ]
     }
 
-let sse2_l_2 input = 
-  assert ((Array.length input) = 4);
-  let t1 = make_tmp () 
-  and t2 = make_tmp ()
-  and t3 = make_tmp () 
-  and t4 = make_tmp () in
-  {
-    output = (Array.of_list [t1;t3;t2;t4]);
-    block  = 
-      [ Shuf (t1, (Array.get input 0), (Array.get input 1), [0;0]);
-        Shuf (t2, (Array.get input 0), (Array.get input 1), [1;1]);
-        Shuf (t3, (Array.get input 2), (Array.get input 3), [0;0]);
-        Shuf (t4, (Array.get input 2), (Array.get input 3), [1;1]);
-      ]
-  }
-
-let sse2_l_4 input = 
-  assert ((Array.length input) = 4);
-  let t1 = make_tmp () 
-  and t2 = make_tmp () 
-  and t3 = make_tmp () 
-  and t4 = make_tmp () in
-  {
-    output = (Array.of_list [t1;t2;t3;t4]);
-    block  = 
-      [ Shuf (t1, (Array.get input 0), (Array.get input 2), [0;0]);
-        Shuf (t2, (Array.get input 0), (Array.get input 2), [1;1]);
-        Shuf (t3, (Array.get input 1), (Array.get input 3), [0;0]);
-        Shuf (t4, (Array.get input 1), (Array.get input 3), [1;1]);
-      ]
-  }
-
 let vertical_merge y x =
   {
     output = (Array.append x.output y.output);
@@ -260,7 +202,7 @@ let a_tensor_i m a input apply =
   let ims = (List.map (fun p -> apply a p) (permute input m)) in
     List.fold_left (vertical_merge) empty_chunk ims
 
-let sse2_w_n_tensor_i_2 input = 
+let sse2_w_n_tensor_i_m input = 
   let whts = List.map (fun p -> scalar_w_2 p) (permute input 2) in
     List.fold_left (vertical_merge) empty_chunk whts
 
@@ -286,9 +228,7 @@ let rec scalar_kernels wht input =
 let rec sse2_kernels wht input =
   match wht with
   | W 4 -> sse2_w_4 input 
-  | Tensor (W n, I 2) -> sse2_w_n_tensor_i_2 input
-  | L (mn,2) -> sse2_l_2 input
-  | L (mn,4) -> sse2_l_4 input
+  | Tensor (W n, I m) -> sse2_w_n_tensor_i_m input
   | other -> wht_to_code_rules wht input sse2_kernels
 
 let wht_to_code wht size specific_rules =
@@ -335,7 +275,7 @@ let wht = derive (W n) in
 
 let n = 8 
 and v = 2 in
-let wht = derive_v (W n) in
+let wht = derive (W n) in
   begin
     print_string (wht_to_string wht); printf "\n";
     let code = (wht_to_code wht (n/v) sse2_kernels) in 

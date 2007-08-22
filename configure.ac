@@ -70,7 +70,7 @@ fi
 
 AC_CONFIG_FILES([
    Makefile
-   whtgen/Makefile
+   whtgen-ml/Makefile
    wht/Makefile
    wht/codelets/Makefile
 ])

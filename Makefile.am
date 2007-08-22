@@ -1,8 +1,8 @@
 OPTIONS_AUTOMAKE=gnu
 
-# recompile genwht if maintainer mode is true
+# recompile whtgen-ml if maintainer mode is true
 if MAINTAINER_MODE
-WHTGEN = whtgen
+WHTGEN = whtgen-ml
 else
 WHTGEN =
 endif
