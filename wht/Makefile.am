@@ -6,6 +6,6 @@ SUBDIRS = codelets
 
 noinst_PROGRAMS = wht
 
-wht_SOURCES = small.c split.c utils.c wht.c scanner.l
+wht_SOURCES = vector.c small.c split.c utils.c wht.c scanner.l
 wht_LDADD = $(top_builddir)/wht/codelets/libwht_codelets.la
 

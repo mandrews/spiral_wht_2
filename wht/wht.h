@@ -64,15 +64,17 @@ int is2power(long n);
  * Place new codelet interfaces here
  */
 
-#define REGISTERED_CODELETS 2
+#define REGISTERED_CODELETS 3
 
 Wht * parse_split();
 Wht * parse_small();
+Wht * parse_vector();
 
 typedef Wht * (*parse_codelet) (void);
 
 static
 parse_codelet codelets[REGISTERED_CODELETS] = { 
+  &parse_vector,
   &parse_small,
   &parse_split,
 };
