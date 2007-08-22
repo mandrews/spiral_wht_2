@@ -1,0 +1,5 @@
+
+For Maintainers:
+libtoolize
+autoreconf
+automake --add-missing
