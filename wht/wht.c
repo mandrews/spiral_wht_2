@@ -1,7 +1,5 @@
 #include "wht.h"
 
-#include "scanner.h"
-
 #include "getopt.h"
 
 
