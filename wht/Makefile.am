@@ -1,3 +1,4 @@
+EXTRA_DIST = wht.h wht_vector.h
 BUILT_SOURCES = scanner.c 
 
 AM_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/wht/codelets

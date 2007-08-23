@@ -34,7 +34,6 @@ AC_SUBST(PREC_SUFFIX)
 dnl TODO move variables that do not change to another header file
 
 AC_DEFINE(SPLIT_MAX_FACTORS,40,"Maximum number of codelets in a split.")
-AC_DEFINE(MAX_UNROLLED,8,"Maximum size of small codelet.")
 AC_DEFINE(CODELET_NAME_MAX_SIZE,10,"Maximum size of a codelet name identifier")
 
 dnl Checks for programs.
