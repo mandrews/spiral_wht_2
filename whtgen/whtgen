@@ -10,25 +10,35 @@ IDENT   = "  "
 @stack  = []
 @tmp    = 0
 
-def wht_v(n,x,a,s,y,b,t,v)
+def l_2v_v(x,a,s,y,b,t,v)
   case v
-    when 1 then wht_2(x,a,s,y,b,t,v)
-    when 2 then wht_4_v2(n,x,a,s,y,b,t,v)
-    else die "No WHT kernel for vector size #{v}"
+    when 1 # Transform undefined, just copy input to output
+      y[b],y[b+t] = x[a],x[a+s]
+    when 2 
+      t1,t2 = mk_tmp(2)
+      @stack.push shuf(t1,x[a],x[a+s],[0,0],v)
+      @stack.push shuf(t2,x[a],x[a+s],[1,1],v)
+      y[b],y[b+t] = t1,t2
+    when 4
+      t1,t2 = mk_tmp(2)
+      @stack.push shuf(t1,x[a],x[a+s],[0,1,0,1],v)
+      @stack.push shuf(t2,x[a],x[a+s],[2,3,2,3],v)
+      @stack.push shuf(t1,t1,t1,[0,2,1,3],v)
+      @stack.push shuf(t2,t2,t2,[0,2,1,3],v)
+      y[b],y[b+t] = t1,t2
   end
 end
 
-def wht_4_v2(n,x,a,s,y,b,t,v)
-  t1,t2,t3,t4 = mk_tmp(4)
-  @stack.push add(t1,x[a],x[a+s],v)
-  @stack.push sub(t2,x[a],x[a+s],v)
-  @stack.push shuf(t3,t1,t2,[0,0],v)
-  @stack.push shuf(t4,t1,t2,[1,1],v)
-  @stack.push add(t1,t3,t4,v)
-  @stack.push sub(t2,t3,t4,v)
-  @stack.push shuf(t3,t1,t2,[0,0],v)
-  @stack.push shuf(t4,t1,t2,[1,1],v)
-  y[b],y[b+t] = t3,t4
+def wht_2v(n,x,a,s,y,b,t,v)
+  p,q,r = {}, {}, {}
+  m = n/2
+  wht_2(x,a,s,p,b,t,v)
+
+  l_2v_v(p,a,s,q,b,t,v)
+
+  wht(v,q,a,s,r,b,t,v)
+
+  l_2v_v(r,a,s,y,b,t,v)
 end
 
 def wht_2(x,a,s,y,b,t,v)
@@ -39,8 +49,12 @@ def wht_2(x,a,s,y,b,t,v)
 end
 
 def wht(n,x,a,s,y,b,t,v)
-  if n == 2*v
-    wht_v(n,x,a,s,y,b,t,v)
+  if n < 2 # Transform undefined, just copy input to output
+    y[b],y[b+s] = x[a],x[a+s]
+  elsif n == 2
+    wht_2(x,a,s,y,b,t,v)
+  elsif n == 2*v
+    wht_2v(n,x,a,s,y,b,t,v)
   else
     z = {}
     m = n/2
@@ -155,8 +169,7 @@ class Options
       die(e.message)
     end
 
-    die unless @params.has_key?(:n)
-    die unless @params.has_key?(:v)
+    die unless @params[:n]
 
     @params[:n] = 2**@params[:n]
     unless @params[:n] > @params[:v]
