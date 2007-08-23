@@ -142,6 +142,7 @@ class Options
     @params = {}
     @params[:n] = nil
     @params[:v] = 1
+    @params[:a] = false
     @options = OptionParser.new do |o|
       o.banner = "Usage: #{$0} [OPTIONS]"
       o.separator ""
@@ -153,6 +154,9 @@ class Options
 
       o.on("-n", "--wht_size=SIZE", Integer,
         "Size of WHT to unroll.") { |x| @params[:n] = x.to_i } 
+
+      o.on("-a", "--aligned", 
+        "Size of WHT to unroll.") { |x| @params[:a] = true }
     end
   end
 
@@ -185,6 +189,7 @@ opts.parse(ARGV)
 n = opts.params[:n]
 v = opts.params[:v]
 m = (Math.log(n) / Math.log(2)).to_i
+a = opts.params[:a] ? "" : "*S"
 
 x = {}
 y = {}
@@ -192,23 +197,25 @@ y = {}
 (n/v).times do |i| 
   t = mk_tmp(1)
   x[i] = t
-  @stack.push  load(t,"x",i*v,v)
+  @stack.push  load(t,"x",(i*v).to_s + a,v)
 end
 
 wht(n,x,0,1,y,0,1,v)
 
 (n/v).times do |i| 
   t = y[i] 
-  @stack.push store(t,"x",i*v,v)
+  @stack.push store(t,"x",(i*v).to_s + a,v)
 end
+
+aligned = opts.params[:a] ? "_a" : ""
 
 if v > 1
   type = "wht_vector#{v}" 
-  name = "apply_small#{m}_v#{v}"
+  name = "apply_small#{m}_v#{v}" + aligned
   body = vector_stack_to_string(@stack) 
 else
   type = "wht_value"
-  name = "apply_small#{m}"
+  name = "apply_small#{m}" + aligned
   body = scalar_stack_to_string(@stack) 
 end
 
