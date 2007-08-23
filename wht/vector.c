@@ -5,10 +5,10 @@ Wht *
 wht_init_vector(int n,int v)
 {
   Wht *W;
-  const size_t bufsize = 16; /*apply_small%d_v%d\0*/
+  const size_t bufsize = 20; /*apply_small%d_v%d_a\0*/
   char buf[bufsize]; 
 
-  snprintf(buf,bufsize,"apply_small%d_v%d",n,v);
+  snprintf(buf,bufsize,"apply_small%d_v%d_a",n,v);
 
   W            = wht_init_codelet(n);
   W->apply     = wht_get_codelet(buf);
