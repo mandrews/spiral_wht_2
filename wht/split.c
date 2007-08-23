@@ -99,9 +99,6 @@ wht_init_split(int nn, Wht *Ws[]) {
     W->priv.split.ns[i] = Ws[i]->N;
   }
 
-  /* Set aligned bit on last guy */
-  // W->priv.split.Ws[nn-1]->apply = wht_get_codelet("apply_small4_v2_a");
-
   return W;
 }
 

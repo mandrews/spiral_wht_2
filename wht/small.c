@@ -8,12 +8,16 @@
 #include "codelets.h"
 
 Wht *
-wht_init_small(int n) 
+wht_init_small(int n, bool aligned) 
 {
   Wht *W;
-  char buf[13]; /*apply_small%d\0*/
+  const size_t bufsize = 15; /*apply_small%d_a\0*/
+  char buf[bufsize]; 
 
-  snprintf(buf,13,"apply_small%d",n);
+  if (aligned) 
+    snprintf(buf,bufsize,"apply_small%d_a",n);
+  else 
+    snprintf(buf,bufsize,"apply_small%d",n);
 
   W            = wht_init_codelet(n);
   W->apply     = wht_get_codelet(buf);
@@ -28,11 +32,26 @@ Wht *
 wht_parse_small()
 {
   int n;
+  bool aligned;
+
+  aligned = false;
   if (wht_is_codelet("small")) {
+
+    if (wht_check('a')) {
+      wht_require('a');
+      aligned = true;
+    }
+
+    /* TODO 
+     * Consider parsing all other small codelets here.
+     * Configuration/Exclusion is the only issue.
+     */
+
     wht_require('[');
     n = wht_read_int();
     wht_require(']');
-    return wht_init_small(n);
+
+    return wht_init_small(n,aligned);
   } 
 
   return NULL;
