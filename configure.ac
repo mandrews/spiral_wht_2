@@ -57,7 +57,7 @@ AC_SUBST(OCAMLDEFS)
 AC_SUBST(OCAMLLDFLAGS)
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS([strings.h])
+AC_CHECK_HEADERS([stdlib.h,stdio.h,strings.h,math.h,stdbool.h])
 
 AC_C_CONST
 AC_C_INLINE
