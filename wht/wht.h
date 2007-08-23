@@ -19,9 +19,6 @@
 #include "string.h"
 #include "math.h"
 
-#define WHT_NUMBER    1
-#define WHT_CODELET   2
-
 #define CODELET_CALL_MAX_SIZE 40
 
 /* data type for the signal */
@@ -32,6 +29,7 @@ typedef struct wht {
   int N,                                          /* signal length */
       n;                                               /*  N = 2^n */
   int nILNumber;
+  short aligned;
   void (*apply)(struct wht *W, long S, long D, wht_value *x);
   void (*free) (struct wht *W);     
   char * (*to_string) (void);
@@ -65,37 +63,33 @@ Wht * wht_direct(int n);
   }
 
 /*
- * Place new codelet interfaces here
+ * Place new codelet interfaces HERE
  */
-
 #define REGISTERED_CODELETS 3
 
-Wht * parse_split();
-Wht * parse_small();
-Wht * parse_vector();
+Wht * wht_parse_split();
+Wht * wht_parse_small();
+Wht * wht_parse_vector();
 
 typedef Wht * (*parse_codelet) (void);
 
-static
-parse_codelet codelets[REGISTERED_CODELETS] = { 
-  &parse_vector,
-  &parse_small,
-  &parse_split,
+const static
+parse_codelet codelets[] = { 
+  &wht_parse_vector,
+  &wht_parse_small,
+  &wht_parse_split,
 };
-
-union {
-  char ident[CODELET_NAME_MAX_SIZE];
-  int  value;
-} wht_token;
 
 int wht_read_int();
 void wht_next_codelet();
 int wht_is_codelet(char *f);
 void wht_require(char c);
 int wht_check(char c);
-Wht * wht_parse_helper();
+Wht * wht_parse_next();
 Wht * wht_parse(char *s);
 
+Wht * wht_init_codelet(int n);
+void wht_free_codelet(Wht *W);
 
 typedef void (*codelet)(Wht *W, long S, long D, wht_value *x);
 

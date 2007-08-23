@@ -1,7 +1,14 @@
 %{
 #include "wht.h"
 
-void wht_unput(char x);
+#define WHT_NUMBER    1
+#define WHT_CODELET   2
+
+union {
+  char ident[CODELET_NAME_MAX_SIZE];
+  int  value;
+} wht_token;
+
 %}
 
 %%
@@ -21,8 +28,48 @@ void wht_unput(char x);
 .           { return yytext[0];   }
 %%
 
-void 
-wht_unput(char x) 
-{ 
-  unput(x); 
+int
+yywrap()
+{
+  return -1;
 }
+
+int
+wht_read_int()
+{
+  if (yylex() != WHT_NUMBER) 
+    wht_error("expected int.\n");
+
+  return wht_token.value;
+}
+
+void 
+wht_next_codelet()
+{
+  if (yylex() != WHT_CODELET)
+    wht_error("expected codelet.");
+}
+
+int
+wht_is_codelet(char *f) 
+{
+  return (strncmp(wht_token.ident, f, strlen(f)) == 0);
+}
+
+void
+wht_require(char c)
+{
+  if (yylex() != (c))
+    wht_error("expected '%c'.", c); 
+}
+
+int
+wht_check(char c)
+{
+  char x;
+  x = yylex();
+  unput(x);
+
+  return (x == c);
+}
+

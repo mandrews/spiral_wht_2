@@ -19,34 +19,6 @@
 
 #include "wht.h"
 
-Wht *wht_new_split(int nn, Wht *Ws[]);
-
-Wht *
-parse_split()
-{
-  Wht *Ws[SPLIT_MAX_FACTORS];
-  int nn;
-
-  if (wht_is_codelet("split")) {
-    wht_require('[');
-    nn = 0;
-    Ws[0] = wht_parse_helper();
-    nn++;
-    while (wht_check(',')) {
-      if (nn == SPLIT_MAX_FACTORS)
-        wht_error("too many arguments for split[ ] in wht_parse()");
-      wht_require(',');
-      Ws[nn] = wht_parse_helper();
-      nn++;
-    }
-    wht_require(']');
-
-    return wht_new_split(nn, Ws);
-  }
-
-  return NULL;
-}
-
 
 /* Split WHT
    ---------
@@ -63,7 +35,9 @@ parse_split()
    from right to left.
 */
 
-static void apply_split(Wht *W, long S, long D, wht_value *x) {
+static void 
+wht_apply_split(Wht *W, long S, long D, wht_value *x)
+{
   int nn;
   long N, R, S1, Ni, i, j, k;
   long nIL;
@@ -90,7 +64,9 @@ static void apply_split(Wht *W, long S, long D, wht_value *x) {
   }
 }
 
-static void free_split(Wht *W) {
+static void 
+wht_free_split(Wht *W) 
+{
   int i;
 
   for (i = 0; i < W->priv.split.nn; i++) {
@@ -99,7 +75,8 @@ static void free_split(Wht *W) {
   wht_free(W);
 }
 
-Wht *wht_new_split(int nn, Wht *Ws[]) {
+Wht *
+wht_init_split(int nn, Wht *Ws[]) {
   Wht *W;
   long i;
   long N = 1;
@@ -111,13 +88,9 @@ Wht *wht_new_split(int nn, Wht *Ws[]) {
     n += Ws[i]->n;
   }
 
-  W            = (Wht *) wht_malloc(sizeof(Wht));
-  W->N         = N;
-  W->n         = n;
-  W->nILNumber = 1;
-
-  W->apply     = apply_split;
-  W->free      = free_split;
+  W            = wht_init_codelet(n);
+  W->apply     = wht_apply_split;
+  W->free      = wht_free_split;
   W->priv.split.nn = nn;
 
   /* store smaller whts */
@@ -126,6 +99,35 @@ Wht *wht_new_split(int nn, Wht *Ws[]) {
     W->priv.split.ns[i] = Ws[i]->N;
   }
 
+  /* Set aligned bit on last guy */
+  // W->priv.split.Ws[nn-1]->apply = wht_get_codelet("apply_small4_v2_a");
+
   return W;
+}
+
+Wht *
+wht_parse_split()
+{
+  Wht *Ws[SPLIT_MAX_FACTORS];
+  int nn;
+
+  if (wht_is_codelet("split")) {
+    wht_require('[');
+    nn = 0;
+    Ws[0] = wht_parse_next();
+    nn++;
+    while (wht_check(',')) {
+      if (nn == SPLIT_MAX_FACTORS)
+        wht_error("too many arguments for split[ ] in wht_parse()");
+      wht_require(',');
+      Ws[nn] = wht_parse_next();
+      nn++;
+    }
+    wht_require(']');
+
+    return wht_init_split(nn, Ws);
+  }
+
+  return NULL;
 }
 

@@ -1,55 +1,7 @@
 #include "wht.h"
 
-#include "getopt.h"
-
-
-int
-yywrap()
-{
-  return -1;
-}
-
-int
-wht_read_int()
-{
-  if (yylex() != WHT_NUMBER)
-    wht_error("expected int.");
-
-  return wht_token.value;
-}
-
-void 
-wht_next_codelet()
-{
-  if (yylex() != WHT_CODELET)
-    wht_error("expected codelet.");
-}
-
-int
-wht_is_codelet(char *f) 
-{
-  return (strncmp(wht_token.ident, f, strlen(f)) == 0);
-}
-
-void
-wht_require(char c)
-{
-  if (yylex() != (c))
-    wht_error("expected '%c'.", c); 
-}
-
-int
-wht_check(char c)
-{
-  char x;
-  x = yylex();
-  wht_unput(x);
-
-  return (x == c);
-}
-
 Wht *
-wht_parse_helper()
+wht_parse_next()
 {
   int i;
   Wht * W;
@@ -73,6 +25,26 @@ Wht *
 wht_parse(char *in)
 {
   yy_scan_string(in);
-  return wht_parse_helper();
+  return wht_parse_next();
+}
+
+Wht *
+wht_init_codelet(int n)
+{
+  Wht *W;
+
+  W            = (Wht *) wht_malloc(sizeof(Wht));
+  W->N         = (long) pow((double) 2, (double) n);
+  W->n         = n;
+  W->free      = wht_free_codelet;
+  W->apply     = NULL;
+
+  return W;  
+}
+
+void 
+wht_free_codelet(Wht *W) 
+{
+  wht_free(W);
 }
 
