@@ -14,10 +14,11 @@
 #include "config.h"
 #include "wht_vector.h"
 
-#include "stdlib.h"
-#include "stdio.h"
-#include "string.h"
-#include "math.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#include <stdbool.h>
 
 #define CODELET_CALL_MAX_SIZE 40
 
@@ -29,7 +30,6 @@ typedef struct wht {
   int N,                                          /* signal length */
       n;                                               /*  N = 2^n */
   int nILNumber;
-  short aligned;
   void (*apply)(struct wht *W, long S, long D, wht_value *x);
   void (*free) (struct wht *W);     
   char * (*to_string) (void);
