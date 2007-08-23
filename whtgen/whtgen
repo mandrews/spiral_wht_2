@@ -95,6 +95,12 @@ def mk_tmp(k)
   a
 end
 
+def vectorize(v,p)
+  p.each do |x|
+    x[:vsize] = v
+  end
+end
+
 def scalar_stack_to_string p
   s = ""
   p.each do |x|
@@ -143,6 +149,7 @@ class Options
     @params[:n] = nil
     @params[:v] = 1
     @params[:a] = false
+    @params[:i] = 1
     @options = OptionParser.new do |o|
       o.banner = "Usage: #{$0} [OPTIONS]"
       o.separator ""
@@ -156,7 +163,10 @@ class Options
         "Size of WHT to unroll.") { |x| @params[:n] = x.to_i } 
 
       o.on("-a", "--aligned", 
-        "Size of WHT to unroll.") { |x| @params[:a] = true }
+        "Access aligned memory, i.e. at unit stride.") { |x| @params[:a] = true }
+
+      o.on("-i", "--interleave=FACTOR", Integer,
+        "Loop interleaving factor.") { |x| @params[:i] = x.to_i } 
     end
   end
 
@@ -188,6 +198,7 @@ opts.parse(ARGV)
 
 n = opts.params[:n]
 v = opts.params[:v]
+il = opts.params[:i]
 m = (Math.log(n) / Math.log(2)).to_i
 a = opts.params[:a] ? "" : "*S"
 
@@ -213,6 +224,10 @@ if v > 1
   type = "wht_vector#{v}" 
   name = "apply_small#{m}_v#{v}" + aligned
   body = vector_stack_to_string(@stack) 
+elsif il > 1
+  type = "wht_vector#{il}" 
+  name = "apply_small#{m}_il#{il}"
+  body = vector_stack_to_string(vectorize(il,@stack)) 
 else
   type = "wht_value"
   name = "apply_small#{m}" + aligned

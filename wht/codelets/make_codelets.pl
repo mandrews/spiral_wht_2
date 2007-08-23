@@ -12,10 +12,11 @@
 # TODO 
 # These parameters should be command line arguments
 # set by ./configure --enable-maintainer-mode
-$small    = 8;
-$vector   = 2;
-$whtgen   = "../../whtgen/whtgen";
-$registry = "codelet_registry.h";
+$small      = 8;
+$vector     = 2;
+$interleave = 2;
+$whtgen     = "../../whtgen/whtgen";
+$registry   = "codelet_registry.h";
 
 @codelets = ();
 $codelets = 0;
@@ -46,6 +47,13 @@ for ($i=1;$i<=$small;++$i) {
 $v = (log($vector) / log(2)) + 1;
 for ($i=$v;$i<=$small;++$i) {
   push(@codelets,("s_$i\_v\_$vector\_a.c", "-n $i -v $vector -a"));
+  $codelets++;
+}
+
+# Generate unaligned interleaved codelets
+$il = (log($vector) / log(2)) + 1;
+for ($i=$il;$i<=$small;++$i) {
+  push(@codelets,("s_$i\_il\_$interleave.c", "-n $i -i $interleave"));
   $codelets++;
 }
 

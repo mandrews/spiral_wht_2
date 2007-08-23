@@ -65,17 +65,19 @@ Wht * wht_direct(int n);
 /*
  * Place new codelet interfaces HERE
  */
-#define REGISTERED_CODELETS 3
+#define REGISTERED_CODELETS 4
 
 Wht * wht_parse_split();
 Wht * wht_parse_small();
 Wht * wht_parse_vector();
+Wht * wht_parse_interleave();
 
 typedef Wht * (*parse_codelet) (void);
 
 const static
 parse_codelet codelets[] = { 
   &wht_parse_vector,
+  &wht_parse_interleave,
   &wht_parse_small,
   &wht_parse_split,
 };
