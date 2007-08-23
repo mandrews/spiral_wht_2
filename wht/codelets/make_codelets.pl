@@ -12,7 +12,7 @@
 # TODO 
 # These parameters should be command line arguments
 # set by ./configure --enable-maintainer-mode
-$small    = 3;
+$small    = 8;
 $vector   = 2;
 $whtgen   = "../../whtgen/whtgen";
 $registry = "codelet_registry.h";
@@ -64,7 +64,7 @@ while (@codelets) {
   print "Register: $name in $registry\n";
   $depends .= "$file "; # Add to dependancies
   $externs .= "extern codelet $name\;\n"; # Add to external declarations
-  $structs .= "  { \"$name\",\n  &$name\n  },\n"; # Add to registry struct
+  $structs .= "  { \"$name\",\n  (codelet) &$name\n  },\n"; # Add to registry struct
 }
 
 # Output the C registry array (see codelets.c)
