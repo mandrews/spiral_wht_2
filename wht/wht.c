@@ -38,6 +38,7 @@ wht_init_codelet(int n)
   W->n         = n;
   W->free      = wht_free_codelet;
   W->apply     = NULL;
+  W->nILNumber = 1;
 
   return W;  
 }
