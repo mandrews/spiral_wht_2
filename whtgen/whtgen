@@ -7,24 +7,21 @@
 
 IDENT   = "  "
 
-@stack  = []
-@tmp    = 0
-
 def l_2v_v(x,a,s,y,b,t,v)
   case v
     when 1 # Transform undefined, just copy input to output
       y[b],y[b+t] = x[a],x[a+s]
     when 2 
       t1,t2 = mk_tmp(2)
-      @stack.push shuf(t1,x[a],x[a+s],[0,0],v)
-      @stack.push shuf(t2,x[a],x[a+s],[1,1],v)
+      @stack.push Shuf.new(t1,x[a],x[a+s],[0,0],v)
+      @stack.push Shuf.new(t2,x[a],x[a+s],[1,1],v)
       y[b],y[b+t] = t1,t2
     when 4
       t1,t2 = mk_tmp(2)
-      @stack.push shuf(t1,x[a],x[a+s],[0,1,0,1],v)
-      @stack.push shuf(t2,x[a],x[a+s],[2,3,2,3],v)
-      @stack.push shuf(t1,t1,t1,[0,2,1,3],v)
-      @stack.push shuf(t2,t2,t2,[0,2,1,3],v)
+      @stack.push Shuf.new(t1,x[a],x[a+s],[0,1,0,1],v)
+      @stack.push Shuf.new(t2,x[a],x[a+s],[2,3,2,3],v)
+      @stack.push Shuf.new(t1,t1,t1,[0,2,1,3],v)
+      @stack.push Shuf.new(t2,t2,t2,[0,2,1,3],v)
       y[b],y[b+t] = t1,t2
   end
 end
@@ -43,8 +40,8 @@ end
 
 def wht_2(x,a,s,y,b,t,v)
   t1,t2 = mk_tmp(2)
-  @stack.push add(t1,x[a],x[a+s],v)
-  @stack.push sub(t2,x[a],x[a+s],v)
+  @stack.push Add.new(t1,x[a],x[a+s],v)
+  @stack.push Sub.new(t2,x[a],x[a+s],v)
   y[b],y[b+t] = t1,t2
 end
 
@@ -66,72 +63,177 @@ def wht(n,x,a,s,y,b,t,v)
   end
 end
 
-def add(r,a,b,v)
-  { :type => :add,   :out => r, :in => [a,b], :vsize => v }
-end
-
-def sub(r,a,b,v)
-  { :type => :sub,   :out => r, :in => [a,b], :vsize => v }
-end
-
-def load(r,m,s,v)
-  { :type => :load,  :out => r, :in => [m,s], :vsize => v }
-end
-
-def store(r,m,s,v)
-  { :type => :store, :out => r, :in => [m,s], :vsize => v }
-end
-
-def shuf(r,a,b,m,v)
-  # TODO assert m.size = v
-  { :type => :shuf,  :out => r, :in => [a,b], :vsize => v, :mask => m}
-end
-
-def mk_tmp(k)
-  a = []
-  k.times do
-    a << @tmp += 1
+class BinIns
+  attr_accessor :v
+  def initialize(r,a,b,v)
+    @r,@a,@b,@v = r,a,b,v
+    @t = 'ta'
   end
-  a
-end
 
-def vectorize(v,p)
-  p.each do |x|
-    x[:vsize] = v
+  def interleave(k)
+    k.times { @t = @t.succ }
   end
 end
 
-def scalar_stack_to_string p
-  s = ""
-  p.each do |x|
-    r,a,b = x[:out],x[:in][0],x[:in][1]
-    s += IDENT
-    s += case x[:type]
-      when :add   then "t#{r} = t#{a} + t#{b};\n"
-      when :sub   then "t#{r} = t#{a} - t#{b};\n"
-      when :load  then "t#{r} = #{a}[#{b}];\n"
-      when :store then "#{a}[#{b}] = t#{r};\n"
-      else "/* undefined. */\n"
+class Add < BinIns
+  def to_s
+    if @v < 2 
+      "#{@t}#{@r} = #{@t}#{@a} + #{@t}#{@b};\n"
+    else
+      "vadd#{@v}(#{@t}#{@r},#{@t}#{@a},#{@t}#{@b});\n"
     end
   end
-  s
 end
 
-def vector_stack_to_string p
-  s = ""
-  p.each do |x|
-    r,a,b,v,m = x[:out],x[:in][0],x[:in][1],x[:vsize],x[:mask]
-    s += IDENT
-    s += case x[:type]
-      when :add   then "vadd#{v}(t#{r},t#{a},t#{b});\n"
-      when :sub   then "vsub#{v}(t#{r},t#{a},t#{b});\n"
-      when :load  then "vload#{v}(t#{r},#{a}[#{b}]);\n"
-      when :store then "vstore#{v}(t#{r},#{a}[#{b}]);\n"
-      when :shuf  then "vshuf#{v}(t#{r},t#{a},t#{b},#{m.join(',')});\n"
-      else "/* undefined. */\n"
+class Sub < BinIns
+  def to_s
+    if @v < 2 
+      "#{@t}#{@r} = #{@t}#{@a} - #{@t}#{@b};\n"
+    else
+      "vsub#{@v}(#{@t}#{@r},#{@t}#{@a},#{@t}#{@b});\n"
     end
   end
-  s
+end
+
+class Shuf 
+  attr_accessor :v
+  def initialize(r,a,b,m,v)
+    # TODO assert m.size = v
+    @r,@a,@b,@m,@v = r,a,b,m,v
+    @t = 'ta'
+  end
+
+  def to_s
+    if @v < 2 
+      "/* undefined*/;\n"
+    else
+      "vshuf#{@v}(#{@t}#{@r},#{@t}#{@a},#{@t}#{@b},#{@m.join(',')});\n"
+    end
+  end
+
+  def interleave(k)
+    k.times { @t = @t.succ }
+  end
+end
+
+class MemIns
+  attr_accessor :v
+  def initialize(r,m,s,a,v)
+    @r,@m,@s,@a,@v = r,m,s,a,v
+    @k = 0
+    @t = 'ta'
+  end
+
+  def interleave(k)
+    @k = k
+    k.times { @t = @t.succ }
+  end
+
+  def stride
+    @a ? "#{@s+@k}" : "#{@s} * S + #{@k}"
+  end
+end
+
+class Load < MemIns
+  def to_s
+    if @v < 2 
+      sprintf "%s%d = %s[%s];\n",@t,@r,@m,stride
+    else
+      sprintf "vload%d(%s%d,%s[%s]);\n",@v,@t,@r,@m,stride
+    end
+  end
+end
+
+class Store < MemIns
+  def to_s
+    if @v < 2 
+      sprintf "%s[%s] = %s%d;\n",@m,stride,@t,@r
+    else
+      sprintf "vstore%d(%s%d,%s[%s]);\n",@v,@t,@r,@m,stride
+    end
+  end
+end
+
+class Generator
+  def initialize(n,i,v,vp,a,type,name)
+    @n,@i,@v,@vp,@a,@type,@name = n,i,v,vp,a,type,name
+    @stack  = []
+    @tmp    = 0
+  end
+
+  def mk_tmp(k=1)
+    return @tmp += 1 unless k > 1
+
+    a = []
+    k.times do
+      a << @tmp += 1
+    end
+    a
+  end
+
+  def to_s
+    body = ""
+    @stack.each do |x|
+      body += IDENT + x.to_s
+    end
+
+    a = @a ? '_a' : ''
+
+    header = "#include \"wht.h\"\n\n" +
+             "void #{@name}#{a}(Wht *W, long S, long D, wht_value *x)\n{\n"
+
+    decls = ""
+    t = 'ta'
+    @i.times {
+      @tmp.times do |k|
+        decls += IDENT + @type + " #{t}#{k+1};\n"
+      end
+      t = t.succ
+    }
+
+    header + decls + body + "}\n"
+  end
+
+  def interleave
+    q = []
+    @stack.each do |x|
+      q << x.clone
+      for k in 1 .. @i-1 do # Make i copies
+        y = x.clone
+        y.interleave(k)
+        q << y
+      end
+    end
+    @stack = q
+  end
+
+  def vectorize
+    @stack.each do |x|
+      x.v = @vp
+    end
+  end
+
+
+  def run
+    x = {}
+    y = {}
+
+    @n.times do |i| 
+      t = mk_tmp
+      x[i] = t
+      @stack.push  Load.new(t,"x",(i*@v),@a,@v)
+    end
+
+    wht(@n*@v,x,0,1,y,0,1,@v)
+
+    @n.times do |i| 
+      t = y[i] 
+      @stack.push Store.new(t,"x",(i*@v),@a,@v)
+    end
+
+    interleave
+    vectorize
+  end
 end
 
 def die(msg)
@@ -193,53 +295,26 @@ class Options
 
 end
 
-opts = Options.new
-opts.parse(ARGV)
+if $0 == __FILE__ 
+  opts = Options.new
+  opts.parse(ARGV)
 
-n = opts.params[:n]
-v = opts.params[:v]
-il = opts.params[:i]
-m = (Math.log(n) / Math.log(2)).to_i
-a = opts.params[:a] ? "" : "*S"
+  n = opts.params[:n]
+  v = opts.params[:v]
+  i = opts.params[:i]
+  a = opts.params[:a] 
+  m = (Math.log(n) / Math.log(2)).to_i
 
-x = {}
-y = {}
+  if v > 1 and i > 1 
+    g = Generator.new(n,(i/v),1,v,a,"wht_vector#{v}", "apply_small#{m}_v#{v}_il#{i}")
+  elsif v > 1
+    g = Generator.new((n/v),1,v,v,a,"wht_vector#{v}", "apply_small#{m}_v#{v}")
+  elsif i > 1
+    g = Generator.new(n,i,1,1,a,"wht_value", "apply_small#{m}_il#{i}")
+  else
+    g = Generator.new(n,1,1,1,a,"wht_value", "apply_small#{m}")
+  end
 
-(n/v).times do |i| 
-  t = mk_tmp(1)
-  x[i] = t
-  @stack.push  load(t,"x",(i*v).to_s + a,v)
+  g.run
+  puts g
 end
-
-wht(n,x,0,1,y,0,1,v)
-
-(n/v).times do |i| 
-  t = y[i] 
-  @stack.push store(t,"x",(i*v).to_s + a,v)
-end
-
-aligned = opts.params[:a] ? "_a" : ""
-
-if v > 1
-  type = "wht_vector#{v}" 
-  name = "apply_small#{m}_v#{v}" + aligned
-  body = vector_stack_to_string(@stack) 
-elsif il > 1
-  type = "wht_vector#{il}" 
-  name = "apply_small#{m}_il#{il}"
-  body = vector_stack_to_string(vectorize(il,@stack)) 
-else
-  type = "wht_value"
-  name = "apply_small#{m}" + aligned
-  body = scalar_stack_to_string(@stack) 
-end
-
-header = "#include \"wht.h\"\n\n" +
-         "void #{name}(Wht *W, long S, long D, wht_value *x)\n{\n"
-
-decls = ""
-@tmp.times do |i|
-  decls += IDENT + type + " t#{i+1};\n"
-end
-
-puts header + decls + body + "}\n"

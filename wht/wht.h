@@ -76,8 +76,8 @@ typedef Wht * (*parse_codelet) (void);
 
 const static
 parse_codelet codelets[] = { 
-  &wht_parse_vector,
   &wht_parse_interleave,
+  &wht_parse_vector,
   &wht_parse_small,
   &wht_parse_split,
 };

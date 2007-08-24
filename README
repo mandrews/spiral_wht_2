@@ -1,7 +1,8 @@
 Bugs:
-  verify -w 'split[small[2],small[2]]'
+  - Cannot tokenize smallil2v2 properly
+  - smallilKvN with N > 2 doesn't work
+  - whtgen is really bad code
 
-  doesn't work because codelets are not generated with stride parameter
 
 For Maintainers:
   libtoolize

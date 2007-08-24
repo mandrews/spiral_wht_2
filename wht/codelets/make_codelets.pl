@@ -12,9 +12,9 @@
 # TODO 
 # These parameters should be command line arguments
 # set by ./configure --enable-maintainer-mode
-$small      = 8;
+$small      = 4;
 $vector     = 2;
-$interleave = 2;
+$interleave = 3;
 $whtgen     = "../../whtgen/whtgen";
 $registry   = "codelet_registry.h";
 
@@ -51,10 +51,21 @@ for ($i=$v;$i<=$small;++$i) {
 }
 
 # Generate unaligned interleaved codelets
-$il = (log($vector) / log(2)) + 1;
-for ($i=$il;$i<=$small;++$i) {
-  push(@codelets,("s_$i\_il\_$interleave.c", "-n $i -i $interleave"));
-  $codelets++;
+for ($i=1;$i<=$small;++$i) {
+  for ($j=1;$j<=$interleave;$j++) {
+    $k = 2**$j;
+    push(@codelets,("s_$i\_il\_$k.c", "-n $i -i $k"));
+    $codelets++;
+  }
+}
+
+# Generate unaligned vectorized interleaved codelets
+for ($i=$v;$i<=$small;++$i) {
+  for ($j=1;$j<=$interleave;$j++) {
+    $k = 2**$j;
+    push(@codelets,("s_$i\_il\_$k\_v$vector.c", "-n $i -i $k -v $vector"));
+    $codelets++;
+  }
 }
 
 $externs  = "";
@@ -65,7 +76,7 @@ while (@codelets) {
   $file = shift @codelets;
   $args = shift @codelets;
 
-  print "Generate:  $whtgen $args > $args\n";
+  print "Generate:  $whtgen $args > $file\n";
   `$whtgen $args > $file`; # Generate codelet
   $name = function_name($file); # Grep for codelet function name
 
