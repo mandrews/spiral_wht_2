@@ -1,4 +1,5 @@
-AM_CPPFLAGS = -I$(top_srcdir)/wht -I$(srcdir) -I$(papi_path)/include
+AM_CPPFLAGS = -I$(top_srcdir)/wht -I$(srcdir) -I$(papi_path)/include \
+	-D MAX_CACHE_SIZE_KB=$(CACHE_SIZE_KB)
 
 noinst_PROGRAMS = measure
 

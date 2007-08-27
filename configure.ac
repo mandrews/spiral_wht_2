@@ -36,7 +36,14 @@ AC_ARG_WITH(papi-path,
   [AC_HELP_STRING([--with-papi-path],[Location of PAPI install])], 
   papi_path=$withval, papi_path="/usr")
 
+AC_ARG_WITH(cache-size-kb, 
+  [AC_HELP_STRING([--with-cache-size-kb],[Size of L2 cache in KB])], 
+  cache_size_kb=$withval, cache_size_kb=8)
+
 AC_SUBST(papi_path)
+
+CACHE_SIZE_KB=$cache_size_kb
+AC_SUBST(CACHE_SIZE_KB)
 
 dnl TODO move variables that do not change to another header file
 AC_DEFINE(SPLIT_MAX_FACTORS,40,"Maximum number of codelets in a split.")
