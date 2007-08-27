@@ -1,0 +1,333 @@
+#!/usr/bin/env ruby
+
+# dp
+#
+# Author: Michael Andrews <mjand@drexel.edu>
+# $Id$
+
+SCRIPT_PATH     = File.dirname(__FILE__) 
+SCRIPT_NAME     = 'dp'
+DEFAULT_PARAMS  = {
+  :sizes        => [ 1,18],
+  :children     => [ 1, 2],
+  :leaf_sizes   => [ 1, 8],
+  :wht_measure  => SCRIPT_PATH + '/wht_measure',
+  :wht_info     => SCRIPT_PATH + '/wht_info',
+  :best_trees   => SCRIPT_PATH + '/best_trees.txt'
+}
+
+class Options
+  require 'optparse'
+  attr_reader :params
+  def initialize
+    @params  = DEFAULT_PARAMS
+    @options = OptionParser.new do |o|
+      o.banner = "Usage: #{SCRIPT_NAME} [OPTIONS]"
+      o.separator ""
+      o.on("-h", "--help", 
+        "Show this help message.") { 
+        die }
+      o.on("-v", "--verbose", 
+        "Show non-essential information.") {
+        @params[:verbose] = true }
+      o.on("-s", "--sizes=START_SIZE,STOP_SIZE", Array,
+        "Start/Stop the search at size 2^SIZE.") { |x|
+        die('sizes should only have two elements.') if x.size != 2
+        @params[:sizes] = x.map { |y| y.to_i } }
+
+      o.on("-k", "--children=MIN_CHILDREN,MAX_CHILDREN", Array,
+        "Min/Max children per node.") { |x|
+        die('children should only have two elements.') if x.size != 2
+        @params[:children] = x.map { |y| y.to_i } }
+
+      o.on("-l", "--leaf-sizes=MIN_LEAF_SIZE,MAX_LEAF_SIZE", Array,
+        "Min/Max leaf size.") { |x|
+        die('leaf sizes should only have two elements.') if x.size != 2
+        @params[:leaf_sizes] = x }
+      o.on("-m", "--wht-measure=FILE", 
+        "Script to measure peformance of WHT tree.") { |x|
+         @params[:wht_measure] = x }
+      o.on("-i", "--wht-info=FILE", 
+        "Script to get info about available WHT codelets.") { |x|
+         @params[:wht_measure] = x }
+      o.on("-t", "--wht-best-trees=FILE", 
+        "File to load/store the best trees found by dynamic programming.") { |x|
+         @params[:best_trees] = x }
+    end
+  end
+
+  def die(msg = nil)
+    puts @options.to_s 
+    puts "\n#{msg}" unless msg.nil?
+    exit
+  end
+
+  def parse(args)
+    begin
+      @options.parse!(args)
+    rescue => e
+      die(e.message)
+    end
+  end
+
+  def info
+    @params.each do |k,v| 
+      s = case v.class.to_s
+            when 'Array'
+              '[' + v.join(',') + ']'
+            else
+              v
+          end
+      puts "#{k} = #{s}"
+    end
+  end
+end
+
+def combinations(a)
+  return a if a.size == 1
+
+  h = a.shift
+  t = combinations(a)
+
+  all = []
+  t.each do |y|
+    h.each do |x|
+      all << [x] + y
+    end
+  end
+
+  all
+end
+
+def size_of_right_tree(zp,n)
+  v = 1
+  zp.reverse.each_with_index do |x,i|
+    break if n >= (zp.size - i)
+    v *= 2**x
+  end
+  v
+end
+
+def load_best_trees(file, trees)
+  return unless File.exists?(file)
+  fd = File.open(file,'r')
+  while line = fd.gets do
+    line =~ /\s*(\d+)\s*,\s*(\d+.\d+)\s*,([\w\d\_\[\]]+)\s*/
+    size,time,plan = $1.to_i,$2.to_f,$3
+    next unless size and time and plan
+    trees[size] = [time,plan]
+  end
+  fd.close
+end
+
+def save_best_trees(file, trees)
+  fd = File.open(file,'w+')
+  trees.sort.each do |k,v|
+    time, plan = v
+    fd.puts "#{k},#{time},#{plan}"
+  end
+  fd.close
+end
+
+class Search
+  INF = 1.0 / 0.0
+  attr_accessor :best
+  attr_accessor :debug
+  def initialize(params)
+    # TODO merge params with default params
+    @min_size = params[:min_size]
+    @max_size = params[:max_size]
+    @measure  = params[:measure]
+    @il_max   = params[:il_max]
+    @vsize    = params[:vsize]
+    @max_leaf = params[:max_leaf]
+    @debug    = params[:debug]
+
+    @best = {}
+  end
+
+  def run
+    for size in 1 .. @max_size do 
+      @best[size] ||= [INF,nil]
+    end
+
+    for size in @min_size .. @max_size do 
+      puts "size #{s}" if @debug
+      find(size)
+    end
+  end
+
+  def measure(plan)
+    cmd = "#{@measure} #{plan}"
+    t = 0
+    IO.popen(cmd) do |fd|
+      t = fd.gets
+    end
+
+    unless t 
+      throw Exception.new("Could not read: #{cmd}")
+    end
+
+    t.to_f
+  end
+
+  def find(size)
+    plans = []
+    zs1(size) do |zp|
+
+      right = right_codelets(zp.pop)
+      lefts = []
+      zp.each_with_index do |z,i|
+        k = size_of_right_tree(zp,i+1)
+        lefts << left_codelets(z,size,k)
+      end
+
+      if lefts.empty? # Basecase
+        plans += right
+        next
+      end
+
+      lefts << right
+
+      combinations(lefts).each do |x|
+        split_codelets.each do |s|
+          plans << "#{s}[#{x.join(',')}]"
+        end
+      end
+        
+    end
+
+    plans.each do |p|
+      t  = measure(p)
+      tp = @best[size][0]
+      if t < tp
+        puts "New Best for #{size} with T=#{t} (T'=#{tp}): #{p}"
+        @best[size] = [t, p]
+      end
+    end
+  end
+
+  def find_best(size)
+    if @best[size][1]
+      @best[size][1]
+    elsif size <= @max_leaf
+      "small[#{size}]"
+    else
+      find(size)
+    end
+  end
+
+  def left_codelets(size, n, m)
+    return [] if size > @max_leaf or size < 2
+
+    lefts = []
+    best = find_best(size)
+    lefts << best unless is_right_codelet?(best)
+    lefts << "small[#{size}]"
+
+    il_max = [n, @il_max, m].min
+    for k in 1 .. il_max do
+      lefts << "smallil#{2**k}[#{size}]"
+    end
+    lefts.uniq
+  end
+
+  def right_codelets(size)
+    return [] if size > @max_leaf
+
+    rights = [ "small[#{size}]", find_best(size) ]
+    if 2**size > @vsize
+      rights << "smallv#{@vsize}[#{size}]"
+    end
+    rights.uniq
+  end
+
+  def is_right_codelet?(codelet)
+    codelet =~ /smallv/
+  end
+
+  def split_codelets
+    [ "split" ]
+  end
+
+end
+
+# ZS1 algorithm
+#
+# Returns integer paritions of n in anti-lexographic order, i.e. n first
+#
+# This corresponds to right most WHT trees
+#
+#@article{zs1
+#  author = {Zoghbi, Antoine   and Stojmenovi{\'c}, Ivan  },
+#  journal = {International Journal of Computer Mathematics},
+#  keywords = {combinatorics computerscience partitions},
+#  number = {2},
+#  pages = {319--332},
+#  title = {Fast algorithms for generating integer partitions},
+#  url = {http://www.site.uottawa.ca/~ivan/F49-int-part.pdf},
+#  volume = {70},
+#  year = {1998}
+#}
+def zs1(n)
+  x = []
+
+  for i in 1 .. n do
+    x[i] = 1
+  end
+
+  x[1] = n
+  m,h = 1,1
+  yield [x[1]]
+
+  while x[1] != 1 do
+    if x[h] == 2
+      m, x[h], h = m + 1, 1, h - 1
+    else
+      r = x[h] - 1
+      t, x[h] = m - h + 1, r
+      while t >= r do
+        h = h + 1
+        x[h], t = r, t - r
+      end
+      if t == 0 
+        m = h
+      else
+        m = h + 1
+        if t > 1
+          h = h + 1
+          x[h] = t
+        end
+      end
+    end
+
+    yield x[1..m]
+  end
+end
+
+if $0 == __FILE__
+  opts = Options.new
+  opts.parse(ARGV)
+  opts.info if opts.params[:verbose]
+
+  measure  = '../measure/papi/measure -w'
+
+  dp = Search.new(
+    { :min_size => 3,
+      :max_size => 10,
+      :measure  => measure,
+      :max_leaf => 4,
+      :il_max   => 3,
+      :vsize    => 2,
+      :debug    => opts.params[:verbose],
+    } )
+
+  trees = {}
+  load_best_trees(opts.params[:best_trees],trees)
+
+  dp.best.merge!(trees)
+  dp.run
+
+  save_best_trees(opts.params[:best_trees],dp.best)
+
+end
