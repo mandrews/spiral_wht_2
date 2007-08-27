@@ -4,3 +4,5 @@ noinst_PROGRAMS = measure
 
 measure_SOURCES = measure.c papi_utils.c
 measure_LDADD   = $(top_builddir)/wht/libwht.la $(papi_path)/lib/libpapi.so
+# NOTE once install dir stuff is settled this should not be necessary
+measure_LDFLAGS = -rpath $(papi_path)/lib
