@@ -5,7 +5,7 @@
 # Author: Michael Andrews <mjand@drexel.edu>
 # $Id$
 
-IDENT   = "  "
+INDENT   = "  "
 
 def l_2v_v(x,a,s,y,b,t,v)
   case v
@@ -73,6 +73,12 @@ class BinIns
   def interleave(k)
     k.times { @t = @t.succ }
   end
+
+  def tmps
+    [(sprintf "%s%d",@t,@r),
+     (sprintf "%s%d",@t,@a), 
+     (sprintf "%s%d",@t,@b), ]
+  end
 end
 
 class Add < BinIns
@@ -95,12 +101,11 @@ class Sub < BinIns
   end
 end
 
-class Shuf 
-  attr_accessor :v
+class Shuf < BinIns
   def initialize(r,a,b,m,v)
     # TODO assert m.size = v
-    @r,@a,@b,@m,@v = r,a,b,m,v
-    @t = 'ta'
+    super(r,a,b,v)
+    @m = m
   end
 
   def to_s
@@ -109,10 +114,6 @@ class Shuf
     else
       "vshuf#{@v}(#{@t}#{@r},#{@t}#{@a},#{@t}#{@b},#{@m.join(',')});\n"
     end
-  end
-
-  def interleave(k)
-    k.times { @t = @t.succ }
   end
 end
 
@@ -131,6 +132,10 @@ class MemIns
 
   def stride
     @a ? "#{@s+@k}" : "#{@s} * S + #{@k}"
+  end
+
+  def tmps
+    [(sprintf "%s%d",@t,@r)]
   end
 end
 
@@ -173,8 +178,10 @@ class Generator
 
   def to_s
     body = ""
+    tmps = []
     @stack.each do |x|
-      body += IDENT + x.to_s
+      body += INDENT + x.to_s
+      tmps += x.tmps
     end
 
     a = @a ? '_a' : ''
@@ -183,13 +190,9 @@ class Generator
              "void #{@name}#{a}(Wht *W, long S, long D, wht_value *x)\n{\n"
 
     decls = ""
-    t = 'ta'
-    @i.times {
-      @tmp.times do |k|
-        decls += IDENT + @type + " #{t}#{k+1};\n"
-      end
-      t = t.succ
-    }
+    tmps.uniq.each do |t|
+      decls += sprintf "%s%s %s;\n",INDENT, @type, t
+    end
 
     header + decls + body + "}\n"
   end
@@ -207,12 +210,15 @@ class Generator
     @stack = q
   end
 
-  def vectorize
-    @stack.each do |x|
-      x.v = @vp
+  def vectorize(v)
+    p = []
+    (0..@stack.size-1).step(v) do |i|
+      x = @stack[i]
+      x.v = v
+      p << x
     end
+    @stack = p
   end
-
 
   def run
     x = {}
@@ -232,7 +238,6 @@ class Generator
     end
 
     interleave
-    vectorize
   end
 end
 
@@ -306,15 +311,19 @@ if $0 == __FILE__
   m = (Math.log(n) / Math.log(2)).to_i
 
   if v > 1 and i > 1 
-    g = Generator.new(n,(i/v),1,v,a,"wht_vector#{v}", "apply_small#{m}_v#{v}_il#{i}")
+    g = Generator.new(n,i,1,v,a,"wht_vector#{v}", "apply_small#{m}_v#{v}_il#{i}")
+    g.run
+    g.vectorize(v)
   elsif v > 1
     g = Generator.new((n/v),1,v,v,a,"wht_vector#{v}", "apply_small#{m}_v#{v}")
+    g.run
   elsif i > 1
     g = Generator.new(n,i,1,1,a,"wht_value", "apply_small#{m}_il#{i}")
+    g.run
   else
     g = Generator.new(n,1,1,1,a,"wht_value", "apply_small#{m}")
+    g.run
   end
 
-  g.run
   puts g
 end

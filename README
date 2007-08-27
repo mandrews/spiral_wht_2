@@ -1,7 +1,7 @@
 Bugs:
   - Cannot tokenize smallil2v2 properly
-  - smallilKvN with N > 2 doesn't work
-  - whtgen is really bad code
+
+  - whtgen needs to be cleaned up
 
 
 For Maintainers:
