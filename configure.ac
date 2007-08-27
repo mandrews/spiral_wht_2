@@ -73,6 +73,8 @@ AC_CONFIG_FILES([
    whtgen-ml/Makefile
    wht/Makefile
    wht/codelets/Makefile
+   measure/Makefile
+   measure/usec/Makefile
 ])
 
 AC_OUTPUT
