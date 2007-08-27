@@ -1,2 +1,2 @@
-SUBDIRS=usec
+SUBDIRS=usec papi
 

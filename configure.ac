@@ -31,8 +31,14 @@ case "$PRECISION" in
 esac
 AC_SUBST(PREC_SUFFIX)
 
-dnl TODO move variables that do not change to another header file
+dnl PAPI path for measure
+AC_ARG_WITH(papi-path, 
+  [AC_HELP_STRING([--with-papi-path],[Location of PAPI install])], 
+  papi_path=$withval, papi_path="/usr")
 
+AC_SUBST(papi_path)
+
+dnl TODO move variables that do not change to another header file
 AC_DEFINE(SPLIT_MAX_FACTORS,40,"Maximum number of codelets in a split.")
 AC_DEFINE(CODELET_NAME_MAX_SIZE,10,"Maximum size of a codelet name identifier")
 
@@ -75,6 +81,7 @@ AC_CONFIG_FILES([
    wht/codelets/Makefile
    measure/Makefile
    measure/usec/Makefile
+   measure/papi/Makefile
 ])
 
 AC_OUTPUT
