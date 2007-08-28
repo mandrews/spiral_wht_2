@@ -81,7 +81,7 @@ class Options
 end
 
 def combinations(a)
-  return a if a.size == 1
+  return a.first if a.size == 1
 
   h = a.shift
   t = combinations(a)
@@ -89,7 +89,11 @@ def combinations(a)
   all = []
   t.each do |y|
     h.each do |x|
-      all << [x] + y
+      if y.class == Array
+        all << [x] + y
+      else
+        all << [x] + [y]
+      end
     end
   end
 
@@ -109,7 +113,7 @@ def load_best_trees(file, trees)
   return unless File.exists?(file)
   fd = File.open(file,'r')
   while line = fd.gets do
-    line =~ /\s*(\d+)\s*,\s*(\d+.\d+)\s*,([\w\d\_\[\]]+)\s*/
+    line =~ /\s*(\d+)\s*,\s*(\d+.\d+)\s*,\s*([\w\d\_\[\],]+)\s*$/
     size,time,plan = $1.to_i,$2.to_f,$3
     next unless size and time and plan
     trees[size] = [time,plan]
@@ -143,6 +147,14 @@ class Search
     @best = {}
   end
 
+  def heuristic(zp,n)
+    if n <= @max_leaf
+      return true
+    else
+      return  zp.size <= (n/3)
+    end
+  end
+
   def run
     for size in 1 .. @max_size do 
       @best[size] ||= [INF,nil]
@@ -172,6 +184,8 @@ class Search
   def find(size)
     plans = []
     zs1(size) do |zp|
+      next if zp.first == size and size > @max_leaf
+      next unless heuristic(zp,size)
 
       right = right_codelets(zp.pop)
       lefts = []
@@ -192,8 +206,10 @@ class Search
           plans << "#{s}[#{x.join(',')}]"
         end
       end
-        
+
     end
+
+    #puts plans.join("\n")
 
     plans.each do |p|
       t  = measure(p)
@@ -208,19 +224,24 @@ class Search
   def find_best(size)
     if @best[size][1]
       @best[size][1]
-    elsif size <= @max_leaf
-      "small[#{size}]"
     else
       find(size)
     end
   end
 
   def left_codelets(size, n, m)
-    return [] if size > @max_leaf or size < 2
+    return [] if size < 2
+
+    if size > @max_leaf
+      best = find_best(size)
+      unless right_codelet?(best)
+        return [best] 
+      else
+        return []
+      end
+    end
 
     lefts = []
-    best = find_best(size)
-    lefts << best unless is_right_codelet?(best)
     lefts << "small[#{size}]"
 
     il_max = [n, @il_max, m, size].min 
@@ -232,23 +253,22 @@ class Search
   end
 
   def right_codelets(size)
-    return [] if size > @max_leaf
+    return [find_best(size)] if size > @max_leaf
 
-    rights = [ "small[#{size}]", find_best(size) ]
+    rights = [ "small[#{size}]" ]
     if 2**size > @vsize
       rights << "smallv#{@vsize}[#{size}]"
     end
     rights.uniq
   end
 
-  def is_right_codelet?(codelet)
-    codelet =~ /smallv/
-  end
-
   def split_codelets
     [ "split" ]
   end
 
+  def right_codelet?(codelet)
+    codelet =~ /smallv/
+  end
 end
 
 # ZS1 algorithm

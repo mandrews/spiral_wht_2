@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(spiral_wht, 2.0, mjand@drexel.edu)
 
-AM_INIT_AUTOMAKE(1.10)
+AM_INIT_AUTOMAKE(1.9)
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 AC_DISABLE_STATIC
