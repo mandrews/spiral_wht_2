@@ -187,7 +187,7 @@ class Search
       next if zp.first == size and size > @max_leaf
       next unless heuristic(zp,size)
 
-      right = right_codelets(zp.pop)
+      right = right_codelets(zp.pop,size)
       lefts = []
       zp.each_with_index do |z,i|
         k = size_of_right_tree(zp,i+1)
@@ -232,7 +232,7 @@ class Search
   def left_codelets(size, n, m)
     return [] if size < 2
 
-    if size > @max_leaf
+    if n > @max_leaf
       best = find_best(size)
       unless right_codelet?(best)
         return [best] 
@@ -252,8 +252,8 @@ class Search
     lefts.uniq
   end
 
-  def right_codelets(size)
-    return [find_best(size)] if size > @max_leaf
+  def right_codelets(size,n)
+    return [find_best(size)] if n > @max_leaf
 
     rights = [ "small[#{size}]" ]
     if 2**size > @vsize
@@ -332,7 +332,7 @@ if $0 == __FILE__
   measure  = '../measure/papi/measure -w'
 
   dp = Search.new(
-    { :min_size => 1,
+    { :min_size => 8,
       :max_size => 18,
       :measure  => measure,
       :max_leaf => 7,
