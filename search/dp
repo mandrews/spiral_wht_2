@@ -232,16 +232,11 @@ class Search
   def left_codelets(size, n, m)
     return [] if size < 2
 
-    if n > @max_leaf
-      best = find_best(size)
-      unless right_codelet?(best)
-        return [best] 
-      else
-        return []
-      end
-    end
-
     lefts = []
+    best = find_best(size)
+    lefts << best unless right_codelet?(best)
+    return lefts if size > @max_leaf
+
     lefts << "small[#{size}]"
 
     il_max = [n, @il_max, m, size].min 
@@ -332,7 +327,7 @@ if $0 == __FILE__
   measure  = '../measure/papi/measure -w'
 
   dp = Search.new(
-    { :min_size => 8,
+    { :min_size => 1,
       :max_size => 18,
       :measure  => measure,
       :max_leaf => 7,
