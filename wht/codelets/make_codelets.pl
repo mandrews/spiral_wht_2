@@ -12,9 +12,9 @@
 # TODO 
 # These parameters should be command line arguments
 # set by ./configure --enable-maintainer-mode
-$small      = 4;
+$small      = 7;
 $vector     = 2;
-$interleave = 3;
+$interleave = 4;
 $whtgen     = "../../whtgen/whtgen";
 $registry   = "codelet_registry.h";
 
