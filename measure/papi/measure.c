@@ -82,7 +82,8 @@ main (int argc, char **argv)
   papi_profile(so_init, so_call, so_free, &total, 1);
 
   /* Print out counter values */
-  printf("%lld ", total.values[0]);
+  /* printf("%lld %.2Lf %zd", total.mean[0], sqrtl((long double) total.stdev[0]),total.samples); */
+  printf("%lld", total.mean[0]);
   printf("\n");
 
   papi_data_free(&total);

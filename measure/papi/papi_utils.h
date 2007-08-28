@@ -22,7 +22,7 @@
 #define DUMMY_SIZE ((MAX_CACHE_SIZE_KB * 1024)/ sizeof(BASE))
 
 #ifndef INITIAL_SAMPLES
-#define INITIAL_SAMPLES 5
+#define INITIAL_SAMPLES 25
 #endif/*INITIAL_SAMPLES*/
 
 /* TODO 
@@ -33,10 +33,11 @@
  */
 struct papi_data {
   long_long  cycles;
-  long_long *values;
-  long_long *values_tmp;
-  long_long *values_mean;
-  long_long *values_stdev;
+  long_long *tmp;
+  long_long *mean;
+  long_long *stdev;
+  long_long *sum;
+  long_long *sum2;
   size_t samples;
 };
 

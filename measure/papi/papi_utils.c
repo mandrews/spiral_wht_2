@@ -137,26 +137,29 @@ papi_data_init(struct papi_data *data, size_t n) {
 
   data->cycles = 0;
   
-  data->values = (long_long *) malloc(sizeof(long_long) * n);
-  data->values_tmp = (long_long *) malloc(sizeof(long_long) * n);
-  data->values_mean = (long_long *) malloc(sizeof(long_long) * n);
-  data->values_stdev = (long_long *) malloc(sizeof(long_long) * n);
+  data->tmp   = (long_long *) malloc(sizeof(long_long) * n);
+  data->mean  = (long_long *) malloc(sizeof(long_long) * n);
+  data->stdev = (long_long *) malloc(sizeof(long_long) * n);
+  data->sum   = (long_long *) malloc(sizeof(long_long) * n);
+  data->sum2  = (long_long *) malloc(sizeof(long_long) * n);
   data->samples = 0;
 
   for (i = 0; i < n; i++) {
-    data->values[i] = 0;
-    data->values_tmp[i] = 0;
-    data->values_mean[i] = 0;
-    data->values_stdev[i] = 0;
+    data->tmp[i]    = 0;
+    data->mean[i]   = 0;
+    data->stdev[i]  = 0;
+    data->sum[i]    = 0;
+    data->sum2[i]   = 0;
 	}
 }
 
 void 
 papi_data_free(struct papi_data  *data) {
-  free(data->values);
-  free(data->values_tmp);
-  free(data->values_mean);
-  free(data->values_stdev);
+  free(data->tmp);
+  free(data->mean);
+  free(data->stdev);
+  free(data->sum);
+  free(data->sum2);
 }
 
 inline void 
@@ -186,10 +189,10 @@ papi_profile_start_events(struct papi_data *data, size_t n) {
 		 * NOTE: PAPI_accum_counters does not work properly.
 		 * */ 
 #if 0
-    if (PAPI_read_counters(data->values_tmp, n) != PAPI_OK) 
+    if (PAPI_read_counters(data->tmp, n) != PAPI_OK) 
       papi_eprintf("Problem reading counters %s:%d.\n", __FILE__, __LINE__);
 #else
-    PAPI_read_counters(data->values_tmp, n);
+    PAPI_read_counters(data->tmp, n);
 #endif
 }
 
@@ -207,7 +210,7 @@ papi_profile_stop_events(struct papi_data *data, size_t n) {
 		 * counters.
 		 * NOTE: PAPI_accum_counters does not work properly.
 		 * */
-    if (PAPI_read_counters(data->values_tmp, n) != PAPI_OK) 
+    if (PAPI_read_counters(data->tmp, n) != PAPI_OK) 
       papi_eprintf("Problem reading counters %s:%d.\n", __FILE__, __LINE__);
 }
 
@@ -217,7 +220,7 @@ papi_profile_helper(void (*so_init)(void), void (*so_call)(void), void (*so_free
 {
   papi_reset(n);
 
-  cache_clear();
+  //cache_clear();
 
   /* Warm up PAPI */
   papi_profile_start_events(data, n);
@@ -244,6 +247,7 @@ papi_profile(void (*so_init)(void), void (*so_call)(void), void (*so_free)(void)
   size_t i,done,M;
 
   M = INITIAL_SAMPLES;
+  cache_clear();
 
   for (i = 0; i < M; i++) {
     papi_profile_helper(so_init, so_call, so_free, data, n);
@@ -268,23 +272,30 @@ void
 papi_update_stats(struct papi_data *data, size_t n)
 {
   size_t i;
-  long_long delta,tmp;
 
   data->samples++;
 
+#if 0
   for (i = 0; i < n; i++) {
-    data->values[i] = papi_min(data->values[i], data->values_tmp[i]);
+    data->sum[i]  += data->tmp[i];
+    data->sum2[i] += data->tmp[i]*data->tmp[i];
+    data->mean[i]  = data->sum[i]  / (long_long) data->samples;
+    data->stdev[i] = data->sum2[i] / (long_long) data->samples;
+  }
+#else
+  long_long delta;
+  for (i = 0; i < n; i++) {
+    delta = data->tmp[i] - data->mean[i];
+    data->mean[i] += delta/((long_long) data->samples);
+    data->sum[i] += delta*data->tmp[i] - delta*data->mean[i];
 
-    delta = data->values[i] - data->values_mean[i];
-    data->values_mean[i] += delta/((long_long) data->samples);
-
-    if (data->samples > 1) {
-      tmp = delta*(data->values[i] - data->values_mean[i]);
-      data->values_stdev[i] += tmp/(((long_long) data->samples) - 1);
+    if (data->samples > 2) {
+      data->stdev[i] = data->sum[i]/(((long_long) data->samples));
     } else {
-      data->values_stdev[i] = data->values_mean[i];
+      data->stdev[i] = data->mean[i];
     }
   }
+#endif
 }
 
 int
@@ -294,20 +305,17 @@ papi_profile_done(struct papi_data *data, size_t n)
   size_t i, samples, good;
   long_long tmp;
 
-  z = 1.645;
-  p = 0.05;
-  a = 0.95;
+  z = 1.90;
+  p = 0.01;
+  a = 0.99;
 
   good = 0;
 
   for (i = 0; i < n; i++) {
-    tmp = data->values_mean[i] * data->values_mean[i];
-    tmp = ceil(p * tmp);
+    tmp = data->mean[i] * data->mean[i];
+    tmp = ceil(p * p * tmp);
 
-    if (data->values_stdev[i] < 1)
-      samples = 1;
-    else
-      samples = (ceil(z*data->values_stdev[i]) / tmp) + 1;
+    samples = (ceil(z*z*data->stdev[i]) / tmp) + 1;
 
     if (data->samples >= samples)
       good++;
