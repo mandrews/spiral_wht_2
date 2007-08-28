@@ -47,9 +47,6 @@ class Options
       o.on("-m", "--wht-measure=FILE", 
         "Script to measure peformance of WHT tree.") { |x|
          @params[:wht_measure] = x }
-      o.on("-i", "--wht-info=FILE", 
-        "Script to get info about available WHT codelets.") { |x|
-         @params[:wht_measure] = x }
       o.on("-t", "--wht-best-trees=FILE", 
         "File to load/store the best trees found by dynamic programming.") { |x|
          @params[:best_trees] = x }
@@ -100,10 +97,10 @@ def combinations(a)
 end
 
 def size_of_right_tree(zp,n)
-  v = 1
+  v = 0
   zp.reverse.each_with_index do |x,i|
     break if n >= (zp.size - i)
-    v *= 2**x
+    v += x
   end
   v
 end
@@ -165,10 +162,11 @@ class Search
     end
 
     unless t 
-      throw Exception.new("Could not read: #{cmd}")
+      puts("Could not read: #{cmd}")
+      return INF
+    else
+      t.to_f
     end
-
-    t.to_f
   end
 
   def find(size)
@@ -225,9 +223,10 @@ class Search
     lefts << best unless is_right_codelet?(best)
     lefts << "small[#{size}]"
 
-    il_max = [n, @il_max, m].min
+    il_max = [n, @il_max, m, size].min 
     for k in 1 .. il_max do
       lefts << "smallil#{2**k}[#{size}]"
+      lefts << "smallvil#{2**k}[#{size}]"
     end
     lefts.uniq
   end
@@ -313,11 +312,11 @@ if $0 == __FILE__
   measure  = '../measure/papi/measure -w'
 
   dp = Search.new(
-    { :min_size => 3,
-      :max_size => 10,
+    { :min_size => 1,
+      :max_size => 18,
       :measure  => measure,
-      :max_leaf => 4,
-      :il_max   => 3,
+      :max_leaf => 7,
+      :il_max   => 4,
       :vsize    => 2,
       :debug    => opts.params[:verbose],
     } )
