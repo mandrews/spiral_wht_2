@@ -1,0 +1,60 @@
+#!/usr/bin/env ruby
+
+# bench
+#
+# Author: Michael Andrews <mjand@drexel.edu>
+# $Id$
+
+SCRIPT_PATH     = File.dirname(__FILE__) 
+SCRIPT_NAME     = 'bench'
+PREFIX          = 'owl-2.0-'
+
+MEASURE = '../measure/papi/measure -w'
+MAX = 7
+MAX_IL = 4
+
+def measure(size,plan,file)
+  cmd = "#{MEASURE} #{plan}"
+  t = 0
+  IO.popen(cmd) do |fd|
+    t = fd.gets
+  end
+
+  fd = File.open(PREFIX+file+'.txt','a+')
+  fd.printf("%d,%d %% %s\n", size, t, plan)
+  fd.close
+end
+
+
+for size in 2 .. MAX do
+  measure(size,"small[#{size}]",'small')
+end
+
+for size in 2 .. MAX do
+  measure(size,"smallv2[#{size}]",'smallv2')
+end
+
+for size in 2 .. MAX do
+  measure(size,"split[small[#{size}],small[4]]",'split4')
+end
+
+for k in 1..MAX_IL do
+  for size in 2 .. MAX do
+    measure(size,"split[smallil#{2**k}[#{size}],small[4]]","split4il#{2**k}")
+  end
+end
+
+for k in 1..MAX_IL do
+  for size in 2 .. MAX do
+    measure(size,"split[smallvil#{2**k}[#{size}],small[4]]","spli4il#{2**k}_v2")
+  end
+end
+
+#puts "#splits 2"
+#for k in 1..MAX_IL do
+#  for size in 2 .. MAX do
+#    measure(size,"split[small[#{size}],small[2],small[2]]")
+#    measure(size,"split[smallvil#{2**k}[#{size}],small[2],small[2]]")
+#  end
+#  puts
+#end
