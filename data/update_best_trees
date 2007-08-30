@@ -14,13 +14,15 @@ MAX = 7
 MAX_IL = 4
 
 def measure(size,plan)
-  cmd = "#{MEASURE} #{plan}"
+  plan.gsub!(/smallil(\d)/) { |s| "smallil#{2**$1.to_i}" }
+  cmd = "#{MEASURE} '#{plan}'"
   t = 0
   IO.popen(cmd) do |fd|
     t = fd.gets
   end
 
   printf("%d,%d %% %s\n", size, t, plan)
+  $stdout.flush
 end
 
 file  = ARGV[0]
@@ -30,5 +32,6 @@ plans.each_line do |line|
   line.chomp!
   next if line =~ /^#/ or line.empty?
   size, plan, usec = line.split(/\s*!\s*/)
+  break if size.to_i > 15
   measure(size,plan)
 end
