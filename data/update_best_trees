@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+
+# update_best_trees
+#
+# Author: Michael Andrews <mjand@drexel.edu>
+# $Id$
+
+SCRIPT_PATH     = File.dirname(__FILE__) 
+SCRIPT_NAME     = 'bench'
+PREFIX          = 'carpenter-2.0-'
+
+MEASURE = '../measure/papi/measure -w'
+MAX = 7
+MAX_IL = 4
+
+def measure(size,plan)
+  cmd = "#{MEASURE} #{plan}"
+  t = 0
+  IO.popen(cmd) do |fd|
+    t = fd.gets
+  end
+
+  printf("%d,%d %% %s\n", size, t, plan)
+end
+
+file  = ARGV[0]
+plans = File.open(file)
+
+plans.each_line do |line|
+  line.chomp!
+  next if line =~ /^#/ or line.empty?
+  size, plan, usec = line.split(/\s*!\s*/)
+  measure(size,plan)
+end
