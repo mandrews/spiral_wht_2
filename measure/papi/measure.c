@@ -2,6 +2,7 @@
 #include "papi_utils.h"
 
 #include <getopt.h>
+#include <stdbool.h>
 
 Wht *W;
 wht_value *x;
@@ -36,15 +37,20 @@ main (int argc, char **argv)
 {
   char *wht_plan;
   int c;
+  bool stats;
 
   wht_plan = NULL;
+  stats = false;
 
   opterr = 0;
 
-  while ((c = getopt (argc, argv, "hw:")) != -1)
+  while ((c = getopt (argc, argv, "hw:s")) != -1)
     switch (c) {
       case 'w':
         wht_plan = optarg;
+        break;
+      case 's':
+        stats = true;
         break;
       case 'h':
         usage();
@@ -82,8 +88,10 @@ main (int argc, char **argv)
   papi_profile(so_init, so_call, so_free, &total, 1);
 
   /* Print out counter values */
-  /* printf("%lld %.2Lf %zd", total.mean[0], sqrtl((long double) total.stdev[0]),total.samples); */
-  printf("%lld", total.mean[0]);
+  if (stats)
+    printf("%lld %.2Lf %zd", total.mean[0], sqrtl((long double) total.stdev[0]),total.samples); 
+  else
+    printf("%lld", total.mean[0]);
   printf("\n");
 
   papi_data_free(&total);

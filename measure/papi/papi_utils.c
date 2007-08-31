@@ -305,7 +305,7 @@ papi_profile_done(struct papi_data *data, size_t n)
   size_t i, samples, good;
   long_long tmp;
 
-  z = 1.90;
+  z = 3.72;
   p = 0.01;
   a = 0.99;
 
