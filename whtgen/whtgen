@@ -179,10 +179,30 @@ class Generator
   def to_s
     body = ""
     tmps = []
+#    lfence, mfence = false,false
     @stack.each do |x|
+#      case x.class.to_s
+#        when 'Load'
+#          if not lfence
+#            lfence = true
+#            body += INDENT + "__builtin_ia32_lfence();\n"
+#          end
+#        when 'Store'
+#          if not mfence
+#            mfence = true
+#            body += INDENT + "__builtin_ia32_mfence();\n"
+#          end
+#        else
+#          if lfence
+#            lfence = false
+#            body += INDENT + "__builtin_ia32_lfence();\n"
+#          end
+#      end
+
       body += INDENT + x.to_s
       tmps += x.tmps
     end
+    #body += INDENT + "__builtin_ia32_mfence();\n"
 
     a = @a ? '_a' : ''
 

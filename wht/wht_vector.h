@@ -25,6 +25,9 @@ typedef v2df wht_vector2;
 
 #define vstore2(R0,M0) \
   __builtin_ia32_storeapd(&M0,R0)
+#if 0
+ __builtin_ia32_movntpd(&M0,R0)
+#endif
 
 #define MM_SHUFFLE2(R1,R0) \
  (((R1) << 1) | (R0))
