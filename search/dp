@@ -251,7 +251,7 @@ class Search
     return [find_best(size)] if n > @max_leaf
 
     rights = [ "small[#{size}]" ]
-    if 2**size > @vsize
+    if @vsize and 2**size > @vsize
       rights << "smallv#{@vsize}[#{size}]"
     end
     rights.uniq
@@ -328,7 +328,7 @@ if $0 == __FILE__
 
   dp = Search.new(
     { :min_size => 1,
-      :max_size => 18,
+      :max_size => 15,
       :measure  => measure,
       :max_leaf => 7,
       :il_max   => 4,
