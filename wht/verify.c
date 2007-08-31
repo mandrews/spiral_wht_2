@@ -88,16 +88,10 @@ main (int argc, char **argv)
   wht_apply(W,1,0,x);
   wht_apply(D,1,0,y);
 
-  for (i = 0; i < N; i++) {
-    if (fabs(x[i] - y[i]) > 1e-10) {
-      printf("difference at index %ld: %e\n", i, fabs(x[i] - y[i]));
-      printf("exiting\n");
-      exit(-1);
-    }
-  }
-
-  /* everything's fine */
-  printf("correct\n");   
+  if (wht_max_norm(x,y,N) < WHT_STABILITY_THRESHOLD)
+    printf("correct\n");   
+  else
+    printf("fails\n");
 
   return 0;
 }

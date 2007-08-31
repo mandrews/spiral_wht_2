@@ -3,6 +3,10 @@ Bugs:
 
   - whtgen needs to be cleaned up
 
+  - rightmost codelet  for v4 doesn't work
+
+  - need to parameterize which codelets to compile from configure
+
 
 For Maintainers:
   libtoolize

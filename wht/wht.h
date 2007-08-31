@@ -18,12 +18,20 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <unistd.h>
 #include <stdbool.h>
 
 #define CODELET_CALL_MAX_SIZE 40
 
-/* data type for the signal */
+#if     WHT_FLOAT==1
+typedef float wht_value;
+#define WHT_STABILITY_THRESHOLD 1e-4
+#endif/*WHT_FLOAT*/
+
+#if     WHT_DOUBLE==1
 typedef double wht_value;
+#define WHT_STABILITY_THRESHOLD 1e-10
+#endif/*WHT_DOUBLE*/
 
 /* data type for the wht */
 typedef struct wht {
@@ -46,7 +54,8 @@ typedef struct wht {
 void * wht_malloc(size_t length);
 void wht_free(void *p);
 
-int is2power(long n);
+int wht_is2power(long n);
+wht_value wht_max_norm(const wht_value *x, const wht_value *y, size_t N);
 
 wht_value * wht_random(size_t n);
 

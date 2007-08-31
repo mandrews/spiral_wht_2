@@ -9,27 +9,70 @@ AM_DISABLE_STATIC
 
 AC_CANONICAL_HOST
 
+dnl Double precision floating point
 AC_ARG_ENABLE(
-  single, 
-  [AC_HELP_STRING([--enable-single], [compile wht in single precision])], 
+  double, 
+  [AC_HELP_STRING([--enable-double], [compile with double precision floating point])], 
+  ok=$enableval, ok=yes)
+
+if test "$ok" = "yes"; then
+	AC_DEFINE(WHT_DOUBLE,1,[Define to compile with double precision floating point.])
+  WHT_PRECISION=
+  WHT_SUFFIX=
+fi
+
+dnl Single precision floating point
+AC_ARG_ENABLE(
+  float, 
+  [AC_HELP_STRING([--enable-float], [compile wht with single precision floating point])], 
   ok=$enableval, ok=no)
 
 if test "$ok" = "yes"; then
-	AC_DEFINE(WHT_SINGLE,1,[Define to compile in single precision.])
-	PRECISION=s
-else
-	PRECISION=d
+	if test "$WHT_PRECISION" != ""; then
+		AC_MSG_ERROR([--enable-float conflict])
+	fi
+	AC_DEFINE(WHT_FLOAT,1,[Define to compile with single precision floating point.])
+	AC_DEFINE(WHT_DOUBLE,0)
+  WHT_PRECISION=f
+  WHT_SUFFIX=f
 fi
-AM_CONDITIONAL(SINGLE, test "$ok" = "yes")
 
-AC_SUBST(PRECISION)
+dnl
+dnl V E C T O R I Z A T I O N
+dnl
+WHT_VECTOR_SIZE=0
+AC_ARG_ENABLE(sse, 
+  [AC_HELP_STRING([--enable-sse],[enable SSE optimizations])], 
+  have_sse=$enableval, have_sse=no)
 
-dnl compute library suffix
-case "$PRECISION" in
-     s) PREC_SUFFIX=f;;
-     d) PREC_SUFFIX=;;
-esac
-AC_SUBST(PREC_SUFFIX)
+if test "$have_sse" = "yes"; then
+	AC_DEFINE(HAVE_SSE,1,[Define to enable SSE optimizations.])
+	have_simd="yes"
+	if test "$WHT_PRECISION" != "f"; then
+		AC_MSG_ERROR([--enable-sse can only be used in conjunction with --enable-float])
+	fi
+  AC_DEFINE(WHT_VECTOR_SIZE,4,[Size of vector to use.])
+fi
+
+AC_ARG_ENABLE(sse2, 
+  [AC_HELP_STRING([--enable-sse2],[enable SSE2 optimizations])], 
+  have_sse2=$enableval, have_sse2=no)
+
+if test "$have_sse2" = "yes"; then
+	AC_DEFINE(HAVE_SSE2,1,[Define to enable SSE2 optimizations.])
+	have_simd="yes"
+	if test "$have_sse" = "yes"; then
+		AC_MSG_ERROR([you cannot use SSE and SSE2 at the same time])
+	fi
+	if test "$WHT_PRECISION" != ""; then
+		AC_MSG_ERROR([--enable-sse2 can only be used in conjunction with --enable-double])
+	fi
+  AC_DEFINE(WHT_VECTOR_SIZE,2,[Size of vector to use.])
+fi
+dnl
+dnl V E C T O R I Z A T I O N
+dnl
+
 
 dnl PAPI path for measure
 AC_ARG_WITH(papi-path, 

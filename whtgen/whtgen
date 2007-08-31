@@ -33,7 +33,7 @@ def wht_2v(n,x,a,s,y,b,t,v)
 
   l_2v_v(p,a,s,q,b,t,v)
 
-  wht(v,q,a,s,r,b,t,v)
+  wht_2(q,a,s,r,b,t,v)
 
   l_2v_v(r,a,s,y,b,t,v)
 end
@@ -57,6 +57,9 @@ def wht(n,x,a,s,y,b,t,v)
     m = n/2
     wht(m,x,a,s,z,b,t,v)
     wht(m,x,a+(m/v),s,z,b+(m/v),t,v)
+
+    #y[b],y[b+t] = z[b],z[b+t] if (m < v)
+
     for i in 0 .. (m/v)-1 do
       wht_2(z,a+i,(m/v)*s,y,b+i,(m/v)*t,v)
     end
@@ -179,42 +182,27 @@ class Generator
   def to_s
     body = ""
     tmps = []
-#    lfence, mfence = false,false
     @stack.each do |x|
-#      case x.class.to_s
-#        when 'Load'
-#          if not lfence
-#            lfence = true
-#            body += INDENT + "__builtin_ia32_lfence();\n"
-#          end
-#        when 'Store'
-#          if not mfence
-#            mfence = true
-#            body += INDENT + "__builtin_ia32_mfence();\n"
-#          end
-#        else
-#          if lfence
-#            lfence = false
-#            body += INDENT + "__builtin_ia32_lfence();\n"
-#          end
-#      end
-
       body += INDENT + x.to_s
       tmps += x.tmps
     end
-    #body += INDENT + "__builtin_ia32_mfence();\n"
 
     a = @a ? '_a' : ''
 
-    header = "#include \"wht.h\"\n\n" +
-             "void #{@name}#{a}(Wht *W, long S, long D, wht_value *x)\n{\n"
+    header  = "#include \"wht.h\"\n\n" +
+              "void #{@name}#{a}(Wht *W, long S, long D, wht_value *x)\n{\n"
+
+		header += "#if WHT_VECTOR_SIZE==#{@vp}\n" if @vp > 1
 
     decls = ""
     tmps.uniq.each do |t|
       decls += sprintf "%s%s %s;\n",INDENT, @type, t
     end
 
-    header + decls + body + "}\n"
+		# TODO add else / error macro guard
+    footer  = ""
+		footer += "#endif/*WHT_VECTOR_SIZE*/\n" if @vp > 1
+    header + decls + body + footer + "}\n"
   end
 
   def interleave

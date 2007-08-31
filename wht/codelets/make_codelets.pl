@@ -12,7 +12,7 @@
 # TODO 
 # These parameters should be command line arguments
 # set by ./configure --enable-maintainer-mode
-$small      = 7;
+$small      = 4;
 $vector     = 2;
 $interleave = 4;
 $whtgen     = "../../whtgen/whtgen";
@@ -35,19 +35,19 @@ sub function_name {
   return $name;
 }
 
-# Generate unaligned and aligned codelets
+# Generate unaligned unrolled codelets
 for ($i=1;$i<=$small;++$i) {
   push(@codelets,("s_$i.c", "-n $i"));
-  $codelets++;
-  push(@codelets,("s_$i\_a.c", "-n $i -a"));
   $codelets++;
 }
 
 # Generate aligned vectorized codelets
-$v = (log($vector) / log(2)) + 1;
-for ($i=$v;$i<=$small;++$i) {
-  push(@codelets,("s_$i\_v\_$vector\_a.c", "-n $i -v $vector -a"));
-  $codelets++;
+for ($k=1;$k<=$vector;$k++) {
+  $v = 2**$k;
+  for ($i=$vector+1;$i<=$small;++$i) {
+    push(@codelets,("s_$i\_v\_$v\_a.c", "-n $i -v $v -a"));
+    $codelets++;
+  }
 }
 
 # Generate unaligned interleaved codelets
@@ -60,11 +60,14 @@ for ($i=1;$i<=$small;++$i) {
 }
 
 # Generate unaligned vectorized interleaved codelets
-for ($i=$v;$i<=$small;++$i) {
-  for ($j=1;$j<=$interleave;$j++) {
-    $k = 2**$j;
-    push(@codelets,("s_$i\_il\_$k\_v$vector.c", "-n $i -i $k -v $vector"));
-    $codelets++;
+for ($i=$vector+1;$i<=$small;++$i) {
+  for ($j=$vector;$j<=$interleave;$j++) {
+    $l = 2**$j;
+    for ($k=1;$k<=$vector;$k++) {
+      $v = 2**$k;
+      push(@codelets,("s_$i\_il\_$l\_v$v.c", "-n $i -i $l -v $v"));
+      $codelets++;
+    }
   }
 }
 

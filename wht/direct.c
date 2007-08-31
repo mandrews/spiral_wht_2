@@ -12,6 +12,9 @@
 
 #include "wht.h"
 
+/*
+ * TODO Investigate the stability of calculation method
+ */
 int 
 wht_entry(int k, long row, long col)
 {

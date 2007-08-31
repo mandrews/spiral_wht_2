@@ -27,7 +27,7 @@ wht_init_interleave_vector(size_t n, size_t i)
   const size_t bufsize = 24; /*apply_small%d_v%d_il%d\0*/
   char buf[bufsize]; 
 
-  snprintf(buf,bufsize,"apply_small%zd_v%zd_il%zd",n,2,i);
+  snprintf(buf,bufsize,"apply_small%zd_v%zd_il%zd",n,4,i);
 
   W            = wht_init_codelet(n);
   W->apply     = wht_get_codelet(buf);
