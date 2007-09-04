@@ -201,6 +201,7 @@ class Generator
 
 		# TODO add else / error macro guard
     footer  = ""
+    footer += "#else\n   wht_error(\"WHT not configured for this size of vector.\");\n" if @vp > 1
 		footer += "#endif/*WHT_VECTOR_SIZE*/\n" if @vp > 1
     header + decls + body + footer + "}\n"
   end
@@ -301,8 +302,8 @@ class Options
     die unless @params[:n]
 
     @params[:n] = 2**@params[:n]
-    unless @params[:n] > @params[:v]
-      die("Size must be greater than vector size.")
+    unless @params[:n]*@params[:i] > @params[:v]
+      die("Size*Interleaved must be greater than vector size.")
     end
   end
 
