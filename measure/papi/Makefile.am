@@ -1,3 +1,4 @@
+EXTRA_DIST=papi_utils.h
 AM_CPPFLAGS = -I$(top_srcdir)/wht -I$(srcdir) -I$(papi_path)/include \
 	-D MAX_CACHE_SIZE_KB=$(CACHE_SIZE_KB)
 
