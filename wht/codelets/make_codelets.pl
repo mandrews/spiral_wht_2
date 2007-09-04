@@ -8,6 +8,7 @@
 #  Version: 
 #  Date:
 #
+use List::Util qw(min);
 
 # TODO 
 # These parameters should be command line arguments
@@ -36,7 +37,7 @@ sub function_name {
 }
 
 # Generate unaligned unrolled codelets
-for ($i=1;$i<=$small;++$i) {
+for ($i=1;$i<=$small;$i++) {
   push(@codelets,("s_$i.c", "-n $i"));
   $codelets++;
 }
@@ -44,14 +45,14 @@ for ($i=1;$i<=$small;++$i) {
 # Generate aligned vectorized codelets
 for ($k=1;$k<=$vector;$k++) {
   $v = 2**$k;
-  for ($i=$vector+1;$i<=$small;++$i) {
+  for ($i=$k+1;$i<=$small;$i++) {
     push(@codelets,("s_$i\_v\_$v\_a.c", "-n $i -v $v -a"));
     $codelets++;
   }
 }
 
 # Generate unaligned interleaved codelets
-for ($i=1;$i<=$small;++$i) {
+for ($i=1;$i<=$small;$i++) {
   for ($j=1;$j<=$interleave;$j++) {
     $k = 2**$j;
     push(@codelets,("s_$i\_il\_$k.c", "-n $i -i $k"));
@@ -59,12 +60,13 @@ for ($i=1;$i<=$small;++$i) {
   }
 }
 
-# Generate unaligned vectorized interleaved codelets
-for ($i=$vector+1;$i<=$small;++$i) {
-  for ($j=$vector;$j<=$interleave;$j++) {
+# Generate unaligned interleaved and vectorized codelets
+for ($i=1;$i<=$small;$i++) {
+  for ($j=1;$j<=$interleave;$j++) {
     $l = 2**$j;
     for ($k=1;$k<=$vector;$k++) {
       $v = 2**$k;
+      next unless ($i*$j >= $k);
       push(@codelets,("s_$i\_il\_$l\_v$v.c", "-n $i -i $l -v $v"));
       $codelets++;
     }
