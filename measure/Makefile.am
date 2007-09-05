@@ -1,2 +1,7 @@
-SUBDIRS=usec papi
+if PAPI_MEASURE
+OPT_SUBDIRS = papi
+else
+OPT_SUBDIRS =
+endif
 
+SUBDIRS = usec $(OPT_SUBDIRS)

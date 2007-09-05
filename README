@@ -1,12 +1,15 @@
-Bugs:
+Issues:
   - Cannot tokenize smallil2v2 properly
 
   - whtgen needs to be cleaned up
 
-  - rightmost codelet  for v4 doesn't work
+  - rightmost codelet for v4 doesn't work
 
   - need to parameterize which codelets to compile from configure
 
+  - need to parameterize which measure is used
+
+  - possible header and lib suffix for different types
 
 For Maintainers:
   libtoolize

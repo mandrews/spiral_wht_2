@@ -16,7 +16,7 @@ AC_ARG_ENABLE(
   ok=$enableval, ok=yes)
 
 if test "$ok" = "yes"; then
-	AC_DEFINE(WHT_DOUBLE,1,[Define to compile with double precision floating point.])
+	AC_DEFINE(WHT_DOUBLE,1,[define to compile with double precision floating point.])
   WHT_PRECISION=
   WHT_SUFFIX=
 fi
@@ -31,7 +31,7 @@ if test "$ok" = "yes"; then
 	if test "$WHT_PRECISION" != ""; then
 		AC_MSG_ERROR([--enable-float conflict])
 	fi
-	AC_DEFINE(WHT_FLOAT,1,[Define to compile with single precision floating point.])
+	AC_DEFINE(WHT_FLOAT,1,[define to compile with single precision floating point.])
 	AC_DEFINE(WHT_DOUBLE,0)
   WHT_PRECISION=f
   WHT_SUFFIX=f
@@ -46,7 +46,7 @@ AC_ARG_ENABLE(sse,
   have_sse=$enableval, have_sse=no)
 
 if test "$have_sse" = "yes"; then
-	AC_DEFINE(HAVE_SSE,1,[Define to enable SSE optimizations.])
+	AC_DEFINE(HAVE_SSE,1,[define to enable SSE optimizations.])
 	have_simd="yes"
 	if test "$WHT_PRECISION" != "f"; then
 		AC_MSG_ERROR([--enable-sse can only be used in conjunction with --enable-float])
@@ -73,20 +73,39 @@ dnl
 dnl V E C T O R I Z A T I O N
 dnl
 
-
-dnl PAPI path for measure
+dnl
+dnl P A P I    M E A S U R E
+dnl
 AC_ARG_WITH(papi-path, 
-  [AC_HELP_STRING([--with-papi-path],[Location of PAPI install])], 
+  [AC_HELP_STRING([--with-papi-path],[location of PAPI install])], 
   papi_path=$withval, papi_path="/usr")
 
-AC_ARG_WITH(cache-size-kb, 
-  [AC_HELP_STRING([--with-cache-size-kb],[Size of L2 cache in KB])], 
-  cache_size_kb=$withval, cache_size_kb=8)
+PAPI_PATH=$papi_path
+AC_SUBST(PAPI_PATH)
 
-AC_SUBST(papi_path)
+AC_ARG_WITH(cache-size-kb, 
+  [AC_HELP_STRING([--with-cache-size-kb],[size of L2 cache in KB])], 
+  cache_size_kb=$withval, cache_size_kb=8)
 
 CACHE_SIZE_KB=$cache_size_kb
 AC_SUBST(CACHE_SIZE_KB)
+
+AC_ARG_ENABLE(
+  papi, 
+  [AC_HELP_STRING([--enable-papi], [compile papi measurement facilities])],
+  enable_papi=$enableval, enable_papi=no)
+
+dnl TODO not sure why this doesn't work
+dnl if test "$enable_papi" = "yes"; then
+dnl   AC_CHECK_HEADERS("$PAPI_PATH/include/papi.h",,
+dnl     AC_MSG_ERROR([required header file for --enable-papi not found]))
+dnl fi
+
+AM_CONDITIONAL(PAPI_MEASURE, test "$enable_papi" = "yes")
+dnl
+dnl P A P I    M E A S U R E
+dnl
+
 
 dnl TODO move variables that do not change to another header file
 AC_DEFINE(SPLIT_MAX_FACTORS,40,"Maximum number of codelets in a split.")
@@ -115,7 +134,7 @@ AC_SUBST(OCAMLLDFLAGS)
 AC_HEADER_STDC
 AC_HEADER_STDBOOL
 AC_HEADER_TIME
-AC_CHECK_HEADERS(math.h,,AC_MSG_ERROR([Required header files not found]))
+AC_CHECK_HEADERS(math.h,,AC_MSG_ERROR([required header files not found]))
 
 AC_C_CONST
 AC_C_INLINE
