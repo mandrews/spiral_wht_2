@@ -76,24 +76,22 @@ dnl
 dnl
 dnl P A P I    M E A S U R E
 dnl
-AC_ARG_WITH(papi-path, 
-  [AC_HELP_STRING([--with-papi-path],[location of PAPI install])], 
-  papi_path=$withval, papi_path="/usr")
+AC_ARG_WITH(papi, 
+  [AC_HELP_STRING([--with-papi=PATH],
+  [compile with PAPI support, PATH is location of PAPI install])], 
+  papi_path=$withval, papi_path="no")
+
+AM_CONDITIONAL(PAPI_MEASURE, test "$papi_path" != "no")
 
 PAPI_PATH=$papi_path
 AC_SUBST(PAPI_PATH)
 
-AC_ARG_WITH(cache-size-kb, 
-  [AC_HELP_STRING([--with-cache-size-kb],[size of L2 cache in KB])], 
-  cache_size_kb=$withval, cache_size_kb=8)
+AC_ARG_ENABLE(cache-size-kb, 
+  [AC_HELP_STRING([--enable-cache-size-kb],[size of L2 cache in KB])], 
+  cache_size_kb=$enableval, cache_size_kb=8)
 
 CACHE_SIZE_KB=$cache_size_kb
 AC_SUBST(CACHE_SIZE_KB)
-
-AC_ARG_ENABLE(
-  papi, 
-  [AC_HELP_STRING([--enable-papi], [compile papi measurement facilities])],
-  enable_papi=$enableval, enable_papi=no)
 
 dnl TODO not sure why this doesn't work
 dnl if test "$enable_papi" = "yes"; then
@@ -101,7 +99,6 @@ dnl   AC_CHECK_HEADERS("$PAPI_PATH/include/papi.h",,
 dnl     AC_MSG_ERROR([required header file for --enable-papi not found]))
 dnl fi
 
-AM_CONDITIONAL(PAPI_MEASURE, test "$enable_papi" = "yes")
 dnl
 dnl P A P I    M E A S U R E
 dnl
