@@ -40,7 +40,8 @@ wht_entry(int k, long row, long col)
 }
 
 static void 
-apply_direct(Wht *W, long S, long D, wht_value *x) {
+apply_direct(Wht *W, long S, wht_value *x) 
+{
   long N = W->N;
   int n = W->n;
   wht_value *y = (wht_value *) wht_malloc(N * sizeof(wht_value));
@@ -59,12 +60,14 @@ apply_direct(Wht *W, long S, long D, wht_value *x) {
 }
 
 static void 
-wht_free_direct(Wht *W) {
+wht_free_direct(Wht *W) 
+{
   wht_free(W);
 }
 
 Wht *
-wht_direct(int n) {
+wht_direct(int n)
+{
   Wht *W;
 
   W            = (Wht *) wht_malloc(sizeof(Wht));

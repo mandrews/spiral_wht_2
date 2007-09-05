@@ -39,7 +39,7 @@ typedef struct wht {
   int N,                                          /* signal length */
       n;                                               /*  N = 2^n */
   int nILNumber;
-  void (*apply)(struct wht *W, long S, long D, wht_value *x);
+  void (*apply)(struct wht *W, long S, wht_value *x);
   void (*free) (struct wht *W);     
   char * (*to_string) (void);
   union {
@@ -61,7 +61,7 @@ wht_value * wht_random(size_t n);
 
 Wht * wht_direct(int n);
 
-#define wht_apply(wht, S, D, x) ((wht->apply)(wht, S, D, x))
+#define wht_apply(wht, S, x) ((wht->apply)(wht, S, x))
 
 #define wht_error(format, args...)  \
   {\
@@ -71,35 +71,12 @@ Wht * wht_direct(int n);
     exit(-1); \
   }
 
-#if 0
-typedef Wht * (*wht_split_dispatch) (Wht *Ws[], size_t ws_n, int *ps[], size_t ps_n);
-typedef Wht * (*wht_small_dispatch) (size_t n, int *ps[], size_t ps_n);
-
-Wht *
-wht_init_split(Wht *Ws[], size_t nn, int *ps[], size_t ps_n);
-
-const static
-wht_split_dispatch wht_splits[] = {
-  &wht_init_split,
-  NULL
-};
-
-Wht *
-wht_init_small(size_t n, int *ps[], size_t ps_n);
-
-const static
-wht_small_dispatch wht_smalls[] = {
-  &wht_init_small,
-  NULL
-};
-#endif
-
 Wht * wht_parse(char *s);
 
 Wht * wht_init_codelet(int n);
 void wht_free_codelet(Wht *W);
 
-typedef void (*codelet)(Wht *W, long S, long D, wht_value *x);
+typedef void (*codelet)(Wht *W, long S, wht_value *x);
 
 typedef struct {
   char    name[CODELET_CALL_MAX_SIZE];

@@ -190,7 +190,7 @@ class Generator
     a = @a ? '_a' : ''
 
     header  = "#include \"wht.h\"\n\n" +
-              "void #{@name}#{a}(Wht *W, long S, long D, wht_value *x)\n{\n"
+              "void #{@name}#{a}(Wht *W, long S, wht_value *x)\n{\n"
 
 		header += "#if WHT_VECTOR_SIZE==#{@vp}\n" if @vp > 1
 

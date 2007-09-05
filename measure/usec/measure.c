@@ -68,7 +68,7 @@ main (int argc, char **argv)
   while (avg_time < max_time) {
     t0 = cputime();
     for (i = 0; i < repeats; i++) 
-      wht_apply(W,1,0,x);
+      wht_apply(W,1,x);
 
     avg_time = cputime() - t0;
     repeats *= 2;

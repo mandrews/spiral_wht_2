@@ -21,7 +21,7 @@ void _wht_free()
 
 void _wht_call()
 {
-  wht_apply(W,1,0,x);
+  wht_apply(W,1,x);
 }
 
 

@@ -35,7 +35,7 @@
 */
 
 static void 
-wht_apply_split(Wht *W, long S, long D, wht_value *x)
+wht_apply_split(Wht *W, long S, wht_value *x)
 {
   int nn;
   long N, R, S1, Ni, i, j, k;
@@ -55,7 +55,7 @@ wht_apply_split(Wht *W, long S, long D, wht_value *x)
     nIL = (W->priv.split.Ws[i])->nILNumber;
     for (j = 0; j < R; j++)
       for (k = 0; k < S1; k+=nIL)
-         wht_apply(W->priv.split.Ws[i], S1*S, S, x+k*S+j*Ni*S1*S);
+         wht_apply(W->priv.split.Ws[i], S1*S, x+k*S+j*Ni*S1*S);
 
     S1 *= Ni;
   }

@@ -85,8 +85,8 @@ main (int argc, char **argv)
   for (i = 0;i<N;i++)
     y[i] = x[i];
 
-  wht_apply(W,1,0,x);
-  wht_apply(D,1,0,y);
+  wht_apply(W,1,x);
+  wht_apply(D,1,y);
 
   if (wht_max_norm(x,y,N) < WHT_STABILITY_THRESHOLD)
     printf("correct\n");   
