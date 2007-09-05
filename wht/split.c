@@ -73,7 +73,8 @@ wht_free_split(Wht *W)
 }
 
 Wht *
-wht_init_split(Wht *Ws[], size_t nn) {
+wht_init_split(Wht *Ws[], size_t nn) 
+{
   Wht *W;
   long i;
   long N = 1;

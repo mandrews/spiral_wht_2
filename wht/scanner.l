@@ -13,14 +13,14 @@
 "("         { return yytext[0];   }
 ")"         { return yytext[0];   }
 ","         { return yytext[0];   }
-"_"         { return yytext[0];   }
 [0-9]+      { 
               yylval.value = atoi(yytext);
               return NUMBER;  
             }
-"split"     { return SPLIT; }
-"small"     { return SMALL; }
-"smallil"   { return SMALLIL; }
+"split"     { return SPLIT;       }
+"small"     { return SMALL;       }
+"smallil"   { return SMALLIL;     }
+"smallv"    { return SMALLV;      }
 .           { return yytext[0];   }
 %%
 
