@@ -22,6 +22,7 @@
 #include <stdbool.h>
 
 #define CODELET_CALL_MAX_SIZE 40
+#define SPLIT_MAX_FACTORS 40
 
 #if     WHT_FLOAT==1
 typedef float wht_value;
@@ -48,7 +49,6 @@ typedef struct wht {
       struct wht *Ws[SPLIT_MAX_FACTORS];      /* the smaller wht's */
     } split;
   } priv;
-
 } Wht;
 
 void * wht_malloc(size_t length);
@@ -71,32 +71,29 @@ Wht * wht_direct(int n);
     exit(-1); \
   }
 
-/*
- * Place new codelet interfaces HERE
- */
-#define REGISTERED_CODELETS 4
+#if 0
+typedef Wht * (*wht_split_dispatch) (Wht *Ws[], size_t ws_n, int *ps[], size_t ps_n);
+typedef Wht * (*wht_small_dispatch) (size_t n, int *ps[], size_t ps_n);
 
-Wht * wht_parse_split();
-Wht * wht_parse_small();
-Wht * wht_parse_vector();
-Wht * wht_parse_interleave();
-
-typedef Wht * (*parse_codelet) (void);
+Wht *
+wht_init_split(Wht *Ws[], size_t nn, int *ps[], size_t ps_n);
 
 const static
-parse_codelet codelets[] = { 
-  &wht_parse_interleave,
-  &wht_parse_vector,
-  &wht_parse_small,
-  &wht_parse_split,
+wht_split_dispatch wht_splits[] = {
+  &wht_init_split,
+  NULL
 };
 
-int wht_read_int();
-void wht_next_codelet();
-int wht_is_codelet(char *f);
-void wht_require(char c);
-int wht_check(char c);
-Wht * wht_parse_next();
+Wht *
+wht_init_small(size_t n, int *ps[], size_t ps_n);
+
+const static
+wht_small_dispatch wht_smalls[] = {
+  &wht_init_small,
+  NULL
+};
+#endif
+
 Wht * wht_parse(char *s);
 
 Wht * wht_init_codelet(int n);
@@ -110,3 +107,4 @@ typedef struct {
 } codelet_entry;
 
 #endif/* WHT_H */
+

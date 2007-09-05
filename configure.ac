@@ -103,17 +103,13 @@ dnl
 dnl P A P I    M E A S U R E
 dnl
 
-
-dnl TODO move variables that do not change to another header file
-AC_DEFINE(SPLIT_MAX_FACTORS,40,"Maximum number of codelets in a split.")
-AC_DEFINE(CODELET_NAME_MAX_SIZE,10,"Maximum size of a codelet name identifier")
-
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CC_STDC
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 AC_PROG_LEX
+AC_PROG_YACC
 
 dnl Check for library symbols
 AC_CHECK_LIB(m, pow)

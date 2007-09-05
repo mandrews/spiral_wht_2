@@ -1,5 +1,6 @@
 #include "wht.h"
 
+#if 0
 Wht *
 wht_parse_next()
 {
@@ -20,12 +21,48 @@ wht_parse_next()
 
   return NULL;
 }
+#endif
+
+#if 0
+Wht *
+wht_parse_split()
+{
+  Wht *Ws[SPLIT_MAX_FACTORS];
+  int nn;
+
+  if (wht_is_codelet("split")) {
+    wht_require('[');
+    nn = 0;
+    Ws[0] = wht_parse_next();
+    nn++;
+    while (wht_check(',')) {
+      if (nn == SPLIT_MAX_FACTORS)
+        wht_error("too many arguments for split[ ] in wht_parse()");
+      wht_require(',');
+      Ws[nn] = wht_parse_next();
+      nn++;
+    }
+    wht_require(']');
+
+    return wht_init_split(nn, Ws);
+  }
+
+  return NULL;
+}
+#endif
+
+extern Wht *wht_root;
 
 Wht *
 wht_parse(char *in)
 {
+  Wht *wht;
+
   yy_scan_string(in);
-  return wht_parse_next();
+  yyparse();
+  wht = wht_root;
+
+  return wht;
 }
 
 Wht *

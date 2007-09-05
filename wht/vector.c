@@ -19,6 +19,7 @@ wht_init_vector(int n,int v)
   return W;  
 }
 
+#if 0
 Wht *
 wht_parse_vector()
 {
@@ -33,4 +34,4 @@ wht_parse_vector()
 
   return NULL;
 }
-
+#endif

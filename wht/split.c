@@ -19,7 +19,6 @@
 
 #include "wht.h"
 
-
 /* Split WHT
    ---------
    A WHT_N can be split into k WHT's of smaller size
@@ -43,15 +42,13 @@ wht_apply_split(Wht *W, long S, long D, wht_value *x)
   long nIL;
 
   nn = W->priv.split.nn;
-  if (nn > SPLIT_MAX_FACTORS) 
-    wht_error("%d > %d, too many factors", nn, SPLIT_MAX_FACTORS);
 
   N  = W->N;
   R  = N;
   S1 = 1;
 
   /* step through the smaller whts */
-  for (i = nn-1; i >= 0; i--) {
+  for (i = 0; i < nn; i++) {
     Ni = W->priv.split.ns[i];
     R /= Ni;
 
@@ -76,11 +73,11 @@ wht_free_split(Wht *W)
 }
 
 Wht *
-wht_init_split(int nn, Wht *Ws[]) {
+wht_init_split(Wht *Ws[], size_t nn) {
   Wht *W;
   long i;
   long N = 1;
-  int n = 0;
+  int n  = 0;
 
   /* compute size of wht */
   for (i = 0; i < nn; i++) {
@@ -100,31 +97,5 @@ wht_init_split(int nn, Wht *Ws[]) {
   }
 
   return W;
-}
-
-Wht *
-wht_parse_split()
-{
-  Wht *Ws[SPLIT_MAX_FACTORS];
-  int nn;
-
-  if (wht_is_codelet("split")) {
-    wht_require('[');
-    nn = 0;
-    Ws[0] = wht_parse_next();
-    nn++;
-    while (wht_check(',')) {
-      if (nn == SPLIT_MAX_FACTORS)
-        wht_error("too many arguments for split[ ] in wht_parse()");
-      wht_require(',');
-      Ws[nn] = wht_parse_next();
-      nn++;
-    }
-    wht_require(']');
-
-    return wht_init_split(nn, Ws);
-  }
-
-  return NULL;
 }
 
