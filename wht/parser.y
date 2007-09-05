@@ -15,7 +15,10 @@ Wht *
 wht_init_interleave(size_t n, size_t k);
 
 Wht *
-wht_init_right_vector(int n, int v);
+wht_init_right_vector(size_t n, size_t v);
+
+Wht *
+wht_init_interleave_vector(size_t n, size_t v, size_t k);
 
 #define MAX_SPLIT_SIZE 40
 
@@ -94,6 +97,10 @@ smallv:
     SMALLV '(' NUMBER ')' '[' NUMBER ']'
   {
     $$ = wht_init_right_vector($6,$3);
+  }
+  | SMALLV '(' NUMBER ',' NUMBER ')' '[' NUMBER ']'
+  {
+    $$ = wht_init_interleave_vector($8,$3,$5);
   }
   ;
 
