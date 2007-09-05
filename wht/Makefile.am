@@ -9,7 +9,8 @@ SUBDIRS = codelets
 
 noinst_LTLIBRARIES = libwht.la
 
-libwht_la_SOURCES = direct.c interleave.c vector.c small.c split.c utils.c wht.c scanner.l parser.y
+libwht_la_SOURCES = direct.c interleave.c right_vector.c small.c split.c \
+									  utils.c wht.c scanner.l parser.y
 libwht_la_LIBADD  = $(top_builddir)/wht/codelets/libwht_codelets.la
 
 noinst_PROGRAMS = verify

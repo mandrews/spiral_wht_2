@@ -2,7 +2,7 @@
 #include "codelets.h"
 
 Wht *
-wht_init_vector(int n,int v)
+wht_init_vector(int n, int v)
 {
   Wht *W;
   const size_t bufsize = 20; /*apply_small%d_v%d_a\0*/
