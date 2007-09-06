@@ -167,7 +167,7 @@ class Search
   end
 
   def measure(plan)
-    cmd = "#{@measure} #{plan}"
+    cmd = "#{@measure} '#{plan}'"
     t = 0
     IO.popen(cmd) do |fd|
       t = fd.gets
@@ -188,6 +188,8 @@ class Search
       next unless heuristic(zp,size)
 
       right = right_codelets(zp.pop,size)
+      next if right.empty?
+
       lefts = []
       zp.each_with_index do |z,i|
         k = size_of_right_tree(zp,i+1)
@@ -222,27 +224,27 @@ class Search
   end
 
   def find_best(size)
-    if @best[size][1]
-      @best[size][1]
-    else
+    unless @best[size][1]
       find(size)
     end
+    @best[size][1]
   end
 
   def left_codelets(size, n, m)
     return [] if size < 2
 
     lefts = []
-    best = find_best(size)
-    lefts << best unless right_codelet?(best)
+    best = leftify(find_best(size))
+    lefts << best if best
     return lefts if size > @max_leaf
 
     lefts << "small[#{size}]"
 
     il_max = [n, @il_max, m, size].min 
     for k in 1 .. il_max do
-      lefts << "smallil#{2**k}[#{size}]"
-      lefts << "smallvil#{2**k}[#{size}]"
+      lefts << "smallil(#{2**k})[#{size}]"
+      next unless 2**k >= @vsize
+      lefts << "smallv(#{@vsize},#{2**k})[#{size}]"
     end
     lefts.uniq
   end
@@ -252,7 +254,7 @@ class Search
 
     rights = [ "small[#{size}]" ]
     if @vsize and 2**size > @vsize
-      rights << "smallv#{@vsize}[#{size}]"
+      rights << "smallv(#{@vsize})[#{size}]"
     end
     rights.uniq
   end
@@ -261,8 +263,9 @@ class Search
     [ "split" ]
   end
 
-  def right_codelet?(codelet)
-    codelet =~ /smallv/
+  def leftify(codelet)
+    return unless codelet
+    codelet.gsub(/smallv\((\d)\)\[(\d)\]\]$/) { |x| "small(#{$1})[#{$2}]]" }
   end
 end
 
@@ -330,9 +333,9 @@ if $0 == __FILE__
     { :min_size => 1,
       :max_size => 15,
       :measure  => measure,
-      :max_leaf => 7,
+      :max_leaf => 4,
       :il_max   => 4,
-      :vsize    => 2,
+      :vsize    => 4,
       :debug    => opts.params[:verbose],
     } )
 
