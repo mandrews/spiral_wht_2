@@ -11,9 +11,11 @@ Wht *
 wht_init_small(size_t n)
 {
   Wht *W;
-
   const size_t bufsize = 15; /*apply_small%2d\0*/
   char buf[bufsize]; 
+
+  if (n > WHT_MAX_UNROLL)
+    wht_error("not configured for unrolled codelets of size %zd", n);
 
   snprintf(buf,bufsize,"apply_small%zd",n);
 
@@ -21,7 +23,7 @@ wht_init_small(size_t n)
   W->apply     = wht_get_codelet(buf);
 
   if (W->apply == NULL)
-    wht_error("Could not find codelet %s.", buf);
+    wht_error("could not find codelet %s", buf);
 
   return W;  
 }
