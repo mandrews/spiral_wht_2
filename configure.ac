@@ -89,7 +89,7 @@ dnl M A X   I N T E R L E A V E    F A C T O R
 dnl
 AC_ARG_ENABLE([max_interleave], 
   [AC_HELP_STRING([--enable-interleave=K], 
-    [interleave 2^k loop iterations in codelet])],
+    [interleave 2^K loop iterations in codelet])],
   [max_interleave=$enableval], 
   [max_interleave=$MAX_INTERLEAVE])
 
@@ -98,7 +98,7 @@ if test $max_interleave -gt $MAX_INTERLEAVE_PKG; then
 fi
 
 AC_DEFINE_UNQUOTED(WHT_MAX_INTERLEAVE,$max_interleave,
-  [interleave 2^k loop iterations in codelet])],
+  [interleave 2^K loop iterations in codelet])],
 
 
 

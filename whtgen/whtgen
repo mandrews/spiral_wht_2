@@ -14,6 +14,10 @@
 
 INDENT   = "  "
 
+def log2(n)
+  (Math.log(n) / Math.log(2)).to_i
+end
+
 def l_mn_m(m,n)
   p = []
   for i in 0 .. (m-1) do
@@ -205,9 +209,9 @@ class Generator
 
   def compile_guard
     g = []
-    g << "(WHT_MAX_UNROLL >= #{@n})"
-		g << "(WHT_MAX_INTERLEAVE >=  #{@i})" if @i > 1
-		g << "(WHT_VECTOR_SIZE ==  #{@vp})"   if @vp > 1
+    g << "(#{log2(@n)} <= WHT_MAX_UNROLL)"
+		g << "(#{log2(@i)} <= WHT_MAX_INTERLEAVE)" if @i > 1
+		g << "(#{@vp} == WHT_VECTOR_SIZE)"   if @vp > 1
     "#if " + g.join(" && ") + "\n"
   end
 
