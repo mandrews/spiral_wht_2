@@ -51,13 +51,16 @@ main (int argc, char **argv)
 
   opterr = 0;
 
-  while ((c = getopt (argc, argv, "hw:")) != -1)
+  while ((c = getopt (argc, argv, "hvw:")) != -1)
     switch (c) {
       case 'w':
         wht_plan = optarg;
         break;
       case 'h':
         usage();
+      case 'v':
+        wht_info();
+        exit(0);
       default:
         usage();
     }

@@ -9,6 +9,14 @@ AM_DISABLE_STATIC
 
 AC_CANONICAL_HOST
 
+dnl
+dnl M A I N T A I N E R   P A R A M E T E R S
+dnl
+MAX_UNROLL=6
+MAX_UNROLL_PKG=8
+
+AC_SUBST(MAX_UNROLL_PKG)
+
 dnl Double precision floating point
 AC_ARG_ENABLE(
   double, 
@@ -16,7 +24,7 @@ AC_ARG_ENABLE(
   ok=$enableval, ok=yes)
 
 if test "$ok" = "yes"; then
-	AC_DEFINE(WHT_DOUBLE,1,[define to compile with double precision floating point.])
+	AC_DEFINE(WHT_DOUBLE,1,[define to compile with double precision floating point])
   WHT_PRECISION=
   WHT_SUFFIX=
 fi
@@ -31,11 +39,25 @@ if test "$ok" = "yes"; then
 	if test "$WHT_PRECISION" != ""; then
 		AC_MSG_ERROR([--enable-float conflict])
 	fi
-	AC_DEFINE(WHT_FLOAT,1,[define to compile with single precision floating point.])
+	AC_DEFINE(WHT_FLOAT,1,[define to compile with single precision floating point])
 	AC_DEFINE(WHT_DOUBLE,0)
   WHT_PRECISION=f
   WHT_SUFFIX=f
 fi
+
+dnl
+dnl M A X    C O D E L E T    S I Z E
+dnl
+AC_ARG_ENABLE([max_unroll], 
+  [AC_HELP_STRING([--enable-max-unroll], 
+    [maximum unrolled codelet size])],
+  [max_unroll=$enableval], 
+  [max_unroll=$MAX_UNROLL])
+
+if test $max_unroll -gt $MAX_UNROLL_PKG; then
+  AC_MSG_ERROR([--enable-max-unroll larger than package was built for])
+fi
+AC_DEFINE_UNQUOTED(WHT_MAX_UNROLL,$max_unroll,[maximum unrolled codelet size])
 
 dnl
 dnl V E C T O R I Z A T I O N
@@ -46,7 +68,7 @@ AC_ARG_ENABLE(sse,
   have_sse=$enableval, have_sse=no)
 
 if test "$have_sse" = "yes"; then
-	AC_DEFINE(HAVE_SSE,1,[define to enable SSE optimizations.])
+	AC_DEFINE(WHT_HAVE_SSE,1,[define to enable SSE optimizations.])
 	have_simd="yes"
 	if test "$WHT_PRECISION" != "f"; then
 		AC_MSG_ERROR([--enable-sse can only be used in conjunction with --enable-float])
@@ -59,7 +81,7 @@ AC_ARG_ENABLE(sse2,
   have_sse2=$enableval, have_sse2=no)
 
 if test "$have_sse2" = "yes"; then
-	AC_DEFINE(HAVE_SSE2,1,[Define to enable SSE2 optimizations.])
+	AC_DEFINE(WHT_HAVE_SSE2,1,[Define to enable SSE2 optimizations.])
 	have_simd="yes"
 	if test "$have_sse" = "yes"; then
 		AC_MSG_ERROR([you cannot use SSE and SSE2 at the same time])
@@ -69,9 +91,7 @@ if test "$have_sse2" = "yes"; then
 	fi
   AC_DEFINE(WHT_VECTOR_SIZE,2,[Size of vector to use.])
 fi
-dnl
-dnl V E C T O R I Z A T I O N
-dnl
+
 
 dnl
 dnl P A P I    M E A S U R E
@@ -99,9 +119,7 @@ dnl   AC_CHECK_HEADERS("$PAPI_PATH/include/papi.h",,
 dnl     AC_MSG_ERROR([required header file for --enable-papi not found]))
 dnl fi
 
-dnl
-dnl P A P I    M E A S U R E
-dnl
+
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -135,8 +153,11 @@ AC_TYPE_SIZE_T
 
 dnl add gcc warnings, in maintainer mode only
 if test "$USE_MAINTAINER_MODE" = yes; then
-  CFLAGS="$CFLAGS -Wall -g"
+  CFLAGS="$CFLAGS -Wall"
 fi
+
+AC_DEFINE_UNQUOTED(WHT_CC,"$CC",[the compiler used to compile this.])
+AC_DEFINE_UNQUOTED(WHT_CFLAGS,"$CFLAGS",[the compiler flags used to compile this.])
 
 AC_CONFIG_FILES([
    Makefile

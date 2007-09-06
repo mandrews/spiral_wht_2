@@ -24,6 +24,10 @@ Issues:
 
   - support for ICC
 
+  - gcc and icc compiler versions, check out fftw/m4/ax_gcc_version
+    and of course for icc
+     __INTEL_COMPILER .  __INTEL_COMPILER_BUILD_DATE
+
 For Maintainers:
   libtoolize
   autoreconf

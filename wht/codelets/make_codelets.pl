@@ -8,16 +8,22 @@
 #  Version: 
 #  Date:
 #
-use List::Util qw(min);
 
-# TODO 
-# These parameters should be command line arguments
-# set by ./configure --enable-maintainer-mode
-$small      = 4;
-$vector     = 2;
-$interleave = 4;
-$whtgen     = "../../whtgen/whtgen";
-$registry   = "codelet_registry.h";
+use vars qw/ %opt /;
+use List::Util qw/ min /;
+use Getopt::Std;
+use File::Basename qw/ dirname /;
+
+$opts = 'm:v:l:';
+getopts($opts, \%opt);
+
+$small      = $opt{m} || 6;
+$vector     = $opt{v} || 2;
+$interleave = $opt{l} || 4;
+
+$path       = dirname($0);
+$whtgen     = "$path/../../whtgen/whtgen";
+$registry   = "$path/codelet_registry.h";
 
 @codelets = ();
 $codelets = 0;

@@ -27,11 +27,13 @@
 #if     WHT_FLOAT==1
 typedef float wht_value;
 #define WHT_STABILITY_THRESHOLD 1e-4
+#define WHT_TYPE_STRING "float"
 #endif/*WHT_FLOAT*/
 
 #if     WHT_DOUBLE==1
 typedef double wht_value;
 #define WHT_STABILITY_THRESHOLD 1e-10
+#define WHT_TYPE_STRING "double"
 #endif/*WHT_DOUBLE*/
 
 /* data type for the wht */
@@ -72,6 +74,7 @@ Wht * wht_direct(int n);
   }
 
 Wht * wht_parse(char *s);
+void wht_info(void);
 
 Wht * wht_init_codelet(int n);
 void wht_free_codelet(Wht *W);

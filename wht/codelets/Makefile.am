@@ -10,6 +10,6 @@ libwht_codelets_la_SOURCES = codelets.c codelets.h $(BUILT_SOURCES)
 
 if MAINTAINER_MODE	
 codelet_registry.h:
-	$(PERL) make_codelets.pl
+	$(PERL) $(srcdir)/make_codelets.pl -m $(MAX_UNROLL_PKG)
 endif # MAINTAINER_MODE
 

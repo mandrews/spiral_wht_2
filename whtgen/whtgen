@@ -4,6 +4,12 @@
 #
 # Author: Michael Andrews <mjand@drexel.edu>
 # $Id$
+#
+# TODO increment ref count when tmp is input
+#      decrement ref count when tmp is output
+#      reuse tmps that have 0 ref count
+#
+#      add macro guards for interleaved codelets
 
 INDENT   = "  "
 
@@ -76,8 +82,6 @@ def wht(n,x,a,s,y,b,t,v)
     m = n/2
     wht(m,x,a,s,z,b,t,v)
     wht(m,x,a+(m/v),s,z,b+(m/v),t,v)
-
-    #y[b],y[b+t] = z[b],z[b+t] if (m < v)
 
     for i in 0 .. (m/v)-1 do
       wht_2(z,a+i,(m/v)*s,y,b+i,(m/v)*t,v)
