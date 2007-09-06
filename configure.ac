@@ -12,44 +12,65 @@ AC_CANONICAL_HOST
 dnl
 dnl M A I N T A I N E R   P A R A M E T E R S
 dnl
-MAX_UNROLL=6
 MAX_UNROLL_PKG=8
+MAX_INTERLEAVE_PKG=4
+MAX_VECTOR_PKG=2
 
 AC_SUBST(MAX_UNROLL_PKG)
+AC_SUBST(MAX_INTERLEAVE_PKG)
+AC_SUBST(MAX_VECTOR_PKG)
 
-dnl Double precision floating point
-AC_ARG_ENABLE(
-  double, 
-  [AC_HELP_STRING([--enable-double], [compile with double precision floating point])], 
-  ok=$enableval, ok=yes)
+
+
+dnl
+dnl D E F A U L T   P A R A M E T E R S
+dnl
+MAX_UNROLL=6
+MAX_INTERLEAVE=4
+WHT_VECTOR_SIZE=0
+
+
+
+dnl
+dnl T R A N S F O R M   T Y P E
+dnl
+AC_ARG_ENABLE([double], 
+  [AC_HELP_STRING([--enable-double], 
+    [compile with double precision floating point])], 
+  [ok=$enableval], 
+  [ok=yes])
 
 if test "$ok" = "yes"; then
-	AC_DEFINE(WHT_DOUBLE,1,[define to compile with double precision floating point])
+	AC_DEFINE(WHT_DOUBLE,1,
+    [define to compile with double precision floating point])
   WHT_PRECISION=
   WHT_SUFFIX=
 fi
 
-dnl Single precision floating point
-AC_ARG_ENABLE(
-  float, 
-  [AC_HELP_STRING([--enable-float], [compile wht with single precision floating point])], 
-  ok=$enableval, ok=no)
+AC_ARG_ENABLE([float], 
+  [AC_HELP_STRING([--enable-float], 
+    [compile wht with single precision floating point])], 
+  [ok=$enableval], 
+  [ok=no])
 
 if test "$ok" = "yes"; then
 	if test "$WHT_PRECISION" != ""; then
 		AC_MSG_ERROR([--enable-float conflict])
 	fi
-	AC_DEFINE(WHT_FLOAT,1,[define to compile with single precision floating point])
+	AC_DEFINE(WHT_FLOAT,1,
+    [define to compile with single precision floating point])
 	AC_DEFINE(WHT_DOUBLE,0)
   WHT_PRECISION=f
   WHT_SUFFIX=f
 fi
 
+
+
 dnl
 dnl M A X    C O D E L E T    S I Z E
 dnl
 AC_ARG_ENABLE([max_unroll], 
-  [AC_HELP_STRING([--enable-max-unroll], 
+  [AC_HELP_STRING([--enable-max-unroll=N], 
     [maximum unrolled codelet size])],
   [max_unroll=$enableval], 
   [max_unroll=$MAX_UNROLL])
@@ -57,28 +78,56 @@ AC_ARG_ENABLE([max_unroll],
 if test $max_unroll -gt $MAX_UNROLL_PKG; then
   AC_MSG_ERROR([--enable-max-unroll larger than package was built for])
 fi
-AC_DEFINE_UNQUOTED(WHT_MAX_UNROLL,$max_unroll,[maximum unrolled codelet size])
+
+AC_DEFINE_UNQUOTED(WHT_MAX_UNROLL,$max_unroll,
+  [maximum unrolled codelet size])
+
+
+
+dnl
+dnl M A X   I N T E R L E A V E    F A C T O R 
+dnl
+AC_ARG_ENABLE([max_interleave], 
+  [AC_HELP_STRING([--enable-interleave=K], 
+    [interleave 2^k loop iterations in codelet])],
+  [max_interleave=$enableval], 
+  [max_interleave=$MAX_INTERLEAVE])
+
+if test $max_interleave -gt $MAX_INTERLEAVE_PKG; then
+  AC_MSG_ERROR([--enable-interleave larger than package was built for])
+fi
+
+AC_DEFINE_UNQUOTED(WHT_MAX_INTERLEAVE,$max_interleave,
+  [interleave 2^k loop iterations in codelet])],
+
+
 
 dnl
 dnl V E C T O R I Z A T I O N
 dnl
-WHT_VECTOR_SIZE=0
-AC_ARG_ENABLE(sse, 
-  [AC_HELP_STRING([--enable-sse],[enable SSE optimizations])], 
-  have_sse=$enableval, have_sse=no)
+AC_ARG_ENABLE([sse], 
+  [AC_HELP_STRING([--enable-sse],
+    [enable SSE optimizations])], 
+  [have_sse=$enableval], 
+  [have_sse=no])
 
 if test "$have_sse" = "yes"; then
-	AC_DEFINE(WHT_HAVE_SSE,1,[define to enable SSE optimizations.])
+	AC_DEFINE(WHT_HAVE_SSE,1,
+    [define to enable SSE optimizations.])
+
 	have_simd="yes"
 	if test "$WHT_PRECISION" != "f"; then
 		AC_MSG_ERROR([--enable-sse can only be used in conjunction with --enable-float])
 	fi
-  AC_DEFINE(WHT_VECTOR_SIZE,4,[Size of vector to use.])
+  AC_DEFINE(WHT_VECTOR_SIZE,4,
+    [Size of vector to use.])
 fi
 
-AC_ARG_ENABLE(sse2, 
-  [AC_HELP_STRING([--enable-sse2],[enable SSE2 optimizations])], 
-  have_sse2=$enableval, have_sse2=no)
+AC_ARG_ENABLE([sse2], 
+  [AC_HELP_STRING([--enable-sse2],
+    [enable SSE2 optimizations])], 
+  [have_sse2=$enableval], 
+  [have_sse2=no])
 
 if test "$have_sse2" = "yes"; then
 	AC_DEFINE(WHT_HAVE_SSE2,1,[Define to enable SSE2 optimizations.])
@@ -89,26 +138,30 @@ if test "$have_sse2" = "yes"; then
 	if test "$WHT_PRECISION" != ""; then
 		AC_MSG_ERROR([--enable-sse2 can only be used in conjunction with --enable-double])
 	fi
-  AC_DEFINE(WHT_VECTOR_SIZE,2,[Size of vector to use.])
+  AC_DEFINE(WHT_VECTOR_SIZE,2,
+    [Size of vector to use.])
 fi
 
 
 dnl
 dnl P A P I    M E A S U R E
 dnl
-AC_ARG_WITH(papi, 
+AC_ARG_WITH([papi], 
   [AC_HELP_STRING([--with-papi=PATH],
-  [compile with PAPI support, PATH is location of PAPI install])], 
-  papi_path=$withval, papi_path="no")
+    [compile with PAPI support, PATH is location of PAPI install])], 
+  [papi_path=$withval], 
+  [papi_path="no"])
 
 AM_CONDITIONAL(PAPI_MEASURE, test "$papi_path" != "no")
 
 PAPI_PATH=$papi_path
 AC_SUBST(PAPI_PATH)
 
-AC_ARG_ENABLE(cache-size-kb, 
-  [AC_HELP_STRING([--enable-cache-size-kb],[size of L2 cache in KB])], 
-  cache_size_kb=$enableval, cache_size_kb=8)
+AC_ARG_ENABLE([cache-size-kb], 
+  [AC_HELP_STRING([--enable-cache-size-kb],
+    [size of L2 cache in KB])], 
+  [cache_size_kb=$enableval], 
+  [cache_size_kb=8])
 
 CACHE_SIZE_KB=$cache_size_kb
 AC_SUBST(CACHE_SIZE_KB)
@@ -156,8 +209,10 @@ if test "$USE_MAINTAINER_MODE" = yes; then
   CFLAGS="$CFLAGS -Wall"
 fi
 
-AC_DEFINE_UNQUOTED(WHT_CC,"$CC",[the compiler used to compile this.])
-AC_DEFINE_UNQUOTED(WHT_CFLAGS,"$CFLAGS",[the compiler flags used to compile this.])
+AC_DEFINE_UNQUOTED(WHT_CC,"$CC",
+  [the compiler used to compile this.])
+AC_DEFINE_UNQUOTED(WHT_CFLAGS,"$CFLAGS",
+  [the compiler flags used to compile this.])
 
 AC_CONFIG_FILES([
    Makefile

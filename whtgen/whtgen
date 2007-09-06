@@ -9,6 +9,7 @@
 #      decrement ref count when tmp is output
 #      reuse tmps that have 0 ref count
 #
+#      add macro guards for unrolled codelets
 #      add macro guards for interleaved codelets
 
 INDENT   = "  "
@@ -202,6 +203,14 @@ class Generator
     a
   end
 
+  def compile_guard
+    g = []
+    g << "(WHT_MAX_UNROLL >= #{@n})"
+		g << "(WHT_MAX_INTERLEAVE >=  #{@i})" if @i > 1
+		g << "(WHT_VECTOR_SIZE ==  #{@vp})"   if @vp > 1
+    "#if " + g.join(" && ") + "\n"
+  end
+
   def to_s
     body = ""
     tmps = []
@@ -215,7 +224,7 @@ class Generator
     header  = "#include \"wht.h\"\n\n" +
               "void #{@name}#{a}(Wht *W, long S, wht_value *x)\n{\n"
 
-		header += "#if WHT_VECTOR_SIZE==#{@vp}\n" if @vp > 1
+		header += compile_guard
 
     decls = ""
     tmps.uniq.each do |t|
@@ -224,8 +233,8 @@ class Generator
 
 		# TODO add else / error macro guard
     footer  = ""
-    footer += "#else\n   wht_error(\"WHT not configured for this size of vector.\");\n" if @vp > 1
-		footer += "#endif/*WHT_VECTOR_SIZE*/\n" if @vp > 1
+    footer += "#else\n   wht_error(\"initialization guards should prevent this message\");\n" 
+		footer += "#endif\n"
     header + decls + body + footer + "}\n"
   end
 

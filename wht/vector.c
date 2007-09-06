@@ -17,6 +17,10 @@ wht_init_right_vector(size_t n, size_t v)
   snprintf(buf,bufsize,"apply_small%zd_v%zd_a",n,v);
 
   W            = wht_init_codelet(n);
+
+  if (v >= W->N)
+    wht_error("vector size %zd must < size 2^(%zd)",v,n);
+
   W->apply     = wht_get_codelet(buf);
 
   if (W->apply == NULL)

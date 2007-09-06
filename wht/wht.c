@@ -42,5 +42,6 @@ wht_info(void)
   fprintf(stderr,"CFLAGS: %s\n", WHT_CFLAGS);
   fprintf(stderr,"type: %s\n", WHT_TYPE_STRING);
   fprintf(stderr,"max_unroll: %d\n", WHT_MAX_UNROLL);
+  fprintf(stderr,"max_interleave: %d\n", WHT_MAX_INTERLEAVE);
   fprintf(stderr,"vector_size: %d\n", WHT_VECTOR_SIZE);
 }
