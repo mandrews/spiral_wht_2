@@ -7,23 +7,38 @@
 
 INDENT   = "  "
 
-def l_2v_v(x,a,s,y,b,t,v)
-  case v
-    when 1 # Transform undefined, just copy input to output
-      y[b],y[b+t] = x[a],x[a+s]
-    when 2 
-      t1,t2 = mk_tmp(2)
-      @stack.push Shuf.new(t1,x[a],x[a+s],[0,0],v)
-      @stack.push Shuf.new(t2,x[a],x[a+s],[1,1],v)
-      y[b],y[b+t] = t1,t2
-    when 4
-      t1,t2 = mk_tmp(2)
-      @stack.push Shuf.new(t1,x[a],x[a+s],[0,1,0,1],v)
-      @stack.push Shuf.new(t2,x[a],x[a+s],[2,3,2,3],v)
-      @stack.push Shuf.new(t1,t1,t1,[0,2,1,3],v)
-      @stack.push Shuf.new(t2,t2,t2,[0,2,1,3],v)
-      y[b],y[b+t] = t1,t2
+def l_mn_m(m,n)
+  p = []
+  for i in 0 .. (m-1) do
+    for j in 0 .. (n-1) do
+      p << (j*m)+i
+    end
   end
+  p
+end
+
+def permute(n,x,a,s,y,b,t,v,sign)
+  p = l_mn_m(n/2,2)
+   
+  t1,t2 = mk_tmp(2)
+  if    p ==  [0,2,1,3] and v == 2
+    @stack.push Shuf.new(t1,x[a],x[a+s],[0,0],v)
+    @stack.push Shuf.new(t2,x[a],x[a+s],[1,1],v)
+  elsif p ==  [0,2,1,3] and v == 4
+    @stack.push Shuf.new(t1,x[a],x[a+s],[0,1,0,1],v)
+    @stack.push Shuf.new(t2,x[a],x[a+s],[2,3,2,3],v)
+  elsif p ==  [0,4,1,5,2,6,3,7] and v == 4 and sign > 0
+    @stack.push Shuf.new(t1,x[a],x[a+s],[0,1,0,1],v)
+    @stack.push Shuf.new(t2,x[a],x[a+s],[2,3,2,3],v)
+    @stack.push Shuf.new(t1,t1,t1,[0,2,1,3],v)
+    @stack.push Shuf.new(t2,t2,t2,[0,2,1,3],v)
+  elsif p ==  [0,4,1,5,2,6,3,7] and v == 4 and sign < 0
+    @stack.push Shuf.new(x[a],x[a],x[a],[0,2,1,3],v)
+    @stack.push Shuf.new(x[a+s],x[a+s],x[a+s],[0,2,1,3],v)
+    @stack.push Shuf.new(t1,x[a],x[a+s],[0,1,0,1],v)
+    @stack.push Shuf.new(t2,x[a],x[a+s],[2,3,2,3],v)
+  end
+  y[b],y[b+t] = t1,t2
 end
 
 def wht_2v(n,x,a,s,y,b,t,v)
@@ -31,11 +46,15 @@ def wht_2v(n,x,a,s,y,b,t,v)
   m = n/2
   wht_2(x,a,s,p,b,t,v)
 
-  l_2v_v(p,a,s,q,b,t,v)
+  permute(n,p,a,s,q,b,t,v,+1)
 
-  wht_2(q,a,s,r,b,t,v)
+  if m > 2
+    wht_2v(m,q,a,s,r,b,t,v)
+  else
+    wht_2(q,a,s,r,b,t,v)
+  end
 
-  l_2v_v(r,a,s,y,b,t,v)
+  permute(n,r,a,s,y,b,t,v,-1)
 end
 
 def wht_2(x,a,s,y,b,t,v)

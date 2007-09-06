@@ -66,7 +66,8 @@ for ($i=1;$i<=$small;$i++) {
     $l = 2**$j;
     for ($k=1;$k<=$vector;$k++) {
       $v = 2**$k;
-      next unless ($i*$j >= $k);
+      next unless $j >= $k; 
+      #next unless $i*$j >= $k;
       push(@codelets,("s_$i\_il\_$l\_v$v.c", "-n $i -i $l -v $v"));
       $codelets++;
     }

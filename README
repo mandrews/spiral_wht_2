@@ -6,15 +6,15 @@ Issues:
     - ZS1 algroithm for stream generation of integer compositions
     - For each integer in a composition, try best and possible transforms of the best
 
-  - Rightmost codelet (I_2 X WHT_4) for v4 doesn't work
-    - No pattern without use of L transform and interregister mapping
-
   - Addition of transpose, parallel split and genetic algorithm
 
   - Interface to package
 
   - Possible header and lib suffix for different types
 
+  - Need "guards" to prevent segfault
+    - Could check for membership in set of allowable codelets in position k
+    - This set would help DP out
 
   - whtgen needs to be cleaned up
 
