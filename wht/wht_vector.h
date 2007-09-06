@@ -1,7 +1,7 @@
 #ifndef WHT_VECTOR_H
 #define WHT_VECTOR_H
 
-#ifdef WHT_DOUBLE 
+#if (WHT_DOUBLE == 1) && (WHT_HAVE_SSE2 == 1) && (WHT_VECTOR_SIZE == 2)
 #include <emmintrin.h>
 
 typedef __m128d wht_vector2;
@@ -23,7 +23,7 @@ typedef __m128d wht_vector2;
 
 #endif/*WHT_DOUBLE*/
 
-#ifdef WHT_FLOAT 
+#if (WHT_FLOAT == 1) && (WHT_HAVE_SSE == 1) && (WHT_VECTOR_SIZE == 4)
 #include <xmmintrin.h>
 
 typedef __m128 wht_vector4;
@@ -41,7 +41,7 @@ typedef __m128 wht_vector4;
   _mm_store_ps(&M0,R0)
 
 #define vshuf4(R0,R1,R2,A,B,C,D) \
-  R0 = _mm_shuffle_ps(R1, R2, MM_SHUFFLE(A,B,C,D))
+  R0 = _mm_shuffle_ps(R1, R2, _MM_SHUFFLE(A,B,C,D))
 
 #endif/*WHT_FLOAT*/
 
