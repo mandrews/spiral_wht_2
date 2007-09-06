@@ -38,10 +38,10 @@ wht_free_codelet(Wht *W)
 void
 wht_info(void)
 {
-  fprintf(stderr,"CC: %s\n", WHT_CC);
-  fprintf(stderr,"CFLAGS: %s\n", WHT_CFLAGS);
-  fprintf(stderr,"type: %s\n", WHT_TYPE_STRING);
-  fprintf(stderr,"max_unroll: %d\n", WHT_MAX_UNROLL);
-  fprintf(stderr,"max_interleave: %d\n", WHT_MAX_INTERLEAVE);
-  fprintf(stderr,"vector_size: %d\n", WHT_VECTOR_SIZE);
+  printf("CC: %s\n", WHT_CC);
+  printf("CFLAGS: %s\n", WHT_CFLAGS);
+  printf("type: %s\n", WHT_TYPE_STRING);
+  printf("max_unroll: %d\n", WHT_MAX_UNROLL);
+  printf("max_interleave: %d\n", WHT_MAX_INTERLEAVE);
+  printf("vector_size: %d\n", WHT_VECTOR_SIZE);
 }

@@ -5,6 +5,8 @@
 # Author: Michael Andrews <mjand@drexel.edu>
 # $Id$
 
+require 'digest/md5'
+
 SCRIPT_PATH     = File.dirname(__FILE__) 
 SCRIPT_NAME     = 'dp'
 DEFAULT_PARAMS  = {
@@ -13,7 +15,7 @@ DEFAULT_PARAMS  = {
   :leaf_sizes   => [ 1, 8],
   :wht_measure  => SCRIPT_PATH + '/wht_measure',
   :wht_info     => SCRIPT_PATH + '/wht_info',
-  :best_trees   => SCRIPT_PATH + '/best_trees.txt'
+  :best_trees   => SCRIPT_PATH + '/best_trees'
 }
 
 class Options
@@ -109,10 +111,33 @@ def size_of_right_tree(zp,n)
   v
 end
 
+def load_runtime_env(measure)
+  cmd = "#{measure} -v"
+  env = {}
+  sig = []
+  IO.popen(cmd) do |fd|
+    while (line = fd.gets) do
+      sig << line.chomp
+      case line
+        when /^max_unroll:\s*(\d+)/
+          env[:max_unroll] = $1.to_i
+        when /^max_interleave:\s*(\d+)/
+          env[:max_interleave] = $1.to_i
+        when /^vector_size:\s*(\d+)/
+          env[:vector_size] = $1.to_i
+      end
+    end
+  end
+  env[:md5]  = Digest::MD5.hexdigest(sig.join(' '))
+  env[:info] = (sig.map {|x| "# #{x}"}).join("\n")
+  env
+end
+
 def load_best_trees(file, trees)
   return unless File.exists?(file)
   fd = File.open(file,'r')
   while line = fd.gets do
+    next if line =~ /^#/ # Skip comments
     line =~ /\s*(\d+)\s*,\s*(\d+.\d+)\s*,\s*([\w\d\_\[\],]+)\s*$/
     size,time,plan = $1.to_i,$2.to_f,$3
     next unless size and time and plan
@@ -121,8 +146,9 @@ def load_best_trees(file, trees)
   fd.close
 end
 
-def save_best_trees(file, trees)
+def save_best_trees(file, trees,info)
   fd = File.open(file,'w+')
+  fd.puts info
   trees.sort.each do |k,v|
     time, plan = v
     fd.puts "#{k},#{time},#{plan}"
@@ -167,7 +193,7 @@ class Search
   end
 
   def measure(plan)
-    cmd = "#{@measure} '#{plan}'"
+    cmd = "#{@measure} -w '#{plan}'"
     t = 0
     IO.popen(cmd) do |fd|
       t = fd.gets
@@ -188,7 +214,7 @@ class Search
       next unless heuristic(zp,size)
 
       right = right_codelets(zp.pop,size)
-      next if right.empty?
+      next if right.nil? or right.empty? 
 
       lefts = []
       zp.each_with_index do |z,i|
@@ -265,7 +291,7 @@ class Search
 
   def leftify(codelet)
     return unless codelet
-    codelet.gsub(/smallv\((\d)\)\[(\d)\]\]$/) { |x| "small(#{$1})[#{$2}]]" }
+    codelet.gsub(/smallv\((\d)\)\[(\d)\]/) { |x| "small[#{$2}]" }
   end
 end
 
@@ -322,29 +348,33 @@ def zs1(n)
   end
 end
 
-if $0 == __FILE__
+if $0 == __FILE__ # Main Entry Point
   opts = Options.new
   opts.parse(ARGV)
   opts.info if opts.params[:verbose]
 
-  measure  = '../measure/papi/measure -w'
+  measure  = '../measure/papi/measure'
+
+  env = load_runtime_env(measure)
 
   dp = Search.new(
     { :min_size => 1,
       :max_size => 15,
       :measure  => measure,
-      :max_leaf => 4,
-      :il_max   => 4,
-      :vsize    => 4,
+      :max_leaf => env[:max_unroll],
+      :il_max   => env[:max_interleave],
+      :vsize    => env[:vector_size],
       :debug    => opts.params[:verbose],
     } )
 
+  best_trees = opts.params[:best_trees] + '_' + env[:md5] + '.txt'
+
   trees = {}
-  load_best_trees(opts.params[:best_trees],trees)
+  load_best_trees(best_trees,trees)
 
   dp.best.merge!(trees)
   dp.run
 
-  save_best_trees(opts.params[:best_trees],dp.best)
-
+  save_best_trees(best_trees, dp.best, env[:info])
 end
+
