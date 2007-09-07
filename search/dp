@@ -269,7 +269,7 @@ class Search
     il_max = [n, @il_max, m, size].min 
     for k in 1 .. il_max do
       lefts << "smallil(#{2**k})[#{size}]"
-      next unless 2**k >= @vsize
+      next unless @vsize > 0 and 2**k >= @vsize
       lefts << "smallv(#{@vsize},#{2**k})[#{size}]"
     end
     lefts.uniq
@@ -279,7 +279,7 @@ class Search
     return [find_best(size)] if n > @max_leaf
 
     rights = [ "small[#{size}]" ]
-    if @vsize and 2**size > @vsize
+    if @vsize > 0 and 2**size > @vsize
       rights << "smallv(#{@vsize})[#{size}]"
     end
     rights.uniq

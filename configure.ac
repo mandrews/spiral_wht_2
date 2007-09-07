@@ -27,7 +27,7 @@ dnl D E F A U L T   P A R A M E T E R S
 dnl
 MAX_UNROLL=6
 MAX_INTERLEAVE=4
-WHT_VECTOR_SIZE=0
+VECTOR_SIZE=0
 
 
 
@@ -119,8 +119,8 @@ if test "$have_sse" = "yes"; then
 	if test "$WHT_PRECISION" != "f"; then
 		AC_MSG_ERROR([--enable-sse can only be used in conjunction with --enable-float])
 	fi
-  AC_DEFINE(WHT_VECTOR_SIZE,4,
-    [Size of vector to use.])
+
+  VECTOR_SIZE=4
 fi
 
 AC_ARG_ENABLE([sse2], 
@@ -138,9 +138,12 @@ if test "$have_sse2" = "yes"; then
 	if test "$WHT_PRECISION" != ""; then
 		AC_MSG_ERROR([--enable-sse2 can only be used in conjunction with --enable-double])
 	fi
-  AC_DEFINE(WHT_VECTOR_SIZE,2,
-    [Size of vector to use.])
+
+  VECTOR_SIZE=2
+
 fi
+AC_DEFINE_UNQUOTED(WHT_VECTOR_SIZE,$VECTOR_SIZE,
+  [Size of vector to use.])
 
 
 dnl

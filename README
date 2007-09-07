@@ -18,15 +18,23 @@ Issues:
 
   - whtgen needs to be cleaned up
 
-  - Parameterize which codelets to compile from configure
-
   - Parameterize which measure is used
-
-  - support for ICC
 
   - gcc and icc compiler versions, check out fftw/m4/ax_gcc_version
     and of course for icc
      __INTEL_COMPILER .  __INTEL_COMPILER_BUILD_DATE
+
+  - Best data format: (should cache old plans that it doesn't need)
+    --
+    arch:
+    host:
+    compiler:
+    version:
+    flags:
+    plans:
+      - size,tree,time
+      - size,tree,time
+
 
 For Maintainers:
   libtoolize
