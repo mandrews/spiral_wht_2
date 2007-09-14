@@ -79,6 +79,7 @@ wht_init_split(Wht *Ws[], size_t nn)
   long i;
   long N = 1;
   int n  = 0;
+  int right = 1;
 
   /* compute size of wht */
   for (i = 0; i < nn; i++) {
@@ -93,8 +94,10 @@ wht_init_split(Wht *Ws[], size_t nn)
 
   /* store smaller whts */
   for (i = 0; i < nn; i++) {
+    Ws[i]->guard(Ws[i], right);
     W->priv.split.Ws[i] = Ws[i];
     W->priv.split.ns[i] = Ws[i]->N;
+    right *= Ws[i]->N;
   }
 
   return W;

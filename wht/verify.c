@@ -96,5 +96,8 @@ main (int argc, char **argv)
   else
     printf("fails\n");
 
+  W->free(W);
+  D->free(D);
+
   return 0;
 }

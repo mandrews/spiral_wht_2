@@ -1,6 +1,13 @@
 #include "wht.h"
 #include "codelets.h"
 
+void
+wht_guard_interleave(Wht *W, size_t right)
+{
+  if (W->nILNumber > right)
+    wht_error("collective size of right most trees must be >= %zd", W->nILNumber);
+}
+
 Wht *
 wht_init_interleave(size_t n, size_t k)
 {
@@ -15,6 +22,8 @@ wht_init_interleave(size_t n, size_t k)
 
   W            = wht_init_codelet(n);
   W->apply     = wht_get_codelet(buf);
+  W->guard     = wht_guard_interleave;
+
   W->nILNumber = k;
 
   if (W->apply == NULL)

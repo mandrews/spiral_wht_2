@@ -29,6 +29,13 @@ wht_init_right_vector(size_t n, size_t v)
   return W;  
 }
 
+void
+wht_guard_interleave_vector(Wht *W, size_t right)
+{
+  if (W->nILNumber > right)
+    wht_error("collective size of right most trees must be >= %zd", W->nILNumber);
+}
+
 Wht *
 wht_init_interleave_vector(size_t n, size_t v, size_t k)
 {
@@ -47,6 +54,7 @@ wht_init_interleave_vector(size_t n, size_t v, size_t k)
   W            = wht_init_codelet(n);
   W->apply     = wht_get_codelet(buf);
   W->nILNumber = k;
+  W->guard     = wht_guard_interleave_vector;
 
   if (W->apply == NULL)
     wht_error("could not find codelet %s", buf);

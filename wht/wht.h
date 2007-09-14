@@ -43,6 +43,8 @@ typedef struct wht {
   int nILNumber;
   void (*apply)(struct wht *W, long S, wht_value *x);
   void (*free) (struct wht *W);     
+  void (*guard) (struct wht *W, size_t right);     
+
   char * (*to_string) (void);
   union {
     struct {
