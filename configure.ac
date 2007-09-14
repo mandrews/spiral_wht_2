@@ -98,7 +98,7 @@ if test $max_interleave -gt $MAX_INTERLEAVE_PKG; then
 fi
 
 AC_DEFINE_UNQUOTED(WHT_MAX_INTERLEAVE,$max_interleave,
-  [interleave 2^K loop iterations in codelet])],
+  [interleave 2^K loop iterations in codelet])
 
 
 
