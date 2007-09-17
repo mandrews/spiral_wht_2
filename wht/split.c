@@ -78,7 +78,7 @@ split_to_string(Wht *W)
   const size_t bufsize = 8; /*split[ ... ]\0*/
 
   char *buf, *tmp;
-  size_t nn, i, len, resize;
+  size_t nn, i, j, len, resize;
 
   buf = wht_malloc(sizeof(char) * bufsize);
 
@@ -88,8 +88,10 @@ split_to_string(Wht *W)
 
   resize = bufsize;
 
+  /* Iterate over children whts, stored anti lexigraphically  */
   for (i = 0; i < nn; i++) {
-    tmp     = W->priv.split.Ws[i]->to_string(W->priv.split.Ws[i]);
+    j       = nn - i - 1;
+    tmp     = W->priv.split.Ws[j]->to_string(W->priv.split.Ws[j]);
     len     = strlen(tmp) + 1; /* Extra 1 is for comma */
 
     resize += len;
