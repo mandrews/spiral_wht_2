@@ -2,10 +2,21 @@
 #include "codelets.h"
 
 void
-wht_guard_interleave(Wht *W, size_t right)
+interleave_guard(Wht *W, size_t right)
 {
   if (W->nILNumber > right)
     wht_error("collective size of right most trees must be >= %zd", W->nILNumber);
+}
+
+char *
+interleave_to_string(Wht *W)
+{
+  const size_t bufsize = 20; /*smallil(%2d)[%2d]\0*/
+  char *buf;
+
+  buf = wht_malloc(sizeof(char) * bufsize);
+  snprintf(buf, bufsize, "smallil(%zd)[%zd]", W->nILNumber, W->n);
+  return buf;
 }
 
 Wht *
@@ -22,7 +33,8 @@ wht_init_interleave(size_t n, size_t k)
 
   W            = wht_init_codelet(n);
   W->apply     = wht_get_codelet(buf);
-  W->guard     = wht_guard_interleave;
+  W->guard     = interleave_guard;
+  W->to_string = interleave_to_string;
 
   W->nILNumber = k;
 
@@ -30,5 +42,22 @@ wht_init_interleave(size_t n, size_t k)
     wht_error("could not find codelet %s", buf);
 
   return W;  
+}
+
+Wht **
+interleave_family(size_t n)
+{
+  size_t i,k;
+
+  Wht **Ws;
+  
+  Ws = wht_malloc(sizeof(*Ws) * WHT_MAX_FAMILY);
+
+  for (k=1, i=0; k <= WHT_MAX_INTERLEAVE; k++, i++) 
+    Ws[i] = wht_init_interleave(n, (1 << k));
+
+  Ws[i] = NULL;
+
+  return Ws;
 }
 

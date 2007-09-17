@@ -7,6 +7,17 @@
 #include "wht.h"
 #include "codelets.h"
 
+char *
+small_to_string(Wht *W)
+{
+  const size_t bufsize = 10; /*small[%2d]\0*/
+  char *buf;
+
+  buf = wht_malloc(sizeof(char) * bufsize);
+  snprintf(buf, bufsize, "small[%zd]", W->n);
+  return buf;
+}
+
 Wht *
 wht_init_small(size_t n)
 {
@@ -21,10 +32,25 @@ wht_init_small(size_t n)
 
   W            = wht_init_codelet(n);
   W->apply     = wht_get_codelet(buf);
+  W->to_string = small_to_string;
 
   if (W->apply == NULL)
     wht_error("could not find codelet %s", buf);
 
   return W;  
 }
+
+Wht **
+small_family(size_t n)
+{
+  Wht **Ws;
+  
+  Ws = wht_malloc(sizeof(*Ws) * WHT_MAX_FAMILY);
+
+  Ws[0] = wht_init_small(n);
+  Ws[1] = NULL;
+
+  return Ws;
+}
+
 

@@ -72,6 +72,40 @@ wht_free_split(Wht *W)
   wht_free(W);
 }
 
+char *
+split_to_string(Wht *W)
+{
+  const size_t bufsize = 8; /*split[ ... ]\0*/
+
+  char *buf, *tmp;
+  size_t nn, i, len, resize;
+
+  buf = wht_malloc(sizeof(char) * bufsize);
+
+  snprintf(buf, bufsize - 1, "split[");
+
+  nn = W->priv.split.nn;
+
+  resize = bufsize;
+
+  for (i = 0; i < nn; i++) {
+    tmp     = W->priv.split.Ws[i]->to_string(W->priv.split.Ws[i]);
+    len     = strlen(tmp) + 1; /* Extra 1 is for comma */
+
+    resize += len;
+    buf     = realloc(buf, resize);
+
+    strncat(buf, tmp, len);
+
+    if (i < nn - 1)
+      strncat(buf, ",", 1);
+  }
+
+  strncat(buf,"]",1);
+
+  return buf;
+}
+
 Wht *
 wht_init_split(Wht *Ws[], size_t nn) 
 {
@@ -90,6 +124,9 @@ wht_init_split(Wht *Ws[], size_t nn)
   W            = wht_init_codelet(n);
   W->apply     = wht_apply_split;
   W->free      = wht_free_split;
+  W->to_string = split_to_string;
+
+
   W->priv.split.nn = nn;
 
   /* store smaller whts */

@@ -94,3 +94,4 @@ wht_max_norm(const wht_value *x, const wht_value *y, size_t N)
 }
 
 #undef wht_max
+

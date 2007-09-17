@@ -23,6 +23,7 @@
 
 #define CODELET_CALL_MAX_SIZE 40
 #define SPLIT_MAX_FACTORS 40
+#define WHT_MAX_FAMILY 32
 
 #if     WHT_FLOAT==1
 typedef float wht_value;
@@ -45,7 +46,7 @@ typedef struct wht {
   void (*free) (struct wht *W);     
   void (*guard) (struct wht *W, size_t right);     
 
-  char * (*to_string) (void);
+  char * (*to_string) (struct wht *W);
   union {
     struct {
       int nn;                                 /* number of factors */
@@ -87,6 +88,8 @@ typedef struct {
   char    name[CODELET_CALL_MAX_SIZE];
   codelet call;
 } codelet_entry;
+
+Wht ** wht_leaf_nodes(size_t size);
 
 #endif/* WHT_H */
 

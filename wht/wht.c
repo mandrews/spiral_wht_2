@@ -1,4 +1,5 @@
 #include "wht.h"
+#include "registry.h"
 
 extern Wht *wht_root;
 
@@ -40,6 +41,30 @@ void
 wht_free_codelet(Wht *W) 
 {
   wht_free(W);
+}
+
+Wht **
+wht_leaf_nodes(size_t size)
+{
+  wht_family *p;
+  Wht **W;
+  Wht **Ws;
+  Wht **nodes;
+
+  size_t i;
+
+  nodes = wht_malloc(sizeof(*nodes) * WHT_MAX_FAMILY);
+
+  for (p = wht_family_generators, i = 0; *p != NULL; ++p) {
+    Ws = (*p)(size);
+
+    for (W = Ws; *W != NULL; ++W, ++i) 
+      nodes[i] = *W;
+  }
+
+  nodes[i] = NULL;
+
+  return nodes;
 }
 
 void
