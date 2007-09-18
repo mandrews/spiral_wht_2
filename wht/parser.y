@@ -73,32 +73,37 @@ node:
 split:
     SPLIT '[' nodes ']'
   {
-    $$ = wht_init_split($3->values, $3->size);
+    int p[] = {};
+    $$ = wht_init_split($3->values, $3->size, p, 0);
   }
   ;
 
 small:
     SMALL '[' NUMBER ']'
   {
-    $$ = wht_init_small($3);
+    int p[] = {};
+    $$ = wht_init_small($3, p, 0);
   }
   ;
 
 smallil:
     SMALLIL '(' NUMBER ')' '[' NUMBER ']'
   {
-    $$ = wht_init_interleave($6,$3);
+    int p[] = { $3 };
+    $$ = wht_init_interleave($6, p, 0);
   }
   ;
 
 smallv:
     SMALLV '(' NUMBER ')' '[' NUMBER ']'
   {
-    $$ = wht_init_right_vector($6,$3);
+    int p[] = { $3 };
+    $$ = wht_init_right_vector($6, p, 0);
   }
   | SMALLV '(' NUMBER ',' NUMBER ')' '[' NUMBER ']'
   {
-    $$ = wht_init_interleave_vector($8,$3,$5);
+    int p[] = { $3, $6 };
+    $$ = wht_init_interleave_vector($8, p, 0);
   }
   ;
 

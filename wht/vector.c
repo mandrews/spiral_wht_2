@@ -2,11 +2,16 @@
 #include "codelets.h"
 
 Wht *
-wht_init_right_vector(size_t n, size_t v)
+wht_init_right_vector(size_t n, int params[], size_t np)
 {
   Wht *W;
   const size_t bufsize = 20; /*apply_small%2d_v%2d_a\0*/
   char buf[bufsize]; 
+  size_t v;
+
+  /* TODO check size of params array */
+
+  v = params[0];
 
   if (n > WHT_MAX_UNROLL)
     wht_error("not configured for unrolled codelets of size %zd", n);
@@ -16,12 +21,12 @@ wht_init_right_vector(size_t n, size_t v)
 
   snprintf(buf,bufsize,"apply_small%zd_v%zd_a",n,v);
 
-  W            = wht_init_codelet(n);
+  W = wht_init_codelet(n);
 
   if (v >= W->N)
     wht_error("vector size %zd must < size 2^(%zd)",v,n);
 
-  W->apply     = wht_get_codelet(buf);
+  W->apply = wht_get_codelet(buf);
 
   if (W->apply == NULL)
     wht_error("could not find codelet %s", buf);
@@ -39,11 +44,17 @@ wht_guard_interleave_vector(Wht *W, size_t right)
 }
 
 Wht *
-wht_init_interleave_vector(size_t n, size_t v, size_t k)
+wht_init_interleave_vector(size_t n, int params[], size_t np)
 {
   Wht *W;
   const size_t bufsize = 24; /*apply_small%2d_v%2d_il%2d\0*/
   char buf[bufsize]; 
+  size_t v, k;
+
+  /* TODO check size of params array */
+
+  v = params[0];
+  k = params[1];
 
   if (n > WHT_MAX_UNROLL)
     wht_error("not configured for unrolled codelets of size %zd", n);

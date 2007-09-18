@@ -23,11 +23,16 @@ interleave_to_string(Wht *W)
 }
 
 Wht *
-wht_init_interleave(size_t n, size_t k)
+wht_init_interleave(size_t n, int params[], size_t np)
 {
   Wht *W;
   const size_t bufsize = 20; /*apply_small%2d_il%2d\0*/
   char buf[bufsize]; 
+  size_t k;
+
+  /* TODO check size of params array */
+
+  k = params[0];
 
   if (n > WHT_MAX_UNROLL)
     wht_error("not configured for unrolled codelets of size %zd", n);

@@ -110,7 +110,7 @@ split_to_string(Wht *W)
 }
 
 Wht *
-wht_init_split(Wht *Ws[], size_t nn) 
+wht_init_split(Wht *Ws[], size_t nn, int params[], size_t pn) 
 {
   Wht *W;
   size_t i;

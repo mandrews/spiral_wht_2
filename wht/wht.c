@@ -44,6 +44,7 @@ wht_free_codelet(Wht *W)
   wht_free(W);
 }
 
+#if 0
 Wht **
 wht_leaf_nodes(size_t size)
 {
@@ -67,6 +68,7 @@ wht_leaf_nodes(size_t size)
 
   return nodes;
 }
+#endif
 
 void
 wht_info(void)

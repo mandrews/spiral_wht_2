@@ -19,7 +19,7 @@ small_to_string(Wht *W)
 }
 
 Wht *
-wht_init_small(size_t n)
+wht_init_small(size_t n, int params[], size_t np)
 {
   Wht *W;
   const size_t bufsize = 15; /*apply_small%2d\0*/
