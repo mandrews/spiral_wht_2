@@ -8,11 +8,46 @@
 # TODO increment ref count when tmp is input
 #      decrement ref count when tmp is output
 #      reuse tmps that have 0 ref count
-#
-#      add macro guards for unrolled codelets
-#      add macro guards for interleaved codelets
 
-INDENT   = "  "
+
+SCRIPT_PATH     = File.dirname(__FILE__) 
+SCRIPT_NAME     = 'whtgen'
+INDENT          = "  "
+
+class Options
+  require 'optparse'
+  attr_reader :params
+  attr_reader :options
+  def initialize
+
+    @params = {
+      :size             => nil,
+      :vector_size      => 1,
+      :interleave_by    => 1,
+      :aligned          => false,
+    }
+
+    @options = OptionParser.new do |o|
+      o.banner = "Usage: #{SCRIPT_NAME} [OPTIONS]"
+      o.separator ""
+      o.on("-h", "--help", 
+        "Show this help message.") { puts @options.to_s; exit }
+
+      o.on("-n", "--wht-size=SIZE", Integer,
+        "Size of WHT to unroll.") { |x| @params[:size] = x.to_i } 
+
+      o.on("-v", "--vector-size=SIZE", Integer,
+        "Vector size.") { |x| @params[:vector_size] = x.to_i }
+
+      o.on("-i", "--interleave-by=FACTOR", Integer,
+        "Loop interleaving factor.") { |x| @params[:interleave_by] = x.to_i } 
+
+      o.on("-a", "--aligned", 
+        "Access aligned memory, i.e. at unit stride.") { |x| @params[:aligned] = true }
+
+    end
+  end
+end
 
 def log2(n)
   (Math.log(n) / Math.log(2)).to_i
@@ -288,85 +323,60 @@ end
 
 def die(msg)
   puts msg
-  exit 1
+  exit
 end
 
-# Main entry point 
-
-class Options
-  require 'optparse'
-  attr_reader :params
-  def initialize
-    @params = {}
-    @params[:n] = nil
-    @params[:v] = 1
-    @params[:a] = false
-    @params[:i] = 1
-    @options = OptionParser.new do |o|
-      o.banner = "Usage: #{$0} [OPTIONS]"
-      o.separator ""
-      o.on("-h", "--help", 
-        "Show this help message.") { die }
-
-      o.on("-v", "--vector_size=SIZE", Integer,
-        "Vector size.") { |x| @params[:v] = x.to_i }
-
-      o.on("-n", "--wht_size=SIZE", Integer,
-        "Size of WHT to unroll.") { |x| @params[:n] = x.to_i } 
-
-      o.on("-a", "--aligned", 
-        "Access aligned memory, i.e. at unit stride.") { |x| @params[:a] = true }
-
-      o.on("-i", "--interleave=FACTOR", Integer,
-        "Loop interleaving factor.") { |x| @params[:i] = x.to_i } 
-    end
+def parse_opts(opts, args)
+  begin
+    opts.options.parse!(args)
+  rescue => e
+    die(e.message)
   end
+end
 
-  def die(msg = nil)
-    puts @options.to_s 
-    puts "\n#{msg}" unless msg.nil?
-    exit
-  end
+def check_opts(opts)
+  die("--size=SIZE required") unless opts.params[:size]
 
-  def parse(args)
-    begin
-      @options.parse!(args)
-    rescue => e
-      die(e.message)
-    end
+  k = opts.params[:interleave_by] * (2**opts.params[:size]) 
+  v = opts.params[:vector_size]
 
-    die unless @params[:n]
-
-    @params[:n] = 2**@params[:n]
-    unless @params[:n]*@params[:i] > @params[:v]
-      die("Size*Interleaved must be greater than vector size.")
-    end
+  unless k > v
+    die("SIZE x INTERLEAVED_BY must be greater than VECTOR_SIZE")
   end
 
 end
 
+# Main entry point 
 if $0 == __FILE__ 
   opts = Options.new
-  opts.parse(ARGV)
 
-  n = opts.params[:n]
-  v = opts.params[:v]
-  i = opts.params[:i]
-  a = opts.params[:a] 
-  m = (Math.log(n) / Math.log(2)).to_i
+  parse_opts(opts, ARGV)
+
+  m = opts.params[:size]
+  v = opts.params[:vector_size]
+  i = opts.params[:interleave_by]
+  a = opts.params[:aligned] 
+
+  check_opts(opts)
+
+  n = 2**m
 
   if v > 1 and i > 1 
-    g = Generator.new(n,i,1,v,a,"wht_vector#{v}", "apply_small#{m}_v#{v}_il#{i}")
+    g = Generator.new(n,i,1,v,a,
+      "wht_vector#{v}", "apply_small#{m}_v#{v}_il#{i}")
     g.run
     g.vectorize(v)
   elsif v > 1
-    g = Generator.new((n/v),1,v,v,a,"wht_vector#{v}", "apply_small#{m}_v#{v}")
+    g = Generator.new((n/v),1,v,v,a,
+      "wht_vector#{v}", "apply_small#{m}_v#{v}")
     g.run
   elsif i > 1
-    g = Generator.new(n,i,1,1,a,"wht_value", "apply_small#{m}_il#{i}")
+    g = Generator.new(n,i,1,1,a,"wht_value", 
+      "apply_small#{m}_il#{i}")
     g.run
   else
-    g = Generator.new(n,1,1,1,a,"wht_value", "apply_small#{m}")
+    g = Generator.new(n,1,1,1,a,"wht_value", 
+      "apply_small#{m}")
     g.run
   end
 
