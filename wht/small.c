@@ -40,17 +40,3 @@ wht_init_small(size_t n)
   return W;  
 }
 
-Wht **
-small_family(size_t n)
-{
-  Wht **Ws;
-  
-  Ws = wht_malloc(sizeof(*Ws) * WHT_MAX_FAMILY);
-
-  Ws[0] = wht_init_small(n);
-  Ws[1] = NULL;
-
-  return Ws;
-}
-
-

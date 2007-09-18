@@ -47,20 +47,3 @@ wht_init_interleave(size_t n, size_t k)
   return W;  
 }
 
-Wht **
-interleave_family(size_t n)
-{
-  size_t i,k;
-
-  Wht **Ws;
-  
-  Ws = wht_malloc(sizeof(*Ws) * WHT_MAX_FAMILY);
-
-  for (k=1, i=0; k <= WHT_MAX_INTERLEAVE; k++, i++) 
-    Ws[i] = wht_init_interleave(n, (1 << k));
-
-  Ws[i] = NULL;
-
-  return Ws;
-}
-
