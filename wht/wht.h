@@ -96,9 +96,9 @@ typedef void (*codelet)(Wht *W, long S, wht_value *x);
 typedef struct {
   size_t  size;
   char    name[MAX_CODELET_NAME_SIZE];
-  codelet call;
-  size_t  n;
   int     params[MAX_CODELET_PARAMS];
+  size_t  n;
+  codelet call;
 } codelet_entry;
 
 

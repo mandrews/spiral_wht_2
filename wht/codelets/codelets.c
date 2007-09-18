@@ -13,17 +13,21 @@ params_equal(int a[], int b[], size_t n)
   return true;
 }
 
+#define NOT_END(p)  ((p != NULL) && (p->size != 0))
+
 codelet wht_get_codelet(size_t size, const char *name, int params[], size_t n)
 {
-  int i;
+  codelet_entry *p;
 
-  for (i=0; i < wht_codelet_registry_size;i++)
-    if ((size == wht_codelet_registry[i].size) &&
-        (strncmp(name, wht_codelet_registry[i].name, MAX_CODELET_NAME_SIZE) == 0) &&
-        (n == wht_codelet_registry[i].n) &&
-        (params_equal(params, wht_codelet_registry[i].params, n))) {
-      return wht_codelet_registry[i].call;
+  for (p = (codelet_entry *) wht_codelet_registry; NOT_END(p); p++)
+    if ((size == p->size) &&
+        (strncmp(name, p->name, MAX_CODELET_NAME_SIZE) == 0) &&
+        (n == p->n) &&
+        (params_equal(params, p->params, n))) {
+      return p->call;
     }
-  return NULL;
+
+  return NULL; /* Did not find codelet in table */
 }
 
+#undef NOT_END

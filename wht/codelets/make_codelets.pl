@@ -26,7 +26,6 @@ $whtgen     = "$path/../../whtgen/whtgen";
 $registry   = "$path/codelet_registry.h";
 
 @codelets = ();
-$codelets = 0;
 
 # Greps through a codelet file for the function call
 sub function_name {
@@ -45,7 +44,6 @@ sub function_name {
 # Generate unaligned unrolled codelets
 for ($i=1;$i<=$small;$i++) {
   push(@codelets,($i, "small",  [], "s_$i.c", "-n $i"));
-  $codelets++;
 }
 
 # Generate aligned vectorized codelets
@@ -53,7 +51,6 @@ for ($k=1;$k<=$vector;$k++) {
   $v = 2**$k;
   for ($i=$k+1;$i<=$small;$i++) {
     push(@codelets,($i, "smallv", [ $v ], "s_$i\_v\_$v\_a.c", "-n $i -v $v -a"));
-    $codelets++;
   }
 }
 
@@ -62,7 +59,6 @@ for ($i=1;$i<=$small;$i++) {
   for ($j=1;$j<=$interleave;$j++) {
     $k = 2**$j;
     push(@codelets,($i, "smallil", [ $k ], "s_$i\_il\_$k.c", "-n $i -i $k"));
-    $codelets++;
   }
 }
 
@@ -74,7 +70,6 @@ for ($i=1;$i<=$small;$i++) {
       $v = 2**$k;
       next unless $j >= $k; 
       push(@codelets,($i, "smallv", [ $v, $l ], "s_$i\_il\_$l\_v$v.c", "-n $i -i $l -v $v"));
-      $codelets++;
     }
   }
 }
@@ -99,26 +94,29 @@ while (@codelets) {
 
   print "Register: $name in $registry\n";
 
-  $depends .= "$file "; # Add to dependancies
-  $externs .= "extern codelet $call\;\n"; # Add to external declarations
+  # Add to Makefile dependancies
+  $depends .= "$file "; 
+  # Add to external declarations
+  $externs .= "extern codelet $call\;\n"; 
+  # Add to registry table
   $structs .= "  { $size, \"$name\", 
-    (codelet) &$call, 
-    $n, { $params } }, \n"; # Add to registry struct
+    { $params }, $n,
+    (codelet) &$call }, \n"; 
 }
 
 # Output the C registry array (see codelets.c)
 open(FD, ">$registry");
 print FD <<TEXT
 #include "wht.h"
+#include "codelets.h"
 
 $externs
-
-static const int wht_codelet_registry_size = $codelets;
 
 static const codelet_entry
 wht_codelet_registry[] =
 {
 $structs
+CODELET_REGISTRY_END
 };
 TEXT
 ;
