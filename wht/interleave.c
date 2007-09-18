@@ -4,9 +4,12 @@
 void
 interleave_guard(Wht *W, size_t right)
 {
-  if (W->nILNumber > right)
-    wht_error("collective size of right most trees must be >= %zd", W->nILNumber);
+  if (W->attr[interleave_by] > right) {
+    wht_error("collective size of right most trees must be >= %zd", 
+      W->attr[interleave_by]);
+  }
 }
+
 
 char *
 interleave_to_string(Wht *W)
@@ -15,7 +18,7 @@ interleave_to_string(Wht *W)
   char *buf;
 
   buf = wht_malloc(sizeof(char) * bufsize);
-  snprintf(buf, bufsize, "smallil(%zd)[%zd]", W->nILNumber, W->n);
+  snprintf(buf, bufsize, "smallil(%zd)[%zd]", W->attr[interleave_by], W->n);
   return buf;
 }
 
@@ -36,7 +39,7 @@ wht_init_interleave(size_t n, size_t k)
   W->guard     = interleave_guard;
   W->to_string = interleave_to_string;
 
-  W->nILNumber = k;
+  W->attr[interleave_by] = k;
 
   if (W->apply == NULL)
     wht_error("could not find codelet %s", buf);

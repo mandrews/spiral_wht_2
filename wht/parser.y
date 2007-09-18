@@ -20,8 +20,6 @@ wht_init_right_vector(size_t n, size_t v);
 Wht *
 wht_init_interleave_vector(size_t n, size_t v, size_t k);
 
-#define MAX_SPLIT_SIZE 40
-
 /*
  * NOTE: Bison does not like the 
  * struct { ... } array;  syntax
@@ -29,7 +27,7 @@ wht_init_interleave_vector(size_t n, size_t v, size_t k);
 
 struct array
 {
-  struct wht *values[MAX_SPLIT_SIZE];
+  struct wht *values[SPLIT_MAX_FACTORS];
   size_t size;
 };
 
@@ -133,7 +131,7 @@ array_append(struct wht *x, struct array *p)
   p->values[p->size] = x;
   p->size++;
 
-  if (p->size > MAX_SPLIT_SIZE)
+  if (p->size > SPLIT_MAX_FACTORS)
     wht_error("Codelet parameters exheeded maximum.");
 
   return p;

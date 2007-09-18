@@ -37,16 +37,20 @@ typedef double wht_value;
 #define WHT_TYPE_STRING "double"
 #endif/*WHT_DOUBLE*/
 
+#define MAX_ATTRIBUTES 2
+enum attr_names { interleave_by = 0, vector_size = 1 };
+
 /* data type for the wht */
 typedef struct wht {
   int N,                                          /* signal length */
       n;                                               /*  N = 2^n */
-  int nILNumber;
-  void (*apply)(struct wht *W, long S, wht_value *x);
-  void (*free) (struct wht *W);     
+
+  void (*apply) (struct wht *W, long S, wht_value *x);
+  void (*free)  (struct wht *W);     
   void (*guard) (struct wht *W, size_t right);     
 
   char * (*to_string) (struct wht *W);
+
   union {
     struct {
       int nn;                                 /* number of factors */
@@ -54,6 +58,9 @@ typedef struct wht {
       struct wht *Ws[SPLIT_MAX_FACTORS];      /* the smaller wht's */
     } split;
   } priv;
+
+  int attr[MAX_ATTRIBUTES];
+
 } Wht;
 
 void * wht_malloc(size_t length);

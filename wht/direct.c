@@ -75,7 +75,6 @@ wht_direct(int n)
   W->n         = n;
   W->apply     = apply_direct;
   W->free      = wht_free_direct;
-  W->nILNumber = 1;
 
   return W;
 }

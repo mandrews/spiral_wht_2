@@ -39,7 +39,6 @@ wht_apply_split(Wht *W, long S, wht_value *x)
 {
   int nn;
   long N, R, S1, Ni, i, j, k;
-  long nIL;
 
   nn = W->priv.split.nn;
 
@@ -47,14 +46,16 @@ wht_apply_split(Wht *W, long S, wht_value *x)
   R  = N;
   S1 = 1;
 
+
   /* step through the smaller whts */
   for (i = 0; i < nn; i++) {
     Ni = W->priv.split.ns[i];
     R /= Ni;
 
-    nIL = (W->priv.split.Ws[i])->nILNumber;
+    size_t kp = W->priv.split.Ws[i]->attr[interleave_by];
+
     for (j = 0; j < R; j++)
-      for (k = 0; k < S1; k+=nIL)
+      for (k = 0; k < S1; k+=kp)
          wht_apply(W->priv.split.Ws[i], S1*S, x+k*S+j*Ni*S1*S);
 
     S1 *= Ni;
@@ -66,9 +67,9 @@ wht_free_split(Wht *W)
 {
   int i;
 
-  for (i = 0; i < W->priv.split.nn; i++) {
+  for (i = 0; i < W->priv.split.nn; i++) 
     W->priv.split.Ws[i]->free(W->priv.split.Ws[i]);
-  }
+
   wht_free(W);
 }
 
@@ -112,7 +113,7 @@ Wht *
 wht_init_split(Wht *Ws[], size_t nn) 
 {
   Wht *W;
-  long i;
+  size_t i;
   long N = 1;
   int n  = 0;
   int right = 1;
@@ -133,10 +134,10 @@ wht_init_split(Wht *Ws[], size_t nn)
 
   /* store smaller whts */
   for (i = 0; i < nn; i++) {
+    right *= Ws[i]->N;
     Ws[i]->guard(Ws[i], right);
     W->priv.split.Ws[i] = Ws[i];
     W->priv.split.ns[i] = Ws[i]->N;
-    right *= Ws[i]->N;
   }
 
   return W;

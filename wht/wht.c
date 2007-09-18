@@ -32,7 +32,8 @@ wht_init_codelet(int n)
   W->free      = wht_free_codelet;
   W->apply     = NULL;
   W->guard     = wht_guard;
-  W->nILNumber = 1;
+
+  W->attr[interleave_by] = 1;
 
   return W;  
 }
