@@ -27,13 +27,15 @@ splits_registry[] = {
 
 extern small wht_init_small;
 extern small wht_init_interleave;
-extern small wht_init_vector;
+extern small wht_init_interleave_vector;
 extern small wht_init_right_vector;
 
 static const small_entry
 smalls_registry[] = {
   { "small"   , 0, (small) &wht_init_small },
   { "smallil" , 1, (small) &wht_init_interleave },
+  { "smallv"  , 1, (small) &wht_init_right_vector },
+  { "smallv"  , 2, (small) &wht_init_interleave_vector },
   { "", 0, NULL } /* This halts the iteration of the registry */
 };
 

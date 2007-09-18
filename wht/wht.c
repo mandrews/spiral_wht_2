@@ -91,7 +91,7 @@ lookup_split(const char *name, size_t params)
   split_entry *p;
 
   for (p = (split_entry *) splits_registry; p != NULL && (split) p->call != NULL; ++p)
-    if (strncmp(name, p->name, MAX_CODELET_NAME_SIZE) == 0)
+    if ((strncmp(name, p->name, MAX_CODELET_NAME_SIZE) == 0) && (params == p->params))
       return p->call;
   return NULL;
 }
@@ -103,7 +103,7 @@ lookup_small(const char *name, size_t params)
   small_entry *p;
 
   for (p = (small_entry *) smalls_registry; p != NULL && (small) p->call != NULL; ++p)
-    if (strncmp(name, p->name, MAX_CODELET_NAME_SIZE) == 0)
+    if ((strncmp(name, p->name, MAX_CODELET_NAME_SIZE) == 0) && (params == p->params))
       return p->call;
   return NULL;
 }

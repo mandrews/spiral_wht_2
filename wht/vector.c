@@ -37,6 +37,7 @@ wht_init_right_vector(char *name, size_t n, int params[], size_t np)
 void
 wht_guard_interleave_vector(Wht *W, size_t right)
 {
+  /* TODO: size * interleave_by > vector_size */
   if (W->attr[interleave_by] > right) {
     wht_error("collective size of right most trees must be >= %zd", 
       W->attr[interleave_by]);

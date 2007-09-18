@@ -7,6 +7,9 @@
  * struct { ... } nodes;  syntax
  */
 
+/* 
+ * TODO: This repetition could be avoided with void * type values
+ */
 struct nodes
 {
   struct wht *values[MAX_SPLIT_NODES];
@@ -15,7 +18,7 @@ struct nodes
 
 struct params
 {
-  int    values[40];
+  int    values[MAX_CODELET_PARAMS];
   size_t size;
 };
 
@@ -93,9 +96,10 @@ small:
   }
   ;
 
-/* TODO Bison documentation recommends left most recursion,
-        would need to reverse the nodes for split nodes
-*/
+/* 
+ * TODO: Bison documentation recommends left most recursion,
+ * would need to reverse the node list (see params rule)
+ */
 nodes:
     node ',' nodes
   {
@@ -179,7 +183,7 @@ params_append(struct params *p, int x)
   p->values[p->size] = x;
   p->size++;
 
-  if (p->size > 40)
+  if (p->size > MAX_CODELET_PARAMS)
     wht_error("codelet parameters exheeded maximum.");
 
   return p;
