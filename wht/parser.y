@@ -6,19 +6,19 @@
  * Forward declarations for dispatch codelets
  */
 Wht *
-wht_init_split(Wht *Ws[], size_t nn);
+wht_init_split(Wht *Ws[], size_t nn, int params[], size_t np);
 
 Wht *
-wht_init_small(size_t n);
+wht_init_small(size_t n, int params[], size_t np);
 
 Wht *
-wht_init_interleave(size_t n, size_t k);
+wht_init_interleave(size_t n, int params[], size_t np);
 
 Wht *
-wht_init_right_vector(size_t n, size_t v);
+wht_init_interleave_vector(size_t n, int params[], size_t np);
 
 Wht *
-wht_init_interleave_vector(size_t n, size_t v, size_t k);
+wht_init_right_vector(size_t n, int params[], size_t np);
 
 /*
  * NOTE: Bison does not like the 
@@ -90,7 +90,7 @@ smallil:
     SMALLIL '(' NUMBER ')' '[' NUMBER ']'
   {
     int p[] = { $3 };
-    $$ = wht_init_interleave($6, p, 0);
+    $$ = wht_init_interleave($6, p, 1);
   }
   ;
 
@@ -98,12 +98,12 @@ smallv:
     SMALLV '(' NUMBER ')' '[' NUMBER ']'
   {
     int p[] = { $3 };
-    $$ = wht_init_right_vector($6, p, 0);
+    $$ = wht_init_right_vector($6, p, 1);
   }
   | SMALLV '(' NUMBER ',' NUMBER ')' '[' NUMBER ']'
   {
-    int p[] = { $3, $6 };
-    $$ = wht_init_interleave_vector($8, p, 0);
+    int p[] = { $3, $5 };
+    $$ = wht_init_interleave_vector($8, p, 2);
   }
   ;
 
