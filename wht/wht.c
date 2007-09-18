@@ -80,3 +80,25 @@ wht_info(void)
   printf("max_interleave: %d\n", WHT_MAX_INTERLEAVE);
   printf("vector_size: %d\n", WHT_VECTOR_SIZE);
 }
+
+
+split lookup_split(const char *name, size_t params)
+{
+  int i;
+
+  for (i=0; i < 2;i++)
+    if (strncmp(name, splits_registry[i].name, 40) == 0)
+      return splits_registry[i].call;
+  return NULL;
+}
+
+small lookup_small(const char *name, size_t params)
+{
+  int i;
+
+  for (i=0; i < 2;i++)
+    if (strncmp(name, smalls_registry[i].name, 40) == 0)
+      return smalls_registry[i].call;
+  return NULL;
+}
+

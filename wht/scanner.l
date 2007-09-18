@@ -17,10 +17,11 @@
               yylval.value = atoi(yytext);
               return NUMBER;  
             }
-"split"     { return SPLIT;       }
-"small"     { return SMALL;       }
-"smallil"   { return SMALLIL;     }
-"smallv"    { return SMALLV;      }
+[a-zA-Z]+   { 
+
+              yylval.ident = strdup(yytext);
+              return IDENT;  
+            }
 .           { return yytext[0];   }
 %%
 

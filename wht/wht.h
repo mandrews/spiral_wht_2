@@ -99,5 +99,54 @@ typedef struct {
 
 Wht ** wht_leaf_nodes(size_t size);
 
+typedef Wht * (*split)(Wht *Ws[], size_t nn, int params[], size_t np);
+
+typedef struct {
+  char    name[40];
+  size_t  params;
+  split   call;
+} split_entry;
+
+split lookup_split(const char *name, size_t params);
+
+typedef Wht * (*small)(size_t n, int params[], size_t np);
+
+typedef struct {
+  char    name[40];
+  size_t  params;
+  small   call;
+} small_entry;
+
+small lookup_small(const char *name, size_t params);
+
+/*
+ * Forward declarations for dispatch codelets
+ */
+Wht *
+wht_init_split(Wht *Ws[], size_t nn, int params[], size_t np);
+
+Wht *
+wht_init_small(size_t n, int params[], size_t np);
+
+Wht *
+wht_init_interleave(size_t n, int params[], size_t np);
+
+Wht *
+wht_init_interleave_vector(size_t n, int params[], size_t np);
+
+Wht *
+wht_init_right_vector(size_t n, int params[], size_t np);
+
+static const split_entry
+splits_registry[] = {
+  { "split",    0, (split) &wht_init_split },
+};
+
+static const small_entry
+smalls_registry[] = {
+  { "small"   , 0, (small) &wht_init_small },
+  { "smallil" , 1, (small) &wht_init_interleave },
+};
+
 #endif/* WHT_H */
 
