@@ -19,7 +19,7 @@ small_to_string(Wht *W)
 }
 
 Wht *
-wht_init_small(size_t n, int params[], size_t np)
+wht_init_small(char *name, size_t n, int params[], size_t np)
 {
   Wht *W;
   const size_t bufsize = 15; /*apply_small%2d\0*/
@@ -30,7 +30,7 @@ wht_init_small(size_t n, int params[], size_t np)
 
   snprintf(buf,bufsize,"apply_small%zd",n);
 
-  W            = wht_init_codelet(n);
+  W            = wht_init_codelet(n, name);
   W->apply     = wht_get_codelet(buf);
   W->to_string = small_to_string;
 

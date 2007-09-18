@@ -76,14 +76,15 @@ wht_free_split(Wht *W)
 char *
 split_to_string(Wht *W)
 {
-  const size_t bufsize = 8; /*split[ ... ]\0*/
+  const size_t bufsize = strlen(W->name) + 3; /*IDENT[ ... ]\0*/
 
   char *buf, *tmp;
   size_t nn, i, j, len, resize;
 
   buf = wht_malloc(sizeof(char) * bufsize);
 
-  snprintf(buf, bufsize - 1, "split[");
+  snprintf(buf, bufsize - 2, W->name);
+  strncat(buf,"[",1);
 
   nn = W->priv.split.nn;
 
@@ -110,7 +111,7 @@ split_to_string(Wht *W)
 }
 
 Wht *
-wht_init_split(Wht *Ws[], size_t nn, int params[], size_t pn) 
+wht_init_split(char *name, Wht *Ws[], size_t nn, int params[], size_t pn) 
 {
   Wht *W;
   size_t i;
@@ -124,7 +125,7 @@ wht_init_split(Wht *Ws[], size_t nn, int params[], size_t pn)
     n += Ws[i]->n;
   }
 
-  W            = wht_init_codelet(n);
+  W            = wht_init_codelet(n, name);
   W->apply     = wht_apply_split;
   W->free      = wht_free_split;
   W->to_string = split_to_string;

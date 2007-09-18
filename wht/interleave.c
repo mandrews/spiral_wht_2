@@ -23,7 +23,7 @@ interleave_to_string(Wht *W)
 }
 
 Wht *
-wht_init_interleave(size_t n, int params[], size_t np)
+wht_init_interleave(char *name, size_t n, int params[], size_t np)
 {
   Wht *W;
   const size_t bufsize = 20; /*apply_small%2d_il%2d\0*/
@@ -39,7 +39,7 @@ wht_init_interleave(size_t n, int params[], size_t np)
 
   snprintf(buf,bufsize,"apply_small%zd_il%zd",n,k);
 
-  W            = wht_init_codelet(n);
+  W            = wht_init_codelet(n, name);
   W->apply     = wht_get_codelet(buf);
   W->guard     = interleave_guard;
   W->to_string = interleave_to_string;

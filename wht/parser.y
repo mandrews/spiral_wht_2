@@ -135,7 +135,7 @@ parse_split(char *ident, struct nodes *nodes, struct params *params)
   if (call == NULL)
     wht_error("%s was not registered in the split table", ident);
 
-  return (call)(nodes->values, nodes->size, params->values, params->size);
+  return (call)(ident, nodes->values, nodes->size, params->values, params->size);
 }
 
 struct wht* 
@@ -148,7 +148,7 @@ parse_small(char *ident, size_t size, struct params *params)
   if (call == NULL)
     wht_error("%s was not registered in the small table", ident);
 
-  return (call)(size, params->values, params->size);
+  return (call)(ident, size, params->values, params->size);
 }
 
 struct nodes *

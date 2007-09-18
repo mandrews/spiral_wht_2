@@ -59,6 +59,8 @@ typedef struct wht {
     } split;
   } priv;
 
+  char *name;
+
   int attr[MAX_ATTRIBUTES];
 
 } Wht;
@@ -86,7 +88,7 @@ Wht * wht_direct(int n);
 Wht * wht_parse(char *s);
 void wht_info(void);
 
-Wht * wht_init_codelet(int n);
+Wht * wht_init_codelet(int n, char *name);
 void wht_free_codelet(Wht *W);
 
 typedef void (*codelet)(Wht *W, long S, wht_value *x);
@@ -97,9 +99,8 @@ typedef struct {
   codelet call;
 } codelet_entry;
 
-Wht ** wht_leaf_nodes(size_t size);
 
-typedef Wht * (*split)(Wht *Ws[], size_t nn, int params[], size_t np);
+typedef Wht * (*split)(char *name, Wht *Ws[], size_t nn, int params[], size_t np);
 
 typedef struct {
   char    name[MAX_CODELET_NAME_SIZE];
@@ -109,7 +110,8 @@ typedef struct {
 
 split lookup_split(const char *name, size_t params);
 
-typedef Wht * (*small)(size_t n, int params[], size_t np);
+
+typedef Wht * (*small)(char *name, size_t n, int params[], size_t np);
 
 typedef struct {
   char    name[MAX_CODELET_NAME_SIZE];

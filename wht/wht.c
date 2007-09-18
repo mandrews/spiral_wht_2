@@ -23,16 +23,17 @@ wht_guard(Wht *W, size_t right)
 }
 
 Wht *
-wht_init_codelet(int n)
+wht_init_codelet(int n, char *name)
 {
   Wht *W;
 
   W            = (Wht *) wht_malloc(sizeof(Wht));
-  W->N         = (long) pow((double) 2, (double) n);
+  W->N         = (1 << n);
   W->n         = n;
   W->free      = wht_free_codelet;
   W->apply     = NULL;
   W->guard     = wht_guard;
+  W->name      = name;
 
   W->attr[interleave_by] = 1;
 
