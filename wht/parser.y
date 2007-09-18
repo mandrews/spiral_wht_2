@@ -1,6 +1,6 @@
 %{
-
 #include "wht.h"
+#include "registry.h"
 
 /*
  * NOTE: Bison does not like the 
@@ -9,7 +9,7 @@
 
 struct nodes
 {
-  struct wht *values[SPLIT_MAX_FACTORS];
+  struct wht *values[MAX_SPLIT_NODES];
   size_t size;
 };
 
@@ -162,7 +162,7 @@ nodes_append(struct nodes *p, struct wht *x)
   p->values[p->size] = x;
   p->size++;
 
-  if (p->size > SPLIT_MAX_FACTORS)
+  if (p->size > MAX_SPLIT_NODES)
     wht_error("number of codelets exheeded maximum.");
 
   return p;

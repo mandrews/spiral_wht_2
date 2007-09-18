@@ -21,9 +21,10 @@
 #include <unistd.h>
 #include <stdbool.h>
 
-#define CODELET_CALL_MAX_SIZE 40
-#define SPLIT_MAX_FACTORS 40
-#define WHT_MAX_FAMILY 32
+#define MAX_CODELET_NAME_SIZE  32
+#define MAX_SPLIT_NODES        32
+#define MAX_CODELET_PARAMS      2
+#define MAX_ATTRIBUTES          2
 
 #if     WHT_FLOAT==1
 typedef float wht_value;
@@ -37,13 +38,12 @@ typedef double wht_value;
 #define WHT_TYPE_STRING "double"
 #endif/*WHT_DOUBLE*/
 
-#define MAX_ATTRIBUTES 2
 enum attr_names { interleave_by = 0, vector_size = 1 };
 
 /* data type for the wht */
 typedef struct wht {
   int N,                                          /* signal length */
-      n;                                               /*  N = 2^n */
+      n;                                          /*       N = 2^n */
 
   void (*apply) (struct wht *W, long S, wht_value *x);
   void (*free)  (struct wht *W);     
@@ -53,9 +53,9 @@ typedef struct wht {
 
   union {
     struct {
-      int nn;                                 /* number of factors */
-      int ns[SPLIT_MAX_FACTORS];                /* size of factors */
-      struct wht *Ws[SPLIT_MAX_FACTORS];      /* the smaller wht's */
+      int nn;                                 /* number of factors  */
+      int ns[MAX_SPLIT_NODES];                /* size of factors    */
+      struct wht *Ws[MAX_SPLIT_NODES];        /* the smaller wht's  */
     } split;
   } priv;
 
@@ -93,7 +93,7 @@ typedef void (*codelet)(Wht *W, long S, wht_value *x);
 
 typedef struct {
   size_t  size;
-  char    name[CODELET_CALL_MAX_SIZE];
+  char    name[MAX_CODELET_NAME_SIZE];
   codelet call;
 } codelet_entry;
 
@@ -102,7 +102,7 @@ Wht ** wht_leaf_nodes(size_t size);
 typedef Wht * (*split)(Wht *Ws[], size_t nn, int params[], size_t np);
 
 typedef struct {
-  char    name[40];
+  char    name[MAX_CODELET_NAME_SIZE];
   size_t  params;
   split   call;
 } split_entry;
@@ -112,41 +112,12 @@ split lookup_split(const char *name, size_t params);
 typedef Wht * (*small)(size_t n, int params[], size_t np);
 
 typedef struct {
-  char    name[40];
+  char    name[MAX_CODELET_NAME_SIZE];
   size_t  params;
   small   call;
 } small_entry;
 
 small lookup_small(const char *name, size_t params);
-
-/*
- * Forward declarations for dispatch codelets
- */
-Wht *
-wht_init_split(Wht *Ws[], size_t nn, int params[], size_t np);
-
-Wht *
-wht_init_small(size_t n, int params[], size_t np);
-
-Wht *
-wht_init_interleave(size_t n, int params[], size_t np);
-
-Wht *
-wht_init_interleave_vector(size_t n, int params[], size_t np);
-
-Wht *
-wht_init_right_vector(size_t n, int params[], size_t np);
-
-static const split_entry
-splits_registry[] = {
-  { "split",    0, (split) &wht_init_split },
-};
-
-static const small_entry
-smalls_registry[] = {
-  { "small"   , 0, (small) &wht_init_small },
-  { "smallil" , 1, (small) &wht_init_interleave },
-};
 
 #endif/* WHT_H */
 
