@@ -85,6 +85,7 @@ void wht_free_codelet(Wht *W);
 typedef void (*codelet)(Wht *W, long S, wht_value *x);
 
 typedef struct {
+  size_t  size;
   char    name[CODELET_CALL_MAX_SIZE];
   codelet call;
 } codelet_entry;

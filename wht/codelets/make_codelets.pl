@@ -44,7 +44,7 @@ sub function_name {
 
 # Generate unaligned unrolled codelets
 for ($i=1;$i<=$small;$i++) {
-  push(@codelets,("s_$i.c", "-n $i"));
+  push(@codelets,($i, "s_$i.c", "-n $i"));
   $codelets++;
 }
 
@@ -52,7 +52,7 @@ for ($i=1;$i<=$small;$i++) {
 for ($k=1;$k<=$vector;$k++) {
   $v = 2**$k;
   for ($i=$k+1;$i<=$small;$i++) {
-    push(@codelets,("s_$i\_v\_$v\_a.c", "-n $i -v $v -a"));
+    push(@codelets,($i, "s_$i\_v\_$v\_a.c", "-n $i -v $v -a"));
     $codelets++;
   }
 }
@@ -61,7 +61,7 @@ for ($k=1;$k<=$vector;$k++) {
 for ($i=1;$i<=$small;$i++) {
   for ($j=1;$j<=$interleave;$j++) {
     $k = 2**$j;
-    push(@codelets,("s_$i\_il\_$k.c", "-n $i -i $k"));
+    push(@codelets,($i, "s_$i\_il\_$k.c", "-n $i -i $k"));
     $codelets++;
   }
 }
@@ -73,8 +73,7 @@ for ($i=1;$i<=$small;$i++) {
     for ($k=1;$k<=$vector;$k++) {
       $v = 2**$k;
       next unless $j >= $k; 
-      #next unless $i*$j >= $k;
-      push(@codelets,("s_$i\_il\_$l\_v$v.c", "-n $i -i $l -v $v"));
+      push(@codelets,($i, "s_$i\_il\_$l\_v$v.c", "-n $i -i $l -v $v"));
       $codelets++;
     }
   }
@@ -85,6 +84,7 @@ $structs  = "";
 $depends  = "";
 
 while (@codelets) {
+  $size = shift @codelets;
   $file = shift @codelets;
   $args = shift @codelets;
 
@@ -95,7 +95,7 @@ while (@codelets) {
   print "Register: $name in $registry\n";
   $depends .= "$file "; # Add to dependancies
   $externs .= "extern codelet $name\;\n"; # Add to external declarations
-  $structs .= "  { \"$name\",\n  (codelet) &$name\n  },\n"; # Add to registry struct
+  $structs .= "  { $size, \"$name\",\n  (codelet) &$name\n  },\n"; # Add to registry struct
 }
 
 # Output the C registry array (see codelets.c)
