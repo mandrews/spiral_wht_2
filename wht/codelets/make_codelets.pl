@@ -30,21 +30,21 @@ $codelets = 0;
 
 # Greps through a codelet file for the function call
 sub function_name {
-  $file = shift @_;
-  $name = "";
+  my $file = shift @_;
+  my $call = "";
   open(FD, $file);
   while (<FD>) {
     next unless $_ =~ /\s*void\s*([\w\d]+)\s*\(.*?\)$/;
-    $name = $1;
+    $call = $1;
     last;
   }
   close(FD);
-  return $name;
+  return $call;
 }
 
 # Generate unaligned unrolled codelets
 for ($i=1;$i<=$small;$i++) {
-  push(@codelets,($i, "s_$i.c", "-n $i"));
+  push(@codelets,($i, "small",  [], "s_$i.c", "-n $i"));
   $codelets++;
 }
 
@@ -52,7 +52,7 @@ for ($i=1;$i<=$small;$i++) {
 for ($k=1;$k<=$vector;$k++) {
   $v = 2**$k;
   for ($i=$k+1;$i<=$small;$i++) {
-    push(@codelets,($i, "s_$i\_v\_$v\_a.c", "-n $i -v $v -a"));
+    push(@codelets,($i, "smallv", [ $v ], "s_$i\_v\_$v\_a.c", "-n $i -v $v -a"));
     $codelets++;
   }
 }
@@ -61,7 +61,7 @@ for ($k=1;$k<=$vector;$k++) {
 for ($i=1;$i<=$small;$i++) {
   for ($j=1;$j<=$interleave;$j++) {
     $k = 2**$j;
-    push(@codelets,($i, "s_$i\_il\_$k.c", "-n $i -i $k"));
+    push(@codelets,($i, "smallil", [ $k ], "s_$i\_il\_$k.c", "-n $i -i $k"));
     $codelets++;
   }
 }
@@ -73,7 +73,7 @@ for ($i=1;$i<=$small;$i++) {
     for ($k=1;$k<=$vector;$k++) {
       $v = 2**$k;
       next unless $j >= $k; 
-      push(@codelets,($i, "s_$i\_il\_$l\_v$v.c", "-n $i -i $l -v $v"));
+      push(@codelets,($i, "smallv", [ $v, $l ], "s_$i\_il\_$l\_v$v.c", "-n $i -i $l -v $v"));
       $codelets++;
     }
   }
@@ -84,18 +84,26 @@ $structs  = "";
 $depends  = "";
 
 while (@codelets) {
-  $size = shift @codelets;
-  $file = shift @codelets;
-  $args = shift @codelets;
+  $size     = shift @codelets;
+  $name     = shift @codelets;
+  $params   = shift @codelets;
+  $file     = shift @codelets;
+  $args     = shift @codelets;
+
+  $n        = scalar(@$params);
+  $params   = join(',', @$params) || '0';
 
   print "Generate:  $whtgen $args > $file\n";
   `$whtgen $args > $file`; # Generate codelet
-  $name = function_name($file); # Grep for codelet function name
+  $call = function_name($file); # Grep for codelet function name
 
   print "Register: $name in $registry\n";
+
   $depends .= "$file "; # Add to dependancies
-  $externs .= "extern codelet $name\;\n"; # Add to external declarations
-  $structs .= "  { $size, \"$name\",\n  (codelet) &$name\n  },\n"; # Add to registry struct
+  $externs .= "extern codelet $call\;\n"; # Add to external declarations
+  $structs .= "  { $size, \"$name\", 
+    (codelet) &$call, 
+    $n, { $params } }, \n"; # Add to registry struct
 }
 
 # Output the C registry array (see codelets.c)

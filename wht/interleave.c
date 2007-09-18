@@ -40,7 +40,7 @@ wht_init_interleave(char *name, size_t n, int params[], size_t np)
   snprintf(buf,bufsize,"apply_small%zd_il%zd",n,k);
 
   W            = wht_init_codelet(n, name);
-  W->apply     = wht_get_codelet(buf);
+  W->apply     = wht_get_codelet(n, name, params, np);
   W->guard     = interleave_guard;
   W->to_string = interleave_to_string;
 

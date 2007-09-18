@@ -97,6 +97,8 @@ typedef struct {
   size_t  size;
   char    name[MAX_CODELET_NAME_SIZE];
   codelet call;
+  size_t  n;
+  int     params[MAX_CODELET_PARAMS];
 } codelet_entry;
 
 

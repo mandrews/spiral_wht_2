@@ -3,7 +3,7 @@
 
 #include "wht.h"
 
-codelet wht_get_codelet(const char *name);
+codelet wht_get_codelet(size_t size, const char *name, int params[], size_t n);
 
 #endif/*CODELETS_H*/
 

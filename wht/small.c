@@ -22,20 +22,15 @@ Wht *
 wht_init_small(char *name, size_t n, int params[], size_t np)
 {
   Wht *W;
-  const size_t bufsize = 15; /*apply_small%2d\0*/
-  char buf[bufsize]; 
-
   if (n > WHT_MAX_UNROLL)
     wht_error("not configured for unrolled codelets of size %zd", n);
 
-  snprintf(buf,bufsize,"apply_small%zd",n);
-
   W            = wht_init_codelet(n, name);
-  W->apply     = wht_get_codelet(buf);
+  W->apply     = wht_get_codelet(n, name, params, np);
   W->to_string = small_to_string;
 
   if (W->apply == NULL)
-    wht_error("could not find codelet %s", buf);
+    wht_error("could not find codelet %s", W->to_string(W));
 
   return W;  
 }

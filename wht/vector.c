@@ -9,7 +9,8 @@ wht_init_right_vector(char *name, size_t n, int params[], size_t np)
   char buf[bufsize]; 
   size_t v;
 
-  /* TODO check size of params array */
+  if (np != 1)
+    wht_error("not enough parameters for this codelet");
 
   v = params[0];
 
@@ -26,7 +27,7 @@ wht_init_right_vector(char *name, size_t n, int params[], size_t np)
   if (v >= W->N)
     wht_error("vector size %zd must < size 2^(%zd)",v,n);
 
-  W->apply = wht_get_codelet(buf);
+  W->apply = wht_get_codelet(n, name, params, np);
 
   if (W->apply == NULL)
     wht_error("could not find codelet %s", buf);
@@ -52,7 +53,8 @@ wht_init_interleave_vector(char *name, size_t n, int params[], size_t np)
   char buf[bufsize]; 
   size_t v, k;
 
-  /* TODO check size of params array */
+  if (np != 2)
+    wht_error("not enough parameters for this codelet");
 
   v = params[0];
   k = params[1];
@@ -66,7 +68,7 @@ wht_init_interleave_vector(char *name, size_t n, int params[], size_t np)
   snprintf(buf,bufsize,"apply_small%zd_v%zd_il%zd",n,v,k);
 
   W            = wht_init_codelet(n, name);
-  W->apply     = wht_get_codelet(buf);
+  W->apply     = wht_get_codelet(n, name, params, np);
   W->guard     = wht_guard_interleave_vector;
 
   W->attr[interleave_by] = k;
