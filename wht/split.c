@@ -135,10 +135,10 @@ wht_init_split(char *name, Wht *Ws[], size_t nn, int params[], size_t pn)
 
   /* store smaller whts */
   for (i = 0; i < nn; i++) {
-    right *= Ws[i]->N;
     Ws[i]->guard(Ws[i], right);
     W->priv.split.Ws[i] = Ws[i];
     W->priv.split.ns[i] = Ws[i]->N;
+    right *= Ws[i]->N;
   }
 
   return W;
