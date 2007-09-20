@@ -1,0 +1,48 @@
+05/16/03: 
+
+	* little memory leakage removed (delete for split and splitddl)
+    thanks to Remy Bruno for reporting
+
+03/19/02: 
+
+	* parallel algorithm support added, some cleaning up
+
+03/01/02: 
+
+	* ported to mac with darwin (os x); benchmark tool added (tools/bench)
+
+01/27/02: 
+
+	* 5 level loop interleaving, small bugs removed, configure.in improved
+
+12/03/01: 
+
+	* loop interleaving added, some cleaning up
+
+11/18/00: 
+
+	* ddl added
+
+08/08/00: 
+
+	* pcl profiling added
+
+08/01/00: 
+
+	* bug removed which affected left expanded trees
+
+07/01/00: 
+
+	* installation via configure
+
+02/10/00: 
+
+	* pclprof.c rewritten
+
+11/09/99: 
+
+	* bug in breakdown strategy fixed
+
+10/05/99: 
+
+	* first version
