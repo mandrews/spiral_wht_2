@@ -5,8 +5,6 @@
 # Author: Michael Andrews <mjand@drexel.edu>
 # $Id$
 
-require 'digest/md5'
-
 SCRIPT_PATH     = File.dirname(__FILE__) 
 SCRIPT_NAME     = 'dp'
 DEFAULT_PARAMS  = {
@@ -14,8 +12,7 @@ DEFAULT_PARAMS  = {
   :children     => [ 1, 2],
   :leaf_sizes   => [ 1, 8],
   :wht_measure  => SCRIPT_PATH + '/wht_measure',
-  :wht_info     => SCRIPT_PATH + '/wht_info',
-  :best_trees   => SCRIPT_PATH + '/best_trees'
+  :best_trees   => SCRIPT_PATH + '/wht_best_trees.txt'
 }
 
 class Options
@@ -82,6 +79,8 @@ class Options
   end
 end
 
+require 'yaml'
+
 def combinations(a)
   return a.first if a.size == 1
 
@@ -114,45 +113,70 @@ end
 def load_runtime_env(measure)
   cmd = "#{measure} -v"
   env = {}
-  sig = []
   IO.popen(cmd) do |fd|
     while (line = fd.gets) do
-      sig << line.chomp
+      line.chomp!
       case line
         when /^max_unroll:\s*(\d+)/
-          env[:max_unroll] = $1.to_i
+          env['max_unroll'] = $1.to_i
         when /^max_interleave:\s*(\d+)/
-          env[:max_interleave] = $1.to_i
+          env['max_interleave'] = $1.to_i
         when /^vector_size:\s*(\d+)/
-          env[:vector_size] = $1.to_i
+          env['vector_size'] = $1.to_i
+        when /^CC:\s*(.*)$/
+          env['compiler'] = $1.to_s
+        when /^type:\s*(.*)$/
+          env['type'] = $1.to_s
+        when /^CFLAGS:\s*(.*)$/
+          env['compiler_flags'] = $1.to_s
       end
     end
   end
-  env[:md5]  = Digest::MD5.hexdigest(sig.join(' '))
-  env[:info] = (sig.map {|x| "# #{x}"}).join("\n")
   env
 end
 
-def load_best_trees(file, trees)
-  return unless File.exists?(file)
-  fd = File.open(file,'r')
-  while line = fd.gets do
-    next if line =~ /^#/ # Skip comments
-    line =~ /\s*(\d+)\s*,\s*(\d+.\d+)\s*,\s*([\w\d\_\[\],]+)\s*$/
-    size,time,plan = $1.to_i,$2.to_f,$3
-    next unless size and time and plan
-    trees[size] = [time,plan]
+def load_entry(env,info)
+  info.each do |e|
+    return e if e['env'] == env
   end
-  fd.close
+
+  # Add a new entry
+  entry = {}
+  entry['env']   = env
+  entry['data']  = {}
+  info << entry
+
+  entry
 end
 
-def save_best_trees(file, trees,info)
-  fd = File.open(file,'w+')
-  fd.puts info
-  trees.sort.each do |k,v|
-    time, plan = v
-    fd.puts "#{k},#{time},#{plan}"
+def load_best_trees(file, env)
+  return unless File.exists?(file)
+
+  fd = File.open(file,'r')
+
+  begin
+    info = YAML::load_stream(fd).documents[0]
+  rescue => e # Cast error as YAML error
+    puts e.message
   end
+
+  trees = load_entry(env, info)['data']
+
+  fd.close
+
+  return info, trees
+
+end
+
+def save_best_trees(file, env, trees, info)
+  fd = File.open(file,'w+')
+
+  #load_entry(env,info)['data'] = trees
+  entry = load_entry(env,info)
+  entry['data'] = trees
+
+  fd.puts(YAML::dump(info))
+
   fd.close
 end
 
@@ -183,7 +207,9 @@ class Search
 
   def run
     for size in 1 .. @max_size do 
-      @best[size] ||= [INF,nil]
+      @best[size] ||= {}
+      @best[size]['time'] ||= INF
+      @best[size]['plan'] ||= nil
     end
 
     for size in @min_size .. @max_size do 
@@ -241,19 +267,20 @@ class Search
 
     plans.each do |p|
       t  = measure(p)
-      tp = @best[size][0]
+      tp = @best[size]['time']
       if t < tp
         puts "New Best for #{size} with T=#{t} (T'=#{tp}): #{p}"
-        @best[size] = [t, p]
+        @best[size]['time'] = t
+        @best[size]['plan'] = p
       end
     end
   end
 
   def find_best(size)
-    unless @best[size][1]
+    unless @best[size]['plan']
       find(size)
     end
-    @best[size][1]
+    @best[size]['plan']
   end
 
   def left_codelets(size, n, m)
@@ -353,28 +380,29 @@ if $0 == __FILE__ # Main Entry Point
   opts.parse(ARGV)
   opts.info if opts.params[:verbose]
 
-  measure  = '../measure/papi/measure'
+  measure  = "#{SCRIPT_PATH}/../measure/papi/wht_measure"
 
   env = load_runtime_env(measure)
 
   dp = Search.new(
     { :min_size => 1,
-      :max_size => 15,
+      :max_size => 4,
       :measure  => measure,
-      :max_leaf => env[:max_unroll],
-      :il_max   => env[:max_interleave],
-      :vsize    => env[:vector_size],
+      :max_leaf => env['max_unroll'],
+      :il_max   => env['max_interleave'],
+      :vsize    => env['vector_size'],
       :debug    => opts.params[:verbose],
     } )
 
-  best_trees = opts.params[:best_trees] + '_' + env[:md5] + '.txt'
+  best_trees = opts.params[:best_trees] 
 
-  trees = {}
-  load_best_trees(best_trees,trees)
+  info, trees = [], {}
+  info, trees = load_best_trees(best_trees, env)
 
   dp.best.merge!(trees)
+
   dp.run
 
-  save_best_trees(best_trees, dp.best, env[:info])
+  save_best_trees(best_trees, env, dp.best, info)
 end
 
