@@ -40,6 +40,13 @@ typedef double wht_value;
 
 enum attr_names { interleave_by = 0, vector_size = 1 };
 
+/* data type for a split's array of children */
+typedef struct {
+  int nn;                                 /* number of factors  */
+  int ns[MAX_SPLIT_NODES];                /* size of factors    */
+  struct wht *Ws[MAX_SPLIT_NODES];        /* the smaller wht's  */
+} split_children;
+
 /* data type for the wht */
 typedef struct wht {
   int N,                                          /* signal length */
@@ -51,13 +58,7 @@ typedef struct wht {
 
   char * (*to_string) (struct wht *W);
 
-  union {
-    struct {
-      int nn;                                 /* number of factors  */
-      int ns[MAX_SPLIT_NODES];                /* size of factors    */
-      struct wht *Ws[MAX_SPLIT_NODES];        /* the smaller wht's  */
-    } split;
-  } priv;
+  split_children * split;
 
   char *name;
 

@@ -40,7 +40,7 @@ wht_apply_split(Wht *W, long S, wht_value *x)
   int nn;
   long N, R, S1, Ni, i, j, k;
 
-  nn = W->priv.split.nn;
+  nn = W->split->nn;
 
   N  = W->N;
   R  = N;
@@ -49,14 +49,14 @@ wht_apply_split(Wht *W, long S, wht_value *x)
 
   /* step through the smaller whts */
   for (i = 0; i < nn; i++) {
-    Ni = W->priv.split.ns[i];
+    Ni = W->split->ns[i];
     R /= Ni;
 
-    size_t kp = W->priv.split.Ws[i]->attr[interleave_by];
+    size_t kp = W->split->Ws[i]->attr[interleave_by];
 
     for (j = 0; j < R; j++)
       for (k = 0; k < S1; k+=kp)
-         wht_apply(W->priv.split.Ws[i], S1*S, x+k*S+j*Ni*S1*S);
+         wht_apply(W->split->Ws[i], S1*S, x+k*S+j*Ni*S1*S);
 
     S1 *= Ni;
   }
@@ -67,9 +67,10 @@ wht_free_split(Wht *W)
 {
   int i;
 
-  for (i = 0; i < W->priv.split.nn; i++) 
-    W->priv.split.Ws[i]->free(W->priv.split.Ws[i]);
+  for (i = 0; i < W->split->nn; i++) 
+    W->split->Ws[i]->free(W->split->Ws[i]);
 
+  wht_free(W->split);
   wht_free(W);
 }
 
@@ -86,14 +87,14 @@ split_to_string(Wht *W)
   snprintf(buf, bufsize - 2, W->name);
   strncat(buf,"[",1);
 
-  nn = W->priv.split.nn;
+  nn = W->split->nn;
 
   resize = bufsize;
 
   /* Iterate over children whts, stored anti lexigraphically  */
   for (i = 0; i < nn; i++) {
     j       = nn - i - 1;
-    tmp     = W->priv.split.Ws[j]->to_string(W->priv.split.Ws[j]);
+    tmp     = W->split->Ws[j]->to_string(W->split->Ws[j]);
     len     = strlen(tmp) + 1; /* Extra 1 is for comma */
 
     resize += len;
@@ -130,14 +131,15 @@ wht_init_split(char *name, Wht *Ws[], size_t nn, int params[], size_t pn)
   W->free      = wht_free_split;
   W->to_string = split_to_string;
 
+  W->split = wht_malloc(sizeof(split_children));
 
-  W->priv.split.nn = nn;
+  W->split->nn = nn;
 
   /* store smaller whts */
   for (i = 0; i < nn; i++) {
     Ws[i]->guard(Ws[i], right);
-    W->priv.split.Ws[i] = Ws[i];
-    W->priv.split.ns[i] = Ws[i]->N;
+    W->split->Ws[i] = Ws[i];
+    W->split->ns[i] = Ws[i]->N;
     right *= Ws[i]->N;
   }
 
