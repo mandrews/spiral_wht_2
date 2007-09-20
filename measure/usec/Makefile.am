@@ -1,6 +1,10 @@
 AM_CPPFLAGS = -I$(top_srcdir)/wht 
 
-noinst_PROGRAMS = measure
+if PAPI_MEASURE
+noinst_PROGRAMS = wht_measure
+else
+bin_PROGRAMS = wht_measure
+endif
 
-measure_SOURCES = measure.c
-measure_LDADD   = $(top_builddir)/wht/libwht.la
+wht_measure_SOURCES = measure.c
+wht_measure_LDADD   = $(top_builddir)/wht/libwht.la
