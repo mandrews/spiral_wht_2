@@ -298,6 +298,18 @@ papi_update_stats(struct papi_data *data, size_t n)
 #endif
 }
 
+/* Statisical significance metric adapted from:
+ *
+ * The Art of Computer Performance Analysis by Raj Jain, p. 217
+ * 
+ * @BOOK{Jain:1991,
+ *  AUTHOR = {Raj Jain},
+ *  TITLE = {{The Art of Computer Performance Analysis}},
+ *  PUBLISHER = {John Wiley \& Sons},
+ *  YEAR = 1991
+ * }
+ */
+
 int
 papi_profile_done(struct papi_data *data, size_t n)
 {
