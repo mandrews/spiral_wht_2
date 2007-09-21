@@ -176,7 +176,6 @@ dnl     AC_MSG_ERROR([required header file for --enable-papi not found]))
 dnl fi
 
 
-
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CC_STDC
@@ -225,6 +224,7 @@ AC_CONFIG_FILES([
    measure/Makefile
    measure/usec/Makefile
    measure/papi/Makefile
+   search/Makefile
 ])
 
 AC_OUTPUT
