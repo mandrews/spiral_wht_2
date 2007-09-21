@@ -65,6 +65,8 @@ struct wht *wht_root;
 %type <Ws> nodes 
 %type <Ps> params
 
+/* %destructor { wht_free($$); } IDENT */
+
 %start node
 
 %%
@@ -175,10 +177,8 @@ nodes_append(struct nodes *p, struct wht *x)
 struct params *
 params_append(struct params *p, int x)
 {
-  if (p == NULL) {
-    p = wht_malloc(sizeof(*p));
-    p->size= 0;
-  }
+  if (p == NULL) 
+    p = empty_params();
 
   p->values[p->size] = x;
   p->size++;

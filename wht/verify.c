@@ -101,5 +101,8 @@ main (int argc, char **argv)
   W->free(W);
   D->free(D);
 
+  wht_free(x);
+  wht_free(y);
+
   return 0;
 }

@@ -57,6 +57,8 @@ apply_direct(Wht *W, long S, wht_value *x)
   /* copy y to x with stride S */
   for (i = 0; i < N; i++) 
     x[i*S] = y[i];
+
+  wht_free(y);
 }
 
 static void 
