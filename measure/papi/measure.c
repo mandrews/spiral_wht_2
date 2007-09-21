@@ -28,7 +28,7 @@ void _wht_call()
 static void
 usage() 
 {
-  printf("measure: -w PLAN\n");
+  printf("wht_measure: -w PLAN\n");
   exit(1);
 }
 
