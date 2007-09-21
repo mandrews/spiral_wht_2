@@ -4,8 +4,8 @@ AC_INIT(spiral_wht, 2.0, mjand@drexel.edu)
 AM_INIT_AUTOMAKE(1.9)
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
-AC_DISABLE_STATIC
-AM_DISABLE_STATIC
+AC_DISABLE_SHARED
+AM_DISABLE_SHARED
 
 AC_CANONICAL_HOST
 
@@ -26,7 +26,7 @@ dnl
 dnl D E F A U L T   P A R A M E T E R S
 dnl
 MAX_UNROLL=6
-MAX_INTERLEAVE=4
+MAX_INTERLEAVE=0
 VECTOR_SIZE=0
 
 
@@ -36,7 +36,7 @@ dnl T R A N S F O R M   T Y P E
 dnl
 AC_ARG_ENABLE([double], 
   [AC_HELP_STRING([--enable-double], 
-    [compile with double precision floating point])], 
+    [compile with double precision floating point (default is enabled) ])], 
   [ok=$enableval], 
   [ok=yes])
 
@@ -49,7 +49,7 @@ fi
 
 AC_ARG_ENABLE([float], 
   [AC_HELP_STRING([--enable-float], 
-    [compile wht with single precision floating point])], 
+    [compile wht with single precision floating point (default is disabled)])], 
   [ok=$enableval], 
   [ok=no])
 
@@ -71,7 +71,7 @@ dnl M A X    C O D E L E T    S I Z E
 dnl
 AC_ARG_ENABLE([max_unroll], 
   [AC_HELP_STRING([--enable-max-unroll=N], 
-    [maximum unrolled codelet size])],
+    [maximum unrolled codelet size (default is 6)])],
   [max_unroll=$enableval], 
   [max_unroll=$MAX_UNROLL])
 
@@ -89,7 +89,7 @@ dnl M A X   I N T E R L E A V E    F A C T O R
 dnl
 AC_ARG_ENABLE([max_interleave], 
   [AC_HELP_STRING([--enable-interleave=K], 
-    [interleave 2^K loop iterations in codelet])],
+    [interleave 2^K loop iterations in codelet (default is disabled)])],
   [max_interleave=$enableval], 
   [max_interleave=$MAX_INTERLEAVE])
 
@@ -107,7 +107,7 @@ dnl V E C T O R I Z A T I O N
 dnl
 AC_ARG_ENABLE([sse], 
   [AC_HELP_STRING([--enable-sse],
-    [enable SSE optimizations])], 
+    [enable SSE optimizations (default is disabled)])], 
   [have_sse=$enableval], 
   [have_sse=no])
 
@@ -125,7 +125,7 @@ fi
 
 AC_ARG_ENABLE([sse2], 
   [AC_HELP_STRING([--enable-sse2],
-    [enable SSE2 optimizations])], 
+    [enable SSE2 optimizations (default is disabled)])], 
   [have_sse2=$enableval], 
   [have_sse2=no])
 
@@ -161,8 +161,8 @@ PAPI_PATH=$papi_path
 AC_SUBST(PAPI_PATH)
 
 AC_ARG_ENABLE([cache-size-kb], 
-  [AC_HELP_STRING([--enable-cache-size-kb],
-    [size of L2 cache in KB])], 
+  [AC_HELP_STRING([--enable-cache-size-kb=KB)],
+    [size of L2 cache in KB (default is 8 KB)])], 
   [cache_size_kb=$enableval], 
   [cache_size_kb=8])
 
