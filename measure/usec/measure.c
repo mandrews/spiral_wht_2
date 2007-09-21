@@ -17,24 +17,29 @@ cputime()
 static void
 usage() 
 {
-  printf("measure: -w PLAN\n");
+  printf("wht_measure: [-t SECONDS] -w PLAN\n");
   exit(1);
 }
 
 int
 main (int argc, char **argv)
 {
+  double max_time;
   char *wht_plan;
   int c;
 
   wht_plan = NULL;
+  max_time = 1e5;
 
   opterr = 0;
 
-  while ((c = getopt (argc, argv, "hvw:")) != -1)
+  while ((c = getopt (argc, argv, "hvw:t:")) != -1)
     switch (c) {
       case 'w':
         wht_plan = optarg;
+        break;
+      case 't':
+        max_time = atof(optarg) * 1e6;
         break;
       case 'v':
         wht_info();
@@ -53,7 +58,7 @@ main (int argc, char **argv)
   long n,N;
   int i, repeats;
 
-  double t0, max_time, avg_time;
+  double t0, avg_time;
 
   W = wht_parse(wht_plan);
 
@@ -64,7 +69,6 @@ main (int argc, char **argv)
 
   t0 = 0;
 
-  max_time = 2.0;
   avg_time = 0.0;
   repeats  = 1;
 
