@@ -5,14 +5,14 @@
 # Author: Michael Andrews <mjand@drexel.edu>
 # $Id$
 
-SCRIPT_PATH     = File.dirname(__FILE__) 
-SCRIPT_NAME     = 'dp'
-DEFAULT_PARAMS  = {
-  :sizes        => [ 1,18],
-  :children     => [ 1, 2],
-  :leaf_sizes   => [ 1, 8],
-  :wht_measure  => SCRIPT_PATH + '/wht_measure',
-  :best_trees   => SCRIPT_PATH + '/wht_best_trees.txt'
+SCRIPT_PATH       = File.dirname(__FILE__) 
+SCRIPT_NAME       = 'dp'
+DEFAULT_PARAMS    = {
+  :min_size       => 1,
+  :max_size       => 15,
+  :max_children   => 2,
+  :measure        => SCRIPT_PATH + '/wht_measure',
+  :best_trees     => SCRIPT_PATH + '/../share/wht_best_trees.txt'
 }
 
 class Options
@@ -26,27 +26,28 @@ class Options
       o.on("-h", "--help", 
         "Show this help message.") { 
         die }
+
       o.on("-v", "--verbose", 
         "Show non-essential information.") {
         @params[:verbose] = true }
-      o.on("-s", "--sizes=START_SIZE,STOP_SIZE", Array,
-        "Start/Stop the search at size 2^SIZE.") { |x|
-        die('sizes should only have two elements.') if x.size != 2
-        @params[:sizes] = x.map { |y| y.to_i } }
 
-      o.on("-k", "--children=MIN_CHILDREN,MAX_CHILDREN", Array,
-        "Min/Max children per node.") { |x|
-        die('children should only have two elements.') if x.size != 2
-        @params[:children] = x.map { |y| y.to_i } }
+      o.on("-a", "--min-size=SIZE", Integer,
+        "Start the search at size 2^SIZE.") { |x|
+        @params[:min_size] = x }
 
-      o.on("-l", "--leaf-sizes=MIN_LEAF_SIZE,MAX_LEAF_SIZE", Array,
-        "Min/Max leaf size.") { |x|
-        die('leaf sizes should only have two elements.') if x.size != 2
-        @params[:leaf_sizes] = x }
+      o.on("-b", "--max-size=SIZE", Integer,
+        "Stop the search at size 2^SIZE.") { |x|
+        @params[:max_size] = x }
+
+      o.on("-k", "--max-children=CHILDREN", Integer,
+        "Maximum number of children to allow on a split node.") { |x|
+        @params[:max_children] = x }
+
       o.on("-m", "--wht-measure=FILE", 
-        "Script to measure peformance of WHT tree.") { |x|
-         @params[:wht_measure] = x }
-      o.on("-t", "--wht-best-trees=FILE", 
+        "Program to measure peformance of WHT tree.") { |x|
+         @params[:measure] = x }
+
+      o.on("-f", "--wht-best-trees=FILE", String,
         "File to load/store the best trees found by dynamic programming.") { |x|
          @params[:best_trees] = x }
     end
@@ -66,49 +67,9 @@ class Options
     end
   end
 
-  def info
-    @params.each do |k,v| 
-      s = case v.class.to_s
-            when 'Array'
-              '[' + v.join(',') + ']'
-            else
-              v
-          end
-      puts "#{k} = #{s}"
-    end
-  end
 end
 
 require 'yaml'
-
-def combinations(a)
-  return a.first if a.size == 1
-
-  h = a.shift
-  t = combinations(a)
-
-  all = []
-  t.each do |y|
-    h.each do |x|
-      if y.class == Array
-        all << [x] + y
-      else
-        all << [x] + [y]
-      end
-    end
-  end
-
-  all
-end
-
-def size_of_right_tree(zp,n)
-  v = 0
-  zp.reverse.each_with_index do |x,i|
-    break if n >= (zp.size - i)
-    v += x
-  end
-  v
-end
 
 def load_runtime_env(measure)
   cmd = "#{measure} -v"
@@ -141,43 +102,44 @@ def load_entry(env,info)
   end
 
   # Add a new entry
-  entry = {}
-  entry['env']   = env
-  entry['data']  = {}
+  entry = {
+    'env'   => env,
+    'data'  => {}
+  }
+
   info << entry
 
   entry
 end
 
 def load_best_trees(file, env)
-  return unless File.exists?(file)
+  unless File.exists?(file)
+    return [ [], {} ] # i.e. empty info and trees
+  end
 
-  fd = File.open(file,'r')
+  info = []
 
-  begin
-    info = YAML::load_stream(fd).documents[0]
-  rescue => e # Cast error as YAML error
-    puts e.message
+  File.open(file,'r') do |fd|
+    begin
+      info = YAML::load_stream(fd).documents[0]
+    rescue => e 
+      puts e.message
+      return [ [], {} ]
+    end
   end
 
   trees = load_entry(env, info)['data']
 
-  fd.close
-
-  return info, trees
+  [info, trees]
 
 end
 
 def save_best_trees(file, env, trees, info)
-  fd = File.open(file,'w+')
+  load_entry(env,info)['data'] = trees
 
-  #load_entry(env,info)['data'] = trees
-  entry = load_entry(env,info)
-  entry['data'] = trees
-
-  fd.puts(YAML::dump(info))
-
-  fd.close
+  File.open(file,'w+') do |fd|
+    YAML::dump(info, fd)
+  end
 end
 
 class Search
@@ -185,33 +147,24 @@ class Search
   attr_accessor :best
   attr_accessor :debug
   def initialize(params)
-    # TODO merge params with default params
-    @min_size = params[:min_size]
-    @max_size = params[:max_size]
-    @measure  = params[:measure]
-    @il_max   = params[:il_max]
-    @vsize    = params[:vsize]
-    @max_leaf = params[:max_leaf]
-    @debug    = params[:debug]
+    @min_size       = params[:min_size]
+    @max_size       = params[:max_size]
+    @max_children   = params[:max_children]
+    @measure        = params[:measure]
+    @il_max         = params[:il_max]
+    @vsize          = params[:vsize]
+    @max_leaf       = params[:max_leaf]
+    @debug          = params[:debug]
 
     @best = {}
-  end
 
-  def heuristic(zp,n)
-    if n <= @max_leaf
-      return true
-    else
-      return  zp.size <= (n/3)
+    for size in 1 .. @max_size do 
+      @best[size] ||= { 'time' => INF, 'plan' => nil }
     end
+
   end
 
   def run
-    for size in 1 .. @max_size do 
-      @best[size] ||= {}
-      @best[size]['time'] ||= INF
-      @best[size]['plan'] ||= nil
-    end
-
     for size in @min_size .. @max_size do 
       puts "size #{s}" if @debug
       find(size)
@@ -226,7 +179,7 @@ class Search
     end
 
     unless t 
-      puts("Could not read: #{cmd}")
+      puts("Could not read: #{cmd}") if @debug
       return INF
     else
       t.to_f
@@ -235,9 +188,10 @@ class Search
 
   def find(size)
     plans = []
+
     zs1(size) do |zp|
       next if zp.first == size and size > @max_leaf
-      next unless heuristic(zp,size)
+      next if zp.length > @max_children
 
       right = right_codelets(zp.pop,size)
       next if right.nil? or right.empty? 
@@ -263,8 +217,6 @@ class Search
 
     end
 
-    #puts plans.join("\n")
-
     plans.each do |p|
       t  = measure(p)
       tp = @best[size]['time']
@@ -283,6 +235,8 @@ class Search
     @best[size]['plan']
   end
 
+
+  # TODO These should be read in by a user configured file
   def left_codelets(size, n, m)
     return [] if size < 2
 
@@ -320,6 +274,16 @@ class Search
     return unless codelet
     codelet.gsub(/smallv\((\d)\)\[(\d)\]/) { |x| "small[#{$2}]" }
   end
+
+  def size_of_right_tree(zp,n)
+    v = 0
+    zp.reverse.each_with_index do |x,i|
+      break if n >= (zp.size - i)
+      v += x
+    end
+    v
+  end
+
 end
 
 # ZS1 algorithm
@@ -375,28 +339,45 @@ def zs1(n)
   end
 end
 
+def combinations(a)
+  return a.first if a.size == 1
+
+  h = a.shift
+  t = combinations(a)
+
+  all = []
+  t.each do |y|
+    h.each do |x|
+      if y.class == Array
+        all << [x] + y
+      else
+        all << [x] + [y]
+      end
+    end
+  end
+
+  all
+end
+
 if $0 == __FILE__ # Main Entry Point
   opts = Options.new
   opts.parse(ARGV)
-  opts.info if opts.params[:verbose]
 
-  measure  = "#{SCRIPT_PATH}/../measure/papi/wht_measure"
-
-  env = load_runtime_env(measure)
+  env = load_runtime_env(opts.params[:measure])
 
   dp = Search.new(
-    { :min_size => 1,
-      :max_size => 4,
-      :measure  => measure,
-      :max_leaf => env['max_unroll'],
-      :il_max   => env['max_interleave'],
-      :vsize    => env['vector_size'],
-      :debug    => opts.params[:verbose],
+    { :min_size       => opts.params[:min_size],
+      :max_size       => opts.params[:max_size],
+      :max_children   => opts.params[:max_children],
+      :max_leaf       => env['max_unroll'],
+      :il_max         => env['max_interleave'],
+      :vsize          => env['vector_size'],
+      :debug          => opts.params[:verbose],
+      :measure        => opts.params[:measure],
     } )
 
   best_trees = opts.params[:best_trees] 
 
-  info, trees = [], {}
   info, trees = load_best_trees(best_trees, env)
 
   dp.best.merge!(trees)
