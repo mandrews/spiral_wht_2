@@ -2,26 +2,13 @@ WHT Package Installation
 ========================
 
 
-On UNIX systems do:
+On UNIX systems:
 -------------------
 
-  ./configure
-    [--prefix=<installation-directory>]   # default is /usr/local
-    [--enable-RAM=<size-in-MB>]           # size of RAM in MB, default is 16
-    [--enable-DDL=BLSIZE]		  # turns on Dynamic Data Layout (DDL) approach
-                                            do not use with PCL_PROFILE, default block 
-                                            size is 32.
-    [--enable-IL=LEVEL]		          # turns on Loop Interleaving (IL) approach
-    					    LEVEL = 1 will interleave loops 2 times
-    					    LEVEL = 2 will interleave loops 2 and/or 4 times
-    					    LEVEL = 3 will interleave loops 2, 4 and/or 8 times
-					    by default, LEVEL = 2
-    [--enable-PCL]                        # turns on pcl monitoring, only for experiments
-    [--enable-PCL_PROFILE]                # turns on pcl profiling of wht trees, only for
-                                            experiments
-    [--enable-PARA=<thread number>]       # turns on parallel computation where OpenMP is 
-                                            available. Do not use with PCL and PCL_PROFILE
-
+  tar -zxf spiral_wht-2.0.tar.gz SRC_DIR  
+  mkdir BUILD_DIR; cd BUILD_DIR
+  ../SRC_DIR/configure --help
+  ../SRC_DIR/configure --prefix=INSTALL_DIR [OPTIONS]
   make
   make install
 
