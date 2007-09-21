@@ -6,7 +6,7 @@
 # $Id$
 
 SCRIPT_PATH       = File.dirname(__FILE__) 
-SCRIPT_NAME       = 'dp'
+SCRIPT_NAME       = 'wht_dp'
 DEFAULT_PARAMS    = {
   :min_size       => 1,
   :max_size       => 15,
@@ -166,7 +166,7 @@ class Search
 
   def run
     for size in @min_size .. @max_size do 
-      puts "size #{s}" if @debug
+      puts "size #{size}" if @debug
       find(size)
     end
   end
