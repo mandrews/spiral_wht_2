@@ -121,7 +121,9 @@ def load_best_trees(file, env)
 
   File.open(file,'r') do |fd|
     begin
-      info = YAML::load_stream(fd).documents[0]
+      yml  = YAML::load_stream(fd)
+      raise "Initializing #{file}" unless yml
+      info = yml.documents[0]
     rescue => e 
       puts e.message
       return [ [], {} ]
@@ -362,6 +364,10 @@ end
 if $0 == __FILE__ # Main Entry Point
   opts = Options.new
   opts.parse(ARGV)
+
+  unless File.exists?(opts.params[:measure])
+    opts.die("Could find measure #{opts.params[:measure]}")
+  end
 
   env = load_runtime_env(opts.params[:measure])
 
