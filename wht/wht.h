@@ -7,6 +7,11 @@
   the package are given in the README file.
 */
 
+/**
+ * \file wht.h
+ *
+ * \brief Internal header for WHT Package.
+ */
 
 #ifndef WHT_H
 #define WHT_H
@@ -21,10 +26,16 @@
 #include <unistd.h>
 #include <stdbool.h>
 
-#define MAX_CODELET_NAME_SIZE  32
-#define MAX_SPLIT_NODES        32
-#define MAX_CODELET_PARAMS      2
-#define MAX_ATTRIBUTES          2
+#define MAX_CODELET_NAME_SIZE  (32) 
+  /**< Maximum string size for codelet identifiers. */
+#define MAX_SPLIT_NODES        (32)
+  /**< Maximum number of children for split codelets. */
+
+#define MAX_CODELET_PARAMS      (2)
+  /**< Maximum number of parameters for all codelets. */
+
+#define MAX_ATTRIBUTES          (2) 
+  /**< Maximum number of attributes for a WHT plan node.  */
 
 #if     WHT_FLOAT==1
 typedef float wht_value;
@@ -40,31 +51,51 @@ typedef double wht_value;
 
 enum attr_names { interleave_by = 0, vector_size = 1 };
 
-/* data type for a split's array of children */
+/* Forward declaration, so typedef'd struct can contain itself */
+typedef struct Wht Wht;
+
+/**
+ * \struct split_children
+ *
+ * \brief Stores children of split codelet, i.e smaller WHTs.
+ */
 typedef struct {
-  int nn;                                 /* number of factors  */
-  int ns[MAX_SPLIT_NODES];                /* size of factors    */
-  struct wht *Ws[MAX_SPLIT_NODES];        /* the smaller wht's  */
+  int nn;                          /**< Number of children  */
+  int ns[MAX_SPLIT_NODES];         /**< Sizes of children   */
+  Wht *Ws[MAX_SPLIT_NODES];        /**< Smaller WHTs        */
 } split_children;
 
-/* data type for the wht */
-typedef struct wht {
-  int N,                                          /* signal length */
-      n;                                          /*       N = 2^n */
+/**
+ * \struct Wht
+ *
+ * \brief Tree-like data structure for storing WHT plan.
+ *
+ * \todo Wht should be in lower case to follow standard C idiom, a typedef
+ * alias can be used for backwards compatability
+ */
+struct Wht {
+  int N; /**< Input signal length */
+  int n; /**< N = 2^n             */
 
-  void (*apply) (struct wht *W, long S, wht_value *x);
-  void (*free)  (struct wht *W);     
-  void (*guard) (struct wht *W, size_t right);     
+  void (*apply) (Wht *W, long S, wht_value *x); 
+    /**< Recursive method for applying transform to input vector */
 
-  char * (*to_string) (struct wht *W);
+  void (*free)  (Wht *W);
+    /**< Recursive method for freeing memory allocated by plan */ 
 
-  split_children * split;
+  void (*guard) (Wht *W, size_t right);     
+    /**< Recursive method for determining validity of a plan */ 
 
-  char *name;
+  char * (*to_string) (Wht *W); 
+    /**< Recursive method for translating a plan into a string */ 
 
-  int attr[MAX_ATTRIBUTES];
+  split_children * split; /**< 
+    Pointer to split children, should not be allocated unless plan is a split */
 
-} Wht;
+  char *name; /**< Identifier for codelet, i.e. 'small' or  'split' */
+
+  int attr[MAX_ATTRIBUTES]; /**< Attributes associated with WHT */
+};
 
 void * wht_malloc(size_t length);
 void wht_free(void *p);
