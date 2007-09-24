@@ -225,6 +225,7 @@ AC_CONFIG_FILES([
    measure/usec/Makefile
    measure/papi/Makefile
    search/Makefile
+   utils/Makefile
 ])
 
 AC_OUTPUT
