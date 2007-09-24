@@ -113,9 +113,9 @@ def load_entry(env,info)
 end
 
 def load_best_trees(file, env)
-  unless File.exists?(file)
-    return [ [], {} ] # i.e. empty info and trees
-  end
+  default = [ [], YAML::Omap.new ] # i.e. empty info and trees
+
+  return default unless File.exists?(file)
 
   info = []
 
@@ -126,7 +126,7 @@ def load_best_trees(file, env)
       info = yml.documents[0]
     rescue => e 
       puts e.message
-      return [ [], {} ]
+      return default
     end
   end
 
@@ -158,12 +158,17 @@ class Search
     @max_leaf       = params[:max_leaf]
     @debug          = params[:debug]
 
-    @best = {}
+    @best = YAML::Omap.new
 
     for size in 1 .. @max_size do 
       @best[size] ||= { 'time' => INF, 'plan' => nil }
     end
+  end
 
+  def best=(map)
+    map.each do |k,v|
+      @best[k] = map[k]
+    end
   end
 
   def run
@@ -386,7 +391,7 @@ if $0 == __FILE__ # Main Entry Point
 
   info, trees = load_best_trees(best_trees, env)
 
-  dp.best.merge!(trees)
+  dp.best = trees
 
   dp.run
 
