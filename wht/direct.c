@@ -18,7 +18,7 @@
 int 
 wht_entry(int k, long row, long col)
 {
-  long h = (long) pow((double) 2, (double) k-1);
+  long h = (1 << (k-1));
   int  b = 0;
 
   /* case k = 1 */
@@ -61,22 +61,13 @@ apply_direct(Wht *W, long S, wht_value *x)
   wht_free(y);
 }
 
-static void 
-wht_free_direct(Wht *W) 
-{
-  wht_free(W);
-}
-
 Wht *
 wht_direct(int n)
 {
   Wht *W;
 
-  W            = (Wht *) wht_malloc(sizeof(Wht));
-  W->N         = (long) pow((double) 2,(double)  n);
-  W->n         = n;
-  W->apply     = apply_direct;
-  W->free      = wht_free_direct;
+  W             = wht_init_codelet(n, "direct");
+  W->apply      = apply_direct;
 
   return W;
 }

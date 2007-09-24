@@ -1,17 +1,17 @@
-dnl Process this file with autoconf to produce a configure script.
+#  Process this file with autoconf to produce a configure script.
 AC_INIT(spiral_wht, 2.0, mjand@drexel.edu)
 
 AM_INIT_AUTOMAKE(1.9)
-AM_CONFIG_HEADER(config.h)
+AM_CONFIG_HEADER([config.h])
 AM_MAINTAINER_MODE
 AC_DISABLE_SHARED
 AM_DISABLE_SHARED
 
 AC_CANONICAL_HOST
 
-dnl
-dnl M A I N T A I N E R   P A R A M E T E R S
-dnl
+# 
+#  M A I N T A I N E R   P A R A M E T E R S
+# 
 MAX_UNROLL_PKG=8
 MAX_INTERLEAVE_PKG=4
 MAX_VECTOR_PKG=2
@@ -22,18 +22,18 @@ AC_SUBST(MAX_VECTOR_PKG)
 
 
 
-dnl
-dnl D E F A U L T   P A R A M E T E R S
-dnl
+# 
+#  D E F A U L T   P A R A M E T E R S
+# 
 MAX_UNROLL=6
 MAX_INTERLEAVE=0
 VECTOR_SIZE=0
 
 
 
-dnl
-dnl T R A N S F O R M   T Y P E
-dnl
+# 
+#  T R A N S F O R M   T Y P E
+# 
 AC_ARG_ENABLE([double], 
   [AC_HELP_STRING([--enable-double], 
     [compile with double precision floating point (default is enabled) ])], 
@@ -66,9 +66,9 @@ fi
 
 
 
-dnl
-dnl M A X    C O D E L E T    S I Z E
-dnl
+# 
+#  M A X    C O D E L E T    S I Z E
+# 
 AC_ARG_ENABLE([max_unroll], 
   [AC_HELP_STRING([--enable-max-unroll=N], 
     [maximum unrolled codelet size (default is 6)])],
@@ -84,9 +84,9 @@ AC_DEFINE_UNQUOTED(WHT_MAX_UNROLL,$max_unroll,
 
 
 
-dnl
-dnl M A X   I N T E R L E A V E    F A C T O R 
-dnl
+# 
+#  M A X   I N T E R L E A V E    F A C T O R 
+# 
 AC_ARG_ENABLE([max_interleave], 
   [AC_HELP_STRING([--enable-interleave=K], 
     [interleave 2^K loop iterations in codelet (default is disabled)])],
@@ -102,9 +102,9 @@ AC_DEFINE_UNQUOTED(WHT_MAX_INTERLEAVE,$max_interleave,
 
 
 
-dnl
-dnl V E C T O R I Z A T I O N
-dnl
+# 
+#  V E C T O R I Z A T I O N
+# 
 AC_ARG_ENABLE([sse], 
   [AC_HELP_STRING([--enable-sse],
     [enable SSE optimizations (default is disabled)])], 
@@ -146,9 +146,9 @@ AC_DEFINE_UNQUOTED(WHT_VECTOR_SIZE,$VECTOR_SIZE,
   [Size of vector to use.])
 
 
-dnl
-dnl P A P I    M E A S U R E
-dnl
+# 
+#  P A P I    M E A S U R E
+# 
 AC_ARG_WITH([papi], 
   [AC_HELP_STRING([--with-papi=PATH],
     [compile with PAPI support, PATH is location of PAPI install])], 
@@ -169,24 +169,29 @@ AC_ARG_ENABLE([cache-size-kb],
 CACHE_SIZE_KB=$cache_size_kb
 AC_SUBST(CACHE_SIZE_KB)
 
-dnl TODO not sure why this doesn't work
-dnl if test "$enable_papi" = "yes"; then
-dnl   AC_CHECK_HEADERS("$PAPI_PATH/include/papi.h",,
-dnl     AC_MSG_ERROR([required header file for --enable-papi not found]))
-dnl fi
+#  TODO not sure why this doesn't work
+#  if test "$enable_papi" = "yes"; then
+#    AC_CHECK_HEADERS("$PAPI_PATH/include/papi.h",,
+#      AC_MSG_ERROR([required header file for --enable-papi not found]))
+#  fi
 
 
-dnl Checks for programs.
+#  Checks for programs.
 AC_PROG_CC
 AC_PROG_CC_STDC
+AC_PROG_CXX
+AC_PROG_CPP
 AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
+AC_PROG_RANLIB
+
 AC_PROG_LIBTOOL
 AC_PROG_LEX
 AC_PROG_YACC
 
-dnl Check for library symbols
-AC_CHECK_LIB(m, pow)
 
+# Ocaml stuff
 AC_CHECK_PROG(OCAMLC, ocamlc, ocamlc)
 AC_CHECK_PROG(OCAMLOPT, ocamlopt, ocamlopt)
 AC_CHECK_PROG(OCAMLDEP, ocamldep, ocamldep)
@@ -197,16 +202,33 @@ AC_SUBST(OCAMLOPTCFLAGS)
 AC_SUBST(OCAMLDEFS)
 AC_SUBST(OCAMLLDFLAGS)
 
+
+# Checks for header files.
+AC_FUNC_ALLOCA
 AC_HEADER_STDC
 AC_HEADER_STDBOOL
 AC_HEADER_TIME
-AC_CHECK_HEADERS(math.h,,AC_MSG_ERROR([required header files not found]))
+AC_CHECK_HEADERS([inttypes.h libintl.h malloc.h stddef.h stdlib.h string.h strings.h unistd.h])
 
+# Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_C_INLINE
+AC_TYPE_INT16_T
+AC_TYPE_INT32_T
+AC_TYPE_INT8_T
 AC_TYPE_SIZE_T
+AC_TYPE_UINT16_T
+AC_TYPE_UINT32_T
+AC_TYPE_UINT8_T
+AC_C_VOLATILE
 
-dnl add gcc warnings, in maintainer mode only
+# Checks for library functions.
+AC_FUNC_MALLOC
+AC_FUNC_REALLOC
+AC_CHECK_FUNCS([memset strdup])
+
+
+#  add gcc warnings, in maintainer mode only
 if test "$USE_MAINTAINER_MODE" = yes; then
   CFLAGS="$CFLAGS -Wall"
 fi
