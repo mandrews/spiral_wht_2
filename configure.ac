@@ -190,19 +190,6 @@ AC_PROG_LIBTOOL
 AC_PROG_LEX
 AC_PROG_YACC
 
-
-# Ocaml stuff
-AC_CHECK_PROG(OCAMLC, ocamlc, ocamlc)
-AC_CHECK_PROG(OCAMLOPT, ocamlopt, ocamlopt)
-AC_CHECK_PROG(OCAMLDEP, ocamldep, ocamldep)
-AC_CHECK_PROG(PERL,perl,perl)
-
-AC_SUBST(OCAMLCFLAGS)
-AC_SUBST(OCAMLOPTCFLAGS)
-AC_SUBST(OCAMLDEFS)
-AC_SUBST(OCAMLLDFLAGS)
-
-
 # Checks for header files.
 AC_FUNC_ALLOCA
 AC_HEADER_STDC
@@ -240,7 +227,6 @@ AC_DEFINE_UNQUOTED(WHT_CFLAGS,"$CFLAGS",
 
 AC_CONFIG_FILES([
    Makefile
-   whtgen-ml/Makefile
    wht/Makefile
    wht/codelets/Makefile
    measure/Makefile
