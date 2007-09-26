@@ -25,10 +25,6 @@ Bugs:
 
   - Some minor memory leak issues with wht_very and wht_randtree
 
-  - make_codelet.pl fails b/c +x not set in dist
-
-  - papi should be linked against libm
-
   - libtool, bison, flex, ruby dependencies not checked
     - check in maintainer mode only ?
 
