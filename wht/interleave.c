@@ -17,7 +17,7 @@ interleave_to_string(Wht *W)
   const size_t bufsize = 20; /*smallil(%2d)[%2d]\0*/
   char *buf;
 
-  buf = wht_malloc(sizeof(char) * bufsize);
+  buf = i_malloc(sizeof(char) * bufsize);
   snprintf(buf, bufsize, "smallil(%zd)[%zd]", W->attr[interleave_by], W->n);
   return buf;
 }

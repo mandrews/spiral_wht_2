@@ -13,7 +13,7 @@ small_to_string(Wht *W)
   const size_t bufsize = 10; /*small[%2d]\0*/
   char *buf;
 
-  buf = wht_malloc(sizeof(char) * bufsize);
+  buf = i_malloc(sizeof(char) * bufsize);
   snprintf(buf, bufsize, "small[%zd]", W->n);
   return buf;
 }

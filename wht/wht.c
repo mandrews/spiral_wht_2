@@ -27,7 +27,7 @@ codelet_init(int n, char *name)
 {
   Wht *W;
 
-  W            = (Wht *) wht_malloc(sizeof(Wht));
+  W            = (Wht *) i_malloc(sizeof(Wht));
   W->N         = (1 << n); 
   W->n         = n;
   W->free      = codelet_free;
@@ -43,7 +43,7 @@ codelet_init(int n, char *name)
 void 
 codelet_free(Wht *W) 
 {
-  wht_free(W);
+  i_free(W);
 }
 
 void

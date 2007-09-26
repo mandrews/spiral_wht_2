@@ -231,8 +231,30 @@ typedef codelet_apply_entry codelet_entry;
 /*
  * Functions
  */
-void * wht_malloc(size_t length);
-void wht_free(void *p);
+
+/**
+ * \fn void * i_malloc(size_t size)
+ *
+ * \brief Internal malloc routine used inside package.
+ *
+ * \param   size Size of memory segment to allocated
+ * \return  Pointer to memory segment
+ *
+ * For now this function just ensures optimal memory alignment.
+ */
+void * i_malloc(size_t size);
+
+/**
+ * \fn void i_free(void *p);
+ *
+ * \brief Internal free routine used inside package.
+ *
+ * \param   p   Pointer to memory segment to be freed.
+ *
+ * For now this function just calls free.
+ */
+void i_free(void *p);
+
 
 wht_value wht_max_norm(const wht_value *x, const wht_value *y, size_t N);
 

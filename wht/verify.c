@@ -83,7 +83,7 @@ main(int argc, char **argv)
   D = wht_direct(n);
 
   x = wht_random(N);
-  y = wht_malloc(sizeof(wht_value) * N);
+  y = i_malloc(sizeof(wht_value) * N);
 
   for (i = 0;i<N;i++)
     y[i] = x[i];
@@ -101,8 +101,8 @@ main(int argc, char **argv)
   W->free(W);
   D->free(D);
 
-  wht_free(x);
-  wht_free(y);
+  i_free(x);
+  i_free(y);
 
   return 0;
 }

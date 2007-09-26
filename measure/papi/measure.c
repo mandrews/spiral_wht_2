@@ -14,7 +14,7 @@ void _wht_init()
   x = wht_random(N);
 }
 
-void _wht_free()
+void _i_free()
 {
 
 }
@@ -74,7 +74,7 @@ main(int argc, char **argv)
   void (*so_free)(void);
 
   so_init = &_wht_init;
-  so_free = &_wht_free;
+  so_free = &_i_free;
   so_call = &_wht_call;
 
   W = wht_parse(wht_plan);

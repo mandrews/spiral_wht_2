@@ -26,7 +26,7 @@ node_init(int size, int num_children)
   int i;
   node *np;
 
-  np = wht_malloc(sizeof(*np));
+  np = i_malloc(sizeof(*np));
 
   np->size = size;
   np->parent = NULL;
@@ -36,7 +36,7 @@ node_init(int size, int num_children)
   if (num_children == 0) {
     np->children = NULL;
   } else {
-    np->children = wht_malloc(num_children * sizeof(*np->children));
+    np->children = i_malloc(num_children * sizeof(*np->children));
     for (i = 0; i < num_children; i++) {
       np->children[i] = NULL;
     }
@@ -54,7 +54,7 @@ node_free(node *node)
   for (i = 0; i < node->num_children; i++) 
     node_free(node->children[i]);
 
-  wht_free(node);
+  i_free(node);
 }
 
 Wht *

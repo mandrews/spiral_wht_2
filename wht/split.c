@@ -3,7 +3,7 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the wht_free Software Foundation; either version 2 of the License, or
+ * the i_free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the wht_free Software
+ * along with this program; if not, write to the i_free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
@@ -70,8 +70,8 @@ split_free(Wht *W)
   for (i = 0; i < W->children->nn; i++) 
     W->children->Ws[i]->free(W->children->Ws[i]);
 
-  wht_free(W->children);
-  wht_free(W);
+  i_free(W->children);
+  i_free(W);
 }
 
 char *
@@ -82,7 +82,7 @@ split_to_string(Wht *W)
   char *buf, *tmp;
   size_t nn, i, j, len, resize;
 
-  buf = wht_malloc(sizeof(char) * bufsize);
+  buf = i_malloc(sizeof(char) * bufsize);
 
   snprintf(buf, bufsize - 2, W->name);
   strncat(buf,"[",1);
@@ -131,7 +131,7 @@ split_init(char *name, Wht *Ws[], size_t nn, int params[], size_t pn)
   W->free      = split_free;
   W->to_string = split_to_string;
 
-  W->children = wht_malloc(sizeof(split_children));
+  W->children = i_malloc(sizeof(split_children));
 
   W->children->nn = nn;
 

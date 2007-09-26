@@ -8,21 +8,21 @@
 
 /* avoiding allocations < 32 Byte */
 void *
-wht_malloc(size_t length) {
+i_malloc(size_t size) {
   void *p;
 
   /* avoid mallocs of size below 32 bytes */
-  if (length < 32)
-    length = 32;
+  if (size < 32)
+    size = 32;
 
-  p = malloc(length);
+  p = malloc(size);
   if (p == NULL)
     wht_error("out of memory in malloc()");
   return p;
 }
 
 void 
-wht_free(void *p) {
+i_free(void *p) {
   free(p);
 }
 
@@ -39,7 +39,7 @@ wht_random(size_t n)
  seed = time(NULL) + getpid();
  initstate(seed, state, 128);
   
-  x = (wht_value *) wht_malloc(n * sizeof(wht_value));
+  x = (wht_value *) i_malloc(n * sizeof(wht_value));
   for (i = 0; i < n; i++) 
     x[i] = ((wht_value) (rand() + 1.0L))/RAND_MAX;
 

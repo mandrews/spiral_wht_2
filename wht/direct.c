@@ -44,7 +44,7 @@ apply_direct(Wht *W, long S, wht_value *x)
 {
   long N = W->N;
   int n = W->n;
-  wht_value *y = (wht_value *) wht_malloc(N * sizeof(wht_value));
+  wht_value *y = (wht_value *) i_malloc(N * sizeof(wht_value));
   long i, j;
 
   /* matrix multiplication, result is in y */
@@ -58,7 +58,7 @@ apply_direct(Wht *W, long S, wht_value *x)
   for (i = 0; i < N; i++) 
     x[i*S] = y[i];
 
-  wht_free(y);
+  i_free(y);
 }
 
 Wht *
