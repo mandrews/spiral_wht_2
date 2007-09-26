@@ -19,6 +19,25 @@ Next, choose from various optimzations listed by:
 
   ../SRC_DIR/configure --help
 
+Some noteworthy options are:
+
+  Usage: ./configure [OPTION]... [VAR=VALUE]...
+
+  Optional Features:
+    --enable-double         compile with double precision floating point
+                            (default is enabled)
+    --enable-float          compile wht with single precision floating point
+                            (default is disabled)
+    --enable-max-unroll=N   maximum unrolled codelet size (default is 6)
+    --enable-interleave=K   interleave 2^K loop iterations in codelet (default
+                            is disabled)
+    --enable-sse            enable SSE optimizations (default is disabled)
+    --enable-sse2           enable SSE2 optimizations (default is disabled)
+
+  Optional Packages:
+    --with-papi=PATH        compile with PAPI support, PATH is location of PAPI
+
+
 Once you have selected appropriate optimizations, configure with an
 installation directory:
 
@@ -50,4 +69,5 @@ where adaptable software for arbitrary signal transforms is developed.
 
 For questions and problems, please contact
   pueschel@ece.cmu.edu
+
 

@@ -189,6 +189,23 @@ In performing experiments it is often useful to generate random trees:
   INSTALL_DIR/bin/wht_randtree -n SIZE
 
 
+Maintainers
+------------
+
+To add new codelets to the system see:
+  
+  wht/registry.h
+
+If these codelets generate unrolled code they should be added to the following
+table:
+
+  wht/codelets/codelets_registry.h
+
+This can be done by utilizing this script:
+
+  wht/codelets/make_codelets.pl
+
+
 Publications
 -------------
 About the WHT package:
