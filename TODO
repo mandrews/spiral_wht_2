@@ -1,0 +1,36 @@
+Milestones:
+
+  - External interface
+  - Build suffix for different types
+
+  - Interal and External Doxygen documentation targets
+    - Naming convention cleanup
+    - indent
+
+  - Simple ctest and check targets
+
+  - Weights input
+
+  - C Version of DP
+  - Retooled version of GA
+
+  - Retool old versions of whtgen
+  - Perl or C version of whtgen
+    - Should accept sse and sse2 flags (shuf is platform specific)
+
+  - C Version of best_trees store
+    - Configure / CPUID info in header
+
+Bugs:
+
+  - Some minor memory leak issues with wht_very and wht_randtree
+
+  - make_codelet.pl fails b/c +x not set in dist
+
+  - papi should be linked against libm
+
+  - libtool, bison, flex, ruby dependencies not checked
+    - check in maintainer mode only ?
+
+
+
