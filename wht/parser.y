@@ -161,7 +161,7 @@ struct nodes *
 nodes_append(struct nodes *p, struct Wht *x)
 {
   if (p == NULL) {
-    p = wht_malloc(sizeof(*p));
+    p = i_malloc(sizeof(*p));
     p->size = 0;
   }
 
@@ -194,7 +194,7 @@ empty_params()
 {
   struct params *p;
 
-  p = wht_malloc(sizeof(*p));
+  p = i_malloc(sizeof(*p));
   p->size = 0;
 
   return p;
