@@ -19,13 +19,13 @@ small_to_string(Wht *W)
 }
 
 Wht *
-wht_init_small(char *name, size_t n, int params[], size_t np)
+small_init(char *name, size_t n, int params[], size_t np)
 {
   Wht *W;
   if (n > WHT_MAX_UNROLL)
     wht_error("not configured for unrolled codelets of size %zd", n);
 
-  W            = wht_init_codelet(n, name);
+  W            = codelet_init(n, name);
   W->apply     = wht_get_codelet(n, name, params, np);
   W->to_string = small_to_string;
 

@@ -22,7 +22,7 @@ wht_init_right_vector(char *name, size_t n, int params[], size_t np)
 
   snprintf(buf,bufsize,"apply_small%zd_v%zd_a",n,v);
 
-  W = wht_init_codelet(n, name);
+  W = codelet_init(n, name);
 
   if (v >= W->N)
     wht_error("vector size %zd must < size 2^(%zd)",v,n);
@@ -67,7 +67,7 @@ wht_init_interleave_vector(char *name, size_t n, int params[], size_t np)
 
   snprintf(buf,bufsize,"apply_small%zd_v%zd_il%zd",n,v,k);
 
-  W            = wht_init_codelet(n, name);
+  W            = codelet_init(n, name);
   W->apply     = wht_get_codelet(n, name, params, np);
   W->guard     = wht_guard_interleave_vector;
 

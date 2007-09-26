@@ -47,29 +47,7 @@ wht_random(size_t n)
 }
 
 
-/* Auxiliary Functions 
-   ===================
-*/
-
-/* wht_is2power( <n> )
-   ---------------
-     checks whether the integer <n> is a 2-power >= 1.
-*/
-int 
-wht_is2power(long n) {
-  if (n < 1)
-    return 0;
-
-  while (n % 2 == 0)
-    n /= 2;
-
-  if (n == 1)
-    return 1;
-  else
-    return 0;
-}
-
-#define wht_max(a,b) (a > b ? a : b)
+#define pkg_max(a,b) (a > b ? a : b)
 
 wht_value
 wht_max_norm(const wht_value *x, const wht_value *y, size_t N)
@@ -81,17 +59,17 @@ wht_max_norm(const wht_value *x, const wht_value *y, size_t N)
   norm = WHT_STABILITY_THRESHOLD*1e-1;
 #if   WHT_FLOAT==1
   for (i = 0; i < N; i++) 
-    norm = wht_max(fabsf(x[i] - y[i]),norm);
+    norm = pkg_max(fabsf(x[i] - y[i]),norm);
 #endif/*WHT_FLOAT*/
 
 #if   WHT_DOUBLE==1
   for (i = 0; i < N; i++) 
-    norm = wht_max(fabs(x[i] - y[i]),norm);
+    norm = pkg_max(fabs(x[i] - y[i]),norm);
 #endif/*WHT_DOUBLE*/
 
   return norm;
 
 }
 
-#undef wht_max
+#undef pkg_max
 

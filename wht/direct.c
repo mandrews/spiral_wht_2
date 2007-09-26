@@ -66,7 +66,7 @@ wht_direct(int n)
 {
   Wht *W;
 
-  W             = wht_init_codelet(n, "direct");
+  W             = codelet_init(n, "direct");
   W->apply      = apply_direct;
 
   return W;

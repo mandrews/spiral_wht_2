@@ -17,22 +17,22 @@ wht_parse(char *in)
 }
 
 void
-wht_guard(Wht *W, size_t right)
+codelet_guard(Wht *W, size_t right)
 {
   /* Empty */
 }
 
 Wht *
-wht_init_codelet(int n, char *name)
+codelet_init(int n, char *name)
 {
   Wht *W;
 
   W            = (Wht *) wht_malloc(sizeof(Wht));
-  W->N         = (1 << n);
+  W->N         = (1 << n); 
   W->n         = n;
-  W->free      = wht_free_codelet;
+  W->free      = codelet_free;
   W->apply     = NULL;
-  W->guard     = wht_guard;
+  W->guard     = codelet_guard;
   W->name      = name;
 
   W->attr[interleave_by] = 1;
@@ -41,36 +41,10 @@ wht_init_codelet(int n, char *name)
 }
 
 void 
-wht_free_codelet(Wht *W) 
+codelet_free(Wht *W) 
 {
   wht_free(W);
 }
-
-#if 0
-Wht **
-wht_leaf_nodes(size_t size)
-{
-  wht_family *p;
-  Wht **W;
-  Wht **Ws;
-  Wht **nodes;
-
-  size_t i;
-
-  nodes = wht_malloc(sizeof(*nodes) * WHT_MAX_FAMILY);
-
-  for (p = wht_family_generators, i = 0; *p != NULL; ++p) {
-    Ws = (*p)(size);
-
-    for (W = Ws; *W != NULL; ++W, ++i) 
-      nodes[i] = *W;
-  }
-
-  nodes[i] = NULL;
-
-  return nodes;
-}
-#endif
 
 void
 wht_info(void)
@@ -84,25 +58,23 @@ wht_info(void)
 }
 
 
-split 
+split_init_fp
 lookup_split(const char *name, size_t params)
 {
-  int i;
-  split_entry *p;
+  split_init_entry *p;
 
-  for (p = (split_entry *) splits_registry; p != NULL && (split) p->call != NULL; ++p)
+  for (p = (split_init_entry *) splits_registry; p != NULL && (split_init_fp) p->call != NULL; ++p)
     if ((strncmp(name, p->name, MAX_CODELET_NAME_SIZE) == 0) && (params == p->params))
       return p->call;
   return NULL;
 }
 
-small 
+small_init_fp
 lookup_small(const char *name, size_t params)
 {
-  int i;
-  small_entry *p;
+  small_init_entry *p;
 
-  for (p = (small_entry *) smalls_registry; p != NULL && (small) p->call != NULL; ++p)
+  for (p = (small_init_entry *) smalls_registry; p != NULL && (small_init_fp) p->call != NULL; ++p)
     if ((strncmp(name, p->name, MAX_CODELET_NAME_SIZE) == 0) && (params == p->params))
       return p->call;
   return NULL;

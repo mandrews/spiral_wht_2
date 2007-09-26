@@ -62,8 +62,8 @@ node_to_wht(node *n)
 {
   size_t i;
 
-  small f;
-  split g;
+  small_init_fp f;
+  split_init_fp g;
 
   Wht *Ws[MAX_SPLIT_NODES];
 

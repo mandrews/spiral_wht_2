@@ -42,7 +42,7 @@ usage()
 }
 
 int
-main (int argc, char **argv)
+main(int argc, char **argv)
 {
   char *wht_plan;
   int c;
@@ -88,8 +88,8 @@ main (int argc, char **argv)
   for (i = 0;i<N;i++)
     y[i] = x[i];
 
-  wht_apply(W,1,x);
-  wht_apply(D,1,y);
+  wht_apply(W,x);
+  wht_apply(D,y);
 
   /* printf("%s\n", W->to_string(W)); */
 

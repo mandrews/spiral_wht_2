@@ -21,7 +21,7 @@ void _wht_free()
 
 void _wht_call()
 {
-  wht_apply(W,1,x);
+  wht_apply(W,x);
 }
 
 
@@ -33,7 +33,7 @@ usage()
 }
 
 int
-main (int argc, char **argv)
+main(int argc, char **argv)
 {
   char *wht_plan;
   int c;

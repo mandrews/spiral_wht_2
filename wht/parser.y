@@ -134,7 +134,7 @@ yyerror(const char *s)
 struct wht* 
 parse_split(char *ident, struct nodes *nodes, struct params *params)
 {
-  split call;
+  split_init_fp call;
  
   call  = lookup_split(ident, params->size);
 
@@ -147,7 +147,7 @@ parse_split(char *ident, struct nodes *nodes, struct params *params)
 struct wht* 
 parse_small(char *ident, size_t size, struct params *params)
 {
-  small call;
+  small_init_fp call;
  
   call  = lookup_small(ident, params->size);
 

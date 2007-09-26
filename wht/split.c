@@ -35,12 +35,12 @@
 */
 
 static void 
-wht_apply_split(Wht *W, long S, wht_value *x)
+split_apply(Wht *W, long S, wht_value *x)
 {
   int nn;
   long N, R, S1, Ni, i, j, k;
 
-  nn = W->split->nn;
+  nn = W->children->nn;
 
   N  = W->N;
   R  = N;
@@ -49,28 +49,28 @@ wht_apply_split(Wht *W, long S, wht_value *x)
 
   /* step through the smaller whts */
   for (i = 0; i < nn; i++) {
-    Ni = W->split->ns[i];
+    Ni = W->children->ns[i];
     R /= Ni;
 
-    size_t kp = W->split->Ws[i]->attr[interleave_by];
+    size_t kp = W->children->Ws[i]->attr[interleave_by];
 
     for (j = 0; j < R; j++)
       for (k = 0; k < S1; k+=kp)
-         wht_apply(W->split->Ws[i], S1*S, x+k*S+j*Ni*S1*S);
+         (W->children->Ws[i]->apply)(W->children->Ws[i], S1*S, x+k*S+j*Ni*S1*S);
 
     S1 *= Ni;
   }
 }
 
 static void 
-wht_free_split(Wht *W) 
+split_free(Wht *W) 
 {
   int i;
 
-  for (i = 0; i < W->split->nn; i++) 
-    W->split->Ws[i]->free(W->split->Ws[i]);
+  for (i = 0; i < W->children->nn; i++) 
+    W->children->Ws[i]->free(W->children->Ws[i]);
 
-  wht_free(W->split);
+  wht_free(W->children);
   wht_free(W);
 }
 
@@ -87,14 +87,14 @@ split_to_string(Wht *W)
   snprintf(buf, bufsize - 2, W->name);
   strncat(buf,"[",1);
 
-  nn = W->split->nn;
+  nn = W->children->nn;
 
   resize = bufsize;
 
   /* Iterate over children whts, stored anti lexigraphically  */
   for (i = 0; i < nn; i++) {
     j       = nn - i - 1;
-    tmp     = W->split->Ws[j]->to_string(W->split->Ws[j]);
+    tmp     = W->children->Ws[j]->to_string(W->children->Ws[j]);
     len     = strlen(tmp) + 1; /* Extra 1 is for comma */
 
     resize += len;
@@ -112,7 +112,7 @@ split_to_string(Wht *W)
 }
 
 Wht *
-wht_init_split(char *name, Wht *Ws[], size_t nn, int params[], size_t pn) 
+split_init(char *name, Wht *Ws[], size_t nn, int params[], size_t pn) 
 {
   Wht *W;
   size_t i;
@@ -126,20 +126,20 @@ wht_init_split(char *name, Wht *Ws[], size_t nn, int params[], size_t pn)
     n += Ws[i]->n;
   }
 
-  W            = wht_init_codelet(n, name);
-  W->apply     = wht_apply_split;
-  W->free      = wht_free_split;
+  W            = codelet_init(n, name);
+  W->apply     = split_apply;
+  W->free      = split_free;
   W->to_string = split_to_string;
 
-  W->split = wht_malloc(sizeof(split_children));
+  W->children = wht_malloc(sizeof(split_children));
 
-  W->split->nn = nn;
+  W->children->nn = nn;
 
   /* store smaller whts */
   for (i = 0; i < nn; i++) {
     Ws[i]->guard(Ws[i], right);
-    W->split->Ws[i] = Ws[i];
-    W->split->ns[i] = Ws[i]->N;
+    W->children->Ws[i] = Ws[i];
+    W->children->ns[i] = Ws[i]->N;
     right *= Ws[i]->N;
   }
 
