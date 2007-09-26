@@ -12,7 +12,7 @@
  */
 struct nodes
 {
-  struct wht *values[MAX_SPLIT_NODES];
+  struct Wht *values[MAX_SPLIT_NODES];
   size_t size;
 };
 
@@ -22,14 +22,14 @@ struct params
   size_t size;
 };
 
-struct wht* 
+struct Wht* 
 parse_split(char *ident, struct nodes *nodes, struct params *params);
 
-struct wht* 
+struct Wht* 
 parse_small(char *ident, size_t size, struct params *params);
 
 struct nodes *
-nodes_append(struct nodes *p, struct wht *x);
+nodes_append(struct nodes *p, struct Wht *x);
 
 struct params *
 params_append(struct params *p, int i);
@@ -38,14 +38,14 @@ struct params *
 empty_params();
 
 /* This symbol points to the root of the parsed wht tree */
-struct wht *wht_root;
+struct Wht *wht_root;
 
 %}
 
 %union {
   int  value; 
   char *ident;
-  struct wht *W;
+  struct Wht *W;
   struct nodes *Ws;
   struct params *Ps;
 }
@@ -131,7 +131,7 @@ yyerror(const char *s)
   wht_error(s);
 }
 
-struct wht* 
+struct Wht* 
 parse_split(char *ident, struct nodes *nodes, struct params *params)
 {
   split_init_fp call;
@@ -144,7 +144,7 @@ parse_split(char *ident, struct nodes *nodes, struct params *params)
   return (call)(ident, nodes->values, nodes->size, params->values, params->size);
 }
 
-struct wht* 
+struct Wht* 
 parse_small(char *ident, size_t size, struct params *params)
 {
   small_init_fp call;
@@ -158,7 +158,7 @@ parse_small(char *ident, size_t size, struct params *params)
 }
 
 struct nodes *
-nodes_append(struct nodes *p, struct wht *x)
+nodes_append(struct nodes *p, struct Wht *x)
 {
   if (p == NULL) {
     p = wht_malloc(sizeof(*p));

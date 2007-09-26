@@ -17,36 +17,6 @@ wht_parse(char *in)
 }
 
 void
-codelet_guard(Wht *W, size_t right)
-{
-  /* Empty */
-}
-
-Wht *
-codelet_init(int n, char *name)
-{
-  Wht *W;
-
-  W            = (Wht *) i_malloc(sizeof(Wht));
-  W->N         = (1 << n); 
-  W->n         = n;
-  W->free      = codelet_free;
-  W->apply     = NULL;
-  W->guard     = codelet_guard;
-  W->name      = name;
-
-  W->attr[interleave_by] = 1;
-
-  return W;  
-}
-
-void 
-codelet_free(Wht *W) 
-{
-  i_free(W);
-}
-
-void
 wht_info(void)
 {
   printf("CC: %s\n", WHT_CC);
@@ -56,7 +26,6 @@ wht_info(void)
   printf("max_interleave: %d\n", WHT_MAX_INTERLEAVE);
   printf("vector_size: %d\n", WHT_VECTOR_SIZE);
 }
-
 
 split_init_fp
 lookup_split(const char *name, size_t params)

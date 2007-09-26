@@ -114,6 +114,11 @@ struct Wht {
 
   char *name; /**< Identifier for codelet, i.e. 'small' or  'split' */
 
+  int *params;
+    /**< Parameters used by codelet */
+
+  size_t np; /**< Number of parameters used by codelet */
+
   int attr[MAX_ATTRIBUTES]; /**< Attributes associated with WHT */
 };
 
@@ -135,10 +140,12 @@ struct split_children {
  *
  * Wht * (*split_init_fp)(char *name, Wht *Ws[], size_t nn, int params[], size_t * np);
  *
- * \param name    unique identifier for codelet
- * \param Ws      array of children codelets
- * \param params  parameters for codelet, typically stored as attributes
- * \param np      number of elements in parameter array
+ * \param name    Unique identifier for codelet
+ * \param Ws      Array of children codelets
+ * \param nn      Number of children
+ * \param params  Parameters for codelet, typically stored as attributes
+ * \param np      Number of elements in parameter array
+ * \return        Pointer to allocated codelet
  */
 typedef Wht * (*split_init_fp)(char *name, Wht *Ws[], size_t nn, int params[], size_t np);
 
@@ -150,10 +157,11 @@ typedef Wht * (*split_init_fp)(char *name, Wht *Ws[], size_t nn, int params[], s
  *
  * Wht * (*small_init_fp)(char *name, size_t n, int params[], size_t np);
  *
- * \param name    unique identifier for codelet
- * \param n       size of codelet
- * \param params  parameters for codelet, typically stored as attributes
- * \param np      number of elements in parameter array
+ * \param name    Unique identifier for codelet
+ * \param n       Size of codelet
+ * \param params  Parameters for codelet, typically stored as attributes
+ * \param np      Number of elements in parameter array
+ * \return        Pointer to allocated codelet
  */
 typedef Wht * (*small_init_fp)(char *name, size_t n, int params[], size_t np);
 
@@ -175,8 +183,8 @@ typedef struct {
   split_init_fp call;
 } split_init_entry;
 
-/* This halts the iteration of the registry */
 #define SPLIT_INIT_ENTRY_END { "", 0, NULL } 
+  /**< Place this at the end of the split_init_registry to halt iteration */
 
 /**
  * \struct small_init_entry
@@ -195,8 +203,8 @@ typedef struct {
   small_init_fp call;
 } small_init_entry;
 
-/* This halts the iteration of the registry */
 #define SMALL_INIT_ENTRY_END { "", 0, NULL } 
+  /**< Place this at the end of the small_init_registry to halt iteration */
 
 /**
  * \struct codelet_apply_entry
@@ -255,12 +263,11 @@ void * i_malloc(size_t size);
  */
 void i_free(void *p);
 
-
 wht_value wht_max_norm(const wht_value *x, const wht_value *y, size_t N);
 
 wht_value * wht_random(size_t n);
 
-Wht * wht_direct(int n);
+Wht * wht_direct(size_t n);
 
 #define wht_error(format, args...)  \
   {\
@@ -279,6 +286,82 @@ void codelet_free(Wht *W);
 split_init_fp lookup_split(const char *name, size_t params);
 
 small_init_fp lookup_small(const char *name, size_t params);
+
+/**
+ * \fn Wht * null_init(char *name, size_t n, int params[], size_t np);
+ *
+ * \brief Initializes a null codelet
+ *
+ * \param name    Unique identifier for codelet
+ * \param n       Size of codelet
+ * \param params  Parameters for codelet, typically stored as attributes
+ * \param np      Number of elements in parameter array
+ * \return        Pointer to allocated codelet
+ *
+ * Null codelets allocate memory and methods in a safe way but do transform the
+ * input vector.  They are used for convience.
+ */
+Wht * null_init(char *name, size_t n, int params[], size_t np);
+
+
+/**
+ * \fn Wht * split_init(char *name, Wht *Ws[], size_t nn, int params[], size_t np);
+ *
+ * \brief Initializes a split codelet
+ *
+ * \param name    Unique identifier for codelet
+ * \param Ws      Array of children codelets
+ * \param nn      Number of children
+ * \param params  Parameters for codelet, typically stored as attributes
+ * \param np      Number of elements in parameter array
+ * \return        Pointer to allocated codelet
+ *
+ * All new split codelets registered with the package should 'derive' from this
+ * codelet, i.e. first initialize the codelet with init_split and then
+ * proceed to customize the codelet.
+ */
+Wht * split_init(char *name, Wht *Ws[], size_t nn, int params[], size_t np);
+
+/**
+ * \fn Wht * small_init(char *name, size_t n, int params[], size_t np);
+ *
+ * \brief Initializes a small codelet
+ *
+ * \param name    Unique identifier for codelet
+ * \param n       Size of codelet
+ * \param params  Parameters for codelet, typically stored as attributes
+ * \param np      Number of elements in parameter array
+ * \return        Pointer to allocated codelet
+ *
+ * All new small codelets registered with the package should 'derive' from this
+ * codelet, i.e. first initialize the codelet with init_small and then
+ * proceed to customize the codelet.
+ */
+Wht * small_init(char *name, size_t n, int params[], size_t np);
+
+
+/**
+ * \fn void split_apply(Wht *W, long S, wht_value *x);
+ *
+ * \brief Recursively apply transform to input vector
+ *
+ * \param   W   Transform
+ * \param   S   Stride to apply transform at
+ * \param   x   Input vector
+ *
+ *  A \f$ {\bf WHT}_{2^n} \f$ can be split into \f$ k \f$ \f$ {\bf WHT} \f$ 's of smaller size
+ *  (according to \f$ n = n_1 + n_2 + \cdots + n_t \f$):
+ *
+  \f$ 
+   \prod_{i=1}^t ({\bf I}_{2^{n_1 + \cdots + n_{i-1}}} 
+      \otimes {\bf WHT}_{2^{n_i}}
+      \otimes {\bf I}_{2^{n_{i+1} + \cdots + n_t}}) 
+  \f$
+ *
+ * The \f$ {\bf WHT}_{2^n} \f$ is performed by stepping through this product
+ * from right to left.
+ */
+void split_apply(Wht *W, long S, wht_value *x);
 
 /**
  * \todo Move this macro to an external interface.

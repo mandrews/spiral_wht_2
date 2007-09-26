@@ -62,11 +62,12 @@ apply_direct(Wht *W, long S, wht_value *x)
 }
 
 Wht *
-wht_direct(int n)
+wht_direct(size_t n)
 {
   Wht *W;
+  int params[] = {};
 
-  W             = codelet_init(n, "direct");
+  W             = null_init("direct", n, params, 0);
   W->apply      = apply_direct;
 
   return W;

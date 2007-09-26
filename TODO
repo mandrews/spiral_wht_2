@@ -33,4 +33,11 @@ Bugs:
     - check in maintainer mode only ?
 
 
+Issues:
+
+  - Can we store left and right I sizes on W
+    - Will remove need to call guard
+
+  - Can we store stride on W
+
 

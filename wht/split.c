@@ -17,24 +17,28 @@
  *
  */
 
+/**
+ * \file split.c
+ *
+ * \brief Implementation of methods for applying WHT recursive split
+ */
+
 #include "wht.h"
 
-/* Split WHT
-   ---------
-   A WHT_N can be split into k WHT's of smaller size
-   (according to N = N_1 * N_2 * ... * N_k):
-
-                              WHT_N_1 tensor 1_(N/N_1) *
-     1_N_1             tensor WHT_N_2 tensor 1_(N/N_1N_2) *
-       ...
-       ...
-     1_(N_1...N_(k-1)) tensor WHT_N_k 
-
-   The WHT_N is performed by stepping through this product
-   from right to left.
+/* 
+ *  A WHT_N can be split into k WHT's of smaller size
+ *  (according to N = N_1 * N_2 * ... * N_k):
+ *
+ *                              WHT_N_1 tensor 1_(N/N_1) *
+ *     1_N_1             tensor WHT_N_2 tensor 1_(N/N_1N_2) *
+ *       ...
+ *       ...
+ *     1_(N_1...N_(k-1)) tensor WHT_N_k 
+ *
+ *  The WHT_N is performed by stepping through this product
+ *  from right to left.
 */
-
-static void 
+void 
 split_apply(Wht *W, long S, wht_value *x)
 {
   int nn;
@@ -62,7 +66,7 @@ split_apply(Wht *W, long S, wht_value *x)
   }
 }
 
-static void 
+void 
 split_free(Wht *W) 
 {
   int i;
@@ -74,6 +78,7 @@ split_free(Wht *W)
   i_free(W);
 }
 
+/** \todo Output parameter list */
 char *
 split_to_string(Wht *W)
 {
@@ -111,8 +116,14 @@ split_to_string(Wht *W)
   return buf;
 }
 
+void
+split_guard(Wht *W, size_t right)
+{
+  /* Empty */
+}
+
 Wht *
-split_init(char *name, Wht *Ws[], size_t nn, int params[], size_t pn) 
+split_init(char *name, Wht *Ws[], size_t nn, int params[], size_t np) 
 {
   Wht *W;
   size_t i;
@@ -120,22 +131,28 @@ split_init(char *name, Wht *Ws[], size_t nn, int params[], size_t pn)
   int n  = 0;
   int right = 1;
 
-  /* compute size of wht */
+  /* Compute size of WHT from smaller WHTs*/
   for (i = 0; i < nn; i++) {
     N *= Ws[i]->N;
     n += Ws[i]->n;
   }
 
-  W            = codelet_init(n, name);
+  W            = (Wht *) i_malloc(sizeof(Wht));
+  W->N         = (1 << n); 
+  W->n         = n;
+  W->name      = name;
+  W->params    = params;
+  W->np        = np;
   W->apply     = split_apply;
   W->free      = split_free;
+  W->guard     = split_guard;
   W->to_string = split_to_string;
 
   W->children = i_malloc(sizeof(split_children));
 
   W->children->nn = nn;
 
-  /* store smaller whts */
+  /* Store smaller WHTs */
   for (i = 0; i < nn; i++) {
     Ws[i]->guard(Ws[i], right);
     W->children->Ws[i] = Ws[i];
