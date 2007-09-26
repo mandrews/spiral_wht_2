@@ -87,17 +87,17 @@ AC_DEFINE_UNQUOTED(WHT_MAX_UNROLL,$max_unroll,
 # 
 #  M A X   I N T E R L E A V E    F A C T O R 
 # 
-AC_ARG_ENABLE([max_interleave], 
-  [AC_HELP_STRING([--enable-max-interleave=K], 
+AC_ARG_ENABLE([interleave], 
+  [AC_HELP_STRING([--enable-interleave=K], 
     [interleave 2^K loop iterations in codelet (default is disabled)])],
-  [max_interleave=$enableval], 
-  [max_interleave=$MAX_INTERLEAVE])
+  [interleave=$enableval], 
+  [interleave=$MAX_INTERLEAVE])
 
-if test $max_interleave -gt $MAX_INTERLEAVE_PKG; then
-  AC_MSG_ERROR([--enable-max-interleave larger than package was built for])
+if test $interleave -gt $MAX_INTERLEAVE_PKG; then
+  AC_MSG_ERROR([--enable-interleave larger than package was built for])
 fi
 
-AC_DEFINE_UNQUOTED(WHT_MAX_INTERLEAVE,$max_interleave,
+AC_DEFINE_UNQUOTED(WHT_MAX_INTERLEAVE,$interleave,
   [interleave 2^K loop iterations in codelet])
 
 
