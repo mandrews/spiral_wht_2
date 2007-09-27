@@ -28,6 +28,8 @@ Bugs:
   - libtool, bison, flex, ruby dependencies not checked
     - check in maintainer mode only ?
 
+  - Infinite loop in dynamic programming when max-unrolled-size < 3
+
 
 Issues:
 

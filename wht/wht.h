@@ -119,6 +119,8 @@ struct Wht {
 
   size_t np; /**< Number of parameters used by codelet */
 
+  size_t nk;
+
   int attr[MAX_ATTRIBUTES]; /**< Attributes associated with WHT */
 };
 
@@ -368,7 +370,7 @@ void split_apply(Wht *W, long S, wht_value *x);
 #define wht_free(W) ((W->free)(W))
 
 #define wht_parse(s) (parse(s))
-#define wht_info() (info)
+#define wht_info() (info())
 #define wht_direct(n) (direct(n))
 #define wht_max_norm(x,y,n) (max_norm(x,y,n))
 #define wht_random_vector(n) (random_vector(n))

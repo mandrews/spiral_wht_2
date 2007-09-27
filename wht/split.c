@@ -43,6 +43,7 @@ split_apply(Wht *W, long S, wht_value *x)
 {
   int nn;
   long N, R, S1, Ni, i, j, k;
+  size_t nk;
 
   nn = W->children->nn;
 
@@ -56,11 +57,11 @@ split_apply(Wht *W, long S, wht_value *x)
     Ni = W->children->ns[i];
     R /= Ni;
 
-    size_t kp = W->children->Ws[i]->attr[interleave_by];
+    nk = W->children->Ws[i]->nk;
 
     for (j = 0; j < R; j++)
-      for (k = 0; k < S1; k+=kp)
-         (W->children->Ws[i]->apply)(W->children->Ws[i], S1*S, x+k*S+j*Ni*S1*S);
+      for (k = 0; k < S1; k += nk)
+        (W->children->Ws[i]->apply)(W->children->Ws[i], S1*S, x+k*S+j*Ni*S1*S);
 
     S1 *= Ni;
   }
@@ -147,6 +148,7 @@ split_init(char *name, Wht *Ws[], size_t nn, int params[], size_t np)
   W->free      = split_free;
   W->guard     = split_guard;
   W->to_string = split_to_string;
+  W->nk        = 1; /* XXX: Right stride parameter */
 
   W->children = i_malloc(sizeof(split_children));
 

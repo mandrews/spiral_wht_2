@@ -75,9 +75,7 @@ null_init(char *name, size_t n, int params[], size_t np)
   W->apply     = null_apply;
   W->guard     = null_guard;
   W->to_string = null_to_string;
-
-  /* TODO Rename this */
-  W->attr[interleave_by] = 1;
+  W->nk        = 1; /* XXX: Right stride parameter */
 
   return W;  
 }

@@ -17,6 +17,7 @@ interleave_init(char *name, size_t n, int params[], size_t np)
 
   W            = small_init(name, n, params, np);
   W->guard     = interleave_guard;
+  W->nk        = k; /* XXX: Right stride parameter */
 
   k = params[0];
 
