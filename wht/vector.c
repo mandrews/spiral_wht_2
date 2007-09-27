@@ -1,7 +1,7 @@
 #include "wht.h"
 
 Wht *
-wht_init_right_vector(char *name, size_t n, int params[], size_t np)
+right_vector_init(char *name, size_t n, int params[], size_t np)
 {
   Wht *W;
   int v;
@@ -36,7 +36,7 @@ interleave_vector_guard(Wht *W, size_t right)
 }
 
 Wht *
-wht_init_interleave_vector(char *name, size_t n, int params[], size_t np)
+interleave_vector_init(char *name, size_t n, int params[], size_t np)
 {
   Wht *W;
   size_t v, k;

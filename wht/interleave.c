@@ -10,7 +10,7 @@ interleave_guard(Wht *W, size_t right)
 }
 
 Wht *
-wht_init_interleave(char *name, size_t n, int params[], size_t np)
+interleave_init(char *name, size_t n, int params[], size_t np)
 {
   Wht *W;
   size_t k;

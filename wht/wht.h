@@ -263,11 +263,15 @@ void * i_malloc(size_t size);
  */
 void i_free(void *p);
 
-wht_value wht_max_norm(const wht_value *x, const wht_value *y, size_t N);
+Wht * parse(char *s);
 
-wht_value * wht_random(size_t n);
+void info(void);
 
-Wht * wht_direct(size_t n);
+Wht * direct(size_t n);
+
+wht_value max_norm(const wht_value *x, const wht_value *y, size_t N);
+
+wht_value * random_vector(size_t n);
 
 #define wht_error(format, args...)  \
   {\
@@ -277,15 +281,9 @@ Wht * wht_direct(size_t n);
     exit(-1); \
   }
 
-Wht * wht_parse(char *s);
-void wht_info(void);
+split_init_fp split_lookup(const char *name, size_t params);
 
-Wht * codelet_init(int n, char *name);
-void codelet_free(Wht *W);
-
-split_init_fp lookup_split(const char *name, size_t params);
-
-small_init_fp lookup_small(const char *name, size_t params);
+small_init_fp small_lookup(const char *name, size_t params);
 
 /**
  * \fn Wht * null_init(char *name, size_t n, int params[], size_t np);
@@ -364,9 +362,16 @@ Wht * small_init(char *name, size_t n, int params[], size_t np);
 void split_apply(Wht *W, long S, wht_value *x);
 
 /**
- * \todo Move this macro to an external interface.
+ * \todo Move these macros to an external interface.
  */
-#define wht_apply(wht, x) ((wht->apply)(wht, 1, x))
+#define wht_apply(W, x) ((W->apply)(W, 1, x))
+#define wht_free(W) ((W->free)(W))
+
+#define wht_parse(s) (parse(s))
+#define wht_info() (info)
+#define wht_direct(n) (direct(n))
+#define wht_max_norm(x,y,n) (max_norm(x,y,n))
+#define wht_random_vector(n) (random_vector(n))
 
 #endif/* WHT_H */
 

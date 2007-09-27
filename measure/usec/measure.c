@@ -65,7 +65,7 @@ main (int argc, char **argv)
   n = W->n;
   N = W->N;
 
-  x = wht_random(N);
+  x = wht_random_vector(N);
 
   t0 = 0;
 
@@ -84,6 +84,10 @@ main (int argc, char **argv)
 
 
   printf("%e\n",(avg_time/repeats));
+
+
+  wht_free(W);
+  free(x);
 
   return 0;
 }

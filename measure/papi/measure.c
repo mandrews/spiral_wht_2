@@ -11,12 +11,18 @@ long N;
 void _wht_init()
 {
   N = W->N;
-  x = wht_random(N);
+  x = wht_random_vector(N);
 }
 
-void _i_free()
+void _wht_free()
 {
-
+  /* NOTE: this should be free'd but we are abusing the previous papi_utils
+   * system into taking warm cache measurements
+   */
+#if 0
+  wht_free(W);
+  free(x);
+#endif
 }
 
 void _wht_call()
@@ -74,7 +80,7 @@ main(int argc, char **argv)
   void (*so_free)(void);
 
   so_init = &_wht_init;
-  so_free = &_i_free;
+  so_free = &_wht_free;
   so_call = &_wht_call;
 
   W = wht_parse(wht_plan);
@@ -98,6 +104,9 @@ main(int argc, char **argv)
   printf("\n");
 
   papi_data_free(&total);
+
+  wht_free(W);
+  free(x);
 
   return 0;
 }

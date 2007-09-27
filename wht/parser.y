@@ -136,7 +136,7 @@ parse_split(char *ident, struct nodes *nodes, struct params *params)
 {
   split_init_fp call;
  
-  call  = lookup_split(ident, params->size);
+  call  = split_lookup(ident, params->size);
 
   if (call == NULL)
     wht_error("%s was not registered in the split table", ident);
@@ -149,7 +149,7 @@ parse_small(char *ident, size_t size, struct params *params)
 {
   small_init_fp call;
  
-  call  = lookup_small(ident, params->size);
+  call  = small_lookup(ident, params->size);
 
   if (call == NULL)
     wht_error("%s was not registered in the small table", ident);

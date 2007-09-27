@@ -27,7 +27,7 @@ i_free(void *p) {
 }
 
 wht_value *
-wht_random(size_t n)
+random_vector(size_t n)
 {
   wht_value *x;
   int i;
@@ -50,7 +50,7 @@ wht_random(size_t n)
 #define pkg_max(a,b) (a > b ? a : b)
 
 wht_value
-wht_max_norm(const wht_value *x, const wht_value *y, size_t N)
+max_norm(const wht_value *x, const wht_value *y, size_t N)
 {
   int i;
   wht_value norm;

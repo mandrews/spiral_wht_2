@@ -82,7 +82,7 @@ main(int argc, char **argv)
 
   D = wht_direct(n);
 
-  x = wht_random(N);
+  x = wht_random_vector(N);
   y = i_malloc(sizeof(wht_value) * N);
 
   for (i = 0;i<N;i++)
@@ -91,7 +91,7 @@ main(int argc, char **argv)
   wht_apply(W,x);
   wht_apply(D,y);
 
-  printf("%s\n", W->to_string(W)); 
+  /* printf("%s\n", W->to_string(W)); */
 
   if (wht_max_norm(x,y,N) < WHT_STABILITY_THRESHOLD)
     printf("correct\n");   
