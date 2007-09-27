@@ -1,6 +1,12 @@
 WHT Package Installation
 ==============================================================================
 
+This package is a modified version of the Spiral WHT 1.8 package:
+
+  http://www.spiral.net/software/wht.html
+
+It is presently a prelease, and some features and data structures will change
+before the next release.
 
 On UNIX systems:
 ------------------------------------------------------------------------------
@@ -10,12 +16,12 @@ Unpack the archive:
   tar -zxf spiral_wht-2.0.tar.gz SRC_DIR  
 
 Optionally create a build directory so that the source directory doesn't get 
-polluted with object files and tempories:
+polluted with object files and temporaries:
 
   mkdir BUILD_DIR; cd BUILD_DIR
 
 Otherwise assume that SRC_DIR and BUILD_DIR are the same.
-Next, choose from various optimzations listed by:
+Next, choose from various optimizations listed by:
 
   ../SRC_DIR/configure --help
 
@@ -68,6 +74,6 @@ This package has been created in the SPIRAL project,
 where adaptable software for arbitrary signal transforms is developed.
 
 For questions and problems, please contact
-  pueschel@ece.cmu.edu
+  mjand@drexel.edu
 
 

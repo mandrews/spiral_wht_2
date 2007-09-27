@@ -1,6 +1,13 @@
 WHT Package Documentation
 ==========================
 
+This package is a modified version of the Spiral WHT 1.8 package:
+
+  http://www.spiral.net/software/wht.html
+
+It is presently a prelease, and some features and data structures will change
+before the next release.
+
 
 Authors
 --------
@@ -33,7 +40,7 @@ by Sebastian Egner:
 
   http://avalon.ira.uka.de/home/egner
 
-The latset version incorporates a more modular design based on the FFTW package
+The latest version incorporates a more modular design based on the FFTW package
 by Matteo Frigo, and Steven G. Johnson:
 
   http://www.fftw.org
@@ -75,7 +82,7 @@ WHT Trees
 There are various ways of recursively computing the WHT_(2^n), arising from
 different breakdown strategies (we call it rules). Recursive use of these rules
 leads to a large number of different breakdown-trees or wht-trees representing
-different algorithms to compute a WHT(2^n). These algorithms differ in their
+different algorithms to compute a WHT_(2^n). These algorithms differ in their
 data access pattern during computation, but have all exactly the same arithmetic
 cost of:
 
@@ -85,9 +92,9 @@ cost of:
 0. rule small: (enabled by default)
 
   For small sizes, 2^n <= 2^8, we provide unrolled code modules that
-  recursively compute a WHT(2^n) using:
+  recursively compute a WHT_(2^n) using:
 
-    WHT(2^n) = (WHT(2) tensor 1_(2^(n-1))) * (1_2 tensor WHT(2^(n-1)))
+    WHT_(2^n) = (WHT_(2) tensor 1_(2^(n-1))) * (1_2 tensor WHT_(2^(n-1)))
 
     Where 1_k is the Identity matrix of size k
 
@@ -95,7 +102,7 @@ cost of:
 1. rule split: (enabled by default)
 
   Let n = n1 + .. + nk be a partition of n, then
-    WHT(2^n) =
+    WHT_(2^n) =
                                   WHT_(2^n1) tensor 1_(2^(n-n1)) *
        1_(2^n1)            tensor WHT_(2^n2) tensor 1_(2^(n-n1-n2)) *
          ...
@@ -107,13 +114,13 @@ cost of:
   all of them lead to the same arithmetic cost -- they are distinguished 
   only by their data access pattern. Each factor:
 
-    1_a tensor WHT(2^ni) tensor 1_b
+    1_a tensor WHT_(2^ni) tensor 1_b
 
   gives rise to a double loop of the form:
 
     for i = 0..a-1 do
       for j = 0..b-1 do
-        apply WHT(2^ni) at stride b
+        apply WHT_(2^ni) at stride b
       od
     od
 
@@ -121,26 +128,48 @@ cost of:
 
   Loop interleaving provides a way of computing base cases of the form:
 
-    WHT(2^n) tensor 1_k  
+    WHT_(2^n) tensor 1_k  
 
-  Instead of looping over 1_k, the computations of WHT(2^n) are interleaved,
+  Instead of looping over 1_k, the computations of WHT_(2^n) are interleaved,
   i.e., computed concurrently. 
   This has the potential to decrease data cache misses.
 
-3. rule direct:
+3. rule smallv (vectorization): (enabled by --enable-sse and --enable-sse2, see INSTALL)
+
+  There are two ways the package utilizes a vectorization factor of v.  
+
+  In right most codelets as:
+                  _
+                 /
+                 | when n > 2v
+                 |  WHT_(2) tensor 1_(2^(n-1)) X 1_(2) tensor W_(2^(n-1)
+    WHT_(2^n) = <  
+                 | otherwise
+                 |   WHT_(2v)
+                 \_
+
+  In interleaved codelets of size k as:
+
+    1_k tensor (WHT_(2^n) tensor 1_v)
+
+
+4. rule direct:
 
   This rule is used only for verification purposes and computes the transform
   using matrix-vector multiplication.
 
 
 The different breakdown rules yield a simple grammar (given in BNF); 
-wht(n) is non-terminal denoting a WHT(2^n).
+wht(n) is non-terminal denoting a WHT_(2^n).
 
 wht(n) ::=  
-    small[n]                     # a code module for wht(n) of unrolled code
-  | smallil(K)[n]                # a code module for wht(n) tensor 1_K
+    small[n]                     # a code module for unrolled WHT_(2^n)
+  | smallil(k)[n]                # a code module for loop interleaving by k
+  | smallv(v)[n]                 # a code module for right most vectorization by v
+  | smallv(v,k)[n]               # a code module for loop interleaving by k 
+                                 # and vectorization by v
   | split[wht(n1), .., wht(nk)]  # a recursive split according to the formula above
-  | direct[n]                    # computing by defintion (for verification only)
+  | direct[n]                    # computing by definition (for verification only)
 
 An algorithm is given by a word (describing a breakdown tree) in the generated language, e.g.,
 a valid breakdown tree for a WHT of size 2^7 is:
@@ -197,7 +226,7 @@ To verify the correctness of a fast algorithm described by a breakdown tree:
   INSTALL_DIR/bin/wht_verify -w TREE
 
 
-Exampls of using WHT tools together
+Examples of using WHT tools together
 ------------------------
 
   INSTALL_DIR/bin/wht_randtree -n SIZE | xargs INSTALL_DIR/bin/wht_verify -w
@@ -219,6 +248,20 @@ Or
 Maintainers
 ------------
 
+To build or rebuild the autotool system from the repository type:
+
+  libtoolize
+  autoconf
+  automake --add-missing
+
+To rebuild the html and latex source code documentation type:
+
+  doxygen
+
+Various developer related ``features'' are turned on by typing:
+
+  ./configure --enable-maintainer-mode ...
+
 To add new codelets to the system see:
   
   wht/registry.h
@@ -232,6 +275,16 @@ This can be done by utilizing this script:
 
   wht/codelets/make_codelets.pl
 
+All unrolled codelets can be rebuilt from parameters set in configure.ac by
+typing:
+
+  make maintainer-clean
+  ./configure --enable-maintainer-mode ...
+  make
+
+To submit a patch please use:
+
+  diff -Naur spiral_wht-2.0-pre-1 my_source_tree | gzip > my_patch.txt.gz
 
 Publications
 -------------
