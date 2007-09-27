@@ -168,12 +168,12 @@ Performing Experiments
 
 By default, runtime measurements have microsecond fidelity:
 
-  BUILD_DIR/measure/usec/wht_measure -w PLAN
+  BUILD_DIR/measure/usec/wht_measure -w TREE
 
 An optional measurement tool using PAPI can be built using the 
 --with-papi=PAPI_INSTALL_DIR configure flags:
 
-  BUILD_DIR/measure/papi/wht_measure -w PLAN
+  BUILD_DIR/measure/papi/wht_measure -w TREE
 
 The measurement tool with the highest fidelity (if enabled then PAPI) is 
 selected to be installed in:
@@ -187,6 +187,33 @@ Generating Random WHT Trees
 In performing experiments it is often useful to generate random trees:
 
   INSTALL_DIR/bin/wht_randtree -n SIZE
+
+
+Verifying Correctness of WHT Trees
+-----------------------------------
+
+To verify the correctness of a fast algorithm described by a breakdown tree:
+
+  INSTALL_DIR/bin/wht_verify -w TREE
+
+
+Exampls of using WHT tools together
+------------------------
+
+  INSTALL_DIR/bin/wht_randtree -n SIZE | xargs INSTALL_DIR/bin/wht_verify -w
+
+Or
+
+  INSTALL_DIR/bin/wht_randtree -n SIZE | xargs INSTALL_DIR/bin/wht_measure -w
+
+Or
+
+  for ((size=2;size<10;size++)); do 
+    plan=`INSTALL_DIR/bin/wht_randtree -n $size`; 
+    correct=`INSTALL_DIR/bin/wht_verify -w $plan`; 
+    time=`INSTALL_DIR/bin/wht_measure -w $plan`; 
+    echo "$size, $plan, $time # $correct"; 
+  done;
 
 
 Maintainers
