@@ -1,5 +1,5 @@
 #  Process this file with autoconf to produce a configure script.
-AC_INIT(spiral_wht, 2.0, mjand@drexel.edu)
+AC_INIT(spiral_wht, 2.0-pre-1, mjand@drexel.edu)
 
 AM_INIT_AUTOMAKE(1.9)
 AM_CONFIG_HEADER([config.h])
