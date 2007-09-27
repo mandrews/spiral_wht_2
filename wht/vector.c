@@ -20,7 +20,7 @@ right_vector_init(char *name, size_t n, int params[], size_t np)
   W = small_init(name, n, params, np);
 
   if (v >= W->N)
-    wht_error("vector size %d must < size 2^(%d)",v,n);
+    wht_error("vector size %d must < size 2^(%zd)",v,n);
 
   return W;  
 }

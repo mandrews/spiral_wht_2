@@ -1,20 +1,18 @@
 Milestones:
 
-  - External interface
-  - Build suffix for different types
+  - External interface 
+    - Suffix for different types
 
-  - Interal and External Doxygen documentation targets
-    - Naming convention cleanup
-    - indent
+  - Simple testing (make check) targets
 
-  - Simple ctest and check targets
-
-  - Weights input
+  - Parser for weights input
 
   - C Version of DP
+
   - Retooled version of GA
 
   - Retool old versions of whtgen
+
   - Perl or C version of whtgen
     - Should accept sse and sse2 flags (shuf is platform specific)
 
@@ -25,17 +23,22 @@ Bugs:
 
   - Some minor memory leak issues with wht_very and wht_randtree
 
-  - libtool, bison, flex, ruby dependencies not checked
-    - check in maintainer mode only ?
+  - Dependancies not checked (libtool, bison, flex, ruby)
+    - Should be checked in maintainer mode only 
 
-  - Infinite loop in dynamic programming when max-unrolled-size < 3
+  - Codelet guards cannot handle validation of rightmost vectorized codelet
 
+  - share/wht_best_trees.txt should not be clobbered by new installation
+
+  - whtgen/whtgen should catch SIGINT and write best trees so to disk
 
 Issues:
 
-  - Can we store left and right I sizes on W
+  - Store left and right I sizes on W
     - Will remove need to call guard
 
-  - Can we store stride on W
+  - Optional ''top-down'' validation of plan
+
+  - splitil and internal stride issue
 
 
