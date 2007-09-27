@@ -68,13 +68,13 @@ node_to_wht(node *n)
   Wht *Ws[MAX_SPLIT_NODES];
 
   if (n->num_children == 0) {
-    f = lookup_small("small", 0);
+    f = small_lookup("small", 0);
     return (f)("small", n->size, NULL, 0);
   } else {
     for (i =0; i < n->num_children; i++)
       Ws[i] = node_to_wht(n->children[i]);
 
-    g = lookup_split("split", 0);
+    g = split_lookup("split", 0);
     return (g)("split", Ws, i, NULL, 0);
   }
 }

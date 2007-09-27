@@ -12,7 +12,7 @@
 static void
 usage() 
 {
-  printf("wht_randtree: -n SIZE\n");
+  printf("wht_randtree: -n SIZE [-a MIN_NODE -b MAX_NODE] \n");
   exit(1);
 }
 
@@ -28,10 +28,19 @@ main(int argc, char **argv)
 
   opterr = 0;
 
-  while ((c = getopt (argc, argv, "hvn:")) != -1)
+  min_leaf = 1;
+  max_leaf = WHT_MAX_UNROLL;
+
+  while ((c = getopt (argc, argv, "hvn:a:b:")) != -1)
     switch (c) {
       case 'n':
         wht_size = atoi(optarg);
+        break;
+      case 'a':
+        min_leaf = atoi(optarg);
+        break;
+      case 'b':
+        max_leaf = atoi(optarg);
         break;
       case 'h':
         usage();
@@ -42,8 +51,15 @@ main(int argc, char **argv)
   if (wht_size == 0)
     usage();
 
-  min_leaf = 1;
-  max_leaf = 4;
+  if (min_leaf < 1) {
+    printf("-a MIN_NODE too small.\n");
+    exit(1);
+  }
+
+  if (max_leaf > WHT_MAX_UNROLL) {
+    printf("-b MAX_NODE cannot be larger than %d.\n", WHT_MAX_UNROLL);
+    exit(1);
+  }
 
   node *root;
   char *buf;
