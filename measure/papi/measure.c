@@ -34,7 +34,11 @@ void _wht_call()
 static void
 usage() 
 {
-  printf("wht_measure: -w PLAN\n");
+  printf("Usage: wht_measure -w PLAN [OPTIONS]\n\n");
+  printf("    -h        Show this help message.\n");
+  printf("    -v        Show build information.\n");
+  printf("    -w PLAN   Measure the average cost (in cycles) to execute PLAN.\n");
+  printf("    -s        Also measure the standard deviation and sample size.\n");
   exit(1);
 }
 

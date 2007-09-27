@@ -37,7 +37,10 @@
 static void
 usage() 
 {
-  printf("verify: -w PLAN\n");
+  printf("Usage: wht_verify -w PLAN [OPTIONS]\n\n");
+  printf("    -h        Show this help message.\n");
+  printf("    -v        Show build information.\n");
+  printf("    -w PLAN   Verify correctness of PLAN.\n");
   exit(1);
 }
 

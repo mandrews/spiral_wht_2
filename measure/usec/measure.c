@@ -17,7 +17,11 @@ cputime()
 static void
 usage() 
 {
-  printf("wht_measure: [-t SECONDS] -w PLAN\n");
+  printf("Usage: wht_measure -w PLAN [OPTIONS]\n\n");
+  printf("    -h        Show this help message.\n");
+  printf("    -v        Show build information.\n");
+  printf("    -w PLAN   Measure the average cost (in microseconds) to execute PLAN.\n");
+  printf("    -t TIME   Accumulate average for TIME seconds.\n");
   exit(1);
 }
 
