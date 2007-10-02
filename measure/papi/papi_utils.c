@@ -16,8 +16,6 @@
 #include <papi.h>
 #include "papi_utils.h"
 
-double invnorm(double a);
-
 #define papi_min(a,b) \
 	(a <= 0) ? b : ((b <= 0) ? a : ( (a < b) ? a : b ) )
 
@@ -244,7 +242,7 @@ papi_profile_helper(void (*so_init)(void), void (*so_call)(void), void (*so_free
 
 inline void
 papi_profile(void (*so_init)(void), void (*so_call)(void), void (*so_free)(void), 
-  struct papi_data *data, size_t n)
+  struct papi_data *data, size_t n, double z, double p)
 {
   size_t i,done,M;
 
@@ -259,7 +257,7 @@ papi_profile(void (*so_init)(void), void (*so_call)(void), void (*so_free)(void)
 
   while (!done) {
     papi_profile_helper(so_init, so_call, so_free, data, n);
-    done = papi_profile_done(data,n);
+    done = papi_profile_done(data, n, z, p);
   }
 }
 
@@ -274,18 +272,10 @@ void
 papi_update_stats(struct papi_data *data, size_t n)
 {
   size_t i;
+  long_long delta;
 
   data->samples++;
 
-#if 0
-  for (i = 0; i < n; i++) {
-    data->sum[i]  += data->tmp[i];
-    data->sum2[i] += data->tmp[i]*data->tmp[i];
-    data->mean[i]  = data->sum[i]  / (long_long) data->samples;
-    data->stdev[i] = data->sum2[i] / (long_long) data->samples;
-  }
-#else
-  long_long delta;
   for (i = 0; i < n; i++) {
     delta = data->tmp[i] - data->mean[i];
     data->mean[i] += delta/((long_long) data->samples);
@@ -297,7 +287,6 @@ papi_update_stats(struct papi_data *data, size_t n)
       data->stdev[i] = data->mean[i];
     }
   }
-#endif
 }
 
 /* Statisical significance metric adapted from:
@@ -313,15 +302,10 @@ papi_update_stats(struct papi_data *data, size_t n)
  */
 
 int
-papi_profile_done(struct papi_data *data, size_t n)
+papi_profile_done(struct papi_data *data, size_t n, double z, double p)
 {
-  double z,p,a;
   size_t i, samples, good;
   long_long tmp;
-
-  p = 0.01;
-  a = 0.99;
-  z = invnorm(a);
 
   good = 0;
 

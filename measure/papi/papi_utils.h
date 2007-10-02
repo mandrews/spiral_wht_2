@@ -70,9 +70,9 @@ void papi_profile_start_events(struct papi_data *data, size_t n);
 void papi_profile_stop_events(struct papi_data *data, size_t n);
 
 void papi_profile(void (*so_init)(void), void (*so_call)(void), void (*so_free)(void), 
-  struct papi_data *data, size_t n);
+  struct papi_data *data, size_t n, double z, double p);
 
-int papi_profile_done(struct papi_data *data, size_t n);
+int papi_profile_done(struct papi_data *data, size_t n, double z, double p);
 
 void papi_update_stats(struct papi_data *data, size_t n);
 
