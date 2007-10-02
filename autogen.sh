@@ -1,13 +1,16 @@
 #!/bin/sh
 # autogen.sh
 #
-# [Re]generate the autotools build system 
+# Rebuild the autotools build system 
 
+echo "Rebuilding autotools build system:"
+echo
 autoheader
 aclocal
 libtoolize
 autoconf
 automake --add-missing
-echo "To [re]build generated codelets:"
-echo "  ./configure --enable-maintainer-mode && make dist"
-echo "NOTE: this takes a few minutes"
+echo
+echo "To rebuild generated codelets (~ 5 minute wait):"
+echo "  ./configure --enable-maintainer-mode && make"
+echo

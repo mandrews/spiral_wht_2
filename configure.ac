@@ -1,8 +1,8 @@
 #  Process this file with autoconf to produce a configure script.
 AC_INIT(spiral_wht, 2.0-pre-1, mjand@drexel.edu)
+AC_CONFIG_HEADERS([config.h])
 
 AM_INIT_AUTOMAKE(1.9)
-AM_CONFIG_HEADER([config.h])
 AM_MAINTAINER_MODE
 AC_DISABLE_SHARED
 AM_DISABLE_SHARED
@@ -184,7 +184,6 @@ AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_PROG_RANLIB
 AC_CHECK_PROG(PERL,perl,perl)
 
 AC_PROG_LIBTOOL
