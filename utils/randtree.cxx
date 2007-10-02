@@ -19,9 +19,9 @@ usage()
   printf("    -h        Show this help message.\n");
   printf("    -v        Show build information.\n");
   printf("    -n SIZE   Total size of random composition tree.\n");
-  printf("    -a MIN		Minimum number of factors in composition.\n");
+  printf("    -a MIN    Minimum number of factors in composition.\n");
   printf("    -b MAX    Maximum number of factors in composition.\n");
-  printf("    -p MIN		Minimum element in composition.\n");
+  printf("    -p MIN    Minimum element in composition.\n");
   printf("    -q MAX    Maximum element in composition.\n");
   exit(1);
 }
