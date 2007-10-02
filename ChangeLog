@@ -1,3 +1,239 @@
+2007-10-02 22:14  ma53
+
+	* README, TODO: Updated internal documentation.
+
+2007-10-02 22:03  ma53
+
+	* measure/papi/measure.c, measure/papi/papi_utils.c,
+	  measure/papi/papi_utils.h: Allowed alpha and rho to be set from
+	  command line.
+
+2007-10-02 21:27  ma53
+
+	* measure/papi/Makefile.am, measure/papi/invnorm.c,
+	  measure/papi/papi_utils.c: Added invnorm implementation
+	  Statistical significance procedure now uses invnorm instead of
+	  hard coded
+	  value.
+
+2007-10-02 20:01  ma53
+
+	* autogen.sh, configure.ac: Fixed some issues with rebuilding the
+	  build system from scratch.
+
+2007-10-02 19:50  ma53
+
+	* autogen.sh: Added utility script for rebuilding the build system.
+
+2007-10-02 19:14  ma53
+
+	* search/wht_dp: Replace zs1 integer partition enumeration
+	  algorithm with
+	  restricted integer *composition* enumeration algorithm.
+
+2007-10-02 18:21  ma53
+
+	* utils/combin.cxx, utils/combin.h: Fixed some boundary condition
+	  problems with generating random compositions.
+
+2007-10-02 15:59  ma53
+
+	* utils/Makefile.am, utils/combin.cxx, utils/combin.h,
+	  utils/genrandtree.c, utils/randtree.cxx, utils/tree.c,
+	  utils/tree.h: Reworked and generalized the random generation of
+	  integer composition trees.
+
+2007-10-02 13:52  ma53
+
+	* utils/rand.c, utils/rand.h, utils/randtree.c, utils/randtree.h:
+	  Removed old random tree algorithms.
+
+2007-09-27 21:26  ma53
+
+	* wht/wht.h:
+
+2007-09-27 21:26  ma53
+
+	* wht/wht.h:
+
+2007-09-27 21:20  ma53
+
+	* wht/wht.h: Experiment with svn license.
+
+2007-09-27 21:05  ma53
+
+	* TODO, wht/interleave.c, wht/vector.c: Fixed ICC warnings and
+	  revalutated TODO items.
+
+2007-09-27 20:46  ma53
+
+	* INSTALL, README: Updated external documentation.
+
+2007-09-27 20:36  ma53
+
+	* measure/papi/measure.c, measure/usec/measure.c, wht/verify.c:
+	  Cleanuped usage and documented more features.
+
+2007-09-27 20:36  ma53
+
+	* Makefile.am: Added doc to dist.
+
+2007-09-27 20:35  ma53
+
+	* configure.ac: Added pre suffix.
+
+2007-09-27 16:22  ma53
+
+	* README: Added detailed instructions on to perform experiments.
+
+2007-09-27 15:49  ma53
+
+	* TODO, wht/interleave.c, wht/null.c, wht/split.c, wht/vector.c,
+	  wht/wht.h: Fixed problem with wht_info macro and interleave
+	  parameter.
+
+2007-09-27 15:21  ma53
+
+	* measure/papi/measure.c, measure/usec/measure.c, wht/interleave.c,
+	  wht/parser.y, wht/registry.h, wht/utils.c, wht/vector.c,
+	  wht/verify.c, wht/wht.c, wht/wht.h: Renamed some functions.
+
+2007-09-27 15:21  ma53
+
+	* utils/genrandtree.c, utils/tree.c: Fixed an input vetting
+	  problem.
+
+2007-09-26 21:22  ma53
+
+	* TODO, configure.ac: Added checks for math functions which were
+	  messing up papi compile.
+
+2007-09-26 21:22  ma53
+
+	* wht/parser.y: Fixed some undetected problems with this file using
+	  only internal functions.
+
+2007-09-26 20:50  ma53
+
+	* INSTALL, README: Updated the external documentation with
+	  references for mainatainers and configure options.
+
+2007-09-26 20:50  ma53
+
+	* configure.ac: Shortened the interleave option.
+
+2007-09-26 20:42  ma53
+
+	* AUTHORS, INSTALL, README: Updated external documentation.
+
+2007-09-26 19:39  ma53
+
+	* Doxyfile, TODO, configure.ac, wht/Makefile.am, wht/direct.c,
+	  wht/interleave.c, wht/null.c, wht/parser.y, wht/registry.h,
+	  wht/small.c, wht/split.c, wht/vector.c, wht/verify.c, wht/wht.c,
+	  wht/wht.h: Rearranged small codes to enforce class diagram.
+
+2007-09-26 17:10  tc365
+
+	* doc/dia, doc/dia/wht.dia: Adding DIA UML-ish diagram
+
+2007-09-26 15:02  ma53
+
+	* measure/papi/measure.c, utils/tree.c, wht/direct.c,
+	  wht/interleave.c, wht/small.c, wht/split.c, wht/utils.c,
+	  wht/verify.c, wht/wht.c, wht/wht.h: Renamed wht_malloc and
+	  wht_free
+	  Documented these procedures
+
+2007-09-26 14:49  ma53
+
+	* TODO: Added internal todo list to repos.
+
+2007-09-26 14:48  ma53
+
+	* measure/papi/measure.c, measure/usec/measure.c, utils/tree.c,
+	  wht/direct.c, wht/interleave.c, wht/parser.y, wht/registry.h,
+	  wht/small.c, wht/split.c, wht/utils.c, wht/vector.c,
+	  wht/verify.c, wht/wht.c, wht/wht.h: Renamed many data structures
+	  to comply with new conventions, added more documentation.
+
+2007-09-26 14:47  ma53
+
+	* configure.ac: Added back in check for perl in configure.ac
+
+2007-09-24 22:22  ma53
+
+	* Doxyfile, doc, wht/wht.h: Began external documentation for key
+	  features of the package.
+
+2007-09-24 19:51  ma53
+
+	* search/wht_dp: DP now stores trees in YAML ordered map
+
+2007-09-24 19:19  ma53
+
+	* search/wht_dp: Fixed a couple usability issues with wht_dp.
+
+2007-09-24 19:13  ma53
+
+	* Makefile.am, configure.ac, whtgen-ml: Removed ML code from trunk.
+
+2007-09-24 18:54  ma53
+
+	* configure.ac, wht/codelets/.codelets, wht/direct.c: Removed
+	  unessary pow function calls, headed autoscan detection advice.
+
+2007-09-24 18:16  ma53
+
+	* Makefile.am, configure.ac, utils, utils/Makefile.am,
+	  utils/genrandtree.c, utils/rand.c, utils/rand.h,
+	  utils/randtree.c, utils/randtree.h, utils/tree.c, utils/tree.h:
+	  Added utils sub system and back ported wht_randtree
+
+2007-09-21 20:47  ma53
+
+	* ChangeLog, wht/direct.c, wht/parser.y, wht/verify.c: Attempted to
+	  fix some memory leaks.
+
+2007-09-21 20:12  ma53
+
+	* configure.ac, wht/codelets/Makefile.am: Fixed some issues with
+	  installation and configuartion and added default parameters.
+
+2007-09-21 20:11  ma53
+
+	* measure/papi/measure.c: Changed hard coded script name.
+
+2007-09-21 20:11  ma53
+
+	* measure/usec/measure.c: Added max time parameter and increased
+	  default time.
+
+2007-09-21 19:19  ma53
+
+	* measure/papi/papi_utils.c: Added citation for statistical
+	  significance
+
+2007-09-21 16:26  ma53
+
+	* Makefile.am, search/Makefile.am, search/dp,
+	  search/wht_best_trees.txt, search/wht_dp: Renamed dp to wht_dp,
+	  removed currently non functioning utils sub system.
+
+2007-09-21 16:08  ma53
+
+	* configure.ac, search, search/Makefile.am: Added search dp install
+	  target.
+
+2007-09-21 16:06  ma53
+
+	* search/dp: Cleaned up the dynamic programming code, integrated in
+	  with build system install targets.
+
+2007-09-21 16:05  ma53
+
+	* INSTALL: New instructions for install.
+
 2007-09-20 20:38  tc365
 
 	* wht/split.c, wht/wht.h: Separated split children from Wht node

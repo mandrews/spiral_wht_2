@@ -1,0 +1,10 @@
+WHT 2.0 pre 2
+
+* Improved performance and statistical correctness of algorithms used in
+  enumeration and random generation of integer compositions.
+
+* Created an external interface to measurement statistical significance.
+
+WHT 2.0 pre 1
+
+* Initial prerelease.
