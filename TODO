@@ -26,6 +26,8 @@ Bugs:
   - Dependancies not checked (libtool, bison, flex, ruby)
     - Should be checked in maintainer mode only 
 
+  - No detection of xmmintrin.h or __SSE2__ macro [ws77]
+
   - Codelet guards cannot handle validation of rightmost vectorized codelet
 
   - share/wht_best_trees.txt should not be clobbered by new installation

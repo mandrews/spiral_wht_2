@@ -250,9 +250,7 @@ Maintainers
 
 To build or rebuild the autotool system from the repository type:
 
-  libtoolize
-  autoconf
-  automake --add-missing
+  autogen.sh
 
 To rebuild the html and latex source code documentation type:
 
@@ -307,6 +305,11 @@ About the parallel WHT with OpenMP:
       Kang Chen and Jeremy Johnson
       A Prototypical Self-Optimization Package for Parallel Implementation of Fast
       Signal Transforms. IPDPS 2002.
+
+About performance analysis of WHT:
+      Michael Andrews and Jeremy Johnson 
+      Performance Analysis of a Family of WHT Algorithms. 
+      IPDPS 2007.
 
 A journal paper on this package is in preparation.
 
