@@ -8,7 +8,7 @@ else
 noinst_PROGRAMS = wht_measure
 endif
 
-wht_measure_SOURCES = measure.c papi_utils.c
+wht_measure_SOURCES = measure.c papi_utils.c invnorm.c
 wht_measure_LDADD   = $(top_builddir)/wht/libwht.la $(PAPI_PATH)/lib/libpapi.so
 # This hard codes the papi library path into the executable
 wht_measure_LDFLAGS = -rpath $(PAPI_PATH)/lib
