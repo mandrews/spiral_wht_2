@@ -16,8 +16,6 @@ extern "C" {
 using std::list;
 using std::map;
 
-#define SPLIT_THRESHOLD (0.5)
-
 typedef unsigned int uint;
 
 typedef list<uint> combin;

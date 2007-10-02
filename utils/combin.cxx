@@ -14,8 +14,12 @@ combin_k_rand(uint n, uint k)
   combin::iterator cmb_i, cmb_j;
   uint tmp, i;
 
-  cmb_a = new combin(n);
   cmb_b = new combin(k);
+
+  if (k == 0) /* Return the empty combination */
+    return cmb_b;
+
+  cmb_a = new combin(n);
 
   /* Initialize a to 1 .. n-1 */
   for (cmb_i = cmb_a->begin(), i = 1; cmb_i != cmb_a->end(); cmb_i++, i++) 
@@ -118,24 +122,30 @@ combin_rand(uint n, uint a, uint b)
 }
 
 compos *
-combin_to_compos(uint n, combin *cmb_a)
+combin_to_compos(uint n, combin *cmb)
 {
-  compos *cmp_a;
+  compos *cmp;
   combin::iterator cmb_i;
   compos::iterator cmp_i;
   uint accum;
 
-  cmp_a = new compos(cmb_a->size() + 1);
+  cmp = new compos(cmb->size() + 1);
+
+  if (cmb->empty()) {
+    cmp_i = cmp->begin();
+    *cmp_i = n;
+    return cmp;
+  }
 
   accum = 0;
-  for (cmb_i = cmb_a->begin(), cmp_i = cmp_a->begin(); cmb_i != cmb_a->end(); cmb_i++, cmp_i++) {
+  for (cmb_i = cmb->begin(), cmp_i = cmp->begin(); cmb_i != cmb->end(); cmb_i++, cmp_i++) {
     *cmp_i = *cmb_i - accum;
     accum = *cmb_i;
   }
 
   *cmp_i = n - accum;
 
-  return cmp_a;
+  return cmp;
 }
 
 compos *
@@ -161,7 +171,6 @@ compos_tree_rand(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
 
   compos_node *cpn;
   compos_nodes::iterator cpn_i;
-  double r;
 
   cpn = new compos_node();
   cpn->value = n;
@@ -170,17 +179,13 @@ compos_tree_rand(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
   if (n <= min_n)
     return cpn;
 
-  /** \todo Figure out how to handle randomly choosing whether or not to expand
-   *        a leaf node.
-   */
-  r = ((double) random() / (double) RAND_MAX);
-  if (min_f == 1 && r < SPLIT_THRESHOLD && n <= max_n)
-    return cpn;
-
   cmp = compos_rand(n, elem_min(n,min_f), elem_min(n,max_f));
 
+  if (cmp->size() == 1) /* One element in composition => no children */
+    return cpn;
+
   cpn->children->resize(cmp->size());
-  
+
   for (cmp_i = cmp->begin(), cpn_i = cpn->children->begin(); cmp_i != cmp->end(); cmp_i++, cpn_i++) 
     *cpn_i = compos_tree_rand(*cmp_i, min_f, max_f, min_n, max_n);
 
