@@ -53,6 +53,8 @@ interleave_vector_init(char *name, size_t n, int params[], size_t np)
   if (v != WHT_VECTOR_SIZE)
     wht_error("not configured for vectors of size %zd",v);
 
+  if (k > (1 << WHT_MAX_INTERLEAVE))
+    wht_error("not configured for codelets of size %zd interleaved by %zd", n, k);
 
   W            = small_init(name, n, params, np);
   W->guard     = interleave_vector_guard;

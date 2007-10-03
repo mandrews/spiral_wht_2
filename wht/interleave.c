@@ -21,7 +21,7 @@ interleave_init(char *name, size_t n, int params[], size_t np)
   W->guard     = interleave_guard;
   W->nk        = k; /* XXX: Right stride parameter */
 
-  if (k > WHT_MAX_INTERLEAVE)
+  if (k > (1 << WHT_MAX_INTERLEAVE))
     wht_error("not configured for codelets of size %zd interleaved by %zd", n, k);
 
   W->attr[interleave_by] = k;
