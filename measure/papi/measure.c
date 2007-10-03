@@ -41,23 +41,29 @@ usage()
   printf("Usage: wht_measure -w PLAN [OPTIONS]\n\n");
   printf("    -h        Show this help message.\n");
   printf("    -v        Show build information.\n");
-  printf("    -w PLAN   Measure the average cost (in cycles) to execute PLAN.\n");
+  printf("    -w PLAN   Measure the mean metric count of PLAN execution (default cycles).\n");
   printf("    -s        Also display the standard deviation and sample size.\n");
   printf("    -a ALPHA  Measure sample mean with ALPHA %% confidence (default %.2f).\n", DEFAULT_ALPHA);
   printf("    -p RHO    Measure within RHO %% of sample mean (default %.2f).\n", DEFAULT_RHO);
+  printf("    -m METRIC Measure PAPI metric METRIC w/o the PAPI_ prefix (default TOT_CYC).\n");
+  printf("\n");
+  printf(" For a list of available PAPI metrics see PAPI_INSTALL_DIR/bin/papi_avail.\n");
   exit(1);
 }
 
 int
 main(int argc, char **argv)
 {
-  char *wht_plan;
+  char *wht_plan, *papi_metric;
   int c;
   bool stats;
   double a, z, p;
 
+  char default_papi_metric[] = "TOT_CYC";
+
   /* Default parameters */
-  wht_plan = NULL;
+  wht_plan      = NULL;
+  papi_metric   = NULL;
 
   stats = false;
 
@@ -66,10 +72,13 @@ main(int argc, char **argv)
 
   opterr = 0;
 
-  while ((c = getopt (argc, argv, "hvw:sa:p:")) != -1)
+  while ((c = getopt (argc, argv, "hvw:sa:p:m:")) != -1)
     switch (c) {
       case 'w':
         wht_plan = optarg;
+        break;
+      case 'm':
+        papi_metric = optarg;
         break;
       case 's':
         stats = true;
@@ -117,6 +126,9 @@ main(int argc, char **argv)
 
   W = wht_parse(wht_plan);
 
+  if (papi_metric == NULL) 
+    papi_metric = default_papi_metric;
+
   a = a / 100.0;
   p = p / 100.0;
   z = invnorm(a);
@@ -124,7 +136,7 @@ main(int argc, char **argv)
   papi_init();
 
   /* This allocates papi_events */
-  papi_get_events("TOT_CYC", &papi_events, &papi_event_total);
+  papi_get_events(papi_metric, &papi_events, &papi_event_total);
   papi_set_events(papi_events, 1);
 
   papi_data_init(&total, 1);
