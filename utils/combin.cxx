@@ -177,7 +177,7 @@ compos_tree_rand(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
   cpn->value = n;
   cpn->children = new compos_nodes();
 
-  if (n <= min_n)
+  if (n >= min_n && n <= max_n)
     return cpn;
 
   cmp = compos_rand(n, elem_min(n,min_f), elem_min(n,max_f));
