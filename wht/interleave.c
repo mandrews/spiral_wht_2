@@ -10,9 +10,9 @@ interleave_accept(Wht *W)
       W->attr[interleave_by],
       W->n);
     return false;
-  } else {
-    return true;
-  }
+  } 
+    
+  return true;
 }
 
 

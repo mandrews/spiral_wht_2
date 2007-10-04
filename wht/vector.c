@@ -3,25 +3,19 @@
 bool
 right_vector_accept(Wht *W)
 {
-  size_t i, nn;
-
   if (W->right != 1) {
     error_msg_set("smallv(%d)[%d] must be right most codelet in a plan", 
       W->attr[vector_size], W->n);
     return false;
-  }
+  } 
 
   if (W->parent == NULL)
     return true;
 
-  nn = W->parent->children->nn;
-
-  for (i = 0; i < nn; i++) {
-    if (W->parent->children->Ws[i]->children != NULL) {
-      error_msg_set("smallv(%d)[%d] must be right most codelet in a plan", 
-        W->attr[vector_size], W->n);
-      return false;
-    }
+  if (W->parent->right != 1) {
+    error_msg_set("smallv(%d)[%d] must be right most codelet in a plan", 
+      W->attr[vector_size], W->n);
+    return false;
   }
 
   return true;
@@ -69,7 +63,9 @@ interleave_vector_accept(Wht *W)
       W->n);
     return false;
 
-  } else if (W->attr[interleave_by] > W->right) {
+  } 
+  
+  if (W->attr[interleave_by] > W->right) {
     error_msg_set("interleave factor %d must be < %d in smallv(%d,%d)[%d]", 
       W->attr[interleave_by],
       W->right,
@@ -77,10 +73,9 @@ interleave_vector_accept(Wht *W)
       W->attr[interleave_by],
       W->n);
     return false;
-
-  } else {
-    return true;
   }
+
+  return true;
 }
 
 Wht *

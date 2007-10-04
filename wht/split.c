@@ -161,8 +161,8 @@ split_init(char *name, Wht *Ws[], size_t nn, int params[], size_t np)
   W->free      = split_free;
   W->accept    = split_accept;
   W->to_string = split_to_string;
-  W->left      = 0;
-  W->right     = 0;
+  W->left      = W->N;
+  W->right     = 1;
   W->parent    = NULL;
   W->nk        = 1; /* XXX: Right stride parameter */
 
