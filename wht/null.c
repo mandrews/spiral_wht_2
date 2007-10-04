@@ -75,8 +75,8 @@ null_init(char *name, size_t n, int params[], size_t np)
   W->apply     = null_apply;
   W->accept    = null_accept;
   W->to_string = null_to_string;
-  W->left      = 0;
-  W->right     = 0;
+  W->left      = W->N;
+  W->right     = 1;
   W->parent    = NULL;
   W->nk        = 1; /* XXX: Right stride parameter */
 

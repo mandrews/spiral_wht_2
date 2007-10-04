@@ -11,6 +11,9 @@ right_vector_accept(Wht *W)
     return false;
   }
 
+  if (W->parent == NULL)
+    return true;
+
   nn = W->parent->children->nn;
 
   for (i = 0; i < nn; i++) {
