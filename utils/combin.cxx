@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <assert.h>
+
 static memo_fact_table memo_fact; /**< Factorial memoization table */
 
 combin *
@@ -71,7 +73,6 @@ fact(uint x)
     return 1;
 
   memo_fact_table::iterator v;
-  v = NULL;
   v = memo_fact.find(x);
 
   if (v != memo_fact.end())
