@@ -1,19 +1,19 @@
 #include "wht.h"
 
 bool
-right_vector_accept(Wht *W, Wht *parent, size_t left, size_t right)
+right_vector_accept(Wht *W)
 {
   size_t i, nn;
 
-  if (right != 1) {
+  if (W->right != 1) {
     error_msg_set("smallv(k)[n] must be right most codelet in a plan");
     return false;
   }
 
-  nn = parent->children->nn;
+  nn = W->parent->children->nn;
 
   for (i = 0; i < nn; i++) {
-    if (parent->children->Ws[i]->children != NULL) {
+    if (W->parent->children->Ws[i]->children != NULL) {
       error_msg_set("smallv(k)[n] must be right most codelet in a plan");
       return false;
     }
@@ -48,6 +48,7 @@ right_vector_init(char *name, size_t n, int params[], size_t np)
   return W;  
 }
 
+#if 0
 void
 interleave_vector_guard(Wht *W, size_t right)
 {
@@ -57,6 +58,7 @@ interleave_vector_guard(Wht *W, size_t right)
       W->attr[interleave_by]);
   }
 }
+#endif
 
 Wht *
 interleave_vector_init(char *name, size_t n, int params[], size_t np)
@@ -80,7 +82,6 @@ interleave_vector_init(char *name, size_t n, int params[], size_t np)
     wht_error("not configured for codelets of size %zd interleaved by %zd", n, k);
 
   W            = small_init(name, n, params, np);
-  W->guard     = interleave_vector_guard;
   W->nk        = k; /* XXX: Right stride parameter */
 
   W->attr[interleave_by] = k;

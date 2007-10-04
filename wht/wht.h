@@ -105,11 +105,16 @@ struct Wht {
   void (*guard) (Wht *W, size_t right);     
     /**< Recursive method for determining validity of a plan */ 
 
-  bool (*accept) (Wht *W, Wht *parent, size_t left, size_t right);     
+  bool (*accept) (Wht *W);
     /**< Recursive method for if plan is an accept string in the language L(WHT) */ 
 
   char * (*to_string) (Wht *W); 
     /**< Recursive method for translating a codelet into a string */ 
+
+  Wht *parent;
+
+  size_t left;
+  size_t right;
 
   split_children * children; 
     /**< Pointer to split children, should not be allocated unless codelet is a split */
@@ -384,7 +389,7 @@ error_msg_set(char *s);
 #define wht_max_norm(x,y,n) (max_norm(x,y,n))
 #define wht_random_vector(n) (random_vector(n))
 
-#define wht_accept(W) ((W->accept)(W, NULL, 1, W->N))
+#define wht_accept(W) ((W->accept)(W))
 
 #define wht_error_msg (error_msg_get())
 

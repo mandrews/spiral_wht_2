@@ -2,7 +2,7 @@
 #include "codelets.h"
 
 bool
-small_accept(Wht *W, Wht *parent, size_t left, size_t right)
+small_accept(Wht *W)
 {
   return true;
 }

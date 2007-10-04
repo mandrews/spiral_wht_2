@@ -18,12 +18,6 @@ null_apply(Wht *W, long S, wht_value *x)
   /* Empty */
 }
 
-void
-null_guard(Wht *W, size_t right)
-{
-  /* Empty */
-}
-
 char *
 null_to_string(Wht *W)
 {
@@ -79,9 +73,11 @@ null_init(char *name, size_t n, int params[], size_t np)
   W->np        = np;
   W->free      = null_free;
   W->apply     = null_apply;
-  W->guard     = null_guard;
   W->accept    = null_accept;
   W->to_string = null_to_string;
+  W->left      = 0;
+  W->right     = 0;
+  W->parent    = NULL;
   W->nk        = 1; /* XXX: Right stride parameter */
 
   return W;  

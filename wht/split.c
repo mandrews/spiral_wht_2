@@ -117,31 +117,19 @@ split_to_string(Wht *W)
   return buf;
 }
 
-void
-split_guard(Wht *W, size_t right)
-{
-  /* Empty */
-}
-
 bool
-split_accept(Wht *W, Wht *parent, size_t left, size_t right)
+split_accept(Wht *W)
 {
-  size_t i, nn, r, l;
+  size_t i, nn;
   bool accept;
 
   nn = W->children->nn;
 
-  r = 1;
-  l = W->N;
-
   for (i = 0; i < nn; i++) {
-    accept = (W->children->Ws[i]->accept)(W->children->Ws[i], W, l, r);
+    accept = (W->children->Ws[i]->accept)(W->children->Ws[i]);
 
     if (accept != true)
       return false;
-
-    r *= W->children->ns[i];
-    l /= W->children->ns[i];
   }
 
   return true;
@@ -154,7 +142,8 @@ split_init(char *name, Wht *Ws[], size_t nn, int params[], size_t np)
   size_t i;
   long N = 1;
   int n  = 0;
-  int right = 1;
+  size_t right; 
+  size_t left; 
 
   /* Compute size of WHT from smaller WHTs*/
   for (i = 0; i < nn; i++) {
@@ -170,21 +159,31 @@ split_init(char *name, Wht *Ws[], size_t nn, int params[], size_t np)
   W->np        = np;
   W->apply     = split_apply;
   W->free      = split_free;
-  W->guard     = split_guard;
   W->accept    = split_accept;
   W->to_string = split_to_string;
+  W->left      = 0;
+  W->right     = 0;
+  W->parent    = NULL;
   W->nk        = 1; /* XXX: Right stride parameter */
 
   W->children = i_malloc(sizeof(split_children));
 
   W->children->nn = nn;
 
+  left  = W->N;
+  right = 1;
+
   /* Store smaller WHTs */
   for (i = 0; i < nn; i++) {
-    // Ws[i]->guard(Ws[i], right);
     W->children->Ws[i] = Ws[i];
     W->children->ns[i] = Ws[i]->N;
+
+    W->children->Ws[i]->parent = W;
+    W->children->Ws[i]->left   = left;
+    W->children->Ws[i]->right  = right;
+
     right *= Ws[i]->N;
+    left  /= Ws[i]->N;
   }
 
   return W;
