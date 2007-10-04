@@ -172,6 +172,7 @@ compos_tree_rand(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
 
   compos_node *cpn;
   compos_nodes::iterator cpn_i;
+  size_t min_fp;
 
   cpn = new compos_node();
   cpn->value = n;
@@ -180,7 +181,14 @@ compos_tree_rand(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
   if (n >= min_n && n <= max_n)
     return cpn;
 
-  cmp = compos_rand(n, elem_min(n,min_f), elem_min(n,max_f));
+  /* If n is greater than the largest element, we need to generate a
+   * composition of at least 2 elements */
+  if (n >= max_n) 
+    min_fp = 2;
+  else
+    min_fp = min_f;
+
+  cmp = compos_rand(n, elem_min(n,min_fp), elem_min(n,max_f));
 
   if (cmp->size() == 1) /* One element in composition => no children */
     return cpn;
