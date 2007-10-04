@@ -147,5 +147,6 @@ if $0 == __FILE__ # Main Entry Point
 
   end 
 
+  exit(0)
 
 end

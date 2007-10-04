@@ -185,6 +185,7 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_CHECK_PROG(PERL,perl,perl)
+AC_CHECK_PROG(RUBY,ruby,ruby)
 
 AC_PROG_LIBTOOL
 AC_PROG_LEX
@@ -236,6 +237,7 @@ AC_CONFIG_FILES([
    measure/papi/Makefile
    search/Makefile
    utils/Makefile
+   tests/Makefile
 ])
 
 AC_OUTPUT
