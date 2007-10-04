@@ -126,6 +126,12 @@ main(int argc, char **argv)
 
   W = wht_parse(wht_plan);
 
+  if (wht_accept(W) != true) {
+    wht_free(W);
+    printf("rejected, %s\n", wht_error_msg);
+    exit(1);
+  }
+
   if (papi_metric == NULL) 
     papi_metric = default_papi_metric;
 

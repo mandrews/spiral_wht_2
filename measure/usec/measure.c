@@ -66,6 +66,12 @@ main (int argc, char **argv)
 
   W = wht_parse(wht_plan);
 
+  if (wht_accept(W) != true) {
+    wht_free(W);
+    printf("rejected, %s\n", wht_error_msg);
+    exit(1);
+  }
+
   n = W->n;
   N = W->N;
 
