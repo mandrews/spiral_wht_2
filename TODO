@@ -21,18 +21,35 @@ Milestones:
 
 Bugs:
 
-  - Some minor memory leak issues with wht_very and wht_randtree
+  - Some minor memory leak issues with parser.y
+    - Need to free memory from temporary data structures using  
+      bison %destructor directive
 
   - Dependancies not checked (libtool, bison, flex, ruby)
     - Should be checked in maintainer mode only 
 
   - No detection of xmmintrin.h or __SSE2__ macro [ws77]
+    - Should added -msse2 to CFLAGS in configure.ac
 
   - Codelet guards cannot handle validation of rightmost vectorized codelet
 
   - share/wht_best_trees.txt should not be clobbered by new installation
 
   - whtgen/whtgen should catch SIGINT and write best trees so to disk
+
+  - FROM:
+    - $ ../spiral_wht-2.0-pre-2/configure --with-papi=/usr/local/papi-3.2.1
+       --prefix=$HOME/tmp/install --enable-interleave=3 --enable-sse2
+       --enable-max-unroll=4
+
+  X - $ ./bin/wht_measure -w 'split[smallv(2,16)[4], smallv(2)[4]]' -s 
+      error, initialization guards should prevent this message
+
+  X - $ ./bin/wht_measure -w 'split[smallil(4)[4], smallv(2)[4]]' -s 
+      error, not configured for codelets of size 4 interleaved by 4
+
+    - $ ./bin/wht_verify -w 'split[small[2], split[smallv(2,2)[2],small[2]], small[2]]'
+      Segmentation fault
 
 Issues:
 
@@ -43,4 +60,6 @@ Issues:
 
   - splitil and internal stride issue
 
+  - $ ./bin/wht_randtree -n 5
+    error, not configured for unrolled codelets of size 5
 
