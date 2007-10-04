@@ -42,7 +42,7 @@ main(int argc, char **argv)
   min_leaf 	= 1;
   max_leaf 	= WHT_MAX_UNROLL;
 
-  while ((c = getopt (argc, argv, "hvn:a:b:")) != -1)
+  while ((c = getopt (argc, argv, "hvn:a:b:p:q:")) != -1)
     switch (c) {
       case 'n':
         wht_size = atoi(optarg);
