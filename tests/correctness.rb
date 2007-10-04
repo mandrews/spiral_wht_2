@@ -5,8 +5,8 @@
 # Author: Michael Andrews <mjand@drexel.edu>
 # $Id$
 
-SCRIPT_PATH   = File.dirname(__FILE__) 
-WHT_VERIFY    = "#{SCRIPT_PATH}/../wht/wht_verify"
+BUILDDIR   = ENV['BUILDDIR'] || File.dirname(__FILE__) + '../'
+WHT_VERIFY = "#{BUILDDIR}/wht/wht_verify"
 
 def load_runtime_env
   cmd = "#{WHT_VERIFY} -v"
