@@ -1,6 +1,8 @@
 #include "wht.h"
 #include "registry.h"
 
+static char error_msg[BUFSIZ];
+
 /* This symbol points to the root of the parsed wht tree */
 extern Wht *wht_root;
 
@@ -50,3 +52,15 @@ small_lookup(const char *name, size_t params)
   return NULL;
 }
 
+
+char *
+error_msg_get()
+{
+  return error_msg;
+}
+
+void
+error_msg_set(char *msg)
+{
+  strncpy(error_msg, msg, BUFSIZ);
+}

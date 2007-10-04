@@ -60,7 +60,6 @@ enum attr_names { interleave_by = 0, vector_size = 1 };
  * Data structures and interfaces (function pointer signatures)
  */
 
-
 /* Forward declarations, so typedef'd struct can contain itself */
 typedef struct Wht Wht;
 typedef struct split_children split_children;
@@ -105,6 +104,9 @@ struct Wht {
 
   void (*guard) (Wht *W, size_t right);     
     /**< Recursive method for determining validity of a plan */ 
+
+  bool (*accept) (Wht *W, Wht *parent, size_t left, size_t right);     
+    /**< Recursive method for if plan is an accept string in the language L(WHT) */ 
 
   char * (*to_string) (Wht *W); 
     /**< Recursive method for translating a codelet into a string */ 
@@ -363,6 +365,13 @@ Wht * small_init(char *name, size_t n, int params[], size_t np);
  */
 void split_apply(Wht *W, long S, wht_value *x);
 
+char *
+error_msg_get();
+
+void
+error_msg_set(char *s);
+
+
 /**
  * \todo Move these macros to an external interface.
  */
@@ -374,6 +383,10 @@ void split_apply(Wht *W, long S, wht_value *x);
 #define wht_direct(n) (direct(n))
 #define wht_max_norm(x,y,n) (max_norm(x,y,n))
 #define wht_random_vector(n) (random_vector(n))
+
+#define wht_accept(W) ((W->accept)(W, NULL, 1, W->N))
+
+#define wht_error_msg (error_msg_get())
 
 #endif/* WHT_H */
 

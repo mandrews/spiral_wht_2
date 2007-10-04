@@ -1,5 +1,27 @@
 #include "wht.h"
 
+bool
+right_vector_accept(Wht *W, Wht *parent, size_t left, size_t right)
+{
+  size_t i, nn;
+
+  if (right != 1) {
+    error_msg_set("smallv(k)[n] must be right most codelet in a plan");
+    return false;
+  }
+
+  nn = parent->children->nn;
+
+  for (i = 0; i < nn; i++) {
+    if (parent->children->Ws[i]->children != NULL) {
+      error_msg_set("smallv(k)[n] must be right most codelet in a plan");
+      return false;
+    }
+  }
+
+  return true;
+}
+
 Wht *
 right_vector_init(char *name, size_t n, int params[], size_t np)
 {
@@ -17,7 +39,8 @@ right_vector_init(char *name, size_t n, int params[], size_t np)
   if (v != WHT_VECTOR_SIZE)
     wht_error("not configured for vectors of size %d",v);
 
-  W = small_init(name, n, params, np);
+  W         = small_init(name, n, params, np);
+  W->accept = right_vector_accept;
 
   if (v >= W->N)
     wht_error("vector size %d must < size 2^(%zd)",v,n);

@@ -1,6 +1,12 @@
 #include "wht.h"
 #include "codelets.h"
 
+bool
+small_accept(Wht *W, Wht *parent, size_t left, size_t right)
+{
+  return true;
+}
+
 Wht *
 small_init(char *name, size_t n, int params[], size_t np)
 {
@@ -12,6 +18,7 @@ small_init(char *name, size_t n, int params[], size_t np)
   W            = null_init(name, n, params, np);
   W->apply     = NULL; /* Ensure that null_apply is overridden */
   W->apply     = wht_get_codelet(n, name, params, np);
+  W->accept    = small_accept;
 
   if (W->apply == NULL)
     wht_error("could not find codelet %s", W->to_string(W));

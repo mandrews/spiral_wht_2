@@ -123,6 +123,30 @@ split_guard(Wht *W, size_t right)
   /* Empty */
 }
 
+bool
+split_accept(Wht *W, Wht *parent, size_t left, size_t right)
+{
+  size_t i, nn, r, l;
+  bool accept;
+
+  nn = W->children->nn;
+
+  r = 1;
+  l = W->N;
+
+  for (i = 0; i < nn; i++) {
+    accept = (W->children->Ws[i]->accept)(W->children->Ws[i], W, l, r);
+
+    if (accept != true)
+      return false;
+
+    r *= W->children->ns[i];
+    l /= W->children->ns[i];
+  }
+
+  return true;
+}
+
 Wht *
 split_init(char *name, Wht *Ws[], size_t nn, int params[], size_t np) 
 {
@@ -147,6 +171,7 @@ split_init(char *name, Wht *Ws[], size_t nn, int params[], size_t np)
   W->apply     = split_apply;
   W->free      = split_free;
   W->guard     = split_guard;
+  W->accept    = split_accept;
   W->to_string = split_to_string;
   W->nk        = 1; /* XXX: Right stride parameter */
 
@@ -156,7 +181,7 @@ split_init(char *name, Wht *Ws[], size_t nn, int params[], size_t np)
 
   /* Store smaller WHTs */
   for (i = 0; i < nn; i++) {
-    Ws[i]->guard(Ws[i], right);
+    // Ws[i]->guard(Ws[i], right);
     W->children->Ws[i] = Ws[i];
     W->children->ns[i] = Ws[i]->N;
     right *= Ws[i]->N;

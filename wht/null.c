@@ -1,5 +1,11 @@
 #include "wht.h"
 
+bool
+null_accept(Wht *W, Wht *parent, size_t left, size_t right)
+{
+  return false; /* Disallow null nodes in plan */
+}
+
 void 
 null_free(Wht *W) 
 {
@@ -74,6 +80,7 @@ null_init(char *name, size_t n, int params[], size_t np)
   W->free      = null_free;
   W->apply     = null_apply;
   W->guard     = null_guard;
+  W->accept    = null_accept;
   W->to_string = null_to_string;
   W->nk        = 1; /* XXX: Right stride parameter */
 

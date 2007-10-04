@@ -74,11 +74,20 @@ main(int argc, char **argv)
   Wht *W;
   Wht *D;
   wht_value *x, *y;
+  bool accept;
 
   long n,N;
   int i;
 
   W = wht_parse(wht_plan);
+
+  accept = wht_accept(W);
+
+  if (accept == false) {
+    wht_free(W);
+    printf("rejected, %s\n", wht_error_msg);
+    exit(1);
+  }
 
   n = W->n;
   N = W->N;
@@ -86,7 +95,7 @@ main(int argc, char **argv)
   D = wht_direct(n);
 
   x = wht_random_vector(N);
-  y = i_malloc(sizeof(wht_value) * N);
+  y = malloc(sizeof(wht_value) * N);
 
   for (i = 0;i<N;i++)
     y[i] = x[i];
@@ -99,13 +108,13 @@ main(int argc, char **argv)
   if (wht_max_norm(x,y,N) < WHT_STABILITY_THRESHOLD)
     printf("correct\n");   
   else
-    printf("fails\n");
+    printf("accepted but incorrect\n");
 
-  W->free(W);
-  D->free(D);
+  wht_free(W);
+  wht_free(D);
 
-  i_free(x);
-  i_free(y);
+  free(x);
+  free(y);
 
   return 0;
 }
