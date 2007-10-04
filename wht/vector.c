@@ -6,7 +6,8 @@ right_vector_accept(Wht *W)
   size_t i, nn;
 
   if (W->right != 1) {
-    error_msg_set("smallv(k)[n] must be right most codelet in a plan");
+    error_msg_set("smallv(%d)[%d] must be right most codelet in a plan", 
+      W->attr[vector_size], W->n);
     return false;
   }
 
@@ -14,7 +15,8 @@ right_vector_accept(Wht *W)
 
   for (i = 0; i < nn; i++) {
     if (W->parent->children->Ws[i]->children != NULL) {
-      error_msg_set("smallv(k)[n] must be right most codelet in a plan");
+      error_msg_set("smallv(%d)[%d] must be right most codelet in a plan", 
+        W->attr[vector_size], W->n);
       return false;
     }
   }
@@ -39,8 +41,10 @@ right_vector_init(char *name, size_t n, int params[], size_t np)
   if (v != WHT_VECTOR_SIZE)
     wht_error("not configured for vectors of size %d",v);
 
-  W         = small_init(name, n, params, np);
-  W->accept = right_vector_accept;
+  W           = small_init(name, n, params, np);
+  W->accept   = right_vector_accept;
+
+  W->attr[vector_size]    = v;
 
   if (v >= W->N)
     wht_error("vector size %d must < size 2^(%zd)",v,n);
@@ -48,17 +52,33 @@ right_vector_init(char *name, size_t n, int params[], size_t np)
   return W;  
 }
 
-#if 0
-void
-interleave_vector_guard(Wht *W, size_t right)
+bool
+interleave_vector_accept(Wht *W)
 {
-  /* TODO: size * interleave_by > vector_size */
-  if (W->attr[interleave_by] > right) {
-    wht_error("collective size of right most trees must be >= %d", 
-      W->attr[interleave_by]);
+  /** \todo Check condition size * interleave_by > vector_size.
+   * This * only occurs with vectors of size >= 4  
+   */
+
+  if (W->parent->parent != NULL) {
+    error_msg_set("vector codelets smallv(%d,%d)[%d] can only appear in the first level", 
+      W->attr[vector_size],
+      W->attr[interleave_by],
+      W->n);
+    return false;
+
+  } else if (W->attr[interleave_by] > W->right) {
+    error_msg_set("interleave factor %d must be < %d in smallv(%d,%d)[%d]", 
+      W->attr[interleave_by],
+      W->right,
+      W->attr[vector_size],
+      W->attr[interleave_by],
+      W->n);
+    return false;
+
+  } else {
+    return true;
   }
 }
-#endif
 
 Wht *
 interleave_vector_init(char *name, size_t n, int params[], size_t np)
@@ -81,10 +101,12 @@ interleave_vector_init(char *name, size_t n, int params[], size_t np)
   if (k > (1 << WHT_MAX_INTERLEAVE))
     wht_error("not configured for codelets of size %zd interleaved by %zd", n, k);
 
-  W            = small_init(name, n, params, np);
-  W->nk        = k; /* XXX: Right stride parameter */
+  W           = small_init(name, n, params, np);
+  W->nk       = k; /* XXX: Right stride parameter */
+  W->accept   = interleave_vector_accept;
 
-  W->attr[interleave_by] = k;
+  W->attr[vector_size]    = v;
+  W->attr[interleave_by]  = k;
 
   return W;  
 }

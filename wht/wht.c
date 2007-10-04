@@ -60,7 +60,11 @@ error_msg_get()
 }
 
 void
-error_msg_set(char *msg)
+error_msg_set(char *format, ...)
 {
-  strncpy(error_msg, msg, BUFSIZ);
+  va_list ap;
+
+  va_start(ap, format);
+  vsnprintf(error_msg, BUFSIZ, format, ap);
+  va_end(ap);
 }

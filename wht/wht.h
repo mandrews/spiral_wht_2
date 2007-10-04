@@ -16,6 +16,7 @@
 #include <math.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <stdarg.h>
 
 /*
  * Constants
@@ -101,9 +102,6 @@ struct Wht {
 
   void (*free)  (Wht *W);
     /**< Recursive method for freeing memory allocated by codelet */ 
-
-  void (*guard) (Wht *W, size_t right);     
-    /**< Recursive method for determining validity of a plan */ 
 
   bool (*accept) (Wht *W);
     /**< Recursive method for if plan is an accept string in the language L(WHT) */ 
@@ -374,7 +372,7 @@ char *
 error_msg_get();
 
 void
-error_msg_set(char *s);
+error_msg_set(char *format, ...);
 
 
 /**

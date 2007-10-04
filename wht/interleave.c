@@ -1,13 +1,20 @@
 #include "wht.h"
 
-void
-interleave_guard(Wht *W, size_t right)
+bool
+interleave_accept(Wht *W)
 {
-  if (W->attr[interleave_by] > right) {
-    wht_error("collective size of right most trees must be >= %d", 
-      W->attr[interleave_by]);
+  if (W->attr[interleave_by] > W->right) {
+    error_msg_set("interleave factor %d must be < %d in smallil(%d)[%d]", 
+      W->attr[interleave_by],
+      W->right,
+      W->attr[interleave_by],
+      W->n);
+    return false;
+  } else {
+    return true;
   }
 }
+
 
 Wht *
 interleave_init(char *name, size_t n, int params[], size_t np)
@@ -18,7 +25,7 @@ interleave_init(char *name, size_t n, int params[], size_t np)
   k = params[0];
 
   W            = small_init(name, n, params, np);
-  W->guard     = interleave_guard;
+  W->accept    = interleave_accept;
   W->nk        = k; /* XXX: Right stride parameter */
 
   if (k > (1 << WHT_MAX_INTERLEAVE))

@@ -1,7 +1,7 @@
 #include "wht.h"
 
 bool
-null_accept(Wht *W, Wht *parent, size_t left, size_t right)
+null_accept(Wht *W)
 {
   return false; /* Disallow null nodes in plan */
 }
