@@ -120,6 +120,8 @@ if test "$have_sse" = "yes"; then
 		AC_MSG_ERROR([--enable-sse can only be used in conjunction with --enable-float])
 	fi
 
+  CFLAGS="$CFLAGS -msse"
+
   VECTOR_SIZE=4
 fi
 
@@ -138,6 +140,8 @@ if test "$have_sse2" = "yes"; then
 	if test "$WHT_PRECISION" != ""; then
 		AC_MSG_ERROR([--enable-sse2 can only be used in conjunction with --enable-double])
 	fi
+
+  CFLAGS="$CFLAGS -msse2"
 
   VECTOR_SIZE=2
 
@@ -218,9 +222,13 @@ AC_SEARCH_LIBS([sqrtl],[m],[], AC_MSG_ERROR([required sqrtl symbol not found]))
 AC_SEARCH_LIBS([ceil],[m],[], AC_MSG_ERROR([required ceil symbol not found]))
 
 
-#  add gcc warnings, in maintainer mode only
+#  Add gcc warnings, in maintainer mode only
 if test "$USE_MAINTAINER_MODE" = yes; then
   CFLAGS="$CFLAGS -Wall"
+fi
+
+if test "$ac_test_CXXFLAGS" != "set"; then 
+  CXXFLAGS="$CFLAGS"
 fi
 
 AC_DEFINE_UNQUOTED(WHT_CC,"$CC",
