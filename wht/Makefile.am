@@ -9,8 +9,10 @@ SUBDIRS = codelets
 
 lib_LTLIBRARIES = libwht.la
 
-libwht_la_SOURCES = null.c direct.c interleave.c vector.c small.c split.c \
-									  utils.c wht.c scanner.l parser.y
+libwht_la_SOURCES = null.c direct.c small.c split.c utils.c wht.c \
+										scanner.l parser.y \
+										interleave.c vector.c transpose.c
+
 libwht_la_LIBADD  = $(top_builddir)/wht/codelets/libwht_codelets.la
 
 # TODO should utilize WHT_SUFFIX to disambiguate types

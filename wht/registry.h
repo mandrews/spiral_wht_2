@@ -3,13 +3,18 @@
 
 #include "wht.h"
 
+/* Split Extensions to core package */
+Wht *
+transpose_init(char *name, Wht *Ws[], size_t nn, int params[], size_t np);
+
 static const split_init_entry
 splits_registry[] = {
   { "split",    0, (split_init_fp) &split_init },
+  { "tsplit",   0, (split_init_fp) &transpose_init },
   SPLIT_INIT_ENTRY_END /* This halts iteration on the registry */
 };
 
-/* Extensions to core package */
+/* Small Extensions to core package */
 Wht * interleave_init(char *name, size_t n, int params[], size_t np);
 Wht * right_vector_init(char *name, size_t n, int params[], size_t np);
 Wht * interleave_vector_init(char *name, size_t n, int params[], size_t np);
