@@ -27,7 +27,7 @@ transpose_accept(Wht *W)
 }
 
 void 
-transpose_apply(Wht *W, long S, wht_value *x)
+transpose_apply(Wht *W, long S, size_t D, wht_value *x)
 {
   size_t N, N1, N2, j;
   wht_value *xs;
@@ -38,14 +38,14 @@ transpose_apply(Wht *W, long S, wht_value *x)
 
   /* Compute right transform first */
   for (j = 0, xs = x; j < N1; j++, xs += (N2 * S))
-    (W->children->Ws[1]->apply)(W->children->Ws[1], S, xs);
+    (W->children->Ws[1]->apply)(W->children->Ws[1], S, 0, xs);
 
   /* L_N^N2 */
   transpose(x, N1, N2);
 
   /* Compute transposed left transform */
   for (j = 0, xs = x; j < N2; j++, xs += (N1 * S))
-    (W->children->Ws[0]->apply)(W->children->Ws[0], S, xs);
+    (W->children->Ws[0]->apply)(W->children->Ws[0], S, 0, xs);
 
   /* L_N^N1 */
   transpose(x, N2, N1);

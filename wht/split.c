@@ -39,7 +39,7 @@
  *  from right to left.
 */
 void 
-split_apply(Wht *W, long S, wht_value *x)
+split_apply(Wht *W, long S, size_t U, wht_value *x)
 {
   int nn;
   long N, R, S1, Ni, i, j, k;
@@ -61,7 +61,7 @@ split_apply(Wht *W, long S, wht_value *x)
 
     for (j = 0; j < R; j++)
       for (k = 0; k < S1; k += nk)
-        (W->children->Ws[i]->apply)(W->children->Ws[i], S1*S, x+k*S+j*Ni*S1*S);
+        (W->children->Ws[i]->apply)(W->children->Ws[i], S1*S, S, x+k*S+j*Ni*S1*S);
 
     S1 *= Ni;
   }

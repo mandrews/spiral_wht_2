@@ -42,6 +42,7 @@ right_vector_init(char *name, size_t n, int params[], size_t np)
   W->accept   = right_vector_accept;
 
   W->attr[vector_size]    = v;
+  W->attr[interleave_by]  = 1;
 
   if (v >= W->N)
     wht_error("vector size %d must < size 2^(%zd)",v,n);
@@ -56,14 +57,15 @@ interleave_vector_accept(Wht *W)
    * This * only occurs with vectors of size >= 4  
    */
 
+# if 0
   if (W->parent->parent != NULL) {
     error_msg_set("vector codelets smallv(%d,%d)[%d] can only appear in the first level", 
       W->attr[vector_size],
       W->attr[interleave_by],
       W->n);
     return false;
-
   } 
+#endif
   
   if (W->attr[interleave_by] > W->right) {
     error_msg_set("interleave factor %d must be < %d in smallv(%d,%d)[%d]", 

@@ -224,7 +224,7 @@ AC_SEARCH_LIBS([ceil],[m],[], AC_MSG_ERROR([required ceil symbol not found]))
 
 #  Add gcc warnings, in maintainer mode only
 if test "$USE_MAINTAINER_MODE" = yes; then
-  CFLAGS="$CFLAGS -Wall"
+  CFLAGS="$CFLAGS -Wall -g"
 fi
 
 if test "$ac_test_CXXFLAGS" != "set"; then 

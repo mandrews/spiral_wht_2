@@ -13,7 +13,7 @@ null_free(Wht *W)
 }
 
 void
-null_apply(Wht *W, long S, wht_value *x)
+null_apply(Wht *W, long S, size_t D, wht_value *x)
 {
   /* Empty */
 }

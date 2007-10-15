@@ -40,7 +40,7 @@ wht_entry(int k, long row, long col)
 }
 
 static void 
-apply_direct(Wht *W, long S, wht_value *x) 
+apply_direct(Wht *W, long S, size_t D, wht_value *x) 
 {
   long N = W->N;
   int n = W->n;

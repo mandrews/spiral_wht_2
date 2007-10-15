@@ -134,9 +134,11 @@ class BinIns
   def initialize(r,a,b,v)
     @r,@a,@b,@v = r,a,b,v
     @t = 'ta'
+    @@stride = false
   end
 
-  def interleave(k)
+  def interleave(k, stride = false)
+    @@stride = stride
     k.times { @t = @t.succ }
   end
 
@@ -189,15 +191,21 @@ class MemIns
     @r,@m,@s,@a,@v = r,m,s,a,v
     @k = 0
     @t = 'ta'
+    @@stride = false
   end
 
-  def interleave(k)
+  def interleave(k, stride = false)
+    @@stride = stride
     @k = k
     k.times { @t = @t.succ }
   end
 
   def stride
-    @a ? "#{@s+@k}" : "#{@s} * S + #{@k}"
+    if @@stride
+      @a ? "#{@s+@k} * S" : "(#{@s} * S) + (#{@k} * U)"
+    else
+      @a ? "#{@s+@k}" : "(#{@s} * S) + #{@k}"
+    end
   end
 
   def tmps
@@ -261,7 +269,7 @@ class Generator
     a = @a ? '_a' : ''
 
     header  = "#include \"wht.h\"\n\n" +
-              "void #{@name}#{a}(Wht *W, long S, wht_value *x)\n{\n"
+              "void #{@name}#{a}(Wht *W, long S, size_t U, wht_value *x)\n{\n"
 
 		header += compile_guard
 
@@ -270,20 +278,19 @@ class Generator
       decls += sprintf "%s%s %s;\n",INDENT, @type, t
     end
 
-		# TODO add else / error macro guard
     footer  = ""
     footer += "#else\n   wht_error(\"initialization guards should prevent this message\");\n" 
 		footer += "#endif\n"
     header + decls + body + footer + "}\n"
   end
 
-  def interleave
+  def interleave(stride = false)
     q = []
     @stack.each do |x|
       q << x.clone
       for k in 1 .. @i-1 do # Make i copies
         y = x.clone
-        y.interleave(k)
+        y.interleave(k, stride)
         q << y
       end
     end
@@ -317,7 +324,6 @@ class Generator
       @stack.push Store.new(t,"x",(i*@v),@a,@v)
     end
 
-    interleave
   end
 end
 
@@ -335,7 +341,7 @@ def parse_opts(opts, args)
 end
 
 def check_opts(opts)
-  die("--size=SIZE required") unless opts.params[:size]
+  die(" -n SIZE required") unless opts.params[:size]
 
   k = opts.params[:interleave_by] * (2**opts.params[:size]) 
   v = opts.params[:vector_size]
@@ -365,6 +371,7 @@ if $0 == __FILE__
     g = Generator.new(n,i,1,v,a,
       "wht_vector#{v}", "apply_small#{m}_v#{v}_il#{i}")
     g.run
+    g.interleave(true)
     g.vectorize(v)
   elsif v > 1
     g = Generator.new((n/v),1,v,v,a,
@@ -374,6 +381,7 @@ if $0 == __FILE__
     g = Generator.new(n,i,1,1,a,"wht_value", 
       "apply_small#{m}_il#{i}")
     g.run
+    g.interleave(true)
   else
     g = Generator.new(n,1,1,1,a,"wht_value", 
       "apply_small#{m}")

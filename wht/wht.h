@@ -76,9 +76,10 @@ typedef struct split_children split_children;
  *
  * \param Wht     Pointer to wht plan 
  * \param S       Stride at which to access the input vector
+ * \param U       Base stride 
  * \param x       Input vector
  */
-typedef void (*codelet_apply_fp)(Wht *W, long S, wht_value *x);
+typedef void (*codelet_apply_fp)(Wht *W, long S, size_t U, wht_value *x);
 
 /**
  *\todo Remove this typedef alias once codelet registry is created with this new type
@@ -352,6 +353,7 @@ Wht * small_init(char *name, size_t n, int params[], size_t np);
  *
  * \param   W   Transform
  * \param   S   Stride to apply transform at
+ * \param   D   Base stride
  * \param   x   Input vector
  *
  *  A \f$ {\bf WHT}_{2^n} \f$ can be split into \f$ k \f$ \f$ {\bf WHT} \f$ 's of smaller size
@@ -366,7 +368,7 @@ Wht * small_init(char *name, size_t n, int params[], size_t np);
  * The \f$ {\bf WHT}_{2^n} \f$ is performed by stepping through this product
  * from right to left.
  */
-void split_apply(Wht *W, long S, wht_value *x);
+void split_apply(Wht *W, long S, size_t D, wht_value *x);
 
 char *
 error_msg_get();
@@ -378,7 +380,7 @@ error_msg_set(char *format, ...);
 /**
  * \todo Move these macros to an external interface.
  */
-#define wht_apply(W, x) ((W->apply)(W, 1, x))
+#define wht_apply(W, x) ((W->apply)(W, 1, 0, x))
 #define wht_free(W) ((W->free)(W))
 
 #define wht_parse(s) (parse(s))
