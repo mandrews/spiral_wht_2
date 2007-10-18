@@ -21,6 +21,14 @@ typedef __m128d wht_vector2;
 #define vshuf2(R0,R1,R2,A,B) \
   R0 = _mm_shuffle_pd(R1, R2, _MM_SHUFFLE2(A,B))
 
+#define vload2u(R0,A0,A1) \
+  R0 = _mm_loadh_pd(R0,&A0); \
+  R0 = _mm_loadl_pd(R0,&A1); 
+
+#define vstore2u(R0,A0,A1) \
+  _mm_storeh_pd(&A0,R0); \
+  _mm_storel_pd(&A1,R0); 
+
 #endif/*WHT_DOUBLE*/
 
 #if (WHT_FLOAT == 1) && (WHT_HAVE_SSE == 1) && (WHT_VECTOR_SIZE == 4)
