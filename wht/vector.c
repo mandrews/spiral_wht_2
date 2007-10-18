@@ -102,7 +102,6 @@ interleave_vector_init(char *name, size_t n, int params[], size_t np)
     wht_error("not configured for codelets of size %zd interleaved by %zd", n, k);
 
   W           = small_init(name, n, params, np);
-  W->nk       = k; /* XXX: Right stride parameter */
   W->accept   = interleave_vector_accept;
 
   W->attr[vector_size]    = v;

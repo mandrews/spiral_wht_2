@@ -64,6 +64,7 @@ Wht *
 null_init(char *name, size_t n, int params[], size_t np)
 {
   Wht *W;
+  size_t i;
 
   W            = (Wht *) i_malloc(sizeof(Wht));
   W->N         = (1 << n); 
@@ -78,7 +79,9 @@ null_init(char *name, size_t n, int params[], size_t np)
   W->left      = W->N;
   W->right     = 1;
   W->parent    = NULL;
-  W->nk        = 1; /* XXX: Right stride parameter */
+
+  for (i = 0; i < MAX_ATTRIBUTES; i++)
+    W->attr[i] = -1;
 
   return W;  
 }

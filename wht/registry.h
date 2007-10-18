@@ -4,13 +4,14 @@
 #include "wht.h"
 
 /* Split Extensions to core package */
-Wht *
-transpose_init(char *name, Wht *Ws[], size_t nn, int params[], size_t np);
+Wht * transpose_init(char *name, Wht *Ws[], size_t nn, int params[], size_t np);
+Wht * split_interleave_init(char *name, Wht *Ws[], size_t nn, int params[], size_t np);
 
 static const split_init_entry
 splits_registry[] = {
-  { "split",    0, (split_init_fp) &split_init },
-  { "tsplit",   0, (split_init_fp) &transpose_init },
+  { "split",        0, (split_init_fp) &split_init },
+  { "splitddl",     0, (split_init_fp) &transpose_init },
+  { "splitil",      0, (split_init_fp) &split_interleave_init },
   SPLIT_INIT_ENTRY_END /* This halts iteration on the registry */
 };
 

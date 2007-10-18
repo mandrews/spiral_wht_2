@@ -125,8 +125,6 @@ struct Wht {
 
   size_t np; /**< Number of parameters used by codelet */
 
-  size_t nk;
-
   int attr[MAX_ATTRIBUTES]; /**< Attributes associated with WHT */
 };
 
@@ -369,6 +367,8 @@ Wht * small_init(char *name, size_t n, int params[], size_t np);
  * from right to left.
  */
 void split_apply(Wht *W, long S, size_t D, wht_value *x);
+
+bool split_accept(Wht *W);
 
 char *
 error_msg_get();
