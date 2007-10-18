@@ -371,7 +371,7 @@ if $0 == __FILE__
     g = Generator.new(n,i,1,v,a,
       "wht_vector#{v}", "apply_small#{m}_v#{v}_il#{i}")
     g.run
-    g.interleave(true)
+    g.interleave(false)
     g.vectorize(v)
   elsif v > 1
     g = Generator.new((n/v),1,v,v,a,

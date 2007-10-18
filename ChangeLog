@@ -1,3 +1,111 @@
+2007-10-15 19:23  ma53
+
+	* configure.ac, wht/direct.c, wht/null.c, wht/split.c,
+	  wht/transpose.c, wht/vector.c, wht/wht.h, whtgen/whtgen: Added
+	  base stride factor now interleaving is working properly.
+
+2007-10-10 20:58  ma53
+
+	* TODO, wht/Makefile.am, wht/registry.h, wht/transpose.c: First try
+	  and implementing split transpose.
+
+2007-10-05 15:00  ma53
+
+	* configure.ac: Added compiler flags for sse instructions in case
+	  the compiler was installed improperly.
+
+2007-10-04 21:35  ma53
+
+	* utils/combin.cxx: Fixed another random composition tree semantic
+	  error.
+
+2007-10-04 21:09  ma53
+
+	* utils/combin.cxx: Fixed max_n semantics.
+
+2007-10-04 20:45  ma53
+
+	* utils/combin.cxx: Fixed compilation issue.
+
+2007-10-04 20:45  ma53
+
+	* utils/randtree.cxx: Fixed options issue.
+
+2007-10-04 20:43  ma53
+
+	* tests/Makefile.am, tests/correctness.rb: Test now accepts
+	  environment variable for builddir.
+
+2007-10-04 19:57  ma53
+
+	* Makefile.am, tests, tests/Makefile.am: Properly integrated tests
+	  with build environment.
+
+2007-10-04 19:57  ma53
+
+	* doc: Set ignore on generated documentation.
+
+2007-10-04 19:31  ma53
+
+	* Makefile.am, configure.ac, test, tests, tests/Makefile.am,
+	  tests/correctness.rb: Integrated tests into build system.
+
+2007-10-04 19:23  ma53
+
+	* TODO, test, test/correctness.rb: Added simple proof of concept
+	  correctness testing script.
+
+2007-10-04 18:50  ma53
+
+	* measure/papi/measure.c, measure/usec/measure.c: Measure now test
+	  for acceptance.
+
+2007-10-04 18:49  ma53
+
+	* wht/interleave.c, wht/split.c, wht/vector.c: Fixed acceptance
+	  problem with right most vector codelet.
+
+2007-10-04 18:28  ma53
+
+	* wht/null.c, wht/vector.c: Fixed acceptance problem with single
+	  smallv codelets.
+
+2007-10-04 18:09  ma53
+
+	* wht/interleave.c, wht/null.c, wht/vector.c, wht/wht.c, wht/wht.h:
+	  Top down accept now functioning as expected.
+
+2007-10-04 17:01  ma53
+
+	* wht/null.c, wht/small.c, wht/split.c, wht/vector.c, wht/wht.h: In
+	  order to handle vectorized interleaving validation, needed to
+	  store a pointer to parent inside wht.
+
+2007-10-04 16:45  ma53
+
+	* wht/null.c, wht/small.c, wht/split.c, wht/vector.c, wht/verify.c,
+	  wht/wht.c, wht/wht.h: First pass at top down validation, working
+	  for vectorized codelets.
+
+2007-10-03 15:54  ma53
+
+	* wht/interleave.c, wht/vector.c: Fixed initialization check
+	  condition
+
+2007-10-03 15:30  ma53
+
+	* measure/papi/measure.c: Can specify papi metrics from the command
+	  line now.
+
+2007-10-02 22:56  ma53
+
+	* ChangeLog, NEWS, configure.ac: Update release documentation.
+
+2007-10-02 22:48  ma53
+
+	* utils/Makefile.am, utils/randtree.cxx: Fixed a dependancy issue
+	  and cleaned up usage.
+
 2007-10-02 22:14  ma53
 
 	* README, TODO: Updated internal documentation.

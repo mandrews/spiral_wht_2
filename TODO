@@ -31,11 +31,7 @@ Bugs:
 
   - share/wht_best_trees.txt should not be clobbered by new installation
 
-  - whtgen/whtgen should catch SIGINT and write best trees so to disk
+  - whtgen/whtgen should catch SIGINT and write best trees to disk
 
-Issues:
-
-  - splitil and internal stride issue
-
-  - s_n_il_k, needs another calling parameter to work in general
+  - whtgen/whtgen should check for write permssion on best tress
 

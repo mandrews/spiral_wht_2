@@ -1,5 +1,5 @@
 #  Process this file with autoconf to produce a configure script.
-AC_INIT(spiral_wht, 2.0-pre-2, mjand@drexel.edu)
+AC_INIT(spiral_wht, 2.0-pre-3, mjand@drexel.edu)
 AC_CONFIG_HEADERS([config.h])
 
 AM_INIT_AUTOMAKE(1.9)
@@ -29,7 +29,7 @@ MAX_UNROLL=6
 MAX_INTERLEAVE=0
 VECTOR_SIZE=0
 
-
+CFLAGS="-O2"
 
 # 
 #  T R A N S F O R M   T Y P E

@@ -274,7 +274,7 @@ class Search
   end
 
   def split_codelets
-    [ "split" ]
+    @il_max > 1 ? ["splitil"] : [ "split" ] 
   end
 
   def leftify(codelet)
