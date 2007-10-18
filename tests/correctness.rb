@@ -70,18 +70,24 @@ def expect_error(plan)
   end
 end
 
-def split(plan, k, extra = nil) 
-  a = []
-  k.times { a << plan }
-  a << extra if extra
+def split(*a)
   "split[" + a.join(',') + "]"
 end
 
-def splitil(plan, k, extra = nil) 
-  a = []
-  k.times { a << plan }
-  a << extra if extra
+def splitil(*a)
   "splitil[" + a.join(',') + "]"
+end
+
+def small(s)
+  ["small[#{s}]"]
+end
+
+def smallv(s, *v)
+  ["smallv(#{v.join(',')})[#{s}]"]
+end
+
+def smallil(s, k)
+  ["smallil(#{k})[#{s}]"]
 end
 
 if $0 == __FILE__ # Main Entry Point
@@ -93,65 +99,61 @@ if $0 == __FILE__ # Main Entry Point
   puts
 
   for size in 1 .. n do
-    expect_correct("small[#{size}]")
+    expect_correct(small(size))
   end
 
   for size in n+1 .. 2*n do
-    expect_error("small[#{size}]")
+    expect_error(small(size))
   end
 
   for size in 1 .. n do
-    expect_correct(split("small[#{size}]",2))
+    expect_correct(split(small(size) * 2))
   end
 
   v = env['vector_size']
 
   if v > 0
+    puts "\nVectorization Tests"
+    puts
 
-  puts "\nVectorization Tests"
-  puts
+    for size in v .. n do
+      expect_correct(smallv(size,v))
+    end
 
-  for size in v .. n do
-    expect_correct("smallv(#{v})[#{size}]")
-  end
+    for size in v .. n do
+      expect_reject(split(smallv(size,v)*2))
+    end
 
-  for size in v .. n do
-    expect_reject(split("smallv(#{v})[#{size}]",2))
-  end
+    for size in v .. n do
+      expect_correct(split(split(small(1)*4),smallv(size,v)))
+    end
 
-  for size in v .. n do
-    expect_correct("split[" + split("small[1]",4) + ",smallv(#{v})[#{size}]]")
-  end
-
-  for size in v .. n do
-    expect_reject("split[" + split("small[1]",3, "smallv(#{v})[#{size}]") + ", small[1]]")
-  end
-
+    for size in v .. n do
+      expect_reject(split(split(small(1)*3),smallv(size,v),small(1)))
+    end
   end 
 
   i = env['max_interleave']
 
   if i > 0
+    puts "\nInterleave Tests"
+    puts
 
-  puts "\nInterleave Tests"
-  puts
+    for x in 1 .. i do
+      y = 2**x
+      expect_correct(splitil(smallil(1,y)*1, small(n)))
+      expect_correct(splitil(smallil(1,y)*2, small(n)))
+    end
 
-  for x in 1 .. i do
-    y = 2**x
-    expect_correct(splitil("smallil(#{y})[1]",1,"small[#{n}]"))
-    expect_correct(splitil("smallil(#{y})[1]",2,"small[#{n}]"))
-  end
+    for x in i+1 .. 2*i do
+      y = 2**x
+      expect_error(splitil(smallil(1,y)*1, small(n)))
+    end
 
-  for x in i+1 .. 2*i do
-    y = 2**x
-    expect_error(splitil("smallil(#{y})[1]",1,"small[#{n}]"))
-  end
-
-  for x in 2 .. i do
-    y = 2**x
-    expect_reject(splitil("smallil(#{y})[1]",1,"small[1]"))
-  end
-
+    for x in 2 .. i do
+      y = 2**x
+      expect_reject(splitil(smallil(1,y)*1, small(1)))
+    end
   end 
 
   exit(0)
