@@ -3,6 +3,21 @@
 bool
 interleave_accept(Wht *W)
 {
+  if (W->parent == NULL) {
+    error_msg_set("codelet smallil(%d)[%d] must be used in conjunction with splitil", 
+      W->attr[interleave_by],
+      W->n);
+    return false;
+  }
+
+  if (strncmp("splitil", W->parent->name, strlen("splitil"))) {
+    error_msg_set("codelet smallil(%d)[%d] must be used in conjunction with splitil", 
+      W->attr[interleave_by],
+      W->n);
+
+    return false;
+  }
+
   if (W->attr[interleave_by] > W->right) {
     error_msg_set("interleave factor %d must be < %d in smallil(%d)[%d]", 
       W->attr[interleave_by],

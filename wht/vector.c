@@ -56,6 +56,23 @@ interleave_vector_accept(Wht *W)
    * This * only occurs with vectors of size >= 4  
    */
 
+  if (W->parent == NULL) {
+    error_msg_set("codelet smallv(%d,%d)[%d] must be used in conjunction with splitil", 
+      W->attr[vector_size],
+      W->attr[interleave_by],
+      W->n);
+    return false;
+  }
+
+  if (strncmp("splitil", W->parent->name, strlen("splitil"))) {
+    error_msg_set("codelet smallv(%d,%d)[%d] must be used in conjunction with splitil", 
+      W->attr[vector_size],
+      W->attr[interleave_by],
+      W->n);
+
+    return false;
+  }
+
   if (W->parent->right != 1) {
     error_msg_set("vector codelet smallv(%d,%d)[%d] must be relatively right most in a plan",
       W->attr[vector_size],

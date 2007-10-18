@@ -113,7 +113,7 @@ if $0 == __FILE__ # Main Entry Point
   v = env['vector_size']
 
   if v > 0
-    puts "\nVectorization Tests"
+    puts "\nVectorization Tests (1)"
     puts
 
     for size in v .. n do
@@ -136,13 +136,20 @@ if $0 == __FILE__ # Main Entry Point
   i = env['max_interleave']
 
   if i > 0
-    puts "\nInterleave Tests"
+    puts "\nInterleave Tests (1)"
     puts
 
     for x in 1 .. i do
       y = 2**x
       expect_correct(splitil(smallil(1,y)*1, small(n)))
       expect_correct(splitil(smallil(1,y)*2, small(n)))
+    end
+
+    # Need to use splitil with smallil
+    for x in 1 .. i do
+      y = 2**x
+      expect_reject(split(smallil(1,y)*1, small(n)))
+      expect_reject(split(smallil(1,y)*2, small(n)))
     end
 
     for x in i+1 .. 2*i do
@@ -154,7 +161,42 @@ if $0 == __FILE__ # Main Entry Point
       y = 2**x
       expect_reject(splitil(smallil(1,y)*1, small(1)))
     end
+
+    for x in 2 .. i do
+      y = 2**x
+      expect_reject(smallil(n,y))
+    end
   end 
+
+  if v > 0 and i > 0
+    puts "\nVectorization Tests (2)"
+    puts
+
+    for size in v .. n do
+      expect_correct(splitil(smallv(1,v,v)*4,smallv(size,v)))
+    end
+
+    for size in v .. n do
+      expect_correct(splitil(smallv(1,v,v), splitil(smallv(1,v,v),smallv(size,v))))
+    end
+
+    # Present system allows only unit stride vectorized codelets
+    for size in v .. n do
+      expect_reject(splitil(
+        splitil(smallv(1,v,v), small(size)),
+        splitil(smallv(1,v,v), small(size))))
+    end
+
+    for size in v .. n do
+      expect_reject(split(smallv(1,v,v)*4,smallv(size,v)))
+    end
+
+    for x in 2 .. i do
+      y = 2**x
+      expect_reject(smallv(n,v,y))
+    end
+
+  end
 
   exit(0)
 
