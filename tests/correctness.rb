@@ -77,6 +77,13 @@ def split(plan, k, extra = nil)
   "split[" + a.join(',') + "]"
 end
 
+def splitil(plan, k, extra = nil) 
+  a = []
+  k.times { a << plan }
+  a << extra if extra
+  "splitil[" + a.join(',') + "]"
+end
+
 if $0 == __FILE__ # Main Entry Point
   env = load_runtime_env
 
@@ -131,18 +138,18 @@ if $0 == __FILE__ # Main Entry Point
 
   for x in 1 .. i do
     y = 2**x
-    expect_correct(split("smallil(#{y})[1]",1,"small[#{n}]"))
-    expect_correct(split("smallil(#{y})[1]",2,"small[#{n}]"))
+    expect_correct(splitil("smallil(#{y})[1]",1,"small[#{n}]"))
+    expect_correct(splitil("smallil(#{y})[1]",2,"small[#{n}]"))
   end
 
   for x in i+1 .. 2*i do
     y = 2**x
-    expect_error(split("smallil(#{y})[1]",1,"small[#{n}]"))
+    expect_error(splitil("smallil(#{y})[1]",1,"small[#{n}]"))
   end
 
   for x in 2 .. i do
     y = 2**x
-    expect_reject(split("smallil(#{y})[1]",1,"small[1]"))
+    expect_reject(splitil("smallil(#{y})[1]",1,"small[1]"))
   end
 
   end 
