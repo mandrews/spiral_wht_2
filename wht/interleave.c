@@ -30,7 +30,6 @@ interleave_accept(Wht *W)
   return true;
 }
 
-
 Wht *
 interleave_init(char *name, size_t n, int params[], size_t np)
 {
@@ -102,3 +101,52 @@ split_interleave_init(char *name, Wht *Ws[], size_t nn, int params[], size_t np)
   return W;  
 }
 
+/** \todo This should go into external extensions header */
+Wht *
+interleave_convert(Wht *W, size_t k);
+
+Wht *
+small_interleave_convert(Wht *W, size_t k)
+{
+  size_t kp, k_min;
+  int *params;
+
+  if (W->right < (1 << WHT_MAX_INTERLEAVE))
+    k_min = W->right;
+  else
+    k_min = (1 << WHT_MAX_INTERLEAVE);
+ 
+  for (kp = k; kp > k_min; kp--);
+
+  if (kp < 2) 
+    return small_init("small", W->n, NULL, 0);
+
+  params = i_malloc(sizeof(*params)*1);
+  params[0] = kp;
+
+  return interleave_init("smallil", W->n, params, 1);
+}
+
+Wht *
+split_interleave_convert(Wht *W, size_t k)
+{
+  size_t nn, i;
+  Wht **Ws;
+
+  nn = W->children->nn;
+  Ws = i_malloc(sizeof(*Ws) *nn);
+
+  for (i = 0; i < nn; i++) 
+    Ws[i] = interleave_convert(W->children->Ws[i], k);
+
+  return split_interleave_init("splitil", Ws, nn, NULL, 0);
+}
+
+Wht *
+interleave_convert(Wht *W, size_t k)
+{
+  if (W->children)
+    return split_interleave_convert(W, k);
+  else
+    return small_interleave_convert(W, k);
+}

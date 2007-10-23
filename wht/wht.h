@@ -382,6 +382,7 @@ error_msg_set(char *format, ...);
  */
 #define wht_apply(W, x) ((W->apply)(W, 1, 0, x))
 #define wht_free(W) ((W->free)(W))
+#define wht_to_string(W) ((W->to_string)(W))
 
 #define wht_parse(s) (parse(s))
 #define wht_info() (info())
