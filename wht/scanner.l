@@ -1,6 +1,7 @@
 %{
 
 #include "parser.h"
+#include "strings.h"
 
 %}
 
@@ -18,8 +19,7 @@
               return NUMBER;  
             }
 [a-zA-Z]+   { 
-
-              yylval.ident = strdup(yytext);
+              yylval.ident = strndup(yytext, strlen(yytext));
               return IDENT;  
             }
 .           { return yytext[0];   }

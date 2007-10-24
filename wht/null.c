@@ -9,6 +9,8 @@ null_accept(Wht *W)
 void 
 null_free(Wht *W) 
 {
+  if (W->name != NULL)
+    i_free(W->name);
   i_free(W);
 }
 
@@ -69,7 +71,7 @@ null_init(char *name, size_t n, int params[], size_t np)
   W            = (Wht *) i_malloc(sizeof(Wht));
   W->N         = (1 << n); 
   W->n         = n;
-  W->name      = name;
+  W->name      = strdup(name);
   W->params    = params;
   W->np        = np;
   W->free      = null_free;

@@ -73,7 +73,7 @@ split_free(Wht *W)
     W->children->Ws[i]->free(W->children->Ws[i]);
 
   i_free(W->children);
-  i_free(W);
+  null_free(W);
 }
 
 /** \todo Output parameter list */

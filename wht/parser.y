@@ -135,26 +135,39 @@ struct Wht*
 parse_split(char *ident, struct nodes *nodes, struct params *params)
 {
   split_init_fp call;
+  struct Wht *W;
  
   call  = split_lookup(ident, params->size);
 
   if (call == NULL)
     wht_error("%s was not registered in the split table", ident);
 
-  return (call)(ident, nodes->values, nodes->size, params->values, params->size);
+  W = (call)(ident, nodes->values, nodes->size, params->values, params->size);
+
+  i_free(ident);
+  i_free(params);
+  i_free(nodes);
+
+  return W;
 }
 
 struct Wht* 
 parse_small(char *ident, size_t size, struct params *params)
 {
   small_init_fp call;
+  struct Wht *W;
  
   call  = small_lookup(ident, params->size);
 
   if (call == NULL)
     wht_error("%s was not registered in the small table", ident);
 
-  return (call)(ident, size, params->values, params->size);
+  W = (call)(ident, size, params->values, params->size);
+
+  i_free(ident);
+  i_free(params);
+
+  return W;
 }
 
 struct nodes *
