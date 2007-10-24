@@ -124,3 +124,65 @@ interleave_vector_init(char *name, size_t n, int params[], size_t np)
   return W;  
 }
 
+/** \todo This should go into external extensions header */
+Wht *
+vector_convert(Wht *W, size_t v, size_t k);
+
+Wht *
+small_right_vector_convert(Wht *W, size_t v)
+{
+  int *params;
+  params = i_malloc(sizeof(*params)*1);
+  params[0] = v;
+  return right_vector_init("smallv", W->n, params, 1);
+}
+
+Wht *
+small_interleave_vector_convert(Wht *W, size_t v, size_t k)
+{
+  size_t kp, k_min;
+  int *params;
+
+  if (W->right < (1 << WHT_MAX_INTERLEAVE))
+    k_min = W->right;
+  else
+    k_min = (1 << WHT_MAX_INTERLEAVE);
+ 
+  for (kp = k; kp > k_min; kp--);
+
+  if (kp < 2) 
+    return small_init("small", W->n, NULL, 0);
+
+  params = i_malloc(sizeof(*params)*2);
+  params[0] = v;
+  params[1] = kp;
+
+  return interleave_vector_init("smallv", W->n, params, 2);
+}
+
+Wht *
+split_vector_convert(Wht *W, size_t v, size_t k)
+{
+  size_t nn, i;
+  Wht **Ws;
+
+  nn = W->children->nn;
+  Ws = i_malloc(sizeof(*Ws) *nn);
+
+  for (i = 0; i < nn; i++) 
+    Ws[i] = vector_convert(W->children->Ws[i], v, k);
+
+  return split_interleave_init("splitil", Ws, nn, NULL, 0);
+}
+
+
+Wht *
+vector_convert(Wht *W, size_t v, size_t k)
+{
+  if (W->children)
+    return split_vector_convert(W, v, k);
+  else if (W->parent == NULL || (W->parent->right == 1 && W->right == 1))
+    return small_right_vector_convert(W, v);
+  else
+    return small_interleave_vector_convert(W, v, k);
+}
