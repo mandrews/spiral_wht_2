@@ -108,6 +108,7 @@ interleave_convert(Wht *W, size_t k);
 Wht *
 small_interleave_convert(Wht *W, size_t k)
 {
+  Wht *Wp;
   size_t kp, k_min;
   int *params;
 
@@ -124,14 +125,17 @@ small_interleave_convert(Wht *W, size_t k)
   params = i_malloc(sizeof(*params)*1);
   params[0] = kp;
 
-  return interleave_init("smallil", W->n, params, 1);
+  Wp = interleave_init("smallil", W->n, params, 1);
+  i_free(params);
+
+  return Wp;
 }
 
 Wht *
 split_interleave_convert(Wht *W, size_t k)
 {
   size_t nn, i;
-  Wht **Ws;
+  Wht *Wp, **Ws;
 
   nn = W->children->nn;
   Ws = i_malloc(sizeof(*Ws) *nn);
@@ -139,7 +143,10 @@ split_interleave_convert(Wht *W, size_t k)
   for (i = 0; i < nn; i++) 
     Ws[i] = interleave_convert(W->children->Ws[i], k);
 
-  return split_interleave_init("splitil", Ws, nn, NULL, 0);
+  Wp = split_interleave_init("splitil", Ws, nn, NULL, 0);
+  i_free(Ws);
+
+  return Wp;
 }
 
 Wht *
