@@ -183,6 +183,8 @@ vector_convert(Wht *W, size_t v, size_t k)
     return split_vector_convert(W, v, k);
   else if (W->parent == NULL || (W->parent->right == 1 && W->right == 1))
     return small_right_vector_convert(W, v);
-  else
+  else if (W->parent == NULL || (W->parent->right == 1))
     return small_interleave_vector_convert(W, v, k);
+  else
+    return small_init("small", W->n, NULL, 0);
 }
