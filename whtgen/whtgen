@@ -45,8 +45,15 @@ class Options
       o.on("-a", "--aligned", 
         "Access aligned memory, i.e. at unit stride.") { |x| @params[:aligned] = true }
 
+      o.on("-d", "--debug",
+        "Turn on debuging.") { $DEBUG = true }
+
     end
   end
+end
+
+def assert
+  raise "assert failed" unless yield
 end
 
 def log2(n)
@@ -68,21 +75,21 @@ def permute(n,x,a,s,y,b,t,v,sign)
    
   t1,t2 = mk_tmp(2)
   if    p ==  [0,2,1,3] and v == 2
-    @stack.push Shuf.new(t1,x[a],x[a+s],[0,0],v)
-    @stack.push Shuf.new(t2,x[a],x[a+s],[1,1],v)
+    @stack.push ShufOp.new(t1,x[a],x[a+s],[0,0],v)
+    @stack.push ShufOp.new(t2,x[a],x[a+s],[1,1],v)
   elsif p ==  [0,2,1,3] and v == 4
-    @stack.push Shuf.new(t1,x[a],x[a+s],[0,1,0,1],v)
-    @stack.push Shuf.new(t2,x[a],x[a+s],[2,3,2,3],v)
+    @stack.push ShufOp.new(t1,x[a],x[a+s],[0,1,0,1],v)
+    @stack.push ShufOp.new(t2,x[a],x[a+s],[2,3,2,3],v)
   elsif p ==  [0,4,1,5,2,6,3,7] and v == 4 and sign > 0
-    @stack.push Shuf.new(t1,x[a],x[a+s],[0,1,0,1],v)
-    @stack.push Shuf.new(t2,x[a],x[a+s],[2,3,2,3],v)
-    @stack.push Shuf.new(t1,t1,t1,[0,2,1,3],v)
-    @stack.push Shuf.new(t2,t2,t2,[0,2,1,3],v)
+    @stack.push ShufOp.new(t1,x[a],x[a+s],[0,1,0,1],v)
+    @stack.push ShufOp.new(t2,x[a],x[a+s],[2,3,2,3],v)
+    @stack.push ShufOp.new(t1,t1,t1,[0,2,1,3],v)
+    @stack.push ShufOp.new(t2,t2,t2,[0,2,1,3],v)
   elsif p ==  [0,4,1,5,2,6,3,7] and v == 4 and sign < 0
-    @stack.push Shuf.new(x[a],x[a],x[a],[0,2,1,3],v)
-    @stack.push Shuf.new(x[a+s],x[a+s],x[a+s],[0,2,1,3],v)
-    @stack.push Shuf.new(t1,x[a],x[a+s],[0,1,0,1],v)
-    @stack.push Shuf.new(t2,x[a],x[a+s],[2,3,2,3],v)
+    @stack.push ShufOp.new(x[a],x[a],x[a],[0,2,1,3],v)
+    @stack.push ShufOp.new(x[a+s],x[a+s],x[a+s],[0,2,1,3],v)
+    @stack.push ShufOp.new(t1,x[a],x[a+s],[0,1,0,1],v)
+    @stack.push ShufOp.new(t2,x[a],x[a+s],[2,3,2,3],v)
   end
   y[b],y[b+t] = t1,t2
 end
@@ -105,8 +112,8 @@ end
 
 def wht_2(x,a,s,y,b,t,v)
   t1,t2 = mk_tmp(2)
-  @stack.push Add.new(t1,x[a],x[a+s],v)
-  @stack.push Sub.new(t2,x[a],x[a+s],v)
+  @stack.push AddOp.new(t1,x[a],x[a+s],v)
+  @stack.push SubOp.new(t2,x[a],x[a+s],v)
   y[b],y[b+t] = t1,t2
 end
 
@@ -129,115 +136,161 @@ def wht(n,x,a,s,y,b,t,v)
   end
 end
 
-class BinIns
-  attr_accessor :v
-  def initialize(r,a,b,v)
-    @r,@a,@b,@v = r,a,b,v
-    @t = 'ta'
-    @@stride = false
+class GenericOp
+  attr_accessor :vsize, :label, :base
+end
+
+class BinaryOp < GenericOp
+  def initialize(result, left, right, vsize = 1, label = 'ta')
+    @result ,@left, @right, @vsize = result, left, right, vsize
+    @label = label
   end
 
-  def interleave(k, stride = false)
-    @@stride = stride
-    k.times { @t = @t.succ }
+  def result
+    sprintf "%s%d", @label, @result
+  end
+
+  def left
+    sprintf "%s%d", @label, @left
+  end
+
+  def right
+    sprintf "%s%d", @label, @right
   end
 
   def tmps
-    [(sprintf "%s%d",@t,@r),
-     (sprintf "%s%d",@t,@a), 
-     (sprintf "%s%d",@t,@b), ]
+    [ result, left, right ]
   end
 end
 
-class Add < BinIns
+class AddOp < BinaryOp
   def to_s
-    if @v < 2 
-      "#{@t}#{@r} = #{@t}#{@a} + #{@t}#{@b};\n"
+    if vsize < 2 
+      "#{result} = #{left} + #{right};\n"
     else
-      "vadd#{@v}(#{@t}#{@r},#{@t}#{@a},#{@t}#{@b});\n"
+      "vadd#{vsize}(#{result},#{left},#{right});\n"
     end
   end
 end
 
-class Sub < BinIns
+class SubOp < BinaryOp
   def to_s
-    if @v < 2 
-      "#{@t}#{@r} = #{@t}#{@a} - #{@t}#{@b};\n"
+    if vsize < 2 
+      "#{result} = #{left} - #{right};\n"
     else
-      "vsub#{@v}(#{@t}#{@r},#{@t}#{@a},#{@t}#{@b});\n"
+      "vsub#{vsize}(#{result},#{left},#{right});\n"
     end
   end
 end
 
-class Shuf < BinIns
-  def initialize(r,a,b,m,v)
-    # TODO assert m.size = v
-    super(r,a,b,v)
-    @m = m
+class ShufOp < BinaryOp
+  def initialize(result, left, right, pattern, vsize = 1, label = 'ta')
+    assert { pattern.size == vsize }
+
+    super(result, left, right, vsize, label)
+    @pattern = pattern
   end
 
   def to_s
-    if @v < 2 
+    if vsize < 2 
       "/* undefined*/;\n"
     else
-      "vshuf#{@v}(#{@t}#{@r},#{@t}#{@a},#{@t}#{@b},#{@m.join(',')});\n"
+      "vshuf#{vsize}(#{result},#{left},#{right},#{@pattern.join(',')});\n"
     end
   end
 end
 
-class MemIns
-  attr_accessor :v
-  def initialize(r,m,s,a,v)
-    @r,@m,@s,@a,@v = r,m,s,a,v
-    @k = 0
-    @t = 'ta'
-    @@stride = false
-  end
+class MemoryOp < GenericOp
+  attr_reader :from
+  attr_accessor :base_by, :stride_by
 
-  def interleave(k, stride = false)
-    @@stride = stride
-    @k = k
-    k.times { @t = @t.succ }
+  def initialize(into, from, base = 0, stride = 1, vsize = 1, label = 'ta')
+    @into, @from, @base, @stride, @vsize = into, from, base, stride, vsize
+    @label = label
   end
 
   def stride
-    if @@stride
-      @a ? "#{@s+@k} * S" : "(#{@s} * S) + (#{@k} * U)"
-    else
-      @a ? "#{@s+@k}" : "(#{@s} * S) + #{@k}"
+    return "(#{@base} * U) + (#{@stride} * S)" if $DEBUG
+
+    e1 =
+    case @base
+      when 0
+        "0"
+      when 1
+        "U"
+      else
+        "#{@base} * U"
     end
+
+    # Replace U in expression and simplify
+    e1 = eval e1.gsub(/U/,@base_by.to_s) if @base_by
+
+    e2 =
+    case @stride
+      when 0
+        "0"
+      when 1
+        "S"
+      else
+        "#{@stride} * S"
+    end
+
+    # Replace S in expression and simplify
+    e2 = eval e2.gsub(/S/,@stride_by.to_s) if @stride_by
+
+    e1, e2 = e1.to_s, e2.to_s
+
+    case [e1,e2]
+      when ["0", "0"]
+        "0"
+      when [e1, "0"]
+        e1
+      when ["0", e2]
+        e2
+      else
+        "(#{e1}) + (#{e2})"
+    end
+  end
+
+  def into
+    sprintf "%s%d", @label, @into
   end
 
   def tmps
-    [(sprintf "%s%d",@t,@r)]
+    [ into ]
   end
 end
 
-class Load < MemIns
+class LoadOp < MemoryOp
   def to_s
-    if @v < 2 
-      sprintf "%s%d = %s[%s];\n",@t,@r,@m,stride
+    if vsize < 2 
+      sprintf "%s = %s[%s];\n", into, from, stride
     else
-      sprintf "vload%d(%s%d,%s[%s]);\n",@v,@t,@r,@m,stride
+      sprintf "vload%d(%s,%s[%s]);\n", vsize, into, from, stride
     end
   end
 end
 
-class Store < MemIns
+class StoreOp < MemoryOp
   def to_s
-    if @v < 2 
-      sprintf "%s[%s] = %s%d;\n",@m,stride,@t,@r
+    if vsize < 2 
+      sprintf "%s[%s] = %s;\n", from, stride, into
     else
-      sprintf "vstore%d(%s%d,%s[%s]);\n",@v,@t,@r,@m,stride
+      sprintf "vstore%d(%s,%s[%s]);\n", vsize, into, from, stride
     end
   end
 end
 
 class Generator
-  def initialize(n,i,v,vp,a,type,name)
-    @n,@i,@v,@vp,@a,@type,@name = n,i,v,vp,a,type,name
+  attr_accessor :name, :type
+
+  def initialize(n, vsize = 1, name = "apply_small#{n}", type = "wht_value")
+    @n, @vsize, @name, @type = n, vsize, name, type
     @stack  = []
     @tmp    = 0
+    @guards = [ "(#{log2(@n)} <= WHT_MAX_UNROLL)" ]
+
+    run
   end
 
   def mk_tmp(k=1)
@@ -250,61 +303,30 @@ class Generator
     a
   end
 
-  def compile_guard
-    g = []
-    g << "(#{log2(@n)} <= WHT_MAX_UNROLL)"
-		g << "(#{log2(@i)} <= WHT_MAX_INTERLEAVE)" if @i > 1
-		g << "(#{@vp} == WHT_VECTOR_SIZE)"   if @vp > 1
-    "#if " + g.join(" && ") + "\n"
-  end
-
   def to_s
     body = ""
     tmps = []
+
     @stack.each do |x|
       body += INDENT + x.to_s
       tmps += x.tmps
     end
 
-    a = @a ? '_a' : ''
-
     header  = "#include \"wht.h\"\n\n" +
-              "void #{@name}#{a}(Wht *W, long S, size_t U, wht_value *x)\n{\n"
+              "void #{@name}(Wht *W, long S, size_t U, wht_value *x)\n{\n"
 
-		header += compile_guard
+    header += "#if " + @guards.join(" && ") + "\n"
 
+    # Declarations of temporary registers
     decls = ""
-    tmps.uniq.each do |t|
-      decls += sprintf "%s%s %s;\n",INDENT, @type, t
+    tmps.uniq.each do |tmp|
+      decls += sprintf "%s%s %s;\n", INDENT, @type, tmp
     end
 
     footer  = ""
     footer += "#else\n   wht_error(\"initialization guards should prevent this message\");\n" 
 		footer += "#endif\n"
     header + decls + body + footer + "}\n"
-  end
-
-  def interleave(stride = false)
-    q = []
-    @stack.each do |x|
-      q << x.clone
-      for k in 1 .. @i-1 do # Make i copies
-        y = x.clone
-        y.interleave(k, stride)
-        q << y
-      end
-    end
-    @stack = q
-  end
-
-  def vectorize(v)
-    p = []
-    (0..@stack.size-1).step(v) do |i|
-      x = @stack[i]
-      x.v = v
-      p << x
-    end
-    @stack = p
   end
 
   def run
@@ -314,18 +336,65 @@ class Generator
     @n.times do |i| 
       t = mk_tmp
       x[i] = t
-      @stack.push  Load.new(t,"x",(i*@v),@a,@v)
+      @stack.push  LoadOp.new(t,"x", 0, (i*@vsize), @vsize)
     end
 
-    wht(@n*@v,x,0,1,y,0,1,@v)
+    wht(@n*@vsize,x,0,1,y,0,1,@vsize)
 
     @n.times do |i| 
       t = y[i] 
-      @stack.push Store.new(t,"x",(i*@v),@a,@v)
+      @stack.push StoreOp.new(t,"x", 0, (i*@vsize), @vsize)
     end
 
   end
+
+  # Transforms
+
+  def interleave(factor)
+    stack = []
+    @stack.each do |x|
+      stack << x.clone
+      base, label = 0, x.label
+      for k in 1 .. factor - 1 do # Make factor copies
+        y = x.clone
+
+        base, label = base + 1, label.succ # Increment base and label
+
+        y.base, y.label = base, label
+
+        stack << y
+      end
+    end
+    @stack = stack
+
+    @guards << "(#{log2(factor)} <= WHT_MAX_INTERLEAVE)"
+  end
+
+  def group(factor)
+    stack = []
+    (0..@stack.size-1).step(factor) do |i|
+      x = @stack[i]
+      stack << x
+    end
+    @stack = stack
+
+  end
+
+  def vectorize(factor)
+    @stack.each { |x| x.vsize = factor }
+    @guards << "(#{factor} == WHT_VECTOR_SIZE)" 
+  end
+
+  def align_base
+    @stack.each { |x| x.base_by = 1 if x.kind_of?(MemoryOp) }
+  end
+
+  def align_stride
+    @stack.each { |x| x.stride_by = 1 if x.kind_of?(MemoryOp) }
+  end
+
 end
+
 
 def die(msg)
   puts msg
@@ -360,32 +429,47 @@ if $0 == __FILE__
 
   m = opts.params[:size]
   v = opts.params[:vector_size]
-  i = opts.params[:interleave_by]
+  k = opts.params[:interleave_by]
   a = opts.params[:aligned] 
 
   check_opts(opts)
 
   n = 2**m
 
-  if v > 1 and i > 1 
-    g = Generator.new(n,i,1,v,a,
-      "wht_vector#{v}", "apply_small#{m}_v#{v}_il#{i}")
-    g.run
-    g.interleave(false)
-    g.vectorize(v)
+  mode, np, vp = :identity, n, v
+
+  if v > 1 and k > 1
+    mode, vp = :general_vectorize, 1
   elsif v > 1
-    g = Generator.new((n/v),1,v,v,a,
-      "wht_vector#{v}", "apply_small#{m}_v#{v}")
-    g.run
-  elsif i > 1
-    g = Generator.new(n,i,1,1,a,"wht_value", 
-      "apply_small#{m}_il#{i}")
-    g.run
-    g.interleave(true)
-  else
-    g = Generator.new(n,1,1,1,a,"wht_value", 
-      "apply_small#{m}")
-    g.run
+    mode, np = :right_vectorize, (2**m) / v
+  elsif k > 1
+    mode = :interleave
+  end
+
+
+  g = Generator.new(np,vp)
+
+  case mode
+    when :general_vectorize
+      g.name = "apply_small#{m}_v#{v}_il#{k}"
+      g.type = "wht_vector#{v}"
+      g.interleave(k)
+      g.group(v)
+      g.vectorize(v)
+      g.align_base 
+    when :right_vectorize
+      g.name = "apply_small#{m}_v#{v}"
+      g.type = "wht_vector#{v}"
+      g.vectorize(v)
+
+      if a
+        g.align_stride
+        g.name += "_a"
+      end
+
+    when :interleave
+      g.name = "apply_small#{m}_il#{k}"
+      g.interleave(k)
   end
 
   puts g
