@@ -11,6 +11,10 @@ null_free(Wht *W)
 {
   if (W->name != NULL)
     i_free(W->name);
+
+  if (W->params != NULL)
+    i_free(W->params);
+
   i_free(W);
 }
 
@@ -72,7 +76,6 @@ null_init(char *name, size_t n, int params[], size_t np)
   W->N         = (1 << n); 
   W->n         = n;
   W->name      = strdup(name);
-  W->params    = params;
   W->np        = np;
   W->free      = null_free;
   W->apply     = null_apply;
@@ -81,6 +84,11 @@ null_init(char *name, size_t n, int params[], size_t np)
   W->left      = W->N;
   W->right     = 1;
   W->parent    = NULL;
+
+  W->params    = (int *) i_malloc(sizeof(int) * MAX_CODELET_PARAMS);
+
+  for (i = 0; i < MAX_CODELET_PARAMS; i++)
+    W->params[i] = params[i];
 
   for (i = 0; i < MAX_ATTRIBUTES; i++)
     W->attr[i] = -1;
