@@ -281,6 +281,31 @@ class StoreOp < MemoryOp
   end
 end
 
+class VectorMemoryOp
+  def initialize(ops)
+    @ops = ops
+  end
+
+  def tmps
+    @ops.first.tmps
+  end
+
+  def vsize=(v)
+    @ops.first.vsize = v
+  end
+
+  def to_s
+    vsize = @ops.first.vsize
+    into  = @ops.first.into
+    froms = @ops.collect { |x| sprintf "%s[%s]", x.from, x.stride }
+    if @ops.first.kind_of?(LoadOp)
+      sprintf "vload%du(%s,%s);\n", vsize, into, froms.join(',')
+    else
+      sprintf "vstore%du(%s,%s);\n", vsize, into, froms.join(',')
+    end
+  end
+end
+
 class Generator
   attr_accessor :name, :type
 
@@ -370,14 +395,25 @@ class Generator
     @guards << "(#{log2(factor)} <= WHT_MAX_INTERLEAVE)"
   end
 
-  def group(factor)
+  def group(factor, unaligned = false)
     stack = []
-    (0..@stack.size-1).step(factor) do |i|
-      x = @stack[i]
-      stack << x
+    copy  = @stack.dup
+    until copy.empty?
+      x = copy.shift
+      if x.kind_of? MemoryOp and unaligned
+        vector = [x]
+        (factor - 1).times { 
+          vector << copy.shift 
+        }
+        stack << VectorMemoryOp.new(vector)
+      else
+        stack << x
+        (factor - 1).times {
+          copy.shift
+        }
+      end
     end
     @stack = stack
-
   end
 
   def vectorize(factor)
@@ -438,14 +474,15 @@ if $0 == __FILE__
 
   mode, np, vp = :identity, n, v
 
-  if v > 1 and k > 1
+  if v > 1 and k > 1 and not a
     mode, vp = :general_vectorize, 1
+  elsif v > 1 and k > 1 
+    mode, vp = :topmost_vectorize, 1
   elsif v > 1
     mode, np = :right_vectorize, (2**m) / v
   elsif k > 1
     mode = :interleave
   end
-
 
   g = Generator.new(np,vp)
 
@@ -454,19 +491,20 @@ if $0 == __FILE__
       g.name = "apply_small#{m}_v#{v}_il#{k}"
       g.type = "wht_vector#{v}"
       g.interleave(k)
+      g.group(v,true)
+      g.vectorize(v)
+    when :topmost_vectorize
+      g.name = "apply_small#{m}_v#{v}_il#{k}_a"
+      g.type = "wht_vector#{v}"
+      g.interleave(k)
       g.group(v)
       g.vectorize(v)
       g.align_base 
     when :right_vectorize
-      g.name = "apply_small#{m}_v#{v}"
+      g.name = "apply_small#{m}_v#{v}_a"
       g.type = "wht_vector#{v}"
       g.vectorize(v)
-
-      if a
-        g.align_stride
-        g.name += "_a"
-      end
-
+      g.align_stride
     when :interleave
       g.name = "apply_small#{m}_il#{k}"
       g.interleave(k)

@@ -27,10 +27,10 @@
 #define MAX_SPLIT_NODES        (32)
   /**< Maximum number of children for split codelets. */
 
-#define MAX_CODELET_PARAMS      (2)
+#define MAX_CODELET_PARAMS      (4)
   /**< Maximum number of parameters for all codelets. */
 
-#define MAX_ATTRIBUTES          (2) 
+#define MAX_ATTRIBUTES          (4) 
   /**< Maximum number of attributes for a WHT plan node.  */
 
 /**

@@ -62,14 +62,15 @@ for ($i=1;$i<=$small;$i++) {
   }
 }
 
-# Generate unaligned interleaved and vectorized codelets
+# Generate unaligned and aligned interleaved and vectorized codelets
 for ($i=1;$i<=$small;$i++) {
   for ($j=1;$j<=$interleave;$j++) {
     $l = 2**$j;
     for ($k=1;$k<=$vector;$k++) {
       $v = 2**$k;
       next unless $j >= $k; 
-      push(@codelets,($i, "smallv", [ $v, $l ], "s_$i\_il\_$l\_v$v.c", "-n $i -i $l -v $v"));
+      push(@codelets,($i, "smallv", [ $v, $l, 0 ], "s_$i\_il\_$l\_v$v.c", "-n $i -i $l -v $v"));
+      push(@codelets,($i, "smallv", [ $v, $l, 1 ], "s_$i\_il\_$l\_v$v\_a.c", "-n $i -i $l -v $v -a"));
     }
   }
 }
