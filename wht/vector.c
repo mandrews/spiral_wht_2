@@ -73,6 +73,8 @@ interleave_vector_accept(Wht *W)
     return false;
   }
 
+  /** \todo Decide if an explict parameter needs to be added here */
+#if 0
   if (W->parent->right != 1) {
     error_msg_set("vector codelet smallv(%d,%d)[%d] must be relatively right most in a plan",
       W->attr[vector_size],
@@ -80,6 +82,12 @@ interleave_vector_accept(Wht *W)
       W->n);
     return false;
   } 
+#else
+  if (W->parent->right == 1) {
+    W->params[2] = 1;
+    W->apply = wht_get_codelet(W->n, W->name, W->params, W->np);
+  }
+#endif
   
   if (W->attr[interleave_by] > W->right) {
     error_msg_set("interleave factor %d must be < %d in smallv(%d,%d)[%d]", 
