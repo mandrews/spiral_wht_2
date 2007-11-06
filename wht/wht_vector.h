@@ -22,8 +22,8 @@ typedef __m128d wht_vector2;
   R0 = _mm_shuffle_pd(R1, R2, _MM_SHUFFLE2(A,B))
 
 #define vload2u(R0,A0,A1) \
-  R0 = _mm_loadh_pd(R0,&A0); \
-  R0 = _mm_loadl_pd(R0,&A1); 
+  R0 = _mm_load_sd(&A1); \
+  R0 = _mm_loadh_pd(R0,&A0); 
 
 #define vstore2u(R0,A0,A1) \
   _mm_storeh_pd(&A0,R0); \
@@ -50,6 +50,28 @@ typedef __m128 wht_vector4;
 
 #define vshuf4(R0,R1,R2,A,B,C,D) \
   R0 = _mm_shuffle_ps(R1, R2, _MM_SHUFFLE(A,B,C,D))
+
+#define vload4u(R0,A0,A1,A2,A3) \
+  { \
+    wht_vector4 R1; \
+    R0 = _mm_load_ss(&A2); \
+    R1 = _mm_load_ss(&A3); \
+    R0 = _mm_loadh_pi(R0, (__m64 const *) &A0); \
+    R1 = _mm_loadh_pi(R1, (__m64 const *) &A1); \
+    vshuf4(R0,R1,R0,3,1,2,0); \
+  };
+
+#define vstore4u(R0,A0,A1,A2,A3) \
+  { \
+    _mm_store_ss(&A3,R0); \
+    vshuf4(R0,R0,R0,2,3,1,0); \
+    _mm_store_ss(&A2,R0); \
+    vshuf4(R0,R0,R0,1,2,3,0); \
+    _mm_store_ss(&A1,R0); \
+    vshuf4(R0,R0,R0,0,1,2,3); \
+    _mm_store_ss(&A0,R0); \
+  };
+
 
 #endif/*WHT_FLOAT*/
 
