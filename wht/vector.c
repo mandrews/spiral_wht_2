@@ -102,6 +102,20 @@ interleave_vector_accept(Wht *W)
   return true;
 }
 
+/** \todo Decide if an explict parameter needs to be added here */
+char *
+interleave_vector_to_string(Wht *W)
+{
+  char *buf;
+
+  /* NOTE: Hack to get null to ignore hidden parameter. */
+  W->np = 2;
+  buf = null_to_string(W);
+  W->np = 3;
+
+  return buf;
+}
+
 Wht *
 interleave_vector_init(char *name, size_t n, int params[], size_t np)
 {
@@ -125,8 +139,9 @@ interleave_vector_init(char *name, size_t n, int params[], size_t np)
 
   params[2] = 0;
 
-  W           = small_init(name, n, params, np + 1);
-  W->accept   = interleave_vector_accept;
+  W             = small_init(name, n, params, np + 1);
+  W->accept     = interleave_vector_accept;
+  W->to_string  = interleave_vector_to_string;
 
   W->attr[vector_size]    = v;
   W->attr[interleave_by]  = k;
