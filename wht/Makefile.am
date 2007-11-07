@@ -1,9 +1,11 @@
 EXTRA_DIST = wht.h wht_vector.h registry.h
-BUILT_SOURCES = scanner.c parser.h parser.c
+BUILT_SOURCES = scanner.h scanner.c parser.h parser.c 
 
 AM_YFLAGS = -d
+AM_LFLAGS = --header-file=scanner.h
 
 AM_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/wht/codelets
+
 
 SUBDIRS = codelets 
 
@@ -24,3 +26,7 @@ wht_verify_LDADD		= libwht.la
 wht_convert_SOURCES	= convert.c 
 wht_convert_LDADD		= libwht.la
 
+# NOTE: This is a hack to fix a problem with autoconf ylwrap script
+# See: http://lists.gnu.org/archive/html/automake/2007-11/msg00001.html
+scanner.h:
+	$(LEX) --outfile=scanner.c scanner.l

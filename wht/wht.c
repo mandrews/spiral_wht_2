@@ -1,6 +1,8 @@
 #include "wht.h"
 #include "registry.h"
 
+#include "scanner.h"
+
 static char error_msg[BUFSIZ];
 
 /* This symbol points to the root of the parsed wht tree */
@@ -10,11 +12,15 @@ Wht *
 parse(char *in)
 {
   Wht *wht;
+  YY_BUFFER_STATE buf;
 
-  yy_scan_string(in);
+  buf = yy_scan_string(in);
+
   yyparse();
 
   wht = wht_root;
+
+  yy_delete_buffer(buf);
 
   return wht;
 }

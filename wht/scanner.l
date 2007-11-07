@@ -1,10 +1,11 @@
 %{
 
 #include "parser.h"
-#include "strings.h"
+#include <string.h>
 
 %}
 
+%option header-file="scanner.h"
 %option noyywrap nounput
 
 %%
