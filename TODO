@@ -35,3 +35,8 @@ Bugs:
 
   - whtgen/whtgen should check for write permssion on best tress
 
+  - all tools should accept wht plan from stdin in addition to -w
+
+Ideas:
+
+  - look into pkg-config for versioning information
