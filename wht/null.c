@@ -85,9 +85,11 @@ null_init(char *name, size_t n, int params[], size_t np)
   W->right     = 1;
   W->parent    = NULL;
 
+  /** \todo assert np <= MAX_CODELET_PARAMS */
+
   W->params    = (int *) i_malloc(sizeof(int) * MAX_CODELET_PARAMS);
 
-  for (i = 0; i < MAX_CODELET_PARAMS; i++)
+  for (i = 0; i < np; i++)
     W->params[i] = params[i];
 
   for (i = 0; i < MAX_ATTRIBUTES; i++)

@@ -100,13 +100,15 @@ split_to_string(Wht *W)
     tmp     = W->children->Ws[j]->to_string(W->children->Ws[j]);
     len     = strlen(tmp) + 1; /* Extra 1 is for comma */
 
-    resize += len;
+    resize += len + 1; /* Extra 1 is for '\0' */
     buf     = realloc(buf, resize);
 
     strncat(buf, tmp, len);
 
     if (i < nn - 1)
       strncat(buf, ",", 1);
+
+    i_free(tmp);
   }
 
   strncat(buf,"]",1);
