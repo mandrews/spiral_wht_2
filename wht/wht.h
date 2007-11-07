@@ -344,6 +344,10 @@ Wht * split_init(char *name, Wht *Ws[], size_t nn, int params[], size_t np);
 Wht * small_init(char *name, size_t n, int params[], size_t np);
 
 
+void null_apply(Wht *W, long S, size_t D, wht_value *x);
+
+void small_apply(Wht *W, long S, size_t D, wht_value *x);
+
 /**
  * \fn void split_apply(Wht *W, long S, wht_value *x);
  *
@@ -368,7 +372,23 @@ Wht * small_init(char *name, size_t n, int params[], size_t np);
  */
 void split_apply(Wht *W, long S, size_t D, wht_value *x);
 
+bool null_accept(Wht *W);
+
+bool small_accept(Wht *W);
+
 bool split_accept(Wht *W);
+
+char * null_to_string(Wht *W);
+
+char * small_to_string(Wht *W);
+
+char * split_to_string(Wht *W);
+
+void null_free(Wht *W);
+
+void small_free(Wht *W);
+
+void split_free(Wht *W);
 
 char *
 error_msg_get();
