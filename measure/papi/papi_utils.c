@@ -137,29 +137,26 @@ papi_data_init(struct papi_data *data, size_t n) {
 
   data->cycles = 0;
   
-  data->tmp   = (long_long *) malloc(sizeof(long_long) * n);
+  data->value = (long_long *) malloc(sizeof(long_long) * n);
   data->mean  = (long_long *) malloc(sizeof(long_long) * n);
   data->stdev = (long_long *) malloc(sizeof(long_long) * n);
   data->sum   = (long_long *) malloc(sizeof(long_long) * n);
-  data->sum2  = (long_long *) malloc(sizeof(long_long) * n);
   data->samples = 0;
 
   for (i = 0; i < n; i++) {
-    data->tmp[i]    = 0;
+    data->value[i]  = 0;
     data->mean[i]   = 0;
     data->stdev[i]  = 0;
     data->sum[i]    = 0;
-    data->sum2[i]   = 0;
 	}
 }
 
 void 
 papi_data_free(struct papi_data  *data) {
-  free(data->tmp);
+  free(data->value);
   free(data->mean);
   free(data->stdev);
   free(data->sum);
-  free(data->sum2);
 }
 
 inline void 
@@ -189,10 +186,10 @@ papi_profile_start_events(struct papi_data *data, size_t n) {
 		 * NOTE: PAPI_accum_counters does not work properly.
 		 * */ 
 #if 0
-    if (PAPI_read_counters(data->tmp, n) != PAPI_OK) 
+    if (PAPI_read_counters(data->value, n) != PAPI_OK) 
       papi_eprintf("Problem reading counters %s:%d.\n", __FILE__, __LINE__);
 #else
-    PAPI_read_counters(data->tmp, n);
+    PAPI_read_counters(data->value, n);
 #endif
 }
 
@@ -210,7 +207,7 @@ papi_profile_stop_events(struct papi_data *data, size_t n) {
 		 * counters.
 		 * NOTE: PAPI_accum_counters does not work properly.
 		 * */
-    if (PAPI_read_counters(data->tmp, n) != PAPI_OK) 
+    if (PAPI_read_counters(data->value, n) != PAPI_OK) 
       papi_eprintf("Problem reading counters %s:%d.\n", __FILE__, __LINE__);
 }
 
@@ -277,9 +274,9 @@ papi_update_stats(struct papi_data *data, size_t n)
   data->samples++;
 
   for (i = 0; i < n; i++) {
-    delta = data->tmp[i] - data->mean[i];
+    delta = data->value[i] - data->mean[i];
     data->mean[i] += delta/((long_long) data->samples);
-    data->sum[i] += delta*data->tmp[i] - delta*data->mean[i];
+    data->sum[i] += delta*data->value[i] - delta*data->mean[i];
 
     if (data->samples > 2) {
       data->stdev[i] = data->sum[i]/(((long_long) data->samples));

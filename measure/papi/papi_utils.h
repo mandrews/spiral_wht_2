@@ -29,15 +29,13 @@
  * Clean up this struct
  * Add so interface struct
  * Relabel prefix to papi_util, and cull non public functions
- * Allow confidence to change, and provide interface
  */
 struct papi_data {
   long_long  cycles;
-  long_long *tmp;
+  long_long *value;
   long_long *mean;
   long_long *stdev;
   long_long *sum;
-  long_long *sum2;
   size_t samples;
 };
 
