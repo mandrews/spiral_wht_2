@@ -84,6 +84,7 @@ null_init(char *name, size_t n, int params[], size_t np)
   W->left      = W->N;
   W->right     = 1;
   W->parent    = NULL;
+  W->children  = NULL;
 
   /** \todo assert np <= MAX_CODELET_PARAMS */
 
