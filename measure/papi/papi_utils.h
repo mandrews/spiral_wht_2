@@ -7,6 +7,7 @@
 #define PAPI_UTILS_H
 
 #include <papi.h>
+#include "measure.h"
 
 #define BASE double
 #define BASE_FSTR "# %g %g\n"
@@ -73,5 +74,12 @@ void papi_profile(void (*so_init)(void), void (*so_call)(void), void (*so_free)(
 int papi_profile_done(struct papi_data *data, size_t n, double z, double p);
 
 void papi_update_stats(struct papi_data *data, size_t n);
+
+void papi_init2(char *metric);
+
+void papi_done();
+
+void papi_start(struct stat *stat);
+void papi_stop(struct stat *stat);
 
 #endif /*PAPI_UTILS_H*/

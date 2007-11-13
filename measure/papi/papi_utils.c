@@ -193,15 +193,37 @@ papi_profile_start_events(struct papi_data *data, size_t n) {
 #endif
 }
 
+long_long papi_tmp_global[1];
+
 inline
 void 
-papi_profile_stop_cycles(struct papi_data *data) {
+papi_start(struct stat *stat) 
+{
+    /* Read and reset the counters.
+		 * The commented out conditional affects the reading of the performance
+		 * counters, but might be good for debugging.
+		 * NOTE: PAPI_accum_counters does not work properly.
+		 * */ 
+#if 0
+    if (PAPI_read_counters(papi_tmp_global, 1) != PAPI_OK)
+      papi_eprintf("Problem reading counters %s:%d.\n", __FILE__, __LINE__);
+#else
+    PAPI_read_counters(papi_tmp_global, 1);
+#endif
+}
+
+
+inline
+void 
+papi_profile_stop_cycles(struct papi_data *data) 
+{
     data->cycles += PAPI_get_virt_cyc(); 
 }
 
 inline
 void 
-papi_profile_stop_events(struct papi_data *data, size_t n) {
+papi_profile_stop_events(struct papi_data *data, size_t n) 
+{
 		/* Read and reset the counters.
 		 * This conditional should not effect the reading of the performance
 		 * counters.
@@ -209,6 +231,40 @@ papi_profile_stop_events(struct papi_data *data, size_t n) {
 		 * */
     if (PAPI_read_counters(data->value, n) != PAPI_OK) 
       papi_eprintf("Problem reading counters %s:%d.\n", __FILE__, __LINE__);
+}
+
+inline
+void 
+papi_stop(struct stat *stat) 
+{
+		/* Read and reset the counters.
+		 * This conditional should not effect the reading of the performance
+		 * counters.
+		 * NOTE: PAPI_accum_counters does not work properly.
+		 * */
+    if (PAPI_read_counters(papi_tmp_global, 1) != PAPI_OK)
+      papi_eprintf("Problem reading counters %s:%d.\n", __FILE__, __LINE__);
+
+    stat->last = (stat_unit) papi_tmp_global[0];
+}
+
+void 
+papi_init2(char *metric)
+{
+  int *papi_events;
+  size_t papi_event_total;
+
+  papi_init();
+
+  /* This allocates papi_events */
+  papi_get_events(metric, &papi_events, &papi_event_total);
+  papi_set_events(papi_events, 1);
+}
+
+void 
+papi_done()
+{
+  // Empty
 }
 
 inline void
