@@ -14,8 +14,10 @@ using std::string;
 using std::vector;
 using std::map;
 
-typedef map<const string, size_t> count_set;
-typedef map<const string, size_t>::iterator count_set_iter;
+/* Annotated matrix */
+
+typedef map<const string, double> count_set;
+typedef map<const string, double>::iterator count_set_iter;
 
 void
 count_set_merge(count_set *into, count_set *from)
@@ -47,6 +49,30 @@ matrix_add_row_as_count_set(struct matrix *a, size_t k, count_set *r)
 
   for (j = 0, i = r->begin(); j < n && i != r->end(); j++, i++) 
     matrix_elem(a,k,j) = i->second;
+}
+
+void
+col_to_count_set(struct matrix *a, size_t k, count_set *r)
+{
+  size_t m, j;
+  count_set_iter i;
+
+  m = a->m;
+
+  assert(k <= m);
+
+  for (j = 0, i = r->begin(); j < m && i != r->end(); j++, i++) 
+    i->second = matrix_elem(a,j,k);
+}
+
+
+void
+print_labels(count_set *r)
+{
+  count_set_iter i;
+
+  for (i = r->begin(); i != r->end(); i++) 
+    printf("%s\n", i->first.c_str());
 }
 
 count_set *
@@ -264,20 +290,40 @@ beta_3(Wht *W)
 }
 
 count_set *
+count_set_init()
+{
+  count_set *counts;
+  counts = new count_set();
+
+  (*counts)["small[1]"] = 0.0;
+  (*counts)["small[2]"] = 0.0;
+  (*counts)["small[3]"] = 0.0;
+  (*counts)["small[4]"] = 0.0;
+  (*counts)["smallv(2)[2]"] = 0.0;
+  (*counts)["smallv(2)[3]"] = 0.0;
+  (*counts)["smallv(2)[4]"] = 0.0;
+  (*counts)["smallv(2,2)[2]"] = 0.0;
+  (*counts)["smallv(2,2)[3]"] = 0.0;
+  (*counts)["smallv(2,2)[4]"] = 0.0;
+  (*counts)["split_alpha"] = 0.0;
+  (*counts)["split_beta_1"] = 0.0;
+  (*counts)["split_beta_2"] = 0.0;
+  (*counts)["split_beta_3"] = 0.0;
+  (*counts)["splitil_alpha"] = 0.0;
+  (*counts)["splitil_beta_1"] = 0.0;
+  (*counts)["splitil_beta_2"] = 0.0;
+  (*counts)["splitil_beta_3"] = 0.0;
+
+  return counts;
+}
+
+count_set *
 ic_counts(Wht *W, size_t max)
 {
   size_t k;
   count_set *counts, *tmp_counts;
 
-  counts = new count_set();
-  (*counts)["small[1]"] = 0;
-  (*counts)["small[2]"] = 0;
-  (*counts)["small[3]"] = 0;
-  (*counts)["small[4]"] = 0;
-  (*counts)["split_alpha"] = 0;
-  (*counts)["split_beta_1"] = 0;
-  (*counts)["split_beta_2"] = 0;
-  (*counts)["split_beta_3"] = 0;
+  counts = count_set_init();
 
   tmp_counts = alpha_n(W);
   count_set_add(counts, tmp_counts);
@@ -304,7 +350,7 @@ ic_counts(Wht *W, size_t max)
   return counts;
 }
 
-vector<double> *
+count_set *
 calc_coeffs()
 {
   char *basis[] = {
@@ -312,25 +358,34 @@ calc_coeffs()
     "small[2]",
     "small[3]",
     "small[4]",
-    "split[small[1],small[1],small[1]]",
-    "split[split[small[1]],small[1],split[small[1]]]",
-    "split[small[1],split[small[1],small[1]]]",
-    "split[split[small[1],small[1]],small[1]]",
+    "split[small[2],small[2],small[2]]",
+    "split[split[small[2]],small[2],split[small[2]]]",
+    "split[small[2],split[small[2],small[2]]]",
+    "split[split[small[2],small[2]],small[2]]",
+    "smallv(2)[2]",
+    "smallv(2)[3]",
+    "smallv(2)[4]",
+    "splitil[small[2],small[2],small[2]]",
+    "splitil[splitil[small[2]],small[2],splitil[small[2]]]",
+    "splitil[small[2],splitil[small[2],small[2]]]",
+    "splitil[splitil[small[2],small[2]],small[2]]",
+    "splitil[smallv(2,2)[2],smallv(2,2)[2],small[1]]",
+    "splitil[smallv(2,2)[3],smallv(2,2)[3],small[1]]",
+    "splitil[smallv(2,2)[4],smallv(2,2)[4],small[1]]",
     NULL
   };
-  const size_t m = 8;
 
   char **elem;
-  size_t max, k;
-  vector<double> *coeffs;
+  size_t max, k, m;
   struct stat *stat;
-  count_set *counts;
+  count_set *counts, *coeffs;
   struct matrix *a, *b, *c;
   Wht *W;
 
   max = 4;
 
-  coeffs = new vector<double>();
+  coeffs = count_set_init();
+  m = coeffs->size();
 
   a = matrix_init(m,m);
   b = matrix_init(m,1);
@@ -344,19 +399,23 @@ calc_coeffs()
     matrix_add_row_as_count_set(a, k, counts);
     matrix_elem(b,k,0) = stat->mean - 238; /** \todo allow value */
 
+    // if (k == 0) print_labels(counts);
+
     wht_free(W);
     delete counts;
     free(stat);
   }
 
-  matrix_print(a);
-  matrix_print(b);
-
   c = matrix_least_squares_error(a,b);
 
+#if 0
+  matrix_print(a);
+  matrix_print(b);
   printf("\n");
-
   matrix_print(c);
+#endif
+
+  col_to_count_set(c,0,coeffs);
 
   matrix_free(a);
   matrix_free(b);
@@ -365,6 +424,23 @@ calc_coeffs()
   return coeffs;
 }
 
+double
+ic_predict(count_set *counts, count_set *coeffs)
+{
+  count_set_iter i, j;
+  double sum;
+
+  i = counts->begin();
+  j = coeffs->begin();
+  sum = 0.0;
+  for (; i != counts->end() && j != counts->end(); i++, j++) {
+    sum += i->second * j->second;
+  }
+
+  return sum;
+}
+
+
 int 
 main()
 {
@@ -372,17 +448,20 @@ main()
   char *plan;
   count_set *counts;
   count_set_iter i;
-  vector<double> *coeffs;
+  count_set *coeffs;
 
   coeffs = calc_coeffs();
-  delete coeffs;
 
-#if 0
+#if 1
+  for (i = coeffs->begin(); i != coeffs->end(); i++) {
+    printf("%s : %g\n", i->first.c_str(), i->second);
+  }
+#endif
+
   plan = (char *) malloc(sizeof(char) * 255);
 
   scanf("%s\n", plan);
 
-  // printf("%s\n", plan);
   W = wht_parse(plan);
 
   if (wht_accept(W) == false) 
@@ -390,14 +469,11 @@ main()
 
   counts = ic_counts(W, 4);
 
-  for (i = counts->begin(); i != counts->end(); i++) {
-    printf("%s : %zd\n", i->first.c_str(), i->second);
-  }
-  delete counts;
+  printf("%g\n", ic_predict(counts, coeffs));
 
   free(plan);
   wht_free(W);
-#endif
+  delete coeffs;
 
   return 0;
 }
