@@ -32,7 +32,7 @@ measure(Wht *W, char *metric)
 
   extension->done();
 
-  stat->mean      = stat->last;
+  stat->mean      = stat->value;
   stat->samples   = 1;
 
   free(x);
@@ -40,31 +40,26 @@ measure(Wht *W, char *metric)
   return stat;
 }
 
-struct stat *
-stat_init()
+#if 0
+struct stat * 
+measure_with_test(Wht *W, char *metric m, size_t initial, double alpha, double rho);
 {
+  struct measure_extension *extn;
   struct stat *stat;
-  stat = malloc(sizeof(*stat));
+  wht_value *x;
 
-  stat->last     = 0.0;
-  stat->mean     = 0.0;
-  stat->stdev    = 0.0;
-  stat->sum      = 0.0;
-  stat->samples  = 0;
+  stat = stat_init();
 
-  return stat;
+  extn = measure_extension_find(metric);
+
+  if (extn == NULL) 
+    wht_error("No extension registered for %s\n", metric);
+
+  x = wht_random_vector(W->N);
+
+  extn->init(metric);
 }
-
-char * 
-stat_to_string(struct stat *stat, bool all)
-{
-  char *buf;
-
-  buf = malloc(sizeof(char) * 32);
-  sprintf(buf, "%Lg", stat->mean);
-
-  return buf;
-}
+#endif
 
 struct measure_extension *
 measure_extension_find(char *metric)
@@ -77,3 +72,4 @@ measure_extension_find(char *metric)
   
   return NULL;
 }
+

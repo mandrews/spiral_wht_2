@@ -12,7 +12,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/wht -I$(top_srcdir)/measure/papi $(OPT_CPPLAGS)
 
 noinst_LTLIBRARIES = libmeasure.la
 
-libmeasure_la_SOURCES = measure.c
+libmeasure_la_SOURCES = stat.h stat.c measure.c measure.h 
 
 libmeasure_la_LIBADD  = $(top_builddir)/wht/libwht.la \
 	$(top_builddir)/measure/papi/libpapi_utils.la

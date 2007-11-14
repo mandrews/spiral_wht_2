@@ -2,16 +2,7 @@
 #define MEASURE_H
 
 #include "wht.h"
-
-typedef long double stat_unit;
-
-struct stat {
-  stat_unit last;
-  stat_unit mean;
-  stat_unit stdev;
-  stat_unit sum;
-  size_t samples;
-};
+#include "stat.h"
 
 typedef void (*measure_init_fp)(char *metric);
 typedef void (*measure_start_fp)(struct stat *stat);
@@ -34,16 +25,8 @@ struct stat * measure_until(Wht *W, enum metric m, double time);
 
 struct stat * measure_n_times(Wht *W, enum metric m, size_t n);
 
-struct stat * measure_with_test(Wht *W, enum metric m, size_t initial, double alpha, double rho);
+struct stat * measure_with_test(Wht *W, char *metric m, size_t initial, double alpha, double rho);
 #endif
-
-struct stat * stat_init();
-
-void stat_update(struct stat *st);
-
-bool stat_done(struct stat *st, double zeta, double rho);
-
-char * stat_to_string(struct stat *stat, bool all);
 
 struct measure_extension * measure_extension_find(char *metric);
 

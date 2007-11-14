@@ -245,7 +245,7 @@ papi_stop(struct stat *stat)
     if (PAPI_read_counters(papi_tmp_global, 1) != PAPI_OK)
       papi_eprintf("Problem reading counters %s:%d.\n", __FILE__, __LINE__);
 
-    stat->last = (stat_unit) papi_tmp_global[0];
+    stat->value = (stat_unit) papi_tmp_global[0];
 }
 
 void 
