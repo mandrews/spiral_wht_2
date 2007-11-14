@@ -65,16 +65,6 @@ col_to_count_set(struct matrix *a, size_t k, count_set *r)
     i->second = matrix_elem(a,j,k);
 }
 
-
-void
-print_labels(count_set *r)
-{
-  count_set_iter i;
-
-  for (i = r->begin(); i != r->end(); i++) 
-    printf("%s\n", i->first.c_str());
-}
-
 count_set *
 alpha_n(Wht *W)
 {
@@ -82,6 +72,8 @@ alpha_n(Wht *W)
   size_t n, ni, nn, i;
   count_set *counts, *tmp_counts;
   string key;
+
+  count_set_iter j;
 
   counts = new count_set();
 
@@ -102,10 +94,8 @@ alpha_n(Wht *W)
 
     tmp_counts = alpha_n(Wi);
 
-    (*counts)[key] += ((1 << (n - ni)) * (*tmp_counts)[key]);
-    tmp_counts->erase(key);
-
-    count_set_add(counts, tmp_counts);
+    for (j = tmp_counts->begin(); j != tmp_counts->end(); j++) 
+      (*counts)[j->first] += ((1 << (n - ni)) * (*tmp_counts)[j->first]);
 
     delete tmp_counts;
   }
@@ -177,6 +167,8 @@ beta_1(Wht *W)
   count_set *counts, *tmp_counts;
   string key;
 
+  count_set_iter j;
+
   counts = new count_set();
 
   if (W->children == NULL)
@@ -196,10 +188,8 @@ beta_1(Wht *W)
 
     tmp_counts = beta_1(Wi);
 
-    (*counts)[key] += ((1 << (n - ni)) * (*tmp_counts)[key]);
-    tmp_counts->erase(key);
-
-    count_set_add(counts, tmp_counts);
+    for (j = tmp_counts->begin(); j != tmp_counts->end(); j++) 
+      (*counts)[j->first] += ((1 << (n - ni)) * (*tmp_counts)[j->first]);
 
     delete tmp_counts;
   }
@@ -215,6 +205,8 @@ beta_2(Wht *W)
   int i;
   count_set *counts, *tmp_counts;
   string key;
+
+  count_set_iter j;
 
   counts = new count_set();
 
@@ -235,12 +227,10 @@ beta_2(Wht *W)
 
     tmp_counts = beta_2(Wi);
 
-    (*counts)[key] += ((1 << (n - ni)) * (*tmp_counts)[key]);
+    for (j = tmp_counts->begin(); j != tmp_counts->end(); j++) 
+      (*counts)[j->first] += ((1 << (n - ni)) * (*tmp_counts)[j->first]);
+
     (*counts)[key] +=  (1 << nj);
-
-    tmp_counts->erase(key);
-
-    count_set_add(counts, tmp_counts);
 
     delete tmp_counts;
   }
@@ -256,6 +246,8 @@ beta_3(Wht *W)
   int i;
   count_set *counts, *tmp_counts;
   string key;
+
+  count_set_iter j;
 
   counts = new count_set();
 
@@ -276,12 +268,10 @@ beta_3(Wht *W)
 
     tmp_counts = beta_3(Wi);
 
-    (*counts)[key] += ((1 << (n - ni)) * (*tmp_counts)[key]);
+    for (j = tmp_counts->begin(); j != tmp_counts->end(); j++) 
+      (*counts)[j->first] += ((1 << (n - ni)) * (*tmp_counts)[j->first]);
+
     (*counts)[key] +=  (1 << (n - ni));
-
-    tmp_counts->erase(key);
-
-    count_set_add(counts, tmp_counts);
 
     delete tmp_counts;
   }
@@ -453,6 +443,7 @@ main()
   coeffs = calc_coeffs();
 
 #if 1
+  printf("coeffs:\n");
   for (i = coeffs->begin(); i != coeffs->end(); i++) {
     printf("%s : %g\n", i->first.c_str(), i->second);
   }
@@ -469,6 +460,14 @@ main()
 
   counts = ic_counts(W, 4);
 
+#if 1
+  printf("counts:\n");
+  for (i = counts->begin(); i != counts->end(); i++) {
+    printf("%s : %g\n", i->first.c_str(), i->second);
+  }
+#endif
+
+  printf("instructions:\n");
   printf("%g\n", ic_predict(counts, coeffs));
 
   free(plan);
