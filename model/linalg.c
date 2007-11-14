@@ -3,8 +3,6 @@
 #include <math.h>
 #include <assert.h>
 
-#define X(A,i,j) (A->v[i + j*(A->m)])
-
 #include "linalg.h"
 
 struct matrix *
@@ -20,7 +18,7 @@ matrix_init(size_t m, size_t n)
 
   for (i = 0; i < m; i++)
     for (j = 0; j < n; j++)
-      X(a,i,j) = 0.0;
+      matrix_elem(a,i,j) = 0.0;
 
   return a;
 }
@@ -43,7 +41,7 @@ matrix_print(struct matrix *a)
 
   for (i = 0; i < m; i++) {
     for (j = 0; j < n; j++) {
-      printf("% .5f ", X(a,i,j));
+      printf("% .5f ", matrix_elem(a,i,j));
     }
     printf("\n");
   }
@@ -65,7 +63,7 @@ matrix_col_copy(struct matrix *a, size_t k, struct matrix *b, size_t l)
   m = a->m;
 
   for (i = 0; i < m; i++)
-    X(b,i,l) = X(a,i,k);
+    matrix_elem(b,i,l) = matrix_elem(a,i,k);
 }
 
 void
@@ -79,7 +77,7 @@ matrix_row_add(struct matrix *a, size_t k, double row[], size_t p)
   assert(p == n);
 
   for (j = 0; j < n; j++)
-    X(a,k,j) = row[j];
+    matrix_elem(a,k,j) = row[j];
 }
 
 void
@@ -93,7 +91,7 @@ matrix_col_add(struct matrix *a, size_t k, double col[], size_t p)
   assert(p == m);
 
   for (i = 0; i < m; i++)
-    X(a,i,k) = col[i];
+    matrix_elem(a,i,k) = col[i];
 }
 
 
@@ -110,7 +108,7 @@ matrix_transpose(struct matrix *a)
 
   for (i = 0; i < m; i++)
     for (j = 0; j < n; j++) 
-      X(b,j,i) = X(a,i,j);
+      matrix_elem(b,j,i) = matrix_elem(a,i,j);
 
   return b;
 }
@@ -134,7 +132,7 @@ matrix_col_iprod(struct matrix *a, size_t k, struct matrix *b, size_t l)
 
   sum = 0.0;
   for (i = 0; i < n; i++)
-    sum += X(a,k,i) * X(b,i,l);
+    sum += matrix_elem(a,k,i) * matrix_elem(b,i,l);
   return sum;
 }
 
@@ -156,7 +154,7 @@ matrix_col_iprod_transpose(struct matrix *a, size_t k, struct matrix *b, size_t 
 
   sum = 0.0;
   for (i = 0; i < n; i++)
-    sum += X(a,i,k) * X(b,i,l);
+    sum += matrix_elem(a,i,k) * matrix_elem(b,i,l);
   return sum;
 }
 
@@ -176,7 +174,7 @@ matrix_col_add_vector(struct matrix *a, size_t k, struct matrix *b, size_t l)
   m = a->m;
 
   for (i = 0; i < m; i++)
-    X(a,i,k) += X(b,i,l);
+    matrix_elem(a,i,k) += matrix_elem(b,i,l);
 }
 
 void
@@ -191,7 +189,7 @@ matrix_col_mul_scalar(struct matrix *a, size_t k, double r)
   m = a->m;
 
   for (i = 0; i < m; i++)
-    X(a,i,k) *= r;
+    matrix_elem(a,i,k) *= r;
 }
 
 void
@@ -207,7 +205,7 @@ matrix_col_div_scalar(struct matrix *a, size_t k, double r)
   m = a->m;
 
   for (i = 0; i < m; i++)
-    X(a,i,k) /= r;
+    matrix_elem(a,i,k) /= r;
 }
 
 double
@@ -256,7 +254,7 @@ modified_gram_schmidt(struct matrix *a)
   for (i = 0; i < n; i++) {
     rii = matrix_col_norm(v,i);
 
-    X(r,i,i) = rii;
+    matrix_elem(r,i,i) = rii;
     matrix_col_copy(v,i,q,i);
     matrix_col_div_scalar(q,i,rii);
 
@@ -264,7 +262,7 @@ modified_gram_schmidt(struct matrix *a)
 
       rij = matrix_col_iprod_transpose(q,i,v,j);
 
-      X(r,i,j) = rij;
+      matrix_elem(r,i,j) = rij;
 
       matrix_col_copy(q,i,qi,0);
       matrix_col_mul_scalar(qi, 0, -1.0*rij);
@@ -297,7 +295,7 @@ matrix_mul(struct matrix *a, struct matrix *b)
 
   for (i = 0; i < m; i++)
     for (j = 0; j < n; j++) 
-      X(c,i,j) = matrix_col_iprod(a,i,b,j);
+      matrix_elem(c,i,j) = matrix_col_iprod(a,i,b,j);
 
   return c;
 }
@@ -332,9 +330,9 @@ matrix_backsubs(struct matrix *a, struct matrix *b)
   for (j = m-1; j >= 0; j--) {
     sum = 0.0;
     for (k = j+1; k < m; k++) {
-      sum += X(x,k,0) * X(a,j,k);
+      sum += matrix_elem(x,k,0) * matrix_elem(a,j,k);
     }
-    X(x,j,0) = (X(b,j,0) - sum) / X(a,j,j);
+    matrix_elem(x,j,0) = (matrix_elem(b,j,0) - sum) / matrix_elem(a,j,j);
   }
 
   return x;
@@ -356,6 +354,9 @@ matrix_backsubs(struct matrix *a, struct matrix *b)
 struct matrix *
 matrix_least_squares_error(struct matrix *a, struct matrix *b)
 {
+  assert(a->m == b->m);
+  assert(b->n == 1);
+
   struct qr_set *qr;
   struct matrix *bp, *qt, *x;
 
@@ -385,21 +386,21 @@ main()
 
   a = matrix_init(5,3);
 
-  X(a,0,0) = 1;
-  X(a,0,1) = 2;
-  X(a,0,2) = 3;
-  X(a,1,0) = 4;
-  X(a,1,1) = 5;
-  X(a,1,2) = 6;
-  X(a,2,0) = 7;
-  X(a,2,1) = 8;
-  X(a,2,2) = 9;
-  X(a,3,0) = 10;
-  X(a,3,1) = 11;
-  X(a,3,2) = 12;
-  X(a,4,0) = 13;
-  X(a,4,1) = 14;
-  X(a,4,2) = 15;
+  matrix_elem(a,0,0) = 1;
+  matrix_elem(a,0,1) = 2;
+  matrix_elem(a,0,2) = 3;
+  matrix_elem(a,1,0) = 4;
+  matrix_elem(a,1,1) = 5;
+  matrix_elem(a,1,2) = 6;
+  matrix_elem(a,2,0) = 7;
+  matrix_elem(a,2,1) = 8;
+  matrix_elem(a,2,2) = 9;
+  matrix_elem(a,3,0) = 10;
+  matrix_elem(a,3,1) = 11;
+  matrix_elem(a,3,2) = 12;
+  matrix_elem(a,4,0) = 13;
+  matrix_elem(a,4,1) = 14;
+  matrix_elem(a,4,2) = 15;
 
   b = matrix_transpose(a);
   c = matrix_mul(a,b);

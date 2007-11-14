@@ -28,4 +28,6 @@ struct qr_set* modified_gram_schmidt(struct matrix *a);
 
 struct matrix * matrix_least_squares_error(struct matrix *a, struct matrix *b);
 
+#define matrix_elem(A,i,j) (A->v[i + j*(A->m)])
+
 #endif/*LINALG_H*/
