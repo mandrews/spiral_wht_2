@@ -26,7 +26,7 @@ measure(Wht *W, char *metric)
   start = extension->start;
   stop  = extension->stop;
 
-  start(start);
+  start(stat);
   wht_apply(W,x);
   stop(stat);
 
