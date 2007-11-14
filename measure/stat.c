@@ -18,13 +18,21 @@ stat_init()
   return stat;
 }
 
+void
+stat_free(struct stat *stat)
+{
+  free(stat);
+}
+
 char * 
 stat_to_string(struct stat *stat, bool all)
 {
+  /** \todo determine this value */
+  const size_t bufsize = 255;
   char *buf;
 
-  buf = malloc(sizeof(char) * 32);
-  sprintf(buf, "%Lg", stat->mean);
+  buf = malloc(sizeof(char) * bufsize);
+  snprintf(buf, bufsize, "%Lg", stat->mean);
 
   return buf;
 }

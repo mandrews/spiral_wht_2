@@ -7,7 +7,9 @@
 #define PAPI_UTILS_H
 
 #include <papi.h>
-#include "measure.h"
+
+#include "wht.h"
+#include "stat.h"
 
 #define BASE double
 #define BASE_FSTR "# %g %g\n"
@@ -79,7 +81,6 @@ void papi_init2(char *metric);
 
 void papi_done();
 
-void papi_start(struct stat *stat);
-void papi_stop(struct stat *stat);
+stat_unit papi_call(Wht *W, wht_value *x);
 
 #endif /*PAPI_UTILS_H*/

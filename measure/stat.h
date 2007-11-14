@@ -16,7 +16,7 @@ struct stat {
 
 struct stat * stat_init();
 
-void stat_free();
+void stat_free(struct stat *stat);
 
 char * stat_to_string(struct stat *stat, bool all);
 
