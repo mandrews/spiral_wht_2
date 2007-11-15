@@ -18,3 +18,12 @@ libmeasure_la_LIBADD  = $(top_builddir)/wht/libwht.la \
 	$(top_builddir)/measure/papi/libpapi_utils.la
 
 
+bin_PROGRAMS = wht_measure
+
+wht_measure_SOURCES = main.c
+
+wht_measure_LDADD = libmeasure.la \
+	$(PAPI_PATH)/lib/libpapi.so
+
+# This hard codes the papi library path into the executable
+wht_measure_LDFLAGS = -rpath $(PAPI_PATH)/lib

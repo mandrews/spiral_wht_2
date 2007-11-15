@@ -3,21 +3,73 @@
 
 extern double invnorm(double p);
 
+#include <sys/types.h>
+#include <sys/resource.h>
+
+inline
+double
+cputime()
+{
+  struct rusage rus;
+
+  getrusage(RUSAGE_SELF, &rus);
+
+  return ((double) rus.ru_utime.tv_sec) * 1e6 + ((double) rus.ru_utime.tv_usec);
+}
+
+void empty(char *metric) { /* Empty */ }
+
+stat_unit
+usec_call(Wht *W, wht_value *x)
+{
+  double t0, t1;
+
+  t0 = cputime();
+  wht_apply(W,x);
+  t1 = cputime();
+
+  return t1 - t0;
+}
+
 struct measure_extension *
-measure_extension_find(char *metric)
+measure_extension_find(char *name)
 {
   struct measure_extension *p;
 
-  for (p = (struct measure_extension *) measure_extensions; p->metric != NULL; p++) 
-    if (strncmp(metric, p->metric, strlen(p->metric)) == 0) 
+  for (p = (struct measure_extension *) measure_extensions; p->name != NULL; p++) 
+    if (strncmp(name, p->name, strlen(p->name)) == 0) 
       return p;
   
   return NULL;
 }
 
+char *
+measure_extension_list()
+{
+  struct measure_extension *p;
+  size_t n;
+  char *buf;
+
+  n = 0;
+  for (p = (struct measure_extension *) measure_extensions; p->name != NULL; p++)
+    n += strlen(p->name) + 1; /* 1 for the extra space */
+
+  buf = malloc(sizeof(char) * n + 1); /* 1 for the \0 */
+
+  strcpy(buf,"");
+
+  for (p = (struct measure_extension *) measure_extensions; p->name != NULL; p++) {
+    strcat(buf, p->name);
+    strcat(buf, " ");
+  }
+
+  return buf;
+}
+
+
 inline
 void
-measure_helper(Wht *W, char *metric, struct stat *stat, struct measure_extension *extension)
+measure_helper(Wht *W, struct stat *stat, struct measure_extension *extension)
 {
   stat_unit value;
   wht_value *x;
@@ -32,21 +84,23 @@ measure_helper(Wht *W, char *metric, struct stat *stat, struct measure_extension
 }
 
 struct stat *
-measure(Wht *W, char *metric)
+measure(Wht *W, char *name, char *metric, size_t n)
 {
   struct measure_extension *extension;
   struct stat *stat;
+  size_t i;
 
   stat = stat_init();
 
-  extension = measure_extension_find(metric);
+  extension = measure_extension_find(name);
 
   if (extension == NULL) 
     wht_error("No extension registered for %s\n", metric);
 
   extension->init(metric);
 
-  measure_helper(W, metric, stat, extension);
+  for (i = 0; i < n; i++)
+    measure_helper(W, stat, extension);
 
   extension->done();
 
@@ -54,7 +108,7 @@ measure(Wht *W, char *metric)
 }
 
 struct stat *
-measure_with_z_test(Wht *W, char *metric, size_t initial, double alpha, double rho)
+measure_with_z_test(Wht *W, char *name, char *metric, size_t initial, double alpha, double rho)
 {
   struct measure_extension *extension;
   struct stat *stat;
@@ -63,7 +117,7 @@ measure_with_z_test(Wht *W, char *metric, size_t initial, double alpha, double r
 
   stat = stat_init();
 
-  extension = measure_extension_find(metric);
+  extension = measure_extension_find(name);
 
   if (extension == NULL) 
     wht_error("No extension registered for %s\n", metric);
@@ -73,26 +127,41 @@ measure_with_z_test(Wht *W, char *metric, size_t initial, double alpha, double r
   extension->init(metric);
 
   for (i = 0; i < initial; i++)
-    measure_helper(W, metric, stat, extension);
+    measure_helper(W, stat, extension);
 
   while (stat_sig_sample(stat, z, rho) > stat->samples)
-    measure_helper(W, metric, stat, extension);
+    measure_helper(W, stat, extension);
 
   extension->done();
 
   return stat;
 }
 
-#if 0
 struct stat * 
-measure_until(Wht *W, char *metric, double time)
+measure_until(Wht *W, char *name, char *metric, double time)
 {
+  struct measure_extension *extension;
+  struct stat *stat;
+  double t0, tk;
 
+  stat = stat_init();
+
+  extension = measure_extension_find(name);
+
+  if (extension == NULL) 
+    wht_error("No extension registered for %s\n", metric);
+
+  extension->init(metric);
+
+  t0 = 0.0;
+  tk = 0.0;
+  while (t0 < time) {
+    t0 = cputime();
+    measure_helper(W, stat, extension);
+    tk += cputime() - t0;
+  }
+
+  extension->done();
+
+  return stat;
 }
-
-struct stat * 
-measure_at_least(Wht *W, char *metric, size_t times)
-{
-
-}
-#endif

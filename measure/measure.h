@@ -10,20 +10,27 @@ typedef void (*measure_done_fp)();
 
 struct measure_extension
 {
-  char * metric;
+  char * name;
   measure_init_fp init;
   measure_call_fp call;
   measure_done_fp done;
 };
 
-struct stat * measure(Wht *W, char *metric);
+double cputime();
 
-struct stat * measure_with_z_test(Wht *W, char *metric, size_t initial, double alpha, double rho);
+struct stat * measure(Wht *W, char *extension, char *metric, size_t n);
 
-struct stat * measure_until(Wht *W, char *metric, double time);
+struct stat * measure_with_z_test(Wht *W, char *extension, char *metric, 
+  size_t initial, double alpha, double rho);
 
-struct stat * measure_at_least(Wht *W, char *metric, size_t times);
+struct stat * measure_until(Wht *W, char *extension, char *metric, double time);
 
-struct measure_extension * measure_extension_find(char *metric);
+char * measure_extension_list();
+
+struct measure_extension * measure_extension_find(char *extension);
+
+void empty(char *metric);
+
+stat_unit usec_call(Wht *W, wht_value *x);
 
 #endif/*MEASURE_H*/

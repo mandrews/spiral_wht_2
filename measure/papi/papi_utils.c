@@ -29,6 +29,7 @@ static BASE cache_dummy[DUMMY_SIZE];
 
 volatile BASE cache_sink;
 
+#if 0
 inline
 double
 cputime() {
@@ -37,6 +38,7 @@ cputime() {
   getrusage (RUSAGE_SELF, &rus);
   return ((double) rus.ru_utime.tv_sec) * 1e6 + ((double) rus.ru_utime.tv_usec);
 }
+#endif
 
 void
 papi_init() {

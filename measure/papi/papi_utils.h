@@ -42,7 +42,9 @@ struct papi_data {
   size_t samples;
 };
 
+#if 0
 double cputime();
+#endif
 
 inline
 void cache_clear();

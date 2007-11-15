@@ -2,6 +2,7 @@
 #define STAT_H
 
 #include <stdlib.h>
+#include <stdbool.h>
 
 typedef long double stat_unit;
 

@@ -32,7 +32,10 @@ stat_to_string(struct stat *stat, bool all)
   char *buf;
 
   buf = malloc(sizeof(char) * bufsize);
-  snprintf(buf, bufsize, "%Lg", stat->mean);
+  if (all)
+    snprintf(buf, bufsize, "%Lg %Lg %zd", stat->mean, sqrtl(stat->stdev), stat->samples);
+  else
+    snprintf(buf, bufsize, "%Lg", stat->mean);
 
   return buf;
 }

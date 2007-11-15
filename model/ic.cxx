@@ -384,10 +384,10 @@ calc_coeffs()
     W = wht_parse(*elem);
     //printf("elem: %s\n", W->to_string(W));
     counts = ic_counts(W, max);
-    stat = measure(W, "TOT_INS");
+    stat = measure(W, "PAPI", "TOT_INS", 1);
 
     matrix_add_row_as_count_set(a, k, counts);
-    matrix_elem(b,k,0) = stat->mean - 238; /** \todo allow value */
+    matrix_elem(b,k,0) = stat->mean - 236; /** \todo allow value */
 
     // if (k == 0) print_labels(counts);
 
