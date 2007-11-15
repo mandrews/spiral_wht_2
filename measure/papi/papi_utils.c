@@ -197,7 +197,7 @@ papi_profile_start_events(struct papi_data *data, size_t n) {
 
 inline
 stat_unit
-papi_call(Wht *W, wht_value *x)
+papi_call(Wht *W, wht_value *x, char *metric)
 {
   long_long tmp[1];
 

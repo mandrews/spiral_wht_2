@@ -35,7 +35,7 @@ usage()
 
   free(extensions);
 
-  exit(1);
+  exit(EXIT_FAILURE);
 }
 
 int 

@@ -5,7 +5,7 @@
 #include "stat.h"
 
 typedef void (*measure_init_fp)(char *metric);
-typedef stat_unit (*measure_call_fp)(Wht *W, wht_value *x);
+typedef stat_unit (*measure_call_fp)(Wht *W, wht_value *x, char *metric);
 typedef void (*measure_done_fp)();
 
 struct measure_extension
@@ -29,8 +29,9 @@ char * measure_extension_list();
 
 struct measure_extension * measure_extension_find(char *extension);
 
-void empty(char *metric);
+void builtin_init(char *metric);
+void builtin_done();
 
-stat_unit usec_call(Wht *W, wht_value *x);
+stat_unit builtin_call(Wht *W, wht_value *x, char *metric);
 
 #endif/*MEASURE_H*/

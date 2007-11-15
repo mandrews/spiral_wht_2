@@ -17,11 +17,13 @@ cputime()
   return ((double) rus.ru_utime.tv_sec) * 1e6 + ((double) rus.ru_utime.tv_usec);
 }
 
-void empty(char *metric) { /* Empty */ }
+void builtin_init(char *metric) { /* Empty, only metric is usec */ }
+void builtin_done() { /* Empty */ }
 
 stat_unit
-usec_call(Wht *W, wht_value *x)
+builtin_call(Wht *W, wht_value *x, char *metric)
 {
+  /* Microsecond metric */
   double t0, t1;
 
   t0 = cputime();
@@ -69,14 +71,14 @@ measure_extension_list()
 
 inline
 void
-measure_helper(Wht *W, struct stat *stat, struct measure_extension *extension)
+measure_helper(Wht *W, char *metric, struct stat *stat, struct measure_extension *extension)
 {
   stat_unit value;
   wht_value *x;
 
   x = wht_random_vector(W->N);
 
-  value = extension->call(W,x);
+  value = extension->call(W,x,metric);
   stat->value = value;
   stat_update(stat);
 
@@ -100,7 +102,7 @@ measure(Wht *W, char *name, char *metric, size_t n)
   extension->init(metric);
 
   for (i = 0; i < n; i++)
-    measure_helper(W, stat, extension);
+    measure_helper(W, metric, stat, extension);
 
   extension->done();
 
@@ -127,10 +129,10 @@ measure_with_z_test(Wht *W, char *name, char *metric, size_t initial, double alp
   extension->init(metric);
 
   for (i = 0; i < initial; i++)
-    measure_helper(W, stat, extension);
+    measure_helper(W, metric, stat, extension);
 
   while (stat_sig_sample(stat, z, rho) > stat->samples)
-    measure_helper(W, stat, extension);
+    measure_helper(W, metric, stat, extension);
 
   extension->done();
 
@@ -157,7 +159,7 @@ measure_until(Wht *W, char *name, char *metric, double time)
   tk = 0.0;
   while (t0 < time) {
     t0 = cputime();
-    measure_helper(W, stat, extension);
+    measure_helper(W, metric, stat, extension);
     tk += cputime() - t0;
   }
 

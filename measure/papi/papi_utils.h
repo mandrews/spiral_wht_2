@@ -83,6 +83,6 @@ void papi_init2(char *metric);
 
 void papi_done();
 
-stat_unit papi_call(Wht *W, wht_value *x);
+stat_unit papi_call(Wht *W, wht_value *x, char *metric);
 
 #endif /*PAPI_UTILS_H*/
