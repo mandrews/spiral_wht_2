@@ -6,7 +6,7 @@ OPT_SUBDIRS =
 OPT_CPPLAGS = 
 endif
 
-SUBDIRS = usec $(OPT_SUBDIRS)
+SUBDIRS = $(OPT_SUBDIRS)
 
 AM_CPPFLAGS = -I$(top_srcdir)/wht -I$(top_srcdir)/measure/papi $(OPT_CPPLAGS)
 
