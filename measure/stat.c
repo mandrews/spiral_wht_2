@@ -73,8 +73,8 @@ stat_update(struct stat *stat)
  *  YEAR = 1991
  * }
  */
-bool
-stat_good_sample(struct stat *stat, stat_unit zeta, stat_unit rho)
+size_t
+stat_sig_sample(struct stat *stat, stat_unit z, stat_unit rho)
 {
   size_t samples;
   stat_unit tmp;
@@ -82,8 +82,8 @@ stat_good_sample(struct stat *stat, stat_unit zeta, stat_unit rho)
   tmp = stat->mean * stat->mean;
   tmp = ceil(rho * rho * tmp);
 
-  samples = (ceil(zeta * zeta * stat->stdev) / tmp) + 1;
+  samples = (ceil(z * z * stat->stdev) / tmp) + 1;
 
-  return stat->samples >= samples;
+  return samples;
 }
 

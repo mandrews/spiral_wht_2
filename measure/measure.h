@@ -18,14 +18,11 @@ struct measure_extension
 
 struct stat * measure(Wht *W, char *metric);
 
-struct stat * measure_with_test(Wht *W, char *metric, size_t initial, double alpha, double rho);
+struct stat * measure_with_z_test(Wht *W, char *metric, size_t initial, double alpha, double rho);
 
-#if 0
-struct stat * measure_until(Wht *W, enum metric m, double time);
+struct stat * measure_until(Wht *W, char *metric, double time);
 
-struct stat * measure_n_times(Wht *W, enum metric m, size_t n);
-
-#endif
+struct stat * measure_at_least(Wht *W, char *metric, size_t times);
 
 struct measure_extension * measure_extension_find(char *metric);
 

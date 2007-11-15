@@ -1,6 +1,8 @@
 #include "measure.h"
 #include "extensions.h"
 
+extern double invnorm(double p);
+
 struct measure_extension *
 measure_extension_find(char *metric)
 {
@@ -14,8 +16,8 @@ measure_extension_find(char *metric)
 }
 
 inline
-stat_unit
-measure_helper(Wht *W, char *metric, struct measure_extension *extension)
+void
+measure_helper(Wht *W, char *metric, struct stat *stat, struct measure_extension *extension)
 {
   stat_unit value;
   wht_value *x;
@@ -23,10 +25,10 @@ measure_helper(Wht *W, char *metric, struct measure_extension *extension)
   x = wht_random_vector(W->N);
 
   value = extension->call(W,x);
+  stat->value = value;
+  stat_update(stat);
 
   free(x);
-
-  return value;
 }
 
 struct stat *
@@ -34,7 +36,6 @@ measure(Wht *W, char *metric)
 {
   struct measure_extension *extension;
   struct stat *stat;
-  stat_unit value;
 
   stat = stat_init();
 
@@ -45,14 +46,53 @@ measure(Wht *W, char *metric)
 
   extension->init(metric);
 
-  value = measure_helper(W, metric, extension);
+  measure_helper(W, metric, stat, extension);
 
   extension->done();
-
-  stat->value = value;
-
-  stat_update(stat);
 
   return stat;
 }
 
+struct stat *
+measure_with_z_test(Wht *W, char *metric, size_t initial, double alpha, double rho)
+{
+  struct measure_extension *extension;
+  struct stat *stat;
+  size_t i;
+  double z;
+
+  stat = stat_init();
+
+  extension = measure_extension_find(metric);
+
+  if (extension == NULL) 
+    wht_error("No extension registered for %s\n", metric);
+
+  z = invnorm(alpha);
+
+  extension->init(metric);
+
+  for (i = 0; i < initial; i++)
+    measure_helper(W, metric, stat, extension);
+
+  while (stat_sig_sample(stat, z, rho) > stat->samples)
+    measure_helper(W, metric, stat, extension);
+
+  extension->done();
+
+  return stat;
+}
+
+#if 0
+struct stat * 
+measure_until(Wht *W, char *metric, double time)
+{
+
+}
+
+struct stat * 
+measure_at_least(Wht *W, char *metric, size_t times)
+{
+
+}
+#endif

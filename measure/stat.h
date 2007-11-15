@@ -2,7 +2,6 @@
 #define STAT_H
 
 #include <stdlib.h>
-#include <stdbool.h>
 
 typedef long double stat_unit;
 
@@ -22,6 +21,6 @@ char * stat_to_string(struct stat *stat, bool all);
 
 void stat_update(struct stat *stat);
 
-bool stat_good_sample(struct stat *stat, stat_unit zeta, stat_unit rho);
+size_t stat_sig_sample(struct stat *stat, stat_unit z, stat_unit rho);
 
 #endif/*STAT_H*/
