@@ -16,7 +16,7 @@ measure_extensions[] = {
     (measure_done_fp)  &builtin_done
   },
   { "PAPI", 
-    (measure_init_fp)  &papi_init2, 
+    (measure_init_fp)  &papi_init, 
     (measure_call_fp)  &papi_call, 
     (measure_done_fp)  &papi_done 
   },

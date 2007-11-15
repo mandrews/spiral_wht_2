@@ -8,16 +8,10 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <time.h>
-#include <sys/resource.h>
 #include <string.h>
-#include <math.h>
-
 #include <papi.h>
-#include "papi_utils.h"
 
-#define papi_min(a,b) \
-	(a <= 0) ? b : ((b <= 0) ? a : ( (a < b) ? a : b ) )
+#include "papi_utils.h"
 
 #define papi_eprintf(format, args...)  \
   {\
@@ -25,23 +19,8 @@
     exit(2); \
   }
 
-static BASE cache_dummy[DUMMY_SIZE];
-
-volatile BASE cache_sink;
-
-#if 0
-inline
-double
-cputime() {
-  struct rusage rus;
-
-  getrusage (RUSAGE_SELF, &rus);
-  return ((double) rus.ru_utime.tv_sec) * 1e6 + ((double) rus.ru_utime.tv_usec);
-}
-#endif
-
 void
-papi_init() {
+papi_setup() {
   int max;
 
   /* Check PAPI sanity */
@@ -133,34 +112,6 @@ papi_set_events(int *papi_events, size_t n) {
 	free(papi_tmp);
 }
 
-void 
-papi_data_init(struct papi_data *data, size_t n) {
-  int i;
-
-  data->cycles = 0;
-  
-  data->value = (long_long *) malloc(sizeof(long_long) * n);
-  data->mean  = (long_long *) malloc(sizeof(long_long) * n);
-  data->stdev = (long_long *) malloc(sizeof(long_long) * n);
-  data->sum   = (long_long *) malloc(sizeof(long_long) * n);
-  data->samples = 0;
-
-  for (i = 0; i < n; i++) {
-    data->value[i]  = 0;
-    data->mean[i]   = 0;
-    data->stdev[i]  = 0;
-    data->sum[i]    = 0;
-	}
-}
-
-void 
-papi_data_free(struct papi_data  *data) {
-  free(data->value);
-  free(data->mean);
-  free(data->stdev);
-  free(data->sum);
-}
-
 inline void 
 papi_reset(size_t n) {
 	long_long *papi_tmp;
@@ -171,28 +122,6 @@ papi_reset(size_t n) {
     papi_eprintf("Problem reading counters %s:%d.\n", __FILE__, __LINE__);
 
 	free(papi_tmp);
-}
-
-inline
-void 
-papi_profile_start_cycles(struct papi_data *data) {
-    data->cycles -= PAPI_get_virt_cyc(); 
-}
-
-inline
-void 
-papi_profile_start_events(struct papi_data *data, size_t n) {
-    /* Read and reset the counters.
-		 * The commented out conditional affects the reading of the performance
-		 * counters, but might be good for debugging.
-		 * NOTE: PAPI_accum_counters does not work properly.
-		 * */ 
-#if 0
-    if (PAPI_read_counters(data->value, n) != PAPI_OK) 
-      papi_eprintf("Problem reading counters %s:%d.\n", __FILE__, __LINE__);
-#else
-    PAPI_read_counters(data->value, n);
-#endif
 }
 
 inline
@@ -214,9 +143,8 @@ papi_call(Wht *W, wht_value *x, char *metric)
 #endif
     wht_apply(W,x);
   /* Read and reset the counters.
-   * This conditional should not effect the reading of the performance
+   * This conditional should NOT effect the reading of the performance
    * counters.
-   * NOTE: PAPI_accum_counters does not work properly.
    * */
   if (PAPI_read_counters(tmp, 1) != PAPI_OK)
     papi_eprintf("Problem reading counters %s:%d.\n", __FILE__, __LINE__);
@@ -224,33 +152,13 @@ papi_call(Wht *W, wht_value *x, char *metric)
   return (stat_unit) tmp[0];
 }
 
-inline
 void 
-papi_profile_stop_cycles(struct papi_data *data) 
-{
-    data->cycles += PAPI_get_virt_cyc(); 
-}
-
-inline
-void 
-papi_profile_stop_events(struct papi_data *data, size_t n) 
-{
-		/* Read and reset the counters.
-		 * This conditional should not effect the reading of the performance
-		 * counters.
-		 * NOTE: PAPI_accum_counters does not work properly.
-		 * */
-    if (PAPI_read_counters(data->value, n) != PAPI_OK) 
-      papi_eprintf("Problem reading counters %s:%d.\n", __FILE__, __LINE__);
-}
-
-void 
-papi_init2(char *metric)
+papi_init(char *metric)
 {
   int *papi_events;
   size_t papi_event_total;
 
-  papi_init();
+  papi_setup();
 
   /* This allocates papi_events */
   papi_get_events(metric, &papi_events, &papi_event_total);
@@ -263,155 +171,5 @@ papi_done()
   // Empty
 }
 
-inline void
-papi_profile_helper(void (*so_init)(void), void (*so_call)(void), void (*so_free)(void), 
-  struct papi_data *data, size_t n)
-{
-  papi_reset(n);
-
-  //cache_clear();
-
-  /* Warm up PAPI */
-  papi_profile_start_events(data, n);
-  papi_profile_stop_events(data, n);
-
-  (*so_init)();
-
-  papi_profile_start_events(data, n);
-  (*so_call)();
-  papi_profile_stop_events(data, n);
-
-  (*so_free)();
-
-  papi_update_stats(data,n);
-
-  cache_guard();
-
-}
-
-inline void
-papi_profile(void (*so_init)(void), void (*so_call)(void), void (*so_free)(void), 
-  struct papi_data *data, size_t n, double z, double p)
-{
-  size_t i,done,M;
-
-  M = INITIAL_SAMPLES;
-  cache_clear();
-
-  for (i = 0; i < M; i++) {
-    papi_profile_helper(so_init, so_call, so_free, data, n);
-  }
-
-  done = 0;
-
-  while (!done) {
-    papi_profile_helper(so_init, so_call, so_free, data, n);
-    done = papi_profile_done(data, n, z, p);
-  }
-}
-
-/* Adapted from Algorithm III:
- *  http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
- * circa 2007
- *
- *  "A numerically stable algorithm is given below. It also computes the mean.
- *  This algorithm is due to Knuth, who cites Welford."
- */
-void
-papi_update_stats(struct papi_data *data, size_t n)
-{
-  size_t i;
-  long_long delta;
-
-  data->samples++;
-
-  for (i = 0; i < n; i++) {
-    delta = data->value[i] - data->mean[i];
-    data->mean[i] += delta/((long_long) data->samples);
-    data->sum[i] += delta*data->value[i] - delta*data->mean[i];
-
-    if (data->samples > 2) {
-      data->stdev[i] = data->sum[i]/(((long_long) data->samples));
-    } else {
-      data->stdev[i] = data->mean[i];
-    }
-  }
-}
-
-/* Statisical significance metric adapted from:
- *
- * The Art of Computer Performance Analysis by Raj Jain, p. 217
- * 
- * @BOOK{Jain:1991,
- *  AUTHOR = {Raj Jain},
- *  TITLE = {{The Art of Computer Performance Analysis}},
- *  PUBLISHER = {John Wiley \& Sons},
- *  YEAR = 1991
- * }
- */
-
-int
-papi_profile_done(struct papi_data *data, size_t n, double z, double p)
-{
-  size_t i, samples, good;
-  long_long tmp;
-
-  good = 0;
-
-  for (i = 0; i < n; i++) {
-    tmp = data->mean[i] * data->mean[i];
-    tmp = ceil(p * p * tmp);
-
-    samples = (ceil(z*z*data->stdev[i]) / tmp) + 1;
-
-    if (data->samples >= samples)
-      good++;
-  }
-
-  return good == n;
-}
-
 #undef papi_eprintf
-#undef papi_min
-
-inline
-void 
-cache_clear()
-{
-	unsigned int i;
-	BASE sum = 0;
-
-  if (PAPI_UTILS_DEBUG)
-    fprintf(stderr, 
-      "Clear cache array size in elements of %zd bytes is %zd.\n", 
-      sizeof(BASE), DUMMY_SIZE);
-
-	for (i=0; i < DUMMY_SIZE; i++)
-    cache_dummy[i] = 3;
-	for (i=0; i < DUMMY_SIZE; i++) 
-    sum += cache_dummy[i];
-
-	cache_sink = sum;
-}
-
-inline 
-void
-cache_guard()
-{
-  /* NOTE:
-   * This prevents the compiler from stipping away cache_sink, cache_dummy, and
-   * the functionality we want from cache_clear.
-   */
-	int r;
-	r = random() % DUMMY_SIZE;
-#if 1
-  FILE *fd;
-  fd = fopen("/dev/null", "w");
-  fprintf(fd, BASE_FSTR, cache_sink, cache_dummy[r]);
-  fclose(fd);
-#else
-  fprintf(stderr, BASE_FSTR, cache_sink, cache_dummy[r]);
-#endif
-}
-
 
