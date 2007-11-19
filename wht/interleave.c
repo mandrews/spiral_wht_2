@@ -1,58 +1,46 @@
 #include "wht.h"
+#include "codelets.h"
 
+/** \todo Lookup based on string, not params list */
 bool
-interleave_accept(Wht *W)
+small_interleave_transform(Wht *W)
 {
-  if (W->parent == NULL) {
-    error_msg_set("codelet smallil(%d)[%d] must be used in conjunction with splitil", 
-      W->attr[interleave_by],
-      W->n);
+  size_t k, k_max;
+
+  k = W->params[0];
+
+  k_max = (1 << WHT_MAX_INTERLEAVE);
+
+  /* Check that parent codelet is split interleaved */
+  if ((W->parent == NULL) || (strcmp("splitil", W->parent->name) != 0)) {
+    erro_msg_set("codelet %s must be used in conjunction with splitil", 
+      W->to_string(W));
     return false;
   }
 
-  if (strncmp("splitil", W->parent->name, strlen("splitil"))) {
-    error_msg_set("codelet smallil(%d)[%d] must be used in conjunction with splitil", 
-      W->attr[interleave_by],
-      W->n);
-
+  /* Check that interleave factor is supported */
+  if (k > k_max) {
+    erro_msg_set("not configured for codelets of size %zd interleaved by %zd", W->n, k);
     return false;
   }
 
-  if (W->attr[interleave_by] > W->right) {
-    error_msg_set("interleave factor %d must be < %d in smallil(%d)[%d]", 
-      W->attr[interleave_by],
-      W->right,
-      W->attr[interleave_by],
-      W->n);
+  /* Check that interleave factor is less than right I_n */
+  if (k > W->right) {
+    erro_msg_set("interleave factor %d must be < %d in %s", 
+      W->to_string(W), k, W->right);
     return false;
-  } 
-    
-  return true;
-}
+  }
 
-Wht *
-interleave_init(char *name, size_t n, int params[], size_t np)
-{
-  Wht *W;
-  size_t k;
+  W->apply = codelet_apply_lookup(W->n, "smallil", W->params, 1);
 
-  k = params[0];
-
-  W            = small_init(name, n, params, np);
-  W->accept    = interleave_accept;
-
-  if (k > (1 << WHT_MAX_INTERLEAVE))
-    wht_error("not configured for codelets of size %zd interleaved by %zd", n, k);
+  if (W->apply == NULL) {
+    erro_msg_set("could not find codelet %s", W->to_string(W));
+    return false;
+  }
 
   W->attr[interleave_by] = k;
 
-  return W;  
-}
-
-bool
-split_interleave_accept(Wht *W)
-{
-  return split_accept(W);
+  return true;
 }
 
 void 
@@ -75,7 +63,7 @@ split_interleave_apply(Wht *W, long S, size_t D, wht_value *x)
     Ni = W->children->ns[i];
     R /= Ni;
 
-    if (Wi->attr[interleave_by] != -1)
+    if (Wi->attr[interleave_by] != UNSET_ATTRIBUTE)
       nk = Wi->attr[interleave_by];
     else
       nk = 1;
@@ -89,22 +77,15 @@ split_interleave_apply(Wht *W, long S, size_t D, wht_value *x)
   }
 }
 
-Wht *
-split_interleave_init(char *name, Wht *Ws[], size_t nn, int params[], size_t np) 
+bool
+split_interleave_transform(Wht *W)
 {
-  Wht *W;
+  W->apply = split_interleave_apply;
 
-  W            = split_init(name, Ws, nn, params, np);
-  W->apply     = split_interleave_apply;
-  W->accept    = split_interleave_accept;
-
-  return W;  
+  return split_transform(W);
 }
 
-/** \todo This should go into external extensions header */
-Wht *
-interleave_convert(Wht *W, size_t k);
-
+#if 0
 Wht *
 small_interleave_convert(Wht *W, size_t k)
 {
@@ -150,3 +131,5 @@ interleave_convert(Wht *W, size_t k)
   else
     return small_interleave_convert(W, k);
 }
+#endif
+

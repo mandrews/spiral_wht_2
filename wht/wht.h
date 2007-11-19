@@ -33,6 +33,12 @@
 #define MAX_ATTRIBUTES          (4) 
   /**< Maximum number of attributes for a WHT plan node.  */
 
+#define UNSET_ATTRIBUTE        (-1)
+
+#define UNSET_PARAMETER        (-1)
+
+#define MAX_MSG_LEN           (256)
+
 /**
  * \typedef wht_value
  * \brief The data type of input vectors applied by the transform 
@@ -82,6 +88,20 @@ typedef struct split_children split_children;
 typedef void (*codelet_apply_fp)(Wht *W, long S, size_t U, wht_value *x);
 
 /**
+ * \typedef codelet_transform_fp
+ *
+ * \brief Interface (function pointer signature) for applying code
+ * transformations to codelets 
+ *
+ * void (*codelet_transform_fp)(Wht *W, int params[], size_t n);
+ *
+ * \param Wht     Pointer to wht plan 
+ * \param params  Parameters to transform
+ * \param n       Number of parameters
+ */
+typedef bool (*codelet_transform_fp)(Wht *W);
+
+/**
  *\todo Remove this typedef alias once codelet registry is created with this new type
  */
 typedef codelet_apply_fp codelet;
@@ -104,7 +124,7 @@ struct Wht {
   void (*free)  (Wht *W);
     /**< Recursive method for freeing memory allocated by codelet */ 
 
-  bool (*accept) (Wht *W);
+  codelet_transform_fp transform;
     /**< Recursive method for if plan is an accept string in the language L(WHT) */ 
 
   char * (*to_string) (Wht *W); 
@@ -120,10 +140,7 @@ struct Wht {
 
   char *name; /**< Identifier for codelet, i.e. 'small' or  'split' */
 
-  int *params;
-    /**< Parameters used by codelet */
-
-  size_t np; /**< Number of parameters used by codelet */
+  int params[MAX_CODELET_PARAMS];
 
   int attr[MAX_ATTRIBUTES]; /**< Attributes associated with WHT */
 };
@@ -140,77 +157,24 @@ struct split_children {
 };
 
 /**
- * \typedef split_init_fp
+ * \struct codelet_transform_entry
  *
- * \brief Interface (function pointer signature) for initializing split codelets
- *
- * Wht * (*split_init_fp)(char *name, Wht *Ws[], size_t nn, int params[], size_t * np);
- *
- * \param name    Unique identifier for codelet
- * \param Ws      Array of children codelets
- * \param nn      Number of children
- * \param params  Parameters for codelet, typically stored as attributes
- * \param np      Number of elements in parameter array
- * \return        Pointer to allocated codelet
- */
-typedef Wht * (*split_init_fp)(char *name, Wht *Ws[], size_t nn, int params[], size_t np);
-
-
-/**
- * \typedef small_init_fp
- *
- * \brief Interface (function pointer signature) for initializing small codelets
- *
- * Wht * (*small_init_fp)(char *name, size_t n, int params[], size_t np);
- *
- * \param name    Unique identifier for codelet
- * \param n       Size of codelet
- * \param params  Parameters for codelet, typically stored as attributes
- * \param np      Number of elements in parameter array
- * \return        Pointer to allocated codelet
- */
-typedef Wht * (*small_init_fp)(char *name, size_t n, int params[], size_t np);
-
-
-/**
- * \struct split_init_entry
- *
- * \brief Structure for registering new split codelets with the package.
+ * \brief Structure for registering new codelet transforms with the package.
  *
  * \see registry.h
  *
- * \param name    Identifier associated with split codelet
- * \param params  Number of parameters accepted by split codelet
- * \param call    Interface to initialize split codelet
+ * \param name    Identifier associated with transform
+ * \param params  Number of parameters accepted by transform
+ * \param call    Interface to transform codelet
  */
 typedef struct {
   char    name[MAX_CODELET_NAME_SIZE];
   size_t  params;
-  split_init_fp call;
-} split_init_entry;
+  codelet_transform_fp call;
+} codelet_transform_entry;
 
-#define SPLIT_INIT_ENTRY_END { "", 0, NULL } 
-  /**< Place this at the end of the split_init_registry to halt iteration */
-
-/**
- * \struct small_init_entry
- *
- * \brief Structure for registering new small codelets with the package.
- *
- * \see registry.h
- *
- * \param name    Identifier associated with small codelet
- * \param params  Number of parameters accepted by small codelet
- * \param call    Interface to initialize small codelet
- */
-typedef struct {
-  char    name[MAX_CODELET_NAME_SIZE];
-  size_t  params;
-  small_init_fp call;
-} small_init_entry;
-
-#define SMALL_INIT_ENTRY_END { "", 0, NULL } 
-  /**< Place this at the end of the small_init_registry to halt iteration */
+#define TRANSFORM_ENTRY_END { "", 0, NULL } 
+  /**< Place this at the end of the transform_registry to halt iteration */
 
 /**
  * \struct codelet_apply_entry
@@ -279,33 +243,21 @@ wht_value max_norm(const wht_value *x, const wht_value *y, size_t N);
 
 wht_value * random_vector(size_t n);
 
-#define wht_error(format, args...)  \
-  {\
-    fprintf (stderr, "error, "); \
-    fprintf (stderr, format , ## args); \
-    fprintf (stderr, "\n"); \
-    exit(-1); \
-  }
-
-split_init_fp split_lookup(const char *name, size_t params);
-
-small_init_fp small_lookup(const char *name, size_t params);
+void codelet_transform(Wht *W, const char *name, int params[], size_t n);
 
 /**
  * \fn Wht * null_init(char *name, size_t n, int params[], size_t np);
  *
  * \brief Initializes a null codelet
  *
- * \param name    Unique identifier for codelet
  * \param n       Size of codelet
- * \param params  Parameters for codelet, typically stored as attributes
- * \param np      Number of elements in parameter array
+ * \param name    Identified associated with codelet
  * \return        Pointer to allocated codelet
  *
  * Null codelets allocate memory and methods in a safe way but do transform the
  * input vector.  They are used for convience.
  */
-Wht * null_init(char *name, size_t n, int params[], size_t np);
+Wht * null_init(size_t n, char *name);
 
 
 /**
@@ -313,18 +265,15 @@ Wht * null_init(char *name, size_t n, int params[], size_t np);
  *
  * \brief Initializes a split codelet
  *
- * \param name    Unique identifier for codelet
  * \param Ws      Array of children codelets
  * \param nn      Number of children
- * \param params  Parameters for codelet, typically stored as attributes
- * \param np      Number of elements in parameter array
  * \return        Pointer to allocated codelet
  *
  * All new split codelets registered with the package should 'derive' from this
  * codelet, i.e. first initialize the codelet with init_split and then
  * proceed to customize the codelet.
  */
-Wht * split_init(char *name, Wht *Ws[], size_t nn, int params[], size_t np);
+Wht * split_init(Wht *Ws[], size_t nn);
 
 /**
  * \fn Wht * small_init(char *name, size_t n, int params[], size_t np);
@@ -341,7 +290,7 @@ Wht * split_init(char *name, Wht *Ws[], size_t nn, int params[], size_t np);
  * codelet, i.e. first initialize the codelet with init_small and then
  * proceed to customize the codelet.
  */
-Wht * small_init(char *name, size_t n, int params[], size_t np);
+Wht * small_init(size_t n);
 
 
 void null_apply(Wht *W, long S, size_t D, wht_value *x);
@@ -372,11 +321,11 @@ void small_apply(Wht *W, long S, size_t D, wht_value *x);
  */
 void split_apply(Wht *W, long S, size_t D, wht_value *x);
 
-bool null_accept(Wht *W);
+bool null_transform(Wht *W);
 
-bool small_accept(Wht *W);
+bool small_transform(Wht *W);
 
-bool split_accept(Wht *W);
+bool split_transform(Wht *W);
 
 char * null_to_string(Wht *W);
 
@@ -390,12 +339,17 @@ void small_free(Wht *W);
 
 void split_free(Wht *W);
 
-char *
-error_msg_get();
+char * warn_msg_get();
 
-void
-error_msg_set(char *format, ...);
+void warn_msg_set(char *format, ...);
 
+char * erro_msg_get();
+
+void erro_msg_set(char *format, ...);
+
+bool accepted(Wht *W);
+
+char * append_params_to_name(const char *ident, int params[], size_t n);
 
 /**
  * \todo Move these macros to an external interface.
@@ -410,9 +364,25 @@ error_msg_set(char *format, ...);
 #define wht_max_norm(x,y,n) (max_norm(x,y,n))
 #define wht_random_vector(n) (random_vector(n))
 
-#define wht_accept(W) ((W->accept)(W))
+#define wht_accepted(W) (accepted(W))
 
-#define wht_error_msg (error_msg_get())
+#define wht_warn_msg (warn_msg_get())
+
+#define wht_erro_msg (erro_msg_get())
+
+/**
+ * \todo Remove this alias once change has been made in codelet generator
+ */
+#define wht_exit(format, args...)  \
+  {\
+    fprintf (stderr, "error, "); \
+    fprintf (stderr, format , ## args); \
+    fprintf (stderr, "\n"); \
+    exit(-1); \
+  }
+
+#define wht_error wht_exit
+
 
 #endif/* WHT_H */
 

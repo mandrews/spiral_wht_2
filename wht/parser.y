@@ -134,15 +134,12 @@ yyerror(const char *s)
 struct Wht* 
 parse_split(char *ident, struct nodes *nodes, struct params *params)
 {
-  split_init_fp call;
   struct Wht *W;
- 
-  call  = split_lookup(ident, params->size);
 
-  if (call == NULL)
-    wht_error("%s was not registered in the split table", ident);
+  W = split_init(nodes->values, nodes->size);
 
-  W = (call)(ident, nodes->values, nodes->size, params->values, params->size);
+  if (strcmp(ident, "split") != 0) 
+    codelet_transform(W, ident, params->values, params->size);
 
   i_free(ident);
   i_free(params);
@@ -154,15 +151,12 @@ parse_split(char *ident, struct nodes *nodes, struct params *params)
 struct Wht* 
 parse_small(char *ident, size_t size, struct params *params)
 {
-  small_init_fp call;
   struct Wht *W;
- 
-  call  = small_lookup(ident, params->size);
 
-  if (call == NULL)
-    wht_error("%s was not registered in the small table", ident);
+  W = small_init(size);
 
-  W = (call)(ident, size, params->values, params->size);
+  if (strcmp(ident, "small") != 0) 
+    codelet_transform(W, ident, params->values, params->size);
 
   i_free(ident);
   i_free(params);

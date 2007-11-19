@@ -3,7 +3,7 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the i_free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the i_free Software
+ * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
@@ -76,7 +76,6 @@ split_free(Wht *W)
   null_free(W);
 }
 
-/** \todo Output parameter list */
 char *
 split_to_string(Wht *W)
 {
@@ -117,25 +116,26 @@ split_to_string(Wht *W)
 }
 
 bool
-split_accept(Wht *W)
+split_transform(Wht *W)
 {
   size_t i, nn;
+  Wht *Wi;
   bool accept;
 
   nn = W->children->nn;
 
-  for (i = 0; i < nn; i++) {
-    accept = (W->children->Ws[i]->accept)(W->children->Ws[i]);
+  accept = true;
 
-    if (accept != true)
-      return false;
+  for (i = 0; i < nn; i++) {
+    Wi = W->children->Ws[i];
+    accept = accept && (Wi->transform)(Wi);
   }
 
-  return true;
+  return accept;
 }
 
 Wht *
-split_init(char *name, Wht *Ws[], size_t nn, int params[], size_t np) 
+split_init(Wht *Ws[], size_t nn)
 {
   Wht *W;
   size_t i;
@@ -149,10 +149,10 @@ split_init(char *name, Wht *Ws[], size_t nn, int params[], size_t np)
     n += Ws[i]->n;
   }
 
-  W            = null_init(name, n, params, np);
+  W            = null_init(n, "split");
   W->apply     = split_apply;
   W->free      = split_free;
-  W->accept    = split_accept;
+  W->transform = split_transform;
   W->to_string = split_to_string;
 
 

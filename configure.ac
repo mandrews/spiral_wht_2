@@ -241,7 +241,6 @@ AC_CONFIG_FILES([
    wht/Makefile
    wht/codelets/Makefile
    measure/Makefile
-   measure/usec/Makefile
    measure/papi/Makefile
    search/Makefile
    model/Makefile

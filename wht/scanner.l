@@ -20,7 +20,7 @@
               return NUMBER;  
             }
 [a-zA-Z]+   { 
-              yylval.ident = strndup(yytext, strlen(yytext));
+              yylval.ident = strdup(yytext);
               return IDENT;  
             }
 .           { return yytext[0];   }

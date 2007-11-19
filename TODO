@@ -3,8 +3,6 @@ Milestones:
   - External interface 
     - Suffix for different types
 
-  - C++ parser for weights input
-
   - C Version of best_trees store
     - Configure / CPUID info in header
 
@@ -31,12 +29,35 @@ Bugs:
 
   - share/wht_best_trees.txt should not be clobbered by new installation
 
-  - whtgen/whtgen should catch SIGINT and write best trees to disk
+  - dp should catch SIGINT and write best trees to disk
 
-  - whtgen/whtgen should check for write permssion on best tress
+  - dp should check for write permssion on best tress
 
   - all tools should accept wht plan from stdin in addition to -w
+
+  - Make large note about antilexographic storing of split children
 
 Ideas:
 
   - look into pkg-config for versioning information
+
+Shortrun:
+
+  - Finalize code base
+    - measure
+    - model
+    - extra parameter in vectorization
+    - conversion
+
+  - Experiments
+    - As before with interleave and vectorization
+
+  - Instruction count model for interleaving should consider k
+    - It works now b/c k is always equal to 2
+
+  check into super extensions idea
+   - modularized configure.ac
+   - script to add to registry
+   - special files for different registrys,
+   - i.e. convert, ic count basis, etc ..
+

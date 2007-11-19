@@ -227,21 +227,16 @@ compos_tree_to_wht(compos_node *cpn)
   compos_nodes *cpns;
   compos_nodes::iterator cpns_i;
 
-  small_init_fp f;
-  split_init_fp g;
-
   Wht *Ws[MAX_SPLIT_NODES];
   cpns = cpn->children;
 
   if (cpns->empty()) {
-    f = small_lookup("small", 0);
-    return (f)("small", cpn->value, NULL, 0);
+    return small_init(cpn->value);
   } else {
     for (cpns_i = cpns->begin(), i = 0; cpns_i != cpns->end(); cpns_i++, i++)
       Ws[i] = compos_tree_to_wht(*cpns_i);
 
-    g = split_lookup("split", 0);
-    return (g)("split", Ws, cpns->size(), NULL, 0);
+    return split_init(Ws, cpns->size());
   }
 }
 

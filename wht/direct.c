@@ -65,9 +65,8 @@ Wht *
 wht_direct(size_t n)
 {
   Wht *W;
-  int params[] = {};
 
-  W             = null_init("direct", n, params, 0);
+  W             = null_init(n, "direct");
   W->apply      = apply_direct;
 
   return W;

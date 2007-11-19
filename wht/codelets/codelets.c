@@ -15,7 +15,7 @@ params_equal(int a[], int b[], size_t n)
 
 #define NOT_END(p)  ((p != NULL) && (p->size != 0))
 
-codelet wht_get_codelet(size_t size, const char *name, int params[], size_t n)
+codelet codelet_apply_lookup(size_t size, const char *name, int params[], size_t n)
 {
   codelet_entry *p;
 

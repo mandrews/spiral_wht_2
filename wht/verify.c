@@ -74,7 +74,6 @@ main(int argc, char **argv)
   Wht *W;
   Wht *D;
   wht_value *x, *y;
-  bool accept;
   char *buf;
 
   long n,N;
@@ -82,11 +81,9 @@ main(int argc, char **argv)
 
   W = wht_parse(wht_plan);
 
-  accept = wht_accept(W);
-
-  if (accept == false) {
+  if (! wht_accepted(W)) {
     wht_free(W);
-    printf("rejected, %s\n", wht_error_msg);
+    printf("rejected, %s\n", wht_erro_msg);
     exit(1);
   }
 
