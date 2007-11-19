@@ -455,10 +455,11 @@ main()
 
   W = wht_parse(plan);
 
-#if 0
-  if (wht_accept(W) == false) 
-    wht_error(wht_error_msg);
-#endif
+  if (wht_error_msg(W) != NULL) {
+    printf("rejected, %s\n", wht_error_msg(W));
+    wht_free(W);
+    exit(1);
+  }
 
   counts = ic_counts(W, 4);
 

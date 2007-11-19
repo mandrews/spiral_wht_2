@@ -93,13 +93,11 @@ typedef void (*codelet_apply_fp)(Wht *W, long S, size_t U, wht_value *x);
  * \brief Interface (function pointer signature) for applying code
  * transformations to codelets 
  *
- * void (*codelet_transform_fp)(Wht *W, int params[], size_t n);
+ * void (*codelet_transform_fp)(Wht *W);
  *
  * \param Wht     Pointer to wht plan 
- * \param params  Parameters to transform
- * \param n       Number of parameters
  */
-typedef bool (*codelet_transform_fp)(Wht *W);
+typedef void (*codelet_transform_fp)(Wht *W);
 
 /**
  *\todo Remove this typedef alias once codelet registry is created with this new type
@@ -143,6 +141,8 @@ struct Wht {
   int params[MAX_CODELET_PARAMS];
 
   int attr[MAX_ATTRIBUTES]; /**< Attributes associated with WHT */
+
+  char *error_msg;
 };
 
 /**
@@ -321,11 +321,11 @@ void small_apply(Wht *W, long S, size_t D, wht_value *x);
  */
 void split_apply(Wht *W, long S, size_t D, wht_value *x);
 
-bool null_transform(Wht *W);
+void null_transform(Wht *W);
 
-bool small_transform(Wht *W);
+void small_transform(Wht *W);
 
-bool split_transform(Wht *W);
+void split_transform(Wht *W);
 
 char * null_to_string(Wht *W);
 
@@ -339,15 +339,9 @@ void small_free(Wht *W);
 
 void split_free(Wht *W);
 
-char * warn_msg_get();
+void error_msg_set(Wht *W, char *format, ...);
 
-void warn_msg_set(char *format, ...);
-
-char * erro_msg_get();
-
-void erro_msg_set(char *format, ...);
-
-bool accepted(Wht *W);
+char * error_msg_get(Wht *W);
 
 char * append_params_to_name(const char *ident, int params[], size_t n);
 
@@ -357,22 +351,13 @@ char * append_params_to_name(const char *ident, int params[], size_t n);
 #define wht_apply(W, x) ((W->apply)(W, 1, 0, x))
 #define wht_free(W) ((W->free)(W))
 #define wht_to_string(W) ((W->to_string)(W))
-
 #define wht_parse(s) (parse(s))
 #define wht_info() (info())
 #define wht_direct(n) (direct(n))
 #define wht_max_norm(x,y,n) (max_norm(x,y,n))
 #define wht_random_vector(n) (random_vector(n))
+#define wht_error_msg(W)    (error_msg_get(W))
 
-#define wht_accepted(W) (accepted(W))
-
-#define wht_warn_msg (warn_msg_get())
-
-#define wht_erro_msg (erro_msg_get())
-
-/**
- * \todo Remove this alias once change has been made in codelet generator
- */
 #define wht_exit(format, args...)  \
   {\
     fprintf (stderr, "error, "); \
@@ -381,8 +366,10 @@ char * append_params_to_name(const char *ident, int params[], size_t n);
     exit(-1); \
   }
 
+/**
+ * \todo Remove this alias once change has been made in codelet generator
+ */
 #define wht_error wht_exit
-
 
 #endif/* WHT_H */
 

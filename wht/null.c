@@ -1,9 +1,9 @@
 #include "wht.h"
 
-bool
+void
 null_transform(Wht *W)
 {
-  return false; /* Disallow null nodes in plan */
+  /* Empty */
 }
 
 void 
@@ -11,6 +11,9 @@ null_free(Wht *W)
 {
   if (W->name != NULL)
     i_free(W->name);
+
+  if (W->error_msg != NULL)
+    i_free(W->error_msg);
 
   i_free(W);
 }
@@ -56,6 +59,7 @@ null_init(size_t n, char *name)
   W->apply     = null_apply;
   W->transform = null_transform;
   W->to_string = null_to_string;
+  W->error_msg = NULL;
   W->left      = W->N;
   W->right     = 1;
   W->parent    = NULL;

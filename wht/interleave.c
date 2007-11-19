@@ -2,7 +2,8 @@
 #include "codelets.h"
 
 /** \todo Lookup based on string, not params list */
-bool
+
+void
 small_interleave_transform(Wht *W)
 {
   size_t k, k_max;
@@ -12,35 +13,23 @@ small_interleave_transform(Wht *W)
   k_max = (1 << WHT_MAX_INTERLEAVE);
 
   /* Check that parent codelet is split interleaved */
-  if ((W->parent == NULL) || (strcmp("splitil", W->parent->name) != 0)) {
-    erro_msg_set("codelet %s must be used in conjunction with splitil", 
-      W->to_string(W));
-    return false;
-  }
+  if ((W->parent == NULL) || (strcmp("splitil", W->parent->name) != 0)) 
+    error_msg_set(W, "codelet must be used in conjunction with splitil");
 
   /* Check that interleave factor is supported */
-  if (k > k_max) {
-    erro_msg_set("not configured for codelets of size %zd interleaved by %zd", W->n, k);
-    return false;
-  }
+  if (k > k_max) 
+    error_msg_set(W, "not configured for codelets of size %zd interleaved by %zd", W->n, k);
 
   /* Check that interleave factor is less than right I_n */
-  if (k > W->right) {
-    erro_msg_set("interleave factor %d must be < %d in %s", 
-      W->to_string(W), k, W->right);
-    return false;
-  }
+  if (k > W->right) 
+    error_msg_set(W, "interleave factor must be <= %d", k);
 
   W->apply = codelet_apply_lookup(W->n, "smallil", W->params, 1);
 
-  if (W->apply == NULL) {
-    erro_msg_set("could not find codelet %s", W->to_string(W));
-    return false;
-  }
+  if (W->apply == NULL) 
+    error_msg_set(W, "could not find codelet");
 
   W->attr[interleave_by] = k;
-
-  return true;
 }
 
 void 
@@ -77,12 +66,11 @@ split_interleave_apply(Wht *W, long S, size_t D, wht_value *x)
   }
 }
 
-bool
+void
 split_interleave_transform(Wht *W)
 {
   W->apply = split_interleave_apply;
-
-  return split_transform(W);
+  split_transform(W);
 }
 
 #if 0

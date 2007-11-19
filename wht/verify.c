@@ -81,9 +81,9 @@ main(int argc, char **argv)
 
   W = wht_parse(wht_plan);
 
-  if (! wht_accepted(W)) {
+  if (wht_error_msg(W) != NULL) {
+    printf("rejected, %s\n", wht_error_msg(W));
     wht_free(W);
-    printf("rejected, %s\n", wht_erro_msg);
     exit(1);
   }
 

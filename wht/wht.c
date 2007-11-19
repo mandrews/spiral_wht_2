@@ -3,9 +3,6 @@
 
 #include "scanner.h"
 
-static char warn_msg[MAX_MSG_LEN];
-static char erro_msg[MAX_MSG_LEN];
-
 /* This symbol points to the root of the parsed wht tree */
 extern Wht *wht_root;
 
@@ -26,12 +23,6 @@ parse(char *in)
   yy_delete_buffer(buf);
 
   return W;
-}
-
-bool 
-accepted(Wht *W)
-{
-  return (strlen(erro_msg_get()) == 0);
 }
 
 void
@@ -81,36 +72,53 @@ codelet_transform(Wht *W, const char *name, int params[], size_t n)
     W->name = strdup(name);
 }
 
-
-char * 
-warn_msg_get() 
-{ 
-  return warn_msg;
-}
-
 void 
-warn_msg_set(char *format, ...) 
+error_msg_set(Wht *W, char *format, ...) 
 { 
   va_list ap; 
+  char *tmp;
+
+  /* Policy to keep first encountered error message */
+  if (W->error_msg != NULL)
+    return;
+
+  W->error_msg = i_malloc(sizeof(char) * MAX_MSG_LEN);
+
+  tmp = W->to_string(W);
+
   va_start(ap, format); 
-  vsnprintf(warn_msg, MAX_MSG_LEN, format, ap); 
+  vsnprintf(W->error_msg, MAX_MSG_LEN, format, ap); 
   va_end(ap); 
+
+  strcat(W->error_msg, " @ ");
+  strcat(W->error_msg, tmp);
+
+  free(tmp);
 }
 
-char * 
-erro_msg_get() 
+char *
+error_msg_get(Wht *W)
 { 
-  return erro_msg;
+  if (W->error_msg != NULL)
+    return W->error_msg;
+
+  if (W->children != NULL) {
+    size_t i, nn;
+    char *tmp;
+
+    nn = W->children->nn;
+
+    for (i = 0; i < nn; i++) {
+      tmp = error_msg_get(W->children->Ws[i]);
+
+      if (tmp != NULL)
+        return tmp;
+    }
+  }
+
+  return NULL;
 }
 
-void 
-erro_msg_set(char *format, ...) 
-{ 
-  va_list ap; 
-  va_start(ap, format); 
-  vsnprintf(erro_msg, MAX_MSG_LEN, format, ap); 
-  va_end(ap); 
-}
 
 char *
 append_params_to_name(const char *name, int params[], size_t n)

@@ -103,7 +103,7 @@ if $0 == __FILE__ # Main Entry Point
   end
 
   for size in n+1 .. 2*n do
-    expect_error(small(size))
+    expect_reject(small(size))
   end
 
   for size in 1 .. n do
@@ -154,7 +154,7 @@ if $0 == __FILE__ # Main Entry Point
 
     for x in i+1 .. 2*i do
       y = 2**x
-      expect_error(splitil(smallil(1,y)*1, small(n)))
+      expect_reject(splitil(smallil(1,y)*1, small(n)))
     end
 
     for x in 2 .. i do

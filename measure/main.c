@@ -114,13 +114,11 @@ main(int argc, char **argv)
 
   W = wht_parse(wht_plan);
 
-#if 0
-  if (wht_accept(W) != true) {
+  if (wht_error_msg(W) != NULL) {
+    printf("rejected, %s\n", wht_error_msg(W));
     wht_free(W);
-    printf("wht plan rejected, %s\n", wht_error_msg);
     exit(1);
   }
-#endif
 
   if (extn == NULL) {
     extn = malloc(sizeof(char) * strlen(DEFAULT_EXTN) + 1);
