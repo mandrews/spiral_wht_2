@@ -345,6 +345,8 @@ char * error_msg_get(Wht *W);
 
 char * append_params_to_name(const char *ident, int params[], size_t n);
 
+void transform(Wht *W, const char *name, int params[], size_t n);
+
 /**
  * \todo Move these macros to an external interface.
  */

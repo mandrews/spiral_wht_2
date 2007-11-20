@@ -18,13 +18,13 @@ libwht_la_SOURCES = null.c direct.c small.c split.c utils.c wht.c \
 libwht_la_LIBADD  = $(top_builddir)/wht/codelets/libwht_codelets.la
 
 # TODO should utilize WHT_SUFFIX to disambiguate types
-bin_PROGRAMS 				= wht_verify # wht_convert
+bin_PROGRAMS 				= wht_verify wht_convert
 
 wht_verify_SOURCES	= verify.c 
 wht_verify_LDADD		= libwht.la
 
-#wht_convert_SOURCES	= convert.c 
-#wht_convert_LDADD		= libwht.la
+wht_convert_SOURCES	= convert.c 
+wht_convert_LDADD		= libwht.la
 
 # NOTE: This is a hack to fix a problem with autoconf ylwrap script
 # See: http://lists.gnu.org/archive/html/automake/2007-11/msg00001.html

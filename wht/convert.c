@@ -53,10 +53,10 @@ main(int argc, char **argv)
         wht_plan = optarg;
         break;
       case 'i':
-        interleave = atoi(optarg);
+        interleave = abs(atoi(optarg));
         break;
       case 'v':
-        vectorize = atoi(optarg);
+        vectorize = abs(atoi(optarg));
         break;
       case 'h':
         usage();
@@ -72,16 +72,19 @@ main(int argc, char **argv)
   if (wht_plan == NULL)
     usage();
 
-  Wht *W, *Wp;
+  Wht *W;
 
   W = wht_parse(wht_plan);
 
-  if (wht_accept(W) == false) {
+  if (wht_error_msg(W) != NULL) {
+    printf("rejected, %s\n", wht_error_msg(W));
     wht_free(W);
-    printf("%s\n", wht_error_msg);
     exit(1);
   }
 
+  char *buf;
+
+#if 0
   if (vectorize > 0 && interleave > 0)
     Wp = vector_convert(W, vectorize, interleave);
   else if (vectorize > 0)
@@ -90,18 +93,24 @@ main(int argc, char **argv)
     Wp = interleave_convert(W, interleave);
   else
     Wp = wht_parse(wht_to_string(W));
+#endif
 
-  if (wht_accept(Wp) == false) {
+  if (interleave > 0) {
+    int params[] = { interleave };
+    interleave_convert(W, params, 1);
+  } 
+
+  if (wht_error_msg(W) != NULL) {
+    printf("rejected, %s\n", wht_error_msg(W));
     wht_free(W);
-    wht_free(Wp);
-    printf("%s\n", wht_error_msg);
     exit(1);
   }
 
-  printf("%s\n", wht_to_string(Wp));
+  buf = wht_to_string(W);
+  printf("%s\n", buf);
+  free(buf);
 
   wht_free(W);
-  wht_free(Wp);
 
   return 0;
 }

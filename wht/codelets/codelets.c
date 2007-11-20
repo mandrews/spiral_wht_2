@@ -15,6 +15,8 @@ params_equal(int a[], int b[], size_t n)
 
 #define NOT_END(p)  ((p != NULL) && (p->size != 0))
 
+/** \todo Lookup based on string, not params list */
+
 codelet codelet_apply_lookup(size_t size, const char *name, int params[], size_t n)
 {
   codelet_entry *p;
