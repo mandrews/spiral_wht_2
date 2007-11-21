@@ -42,6 +42,9 @@ small_right_vector_transform(Wht *W)
 void
 small_vector_transform(Wht *W)
 {
+  /** 
+   * \todo Check assumptions about number of parameters
+   */
   size_t v, k, a;
 
   v = W->params[0];
@@ -73,3 +76,31 @@ small_vector_transform(Wht *W)
   if (W->apply == NULL) 
     return error_msg_set(W, "could not find codelet");
 }
+
+void
+vector_convert(Wht *W, int params[], size_t n)
+{
+  int i;
+  size_t k,v, k_max;
+
+  v = params[0];
+  k = params[1];
+
+  k_max = (k >> 1);
+
+  transform(W, "splitil", NULL, 0);
+
+  int params2[1] = { v };
+  transform(W, "smallv", params2, 1);
+
+  for (i = k_max; i >= 1; i--) {
+    int params2[3] = { v, (1 << i), 1};
+    transform(W, "smallv", params2, 3);
+  }
+
+  for (i = k_max; i >= 1; i--) {
+    int params2[3] = { v, (1 << i), 0};
+    transform(W, "smallv", params2, 3);
+  }
+}
+

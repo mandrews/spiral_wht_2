@@ -73,6 +73,7 @@ main(int argc, char **argv)
     usage();
 
   Wht *W;
+  char *buf;
 
   W = wht_parse(wht_plan);
 
@@ -82,20 +83,13 @@ main(int argc, char **argv)
     exit(1);
   }
 
-  char *buf;
-
-#if 0
-  if (vectorize > 0 && interleave > 0)
-    Wp = vector_convert(W, vectorize, interleave);
-  else if (vectorize > 0)
-    Wp = vector_convert(W, vectorize, vectorize);
-  else if (interleave > 0)
-    Wp = interleave_convert(W, interleave);
-  else
-    Wp = wht_parse(wht_to_string(W));
-#endif
-
-  if (interleave > 0) {
+  if (vectorize > 0 && interleave > 0) {
+    int params[] = { vectorize, interleave };
+    vector_convert(W, params, 2);
+  } else if (vectorize > 0) {
+    int params[] = { vectorize, vectorize };
+    vector_convert(W, params, 2);
+  } else if (interleave > 0) {
     int params[] = { interleave };
     interleave_convert(W, params, 1);
   } 
