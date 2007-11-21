@@ -173,29 +173,36 @@ if $0 == __FILE__ # Main Entry Point
     puts
 
     for size in v .. n do
-      expect_correct(splitil(smallv(1,v,v)*4,smallv(size,v)))
+      expect_correct(splitil(smallv(1,v,v,1)*4,smallv(size,v)))
     end
 
     for size in v .. n do
-      expect_correct(splitil(smallv(1,v,v), splitil(smallv(1,v,v),smallv(size,v))))
+      expect_correct(splitil(smallv(1,v,v,1), splitil(smallv(1,v,v,1),smallv(size,v))))
     end
 
-    # NOTE: Ambiguity needs to be resolved in vector.c
-    # Present system allows only unit stride vectorized codelets
     for size in v .. n do
-      # expect_reject(splitil(
+      # Reject aligned vectors here
+      expect_reject(splitil(
+        splitil(smallv(1,v,v,1), small(size)),
+        splitil(smallv(1,v,v,1), small(size))))
+
+      # Accept general vectors here
       expect_correct(splitil(
-        splitil(smallv(1,v,v), small(size)),
-        splitil(smallv(1,v,v), small(size))))
+        splitil(smallv(1,v,v,0), small(size)),
+        splitil(smallv(1,v,v,0), small(size))))
     end
 
+    # Reject when interleaved codelets do not have splitil parent
     for size in v .. n do
-      expect_reject(split(smallv(1,v,v)*4,smallv(size,v)))
+      expect_reject(split(smallv(1,v,v,0)*4,smallv(size,v)))
+      expect_reject(split(smallv(1,v,v,1)*4,smallv(size,v)))
     end
 
+    # Reject when interleaved codelets do not have parent
     for x in 2 .. i do
       y = 2**x
-      expect_reject(smallv(n,v,y))
+      expect_reject(smallv(n,v,y,0))
+      expect_reject(smallv(n,v,y,1))
     end
 
   end
