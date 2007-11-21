@@ -13,7 +13,7 @@ lib_LTLIBRARIES = libwht.la
 
 libwht_la_SOURCES = null.c direct.c small.c split.c utils.c wht.c \
 										scanner.l parser.y \
-										interleave.c
+										interleave.c vector.c
 
 libwht_la_LIBADD  = $(top_builddir)/wht/codelets/libwht_codelets.la
 

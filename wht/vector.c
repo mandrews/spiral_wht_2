@@ -1,215 +1,75 @@
 #include "wht.h"
+#include "codelets.h"
 
 bool
-right_vector_accept(Wht *W)
+rightmost_tree(Wht *W)
 {
-  if (W->right != 1) {
-    error_msg_set("smallv(%d)[%d] must be right most codelet in a plan", 
-      W->attr[vector_size], W->n);
-    return false;
-  } 
+  Wht *Wp;
+  size_t right;
 
-  if (W->parent == NULL)
-    return true;
+  Wp = W->parent;
+  right = 1;
 
-  if (W->parent->right != 1) {
-    error_msg_set("smallv(%d)[%d] must be right most codelet in a plan", 
-      W->attr[vector_size], W->n);
-    return false;
+  while (Wp != NULL) {
+    right *= Wp->right;
+    Wp = Wp->parent;
   }
 
-  return true;
+  return (right == 1);
 }
 
-Wht *
-right_vector_init(char *name, size_t n, int params[], size_t np)
+void
+small_right_vector_transform(Wht *W)
 {
-  Wht *W;
-  int v;
+  size_t v;
 
-  if (np != 1)
-    wht_error("not enough parameters for this codelet");
-
-  v = params[0];
-
-  if (n > WHT_MAX_UNROLL)
-    wht_error("not configured for unrolled codelets of size %zd", n);
+  v = W->params[0];
 
   if (v != WHT_VECTOR_SIZE)
-    wht_error("not configured for vectors of size %d",v);
+    return error_msg_set(W, "not configured for vectors of size %d",v);
 
-  W           = small_init(name, n, params, np);
-  W->accept   = right_vector_accept;
+  if (! (rightmost_tree(W) && (W->right == 1)))
+    return error_msg_set(W, "must be rightmost codelet in plan");
 
-  W->attr[vector_size]    = v;
+  W->apply = codelet_apply_lookup(W->n, "smallv", W->params, 1);
 
-  if (v >= W->N)
-    wht_error("vector size %d must < size 2^(%zd)",v,n);
+  if (W->apply == NULL) 
+    return error_msg_set(W, "could not find codelet");
 
-  return W;  
+  W->attr[vector_size] = v;
 }
 
-bool
-interleave_vector_accept(Wht *W)
+void
+small_vector_transform(Wht *W)
 {
-  /** \todo Check condition size * interleave_by > vector_size.
-   * This * only occurs with vectors of size >= 4  
+  size_t v, k, a;
+
+  v = W->params[0];
+  k = W->params[1];
+  a = W->params[2];
+
+  if (v != WHT_VECTOR_SIZE)
+    return error_msg_set(W, "not configured for vectors of size %d",v);
+
+  if ((a == 1) && (! rightmost_tree(W)))
+    return error_msg_set(W, "must be in rightmost tree of plan");
+
+  /** 
+   * \todo Check and test (size * interleave_by) > vector_size.
+   * This only occurs with vectors of size >= 4  
    */
 
-  if (W->parent == NULL) {
-    error_msg_set("codelet smallv(%d,%d)[%d] must be used in conjunction with splitil", 
-      W->attr[vector_size],
-      W->attr[interleave_by],
-      W->n);
-    return false;
-  }
+  W->params[0] = k;
+  W->params[1] = UNSET_PARAMETER;
+  W->params[2] = UNSET_PARAMETER;
+  small_interleave_transform(W);
 
-  if (strncmp("splitil", W->parent->name, strlen("splitil"))) {
-    error_msg_set("codelet smallv(%d,%d)[%d] must be used in conjunction with splitil", 
-      W->attr[vector_size],
-      W->attr[interleave_by],
-      W->n);
+  W->params[0] = v;
+  W->params[1] = k;
+  W->params[2] = a;
 
-    return false;
-  }
+  W->apply = codelet_apply_lookup(W->n, "smallv", W->params, 3);
 
-  /** \todo Decide if an explict parameter needs to be added here */
-#if 0
-  if (W->parent->right != 1) {
-    error_msg_set("vector codelet smallv(%d,%d)[%d] must be relatively right most in a plan",
-      W->attr[vector_size],
-      W->attr[interleave_by],
-      W->n);
-    return false;
-  } 
-#else
-  if (W->parent->right == 1) {
-    W->params[2] = 1;
-    W->apply = wht_get_codelet(W->n, W->name, W->params, W->np);
-  }
-#endif
-  
-  if (W->attr[interleave_by] > W->right) {
-    error_msg_set("interleave factor %d must be < %d in smallv(%d,%d)[%d]", 
-      W->attr[interleave_by],
-      W->right,
-      W->attr[vector_size],
-      W->attr[interleave_by],
-      W->n);
-    return false;
-  }
-
-  return true;
-}
-
-/** \todo Decide if an explict parameter needs to be added here */
-char *
-interleave_vector_to_string(Wht *W)
-{
-  char *buf;
-
-  /* NOTE: Hack to get null to ignore hidden parameter. */
-  W->np = 2;
-  buf = null_to_string(W);
-  W->np = 3;
-
-  return buf;
-}
-
-Wht *
-interleave_vector_init(char *name, size_t n, int params[], size_t np)
-{
-  Wht *W;
-  size_t v, k;
-
-  if (np != 2)
-    wht_error("not enough parameters for this codelet");
-
-  v = params[0];
-  k = params[1];
-
-  if (n > WHT_MAX_UNROLL)
-    wht_error("not configured for unrolled codelets of size %zd", n);
-
-  if (v != WHT_VECTOR_SIZE)
-    wht_error("not configured for vectors of size %zd",v);
-
-  if (k > (1 << WHT_MAX_INTERLEAVE))
-    wht_error("not configured for codelets of size %zd interleaved by %zd", n, k);
-
-  params[2] = 0;
-
-  W             = small_init(name, n, params, np + 1);
-  W->accept     = interleave_vector_accept;
-  W->to_string  = interleave_vector_to_string;
-
-  W->attr[vector_size]    = v;
-  W->attr[interleave_by]  = k;
-
-  return W;  
-}
-
-/** \todo This should go into external extensions header */
-Wht *
-vector_convert(Wht *W, size_t v, size_t k);
-
-Wht *
-small_right_vector_convert(Wht *W, size_t v)
-{
-  int *params;
-  params = i_malloc(sizeof(*params)*1);
-  params[0] = v;
-  return right_vector_init("smallv", W->n, params, 1);
-}
-
-Wht *
-small_interleave_vector_convert(Wht *W, size_t v, size_t k)
-{
-  size_t kp, k_min;
-  int *params;
-
-  if (W->right < (1 << WHT_MAX_INTERLEAVE))
-    k_min = W->right;
-  else
-    k_min = (1 << WHT_MAX_INTERLEAVE);
- 
-  for (kp = k; kp > k_min; kp--);
-
-  if (kp < 2) 
-    return small_init("small", W->n, NULL, 0);
-
-  params = i_malloc(sizeof(*params)*2);
-  params[0] = v;
-  params[1] = kp;
-
-  return interleave_vector_init("smallv", W->n, params, 2);
-}
-
-Wht *
-split_vector_convert(Wht *W, size_t v, size_t k)
-{
-  size_t nn, i;
-  Wht **Ws;
-
-  nn = W->children->nn;
-  Ws = i_malloc(sizeof(*Ws) *nn);
-
-  for (i = 0; i < nn; i++) 
-    Ws[i] = vector_convert(W->children->Ws[i], v, k);
-
-  return split_interleave_init("splitil", Ws, nn, NULL, 0);
-}
-
-
-Wht *
-vector_convert(Wht *W, size_t v, size_t k)
-{
-  if (W->children)
-    return split_vector_convert(W, v, k);
-  else if (W->N > v && (W->parent == NULL || (W->parent->right == 1 && W->right == 1)))
-    return small_right_vector_convert(W, v);
-  else if (W->parent == NULL || (W->parent->right == 1))
-    return small_interleave_vector_convert(W, v, k);
-  else
-    return small_init("small", W->n, NULL, 0);
+  if (W->apply == NULL) 
+    return error_msg_set(W, "could not find codelet");
 }
