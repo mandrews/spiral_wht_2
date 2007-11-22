@@ -97,10 +97,11 @@ vector_convert(Wht *W, int params[], size_t n)
     int params2[3] = { v, (1 << i), 1};
     transform(W, "smallv", params2, 3);
   }
-
+#if 0
   for (i = k_max; i >= 1; i--) {
     int params2[3] = { v, (1 << i), 0};
     transform(W, "smallv", params2, 3);
   }
+#endif
 }
 
