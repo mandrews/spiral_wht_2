@@ -103,7 +103,9 @@ main(int argc, char **argv)
 
   buf = W->to_string(W);
 
+#if 0
   printf("%s\n", buf);
+#endif
 
   if (wht_max_norm(x,y,N) < WHT_STABILITY_THRESHOLD)
     printf("correct\n");   

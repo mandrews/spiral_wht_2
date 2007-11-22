@@ -36,7 +36,7 @@ end
 def expect_correct(plan)
   out = `#{WHT_VERIFY} -w '#{plan}'`
 
-  if out =~ /correct/
+  if out =~ /^correct/
     puts "PASS[A] #{plan}"
   else
     puts "FAIL[R] #{plan}"
@@ -48,7 +48,7 @@ end
 def expect_reject(plan)
   out = `#{WHT_VERIFY} -w '#{plan}'`
 
-  if out =~ /reject/
+  if out =~ /^reject/
     puts "PASS[R] #{plan}"
   else
     puts "FAIL[A] #{plan}"
@@ -61,7 +61,7 @@ def expect_error(plan)
   # Pipe stderr to stdout
   out = `#{WHT_VERIFY} -w '#{plan}' 2>&1 `
 
-  if out =~ /error/
+  if out =~ /^error/
     puts "PASS[R] #{plan}"
   else
     puts "FAIL[A] #{plan}"
@@ -172,12 +172,15 @@ if $0 == __FILE__ # Main Entry Point
     puts "\nVectorization Tests (2)"
     puts
 
+    # Vary interleave factor fix size
     for size in v .. n do
       expect_correct(splitil(smallv(1,v,v,1)*4,smallv(size,v)))
+      expect_correct(splitil(smallv(1,v,v,0)*4,smallv(size,v)))
     end
 
     for size in v .. n do
       expect_correct(splitil(smallv(1,v,v,1), splitil(smallv(1,v,v,1),smallv(size,v))))
+      expect_correct(splitil(smallv(1,v,v,0), splitil(smallv(1,v,v,0),smallv(size,v))))
     end
 
     for size in v .. n do
@@ -203,6 +206,11 @@ if $0 == __FILE__ # Main Entry Point
       y = 2**x
       expect_reject(smallv(n,v,y,0))
       expect_reject(smallv(n,v,y,1))
+    end
+
+    # NOTE: This fails but I am not sure why
+    for size in v .. n do
+      expect_correct(splitil(smallv(size,v,8,0),smallv(3,v)))
     end
 
   end
