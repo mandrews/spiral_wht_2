@@ -6,14 +6,10 @@
    ==========
 */
 
-/* avoiding allocations < 32 Byte */
 void *
-i_malloc(size_t size) {
-  void *p;
-
-  /* avoid mallocs of size below 32 bytes */
-  if (size < 32)
-    size = 32;
+i_malloc(size_t size) 
+{
+  void *p __attribute__ ((aligned (16)));
 
   p = malloc(size);
   if (p == NULL)
@@ -22,7 +18,8 @@ i_malloc(size_t size) {
 }
 
 void 
-i_free(void *p) {
+i_free(void *p) 
+{
   free(p);
 }
 
