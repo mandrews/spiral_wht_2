@@ -29,7 +29,9 @@ MAX_UNROLL=6
 MAX_INTERLEAVE=0
 VECTOR_SIZE=0
 
-CFLAGS="-O2"
+if test "$CFLAGS" = ""; then
+  CFLAGS="-O2"
+fi
 
 # 
 #  T R A N S F O R M   T Y P E
