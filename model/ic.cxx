@@ -148,8 +148,12 @@ alpha_k(Wht *W, size_t k)
 
     tmp_counts = alpha_k(Wi,k);
 
+    int il = 1;
+    if (Wi->attr[interleave_by] != UNSET_PARAMETER)
+      il = Wi->attr[interleave_by];
+
     for (j = tmp_counts->begin(); j != tmp_counts->end(); j++) 
-      (*counts)[j->first] += ((1 << (n - ni)) * j->second);
+      (*counts)[j->first] += (((1 << (n - ni)) * j->second) / il);
 
     delete tmp_counts;
   }
@@ -289,12 +293,27 @@ count_set_init()
   (*counts)["small[2]"] = 0.0;
   (*counts)["small[3]"] = 0.0;
   (*counts)["small[4]"] = 0.0;
+  (*counts)["smallil(2)[2]"] = 0.0;
+  (*counts)["smallil(2)[3]"] = 0.0;
+  (*counts)["smallil(2)[4]"] = 0.0;
+  (*counts)["smallil(4)[2]"] = 0.0;
+  (*counts)["smallil(4)[3]"] = 0.0;
+  (*counts)["smallil(4)[4]"] = 0.0;
+  (*counts)["smallil(8)[2]"] = 0.0;
+  (*counts)["smallil(8)[3]"] = 0.0;
+  (*counts)["smallil(8)[4]"] = 0.0;
   (*counts)["smallv(2)[2]"] = 0.0;
   (*counts)["smallv(2)[3]"] = 0.0;
   (*counts)["smallv(2)[4]"] = 0.0;
-  (*counts)["smallv(2,2)[2]"] = 0.0;
-  (*counts)["smallv(2,2)[3]"] = 0.0;
-  (*counts)["smallv(2,2)[4]"] = 0.0;
+  (*counts)["smallv(2,2,1)[2]"] = 0.0;
+  (*counts)["smallv(2,2,1)[3]"] = 0.0;
+  (*counts)["smallv(2,2,1)[4]"] = 0.0;
+  (*counts)["smallv(2,4,1)[2]"] = 0.0;
+  (*counts)["smallv(2,4,1)[3]"] = 0.0;
+  (*counts)["smallv(2,4,1)[4]"] = 0.0;
+  (*counts)["smallv(2,8,1)[2]"] = 0.0;
+  (*counts)["smallv(2,8,1)[3]"] = 0.0;
+  (*counts)["smallv(2,8,1)[4]"] = 0.0;
   (*counts)["split_alpha"] = 0.0;
   (*counts)["split_beta_1"] = 0.0;
   (*counts)["split_beta_2"] = 0.0;
@@ -352,16 +371,31 @@ calc_coeffs()
     "split[split[small[2]],small[2],split[small[2]]]",
     "split[small[2],split[small[2],small[2]]]",
     "split[split[small[2],small[2]],small[2]]",
-    "smallv(2)[2]",
-    "smallv(2)[3]",
-    "smallv(2)[4]",
     "splitil[small[2],small[2],small[2]]",
     "splitil[splitil[small[2]],small[2],splitil[small[2]]]",
     "splitil[small[2],splitil[small[2],small[2]]]",
     "splitil[splitil[small[2],small[2]],small[2]]",
-    "splitil[smallv(2,2)[2],smallv(2,2)[2],small[1]]",
-    "splitil[smallv(2,2)[3],smallv(2,2)[3],small[1]]",
-    "splitil[smallv(2,2)[4],smallv(2,2)[4],small[1]]",
+    "splitil[smallil(2)[2],smallil(2)[2],small[1]]",
+    "splitil[smallil(2)[3],smallil(2)[3],small[1]]",
+    "splitil[smallil(2)[4],smallil(2)[4],small[1]]",
+    "splitil[smallil(4)[2],smallil(4)[2],small[1]]",
+    "splitil[smallil(4)[3],smallil(4)[3],small[1]]",
+    "splitil[smallil(4)[4],smallil(4)[4],small[1]]",
+    "splitil[smallil(8)[2],smallil(8)[2],small[1]]",
+    "splitil[smallil(8)[3],smallil(8)[3],small[1]]",
+    "splitil[smallil(8)[4],smallil(8)[4],small[1]]",
+    "smallv(2)[2]",
+    "smallv(2)[3]",
+    "smallv(2)[4]",
+    "splitil[smallv(2,2,1)[2],smallv(2,2,1)[2],small[1]]",
+    "splitil[smallv(2,2,1)[3],smallv(2,2,1)[3],small[1]]",
+    "splitil[smallv(2,2,1)[4],smallv(2,2,1)[4],small[1]]",
+    "splitil[smallv(2,4,1)[2],smallv(2,4,1)[2],small[2]]",
+    "splitil[smallv(2,4,1)[3],smallv(2,4,1)[3],small[2]]",
+    "splitil[smallv(2,4,1)[4],smallv(2,4,1)[4],small[2]]",
+    "splitil[smallv(2,8,1)[2],smallv(2,8,1)[2],small[3]]",
+    "splitil[smallv(2,8,1)[3],smallv(2,8,1)[3],small[3]]",
+    "splitil[smallv(2,8,1)[4],smallv(2,8,1)[4],small[3]]",
     NULL
   };
 
@@ -396,14 +430,14 @@ calc_coeffs()
     free(stat);
   }
 
-  c = matrix_least_squares_error(a,b);
-
 #if 0
   matrix_print(a);
   matrix_print(b);
   printf("\n");
   matrix_print(c);
 #endif
+
+  c = matrix_least_squares_error(a,b);
 
   col_to_count_set(c,0,coeffs);
 
@@ -442,7 +476,7 @@ main()
 
   coeffs = calc_coeffs();
 
-#if 1
+#if 0
   printf("coeffs:\n");
   for (i = coeffs->begin(); i != coeffs->end(); i++) {
     printf("%s : %g\n", i->first.c_str(), i->second);
@@ -451,30 +485,31 @@ main()
 
   plan = (char *) malloc(sizeof(char) * 255);
 
-  scanf("%s\n", plan);
+  while (gets(plan) != NULL) {
 
-  W = wht_parse(plan);
+    W = wht_parse(plan);
 
-  if (wht_error_msg(W) != NULL) {
-    printf("rejected, %s\n", wht_error_msg(W));
-    wht_free(W);
-    exit(1);
-  }
+    if (wht_error_msg(W) != NULL) {
+      printf("rejected, %s\n", wht_error_msg(W));
+      wht_free(W);
+      exit(1);
+    }
 
-  counts = ic_counts(W, 4);
+    counts = ic_counts(W, 4);
 
-#if 1
-  printf("counts:\n");
-  for (i = counts->begin(); i != counts->end(); i++) {
-    printf("%s : %g\n", i->first.c_str(), i->second);
-  }
+#if 0
+    printf("counts:\n");
+    for (i = counts->begin(); i != counts->end(); i++) {
+      printf("%s : %g\n", i->first.c_str(), i->second);
+    }
+    printf("instructions:\n");
 #endif
 
-  printf("instructions:\n");
-  printf("%g\n", ic_predict(counts, coeffs));
+    printf("%g\n", ic_predict(counts, coeffs));
+    wht_free(W);
+  }
 
   free(plan);
-  wht_free(W);
   delete coeffs;
 
   return 0;
