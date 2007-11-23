@@ -181,7 +181,9 @@ main(int argc, char **argv)
 
   buf = W->to_string(W);
 
+#if 0
   printf("%s\n", buf);
+#endif
 
   if (plan_is_iterative(W))
     printf("iterative ");
