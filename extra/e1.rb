@@ -11,14 +11,13 @@ CONVERT_PATH    = '../wht'
 CLASSIFY_PATH   = '../wht'
 IC_PATH         = '../model'
 
-#MAX = 5000
-MAX = 5
+MAX = 5001
 
 METRICS = [ 'TOT_CYC', 'TOT_INS', 'L1_DCM' ]
 
 PARAMS = {
   'TOT_CYC' => '-a 0.05 -p 1 -n 50',
-  'L1_DCM'  => '-a 0.05 -p 0.05 -n 50',
+  'L1_DCM'  => '-n 500',
 #  'L2_TCM'  => '-a 0.05 -p 0.05 -n 50'
 }
 
@@ -124,13 +123,13 @@ TRANSFORMS = {
 def transform(model)
   return unless model.size == MAX
 
-  model2 = model
+  model2 = model.dup
 
   model.each do |key,node|
     plan,m = key
     TRANSFORMS.each do |name, args|
       new_plan = convert(plan, args)
-      model2[[new_plan,m]] = {
+      model2[[new_plan,m,name]] = {
         'type' => node['type'],
         'transform' => name
       }
@@ -172,8 +171,6 @@ def test(model)
       print '.'
       $stdout.flush
     end
-
-    node['updated_on'] = DateTime.now.to_s
   end
 
   puts "\ndone"
@@ -234,7 +231,7 @@ time {
 
 time {
   puts "Transform ..."
-  transform(model)
+  model = transform(model)
 }
 
 time {
