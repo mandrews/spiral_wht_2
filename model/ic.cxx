@@ -506,6 +506,8 @@ main()
 #endif
 
     printf("%g\n", ic_predict(counts, coeffs));
+    fflush(stdout);
+
     wht_free(W);
   }
 
