@@ -293,12 +293,15 @@ count_set_init()
   (*counts)["small[2]"] = 0.0;
   (*counts)["small[3]"] = 0.0;
   (*counts)["small[4]"] = 0.0;
+  (*counts)["smallil(2)[1]"] = 0.0;
   (*counts)["smallil(2)[2]"] = 0.0;
   (*counts)["smallil(2)[3]"] = 0.0;
   (*counts)["smallil(2)[4]"] = 0.0;
+  (*counts)["smallil(4)[1]"] = 0.0;
   (*counts)["smallil(4)[2]"] = 0.0;
   (*counts)["smallil(4)[3]"] = 0.0;
   (*counts)["smallil(4)[4]"] = 0.0;
+  (*counts)["smallil(8)[1]"] = 0.0;
   (*counts)["smallil(8)[2]"] = 0.0;
   (*counts)["smallil(8)[3]"] = 0.0;
   (*counts)["smallil(8)[4]"] = 0.0;
@@ -375,12 +378,15 @@ calc_coeffs()
     "splitil[splitil[small[2]],small[2],splitil[small[2]]]",
     "splitil[small[2],splitil[small[2],small[2]]]",
     "splitil[splitil[small[2],small[2]],small[2]]",
+    "splitil[smallil(2)[1],smallil(2)[1],small[1]]",
     "splitil[smallil(2)[2],smallil(2)[2],small[1]]",
     "splitil[smallil(2)[3],smallil(2)[3],small[1]]",
     "splitil[smallil(2)[4],smallil(2)[4],small[1]]",
+    "splitil[smallil(4)[1],smallil(4)[1],small[1]]",
     "splitil[smallil(4)[2],smallil(4)[2],small[1]]",
     "splitil[smallil(4)[3],smallil(4)[3],small[1]]",
     "splitil[smallil(4)[4],smallil(4)[4],small[1]]",
+    "splitil[smallil(8)[1],smallil(8)[1],small[1]]",
     "splitil[smallil(8)[2],smallil(8)[2],small[1]]",
     "splitil[smallil(8)[3],smallil(8)[3],small[1]]",
     "splitil[smallil(8)[4],smallil(8)[4],small[1]]",
