@@ -1,0 +1,49 @@
+#!/usr/bin/env ruby
+
+# query
+#
+# Author: Michael Andrews <mjand@drexel.edu>
+# $Id$
+
+# TODO matlab or CSV style 
+
+require 'utils'
+
+def die
+  puts "query: FILE SELECT [WHERE]"
+  exit 1
+end
+
+if __FILE__ == $0
+  die if ARGV.size < 2
+  input   = ARGV[0]
+  selects = ARGV[1].split(/\s*,\s*/)
+  where   = ARGV[2]
+  
+  re = where.nil? ? nil : Regexp.new(where)
+
+  env   = load_runtime_env
+  plans = load_data(input, env)
+
+  # Place header
+  hostname = `hostname`
+  puts "% HOSTNAME #{hostname}"
+  env.each { |key,value| puts "% #{key} #{value}" }
+  puts "% WHERE  : #{where}"
+  puts "% SELECT : " + selects.join(', ')
+
+  plans.each do |id, node|
+    next unless re.nil? or id.join(',') =~ re
+
+    row = Array.new(selects.size)
+
+    node.each do |key,value|
+      i = selects.index(key)
+      next if i.nil?
+      row[i] = value
+    end
+
+    puts row.join(' ')
+  end
+    
+end
