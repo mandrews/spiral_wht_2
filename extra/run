@@ -28,13 +28,15 @@ METRICS = {
 
 
 TRANSFORMS = {
-  "vectorize(2,2)" => "-v 2 -i 2",
+#  "vectorize(2,2)" => "-v 2 -i 2",
 #  "vectorize(2,4)" => "-v 2 -i 4",
 #  "vectorize(2,8)" => "-v 2 -i 8",
-#  "interleave(2)"  => "-i 2",
-  "interleave(4)"  => "-i 4",
+  "interleave(2)"  => "-i 2",
+#  "interleave(4)"  => "-i 4",
 #  "interleave(8)"  => "-i 8"
 }
+
+NO_UPDATE = true
 
 def measure(plan, metric, args)
   values = `#{MEASURE_PATH}/wht_measure -w '#{plan}' -e PAPI -m #{metric} -s #{args}`.split
@@ -54,6 +56,7 @@ def classify(plan, args = nil)
 end
 
 def generate(plans, n, max)
+  # TODO select plans with no transform
   return if plans.size >= max
 
   a,b,p,q = 1,4,1,4
@@ -77,6 +80,9 @@ def transform(plans, transforms)
 
     oid  = index[0]
     plan = index[1]
+    prev = index[2]
+
+    next unless prev == 'none'
 
     transforms.each do |name, args|
       new_plan = convert(plan, args)
@@ -100,7 +106,7 @@ def test(plans, metrics)
     plan = index[1]
 
     metrics.each do |metric, params|
-      # next if node.has_key?(metric + "_mean")
+      next if NO_UPDATE and node.has_key?(metric + "_mean")
 
       value = measure(plan, metric, params)
       node[metric + "_mean" ]    = value[0]
