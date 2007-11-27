@@ -5,9 +5,13 @@
 # Author: Michael Andrews <mjand@drexel.edu>
 # $Id$
 
-require 'yaml'
+require 'json/ext'
 
 MEASURE_PATH    = '../measure'
+RANDTREE_PATH   = '../utils'
+CONVERT_PATH    = '../wht'
+CLASSIFY_PATH   = '../wht'
+IC_PATH         = '../model'
 
 def load_runtime_env
   cmd = "#{MEASURE_PATH}/wht_measure -v"
@@ -51,7 +55,7 @@ def load_entry(env,info)
 end
 
 def load_data(file, env)
-  default = [ [], YAML::Omap.new ] # i.e. empty info and plans
+  default = [[],{}]
 
   return default unless File.exists?(file)
 
@@ -59,9 +63,9 @@ def load_data(file, env)
 
   File.open(file,'r') do |fd|
     begin
-      yml  = YAML::load_stream(fd)
-      raise "Initializing #{file}" unless yml
-      info = yml.documents[0]
+      json  = JSON.load(fd)
+      raise "Initializing #{file}" unless json
+      info = json 
     rescue => e 
       puts e.message
       return default
@@ -70,6 +74,14 @@ def load_data(file, env)
 
   plans = load_entry(env, info)['data']
 
-  plans
+  [info, plans]
+end
+
+def save_data(file, env, plans, info)
+  load_entry(env,info)['data'] = plans
+
+  File.open(file,'w+') do |fd|
+    fd.puts(JSON.pretty_generate(info))
+  end
 end
 
