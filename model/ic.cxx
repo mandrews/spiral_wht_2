@@ -14,10 +14,15 @@ using std::string;
 using std::vector;
 using std::map;
 
+static const double OVERHEAD = 235.0;
+
 /* Annotated matrix */
 
 typedef map<const string, double> count_set;
 typedef map<const string, double>::iterator count_set_iter;
+
+double
+ic_predict(count_set *counts, count_set *coeffs);
 
 void
 count_set_merge(count_set *into, count_set *from)
@@ -149,8 +154,10 @@ alpha_k(Wht *W, size_t k)
     tmp_counts = alpha_k(Wi,k);
 
     int il = 1;
+#if 1
     if (Wi->attr[interleave_by] != UNSET_PARAMETER)
       il = Wi->attr[interleave_by];
+#endif
 
     for (j = tmp_counts->begin(); j != tmp_counts->end(); j++) 
       (*counts)[j->first] += (((1 << (n - ni)) * j->second) / il);
@@ -297,6 +304,7 @@ count_set_init()
   (*counts)["smallil(2)[2]"] = 0.0;
   (*counts)["smallil(2)[3]"] = 0.0;
   (*counts)["smallil(2)[4]"] = 0.0;
+#if 0
   (*counts)["smallil(4)[1]"] = 0.0;
   (*counts)["smallil(4)[2]"] = 0.0;
   (*counts)["smallil(4)[3]"] = 0.0;
@@ -317,6 +325,7 @@ count_set_init()
   (*counts)["smallv(2,8,1)[2]"] = 0.0;
   (*counts)["smallv(2,8,1)[3]"] = 0.0;
   (*counts)["smallv(2,8,1)[4]"] = 0.0;
+#endif
   (*counts)["split_alpha"] = 0.0;
   (*counts)["split_beta_1"] = 0.0;
   (*counts)["split_beta_2"] = 0.0;
@@ -325,6 +334,24 @@ count_set_init()
   (*counts)["splitil_beta_1"] = 0.0;
   (*counts)["splitil_beta_2"] = 0.0;
   (*counts)["splitil_beta_3"] = 0.0;
+
+  return counts;
+}
+
+count_set *
+count_set_init_known()
+{
+  count_set *counts;
+  counts = count_set_init();
+
+  (*counts)["small[1]"] =   8.0;
+  (*counts)["small[2]"] =  25.0;
+  (*counts)["small[3]"] =  67.0;
+  (*counts)["small[4]"] = 190.0;
+  (*counts)["smallil(2)[1]"] =  16.0;
+  (*counts)["smallil(2)[2]"] =  50.0;
+  (*counts)["smallil(2)[3]"] = 154.0;
+  (*counts)["smallil(2)[4]"] = 757.0;
 
   return counts;
 }
@@ -362,6 +389,19 @@ ic_counts(Wht *W, size_t max)
   return counts;
 }
 
+void
+update_coeffs_with_known(count_set *coeffs, count_set * known)
+{
+  count_set_iter i, j;
+
+  i = known->begin();
+  j = coeffs->begin();
+  for (; i != known->end() && j != known->end(); i++, j++) {
+    if (i->second != 0.0)
+      j->second = i->second;
+  }
+}
+
 count_set *
 calc_coeffs()
 {
@@ -370,18 +410,11 @@ calc_coeffs()
     "small[2]",
     "small[3]",
     "small[4]",
-    "split[small[2],small[2],small[2]]",
-    "split[split[small[2]],small[2],split[small[2]]]",
-    "split[small[2],split[small[2],small[2]]]",
-    "split[split[small[2],small[2]],small[2]]",
-    "splitil[small[2],small[2],small[2]]",
-    "splitil[splitil[small[2]],small[2],splitil[small[2]]]",
-    "splitil[small[2],splitil[small[2],small[2]]]",
-    "splitil[splitil[small[2],small[2]],small[2]]",
-    "splitil[smallil(2)[1],smallil(2)[1],small[1]]",
-    "splitil[smallil(2)[2],smallil(2)[2],small[1]]",
-    "splitil[smallil(2)[3],smallil(2)[3],small[1]]",
-    "splitil[smallil(2)[4],smallil(2)[4],small[1]]",
+    "splitil[smallil(2)[1],smallil(2)[1],small[2]]",
+    "splitil[smallil(2)[2],smallil(2)[2],small[2]]",
+    "splitil[smallil(2)[3],smallil(2)[3],small[2]]",
+    "splitil[smallil(2)[4],smallil(2)[4],small[2]]",
+#if 0
     "splitil[smallil(4)[1],smallil(4)[1],small[1]]",
     "splitil[smallil(4)[2],smallil(4)[2],small[1]]",
     "splitil[smallil(4)[3],smallil(4)[3],small[1]]",
@@ -402,19 +435,31 @@ calc_coeffs()
     "splitil[smallv(2,8,1)[2],smallv(2,8,1)[2],small[3]]",
     "splitil[smallv(2,8,1)[3],smallv(2,8,1)[3],small[3]]",
     "splitil[smallv(2,8,1)[4],smallv(2,8,1)[4],small[3]]",
+#endif
+    "split[small[2],small[2],small[2]]",
+    "split[split[small[2]],small[2],split[small[2]]]",
+    "split[small[2],split[small[2],small[2]]]",
+    "split[split[small[2],small[2]],small[2]]",
+    "splitil[small[2],small[2],small[2]]",
+    "splitil[splitil[small[2]],small[2],splitil[small[2]]]",
+    "splitil[small[2],splitil[small[2],small[2]]]",
+    "splitil[splitil[small[2],small[2]],small[2]]",
     NULL
   };
 
   char **elem;
   size_t max, k, m;
   struct stat *stat;
-  count_set *counts, *coeffs;
+  count_set *counts, *coeffs, *known;
   struct matrix *a, *b, *c;
+  double y, d;
   Wht *W;
 
   max = 4;
 
   coeffs = count_set_init();
+  known  = count_set_init_known();
+
   m = coeffs->size();
 
   a = matrix_init(m,m);
@@ -422,34 +467,35 @@ calc_coeffs()
 
   for (elem = basis, k = 0; *elem != NULL; elem++, k++) {
     W = wht_parse(*elem);
-    //printf("elem: %s\n", W->to_string(W));
+    
     counts = ic_counts(W, max);
+
+    d = ic_predict(counts, known);
+
     stat = measure(W, "PAPI", "TOT_INS", 1);
 
-    matrix_add_row_as_count_set(a, k, counts);
-    matrix_elem(b,k,0) = stat->mean - 236; /** \todo allow value */
+    y = stat->mean - OVERHEAD;
+    y -= d;
 
-    // if (k == 0) print_labels(counts);
+    matrix_add_row_as_count_set(a, k, counts);
+    matrix_elem(b,k,0) = y;
 
     wht_free(W);
     delete counts;
     free(stat);
   }
 
-#if 0
-  matrix_print(a);
-  matrix_print(b);
-  printf("\n");
-  matrix_print(c);
-#endif
-
   c = matrix_least_squares_error(a,b);
 
   col_to_count_set(c,0,coeffs);
 
+  update_coeffs_with_known(coeffs, known);
+
   matrix_free(a);
   matrix_free(b);
   matrix_free(c);
+
+  delete known;
 
   return coeffs;
 }
@@ -482,7 +528,7 @@ main()
 
   coeffs = calc_coeffs();
 
-#if 0
+#if 1
   printf("coeffs:\n");
   for (i = coeffs->begin(); i != coeffs->end(); i++) {
     printf("%s : %g\n", i->first.c_str(), i->second);
