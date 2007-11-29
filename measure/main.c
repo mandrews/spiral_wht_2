@@ -2,9 +2,6 @@
 
 #include <getopt.h>
 
-#define DEFAULT_EXTN    ("BUILTIN")
-#define DEFAULT_METRIC  ("USEC")
-
 static void
 usage() 
 {
@@ -109,8 +106,6 @@ main(int argc, char **argv)
   Wht *W;
   struct stat *s;
   char *buf;
-  bool non_getopt_extn = false;
-  bool non_getopt_metric = false;
 
   W = wht_parse(wht_plan);
 
@@ -118,18 +113,6 @@ main(int argc, char **argv)
     printf("rejected, %s\n", wht_error_msg(W));
     wht_free(W);
     exit(1);
-  }
-
-  if (extn == NULL) {
-    extn = malloc(sizeof(char) * strlen(DEFAULT_EXTN) + 1);
-    strcpy(extn, DEFAULT_EXTN);
-    non_getopt_extn = true;
-  }
-
-  if (metric == NULL) {
-    metric = malloc(sizeof(char) * strlen(DEFAULT_METRIC) + 1);
-    strcpy(metric, DEFAULT_METRIC);
-    non_getopt_metric = true;
   }
 
   if (a != INFINITY && p != INFINITY)
@@ -146,9 +129,6 @@ main(int argc, char **argv)
   wht_free(W);
   stat_free(s);
   free(buf);
-
-  if (non_getopt_extn)    free(extn);
-  if (non_getopt_metric)  free(metric);
 
   return 0;
 }

@@ -21,6 +21,21 @@ void builtin_init(char *metric) { /* Empty, only metric is usec */ }
 void builtin_done() { /* Empty */ }
 
 stat_unit
+builtin_test(Wht *W, wht_value *x, char *metric)
+{
+  /* Microsecond metric */
+  double t0, t1;
+
+  W->apply = null_apply;
+
+  t0 = cputime();
+  wht_apply(W,x);
+  t1 = cputime();
+
+  return t1 - t0;
+}
+
+stat_unit
 builtin_call(Wht *W, wht_value *x, char *metric)
 {
   /* Microsecond metric */
@@ -33,10 +48,22 @@ builtin_call(Wht *W, wht_value *x, char *metric)
   return t1 - t0;
 }
 
+struct measure_extension builtin  = 
+{ 
+  "BUILTIN", 
+  (measure_init_fp)  &builtin_init,
+  (measure_call_fp)  &builtin_test,
+  (measure_call_fp)  &builtin_call,
+  (measure_done_fp)  &builtin_done
+};
+
 struct measure_extension *
 measure_extension_find(char *name)
 {
   struct measure_extension *p;
+
+  if (name == NULL) 
+    return &builtin;
 
   for (p = (struct measure_extension *) measure_extensions; p->name != NULL; p++) 
     if (strncmp(name, p->name, strlen(p->name)) == 0) 
@@ -73,13 +100,16 @@ inline
 void
 measure_helper(Wht *W, char *metric, struct stat *stat, struct measure_extension *extension)
 {
-  stat_unit value;
+  stat_unit value, calib;
   wht_value *x;
 
   x = wht_random_vector(W->N);
 
   value = extension->call(W,x,metric);
-  stat->value = value;
+  calib = extension->test(W,x,metric);
+
+  stat->value = value - calib;
+
   stat_update(stat);
 
   free(x);

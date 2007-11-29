@@ -20,5 +20,6 @@ void papi_init();
 void papi_done();
 
 stat_unit papi_call(Wht *W, wht_value *x, char *metric);
+stat_unit papi_test(Wht *W, wht_value *x, char *metric);
 
 #endif /*PAPI_UTILS_H*/

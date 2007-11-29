@@ -12,6 +12,7 @@ struct measure_extension
 {
   char * name;
   measure_init_fp init;
+  measure_call_fp test;
   measure_call_fp call;
   measure_done_fp done;
 };
@@ -28,10 +29,5 @@ struct stat * measure_until(Wht *W, char *extension, char *metric, double time);
 char * measure_extension_list();
 
 struct measure_extension * measure_extension_find(char *extension);
-
-void builtin_init(char *metric);
-void builtin_done();
-
-stat_unit builtin_call(Wht *W, wht_value *x, char *metric);
 
 #endif/*MEASURE_H*/

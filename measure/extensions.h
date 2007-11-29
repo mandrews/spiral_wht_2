@@ -10,13 +10,9 @@
 
 static const struct measure_extension
 measure_extensions[] = {
-  { "BUILTIN", 
-    (measure_init_fp)  &builtin_init,
-    (measure_call_fp)  &builtin_call,
-    (measure_done_fp)  &builtin_done
-  },
   { "PAPI", 
     (measure_init_fp)  &papi_init, 
+    (measure_call_fp)  &papi_test, 
     (measure_call_fp)  &papi_call, 
     (measure_done_fp)  &papi_done 
   },

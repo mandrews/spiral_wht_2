@@ -124,7 +124,37 @@ papi_reset(size_t n) {
 	free(papi_tmp);
 }
 
-inline
+stat_unit
+papi_test(Wht *W, wht_value *x, char *metric)
+{
+  long_long tmp[1];
+
+  W->apply = null_apply;
+
+  /* Read and reset the counters.
+   * The commented out conditional affects the reading of the performance
+   * counters, but might be good for debugging.
+   * NOTE: PAPI_accum_counters does not work properly.
+   * */ 
+#if 0
+    if (PAPI_read_counters(tmp, 1) != PAPI_OK)
+      papi_eprintf("Problem reading counters %s:%d.\n", __FILE__, __LINE__);
+#else
+    PAPI_read_counters(tmp, 1);
+#endif
+
+  wht_apply(W,x);
+
+  /* Read and reset the counters.
+   * This conditional should NOT effect the reading of the performance
+   * counters.
+   * */
+  if (PAPI_read_counters(tmp, 1) != PAPI_OK)
+    papi_eprintf("Problem reading counters %s:%d.\n", __FILE__, __LINE__);
+
+  return (stat_unit) tmp[0];
+}
+
 stat_unit
 papi_call(Wht *W, wht_value *x, char *metric)
 {
@@ -151,6 +181,7 @@ papi_call(Wht *W, wht_value *x, char *metric)
 
   return (stat_unit) tmp[0];
 }
+
 
 void 
 papi_init(char *metric)
