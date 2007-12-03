@@ -23,6 +23,7 @@ usage()
   printf("    -b MAX    Maximum number of factors in composition.\n");
   printf("    -p MIN    Minimum element in composition.\n");
   printf("    -q MAX    Maximum element in composition.\n");
+  printf("    -t TYPE   Type of WHT to generate (DEFAULT \"general\").\n");
   exit(1);
 }
 
@@ -30,6 +31,7 @@ int
 main(int argc, char **argv)
 {
   size_t wht_size, min_child, max_child, min_leaf, max_leaf;
+  char *wht_type;
 
   int c;
 
@@ -41,8 +43,9 @@ main(int argc, char **argv)
 	max_child = MAX_SPLIT_NODES;
   min_leaf 	= 1;
   max_leaf 	= WHT_MAX_UNROLL;
+  wht_type  = NULL;
 
-  while ((c = getopt (argc, argv, "hvn:a:b:p:q:")) != -1)
+  while ((c = getopt (argc, argv, "hvn:a:b:p:q:t:")) != -1)
     switch (c) {
       case 'n':
         wht_size = atoi(optarg);
@@ -58,6 +61,9 @@ main(int argc, char **argv)
         break;
       case 'q':
         max_leaf = atoi(optarg);
+        break;
+      case 't':
+        wht_type = optarg;
         break;
       case 'h':
         usage();
@@ -81,12 +87,23 @@ main(int argc, char **argv)
     exit(1);
   }
 
+  if (wht_type != NULL && (strcmp(wht_type, "general" ) != 0) 
+                       && (strcmp(wht_type, "right"   ) != 0)) {
+    printf("-t TYPE can be \"general\" or \"right\".\n");
+    exit(1);
+  }
+
   compos_node *root;
   char *buf;
 
   srandom((unsigned int) (getpid() * M_PI));
 
-	root = compos_tree_rand(wht_size, min_child, max_child, min_leaf, max_leaf);
+  root = NULL;
+
+  if (wht_type == NULL || (strcmp(wht_type, "general") == 0))
+	  root = compos_tree_rand(wht_size, min_child, max_child, min_leaf, max_leaf);
+  else if (strcmp(wht_type, "right") == 0)
+    root = compos_tree_rand_right(wht_size, min_child, max_child, min_leaf, max_leaf);
 
   buf = compos_tree_to_string(root);
   printf("%s\n", buf);

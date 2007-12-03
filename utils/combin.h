@@ -23,8 +23,6 @@ typedef list<uint> compos;
 
 typedef map<uint, double> combin_pdf;
 
-typedef map<uint, uint> memo_fact_table;
-
 typedef struct compos_node compos_node;
 
 typedef list<struct compos_node *> compos_nodes;
@@ -34,7 +32,7 @@ struct compos_node {
   compos_nodes *children;
 };
 
-uint fact(uint x);
+ulong n_choose_k(ulong n, ulong k);
 
 combin::iterator combin_elem_rand(combin * c, uint n);
 
@@ -50,6 +48,7 @@ compos * combin_to_compos(uint n, combin *c);
 compos * compos_rand(uint n, uint a, uint b);
 
 compos_node * compos_tree_rand(uint n, uint a, uint b, uint min, uint max);
+compos_node * compos_tree_rand_right(uint n, uint a, uint b, uint min, uint max);
 
 void compos_tree_free(compos_node *node);
 
