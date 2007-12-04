@@ -43,21 +43,9 @@ Ideas:
 
 Shortrun:
 
-  - Finalize code base
-    - measure
-    - model
-    - extra parameter in vectorization
-    - conversion
-
-  - Experiments
-    - As before with interleave and vectorization
-
-  - Instruction count model for interleaving should consider k
-    - It works now b/c k is always equal to 2
-
-  check into super extensions idea
-   - modularized configure.ac
-   - script to add to registry
-   - special files for different registrys,
+  Look into "Super" Extensions Idea
+   - Modularized configure.ac
+   - Script to add to registry
+   - Special files for different registrys,
    - i.e. convert, ic count basis, etc ..
 
