@@ -14,6 +14,7 @@ usage()
   printf("    -e EXTN   Use measure extension EXTN (default BUILTIN).\n");
   printf("    -m METRIC Measure metric METRIC (default USEC).\n");
   printf("    -s        Also display the standard deviation and sample size.\n");
+  printf("    -c        Calibrate and subtract overhead.\n");
   printf(" Measurement Techniques (mutually exclusive):\n");
   printf("    Average (default)\n");
   printf("      -n SAMPLES  Accumulate average for N SAMPLES (default 1).\n");
@@ -41,18 +42,19 @@ main(int argc, char **argv)
   char *wht_plan, *extn, *metric;
   int c, n;
   double a, p, t;
-  bool all;
+  bool all, calib;
 
   wht_plan = NULL;
   extn = NULL;
   metric = NULL;
   all = false;
+  calib = false;
   a = INFINITY;
   p = INFINITY;
   t = INFINITY;
   n = 1;
 
-  while ((c = getopt (argc, argv, "hvw:e:sa:p:m:t:n:")) != -1)
+  while ((c = getopt (argc, argv, "hvw:e:sa:p:m:t:n:c")) != -1)
     switch (c) {
       case 'w':
         wht_plan = optarg;
@@ -80,6 +82,9 @@ main(int argc, char **argv)
         break;
       case 'n':
         n = atoi(optarg);
+        break;
+      case 'c':
+        calib = true;
         break;
       case 'v':
         wht_info();
@@ -116,11 +121,11 @@ main(int argc, char **argv)
   }
 
   if (a != INFINITY && p != INFINITY)
-    s = measure_with_z_test(W, extn, metric, n, a, p);
+    s = measure_with_z_test(W, extn, metric, calib, n, a, p);
   else if (t != INFINITY)
-    s = measure_until(W, extn, metric, t);
+    s = measure_until(W, extn, metric, calib, t);
   else
-    s = measure(W, extn, metric, n);
+    s = measure(W, extn, metric, calib, n);
 
   buf = stat_to_string(s, all);
 

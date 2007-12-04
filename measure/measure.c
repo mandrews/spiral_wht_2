@@ -98,17 +98,19 @@ measure_extension_list()
 
 inline
 void
-measure_helper(Wht *W, char *metric, struct stat *stat, struct measure_extension *extension)
+measure_helper(Wht *W, char *metric, struct stat *stat, bool calib, struct measure_extension *extension)
 {
-  stat_unit value, calib;
+  stat_unit value, overhead;
   wht_value *x;
 
   x = wht_random_vector(W->N);
-
+  overhead = 0.0;
   value = extension->call(W,x,metric);
-  calib = extension->test(W,x,metric);
 
-  stat->value = value - calib;
+  if (calib)
+    overhead = extension->test(W,x,metric);
+
+  stat->value = value - overhead;
 
   stat_update(stat);
 
@@ -116,7 +118,8 @@ measure_helper(Wht *W, char *metric, struct stat *stat, struct measure_extension
 }
 
 struct stat *
-measure(Wht *W, char *name, char *metric, size_t n)
+measure(Wht *W, char *name, char *metric, bool calib, 
+  size_t samples)
 {
   struct measure_extension *extension;
   struct stat *stat;
@@ -131,8 +134,8 @@ measure(Wht *W, char *name, char *metric, size_t n)
 
   extension->init(metric);
 
-  for (i = 0; i < n; i++)
-    measure_helper(W, metric, stat, extension);
+  for (i = 0; i < samples; i++)
+    measure_helper(W, metric, stat, calib, extension);
 
   extension->done();
 
@@ -140,7 +143,8 @@ measure(Wht *W, char *name, char *metric, size_t n)
 }
 
 struct stat *
-measure_with_z_test(Wht *W, char *name, char *metric, size_t initial, double alpha, double rho)
+measure_with_z_test(Wht *W, char *name, char *metric, bool calib, 
+  size_t initial, double alpha, double rho)
 {
   struct measure_extension *extension;
   struct stat *stat;
@@ -159,10 +163,10 @@ measure_with_z_test(Wht *W, char *name, char *metric, size_t initial, double alp
   extension->init(metric);
 
   for (i = 0; i < initial; i++)
-    measure_helper(W, metric, stat, extension);
+    measure_helper(W, metric, stat, calib, extension);
 
   while (stat_sig_sample(stat, z, rho) > stat->samples)
-    measure_helper(W, metric, stat, extension);
+    measure_helper(W, metric, stat, calib, extension);
 
   extension->done();
 
@@ -170,7 +174,8 @@ measure_with_z_test(Wht *W, char *name, char *metric, size_t initial, double alp
 }
 
 struct stat * 
-measure_until(Wht *W, char *name, char *metric, double time)
+measure_until(Wht *W, char *name, char *metric, bool calib, 
+  double time)
 {
   struct measure_extension *extension;
   struct stat *stat;
@@ -189,7 +194,7 @@ measure_until(Wht *W, char *name, char *metric, double time)
   tk = 0.0;
   while (t0 < time) {
     t0 = cputime();
-    measure_helper(W, metric, stat, extension);
+    measure_helper(W, metric, stat, calib, extension);
     tk += cputime() - t0;
   }
 
