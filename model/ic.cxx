@@ -14,8 +14,6 @@ using std::string;
 using std::vector;
 using std::map;
 
-static const double OVERHEAD = 235.0;
-
 /* Annotated matrix */
 
 typedef map<const string, double> count_set;
@@ -304,7 +302,6 @@ count_set_init()
   (*counts)["smallil(2)[2]"] = 0.0;
   (*counts)["smallil(2)[3]"] = 0.0;
   (*counts)["smallil(2)[4]"] = 0.0;
-#if 0
   (*counts)["smallil(4)[1]"] = 0.0;
   (*counts)["smallil(4)[2]"] = 0.0;
   (*counts)["smallil(4)[3]"] = 0.0;
@@ -313,6 +310,7 @@ count_set_init()
   (*counts)["smallil(8)[2]"] = 0.0;
   (*counts)["smallil(8)[3]"] = 0.0;
   (*counts)["smallil(8)[4]"] = 0.0;
+#if 0
   (*counts)["smallv(2)[2]"] = 0.0;
   (*counts)["smallv(2)[3]"] = 0.0;
   (*counts)["smallv(2)[4]"] = 0.0;
@@ -344,6 +342,7 @@ count_set_init_known()
   count_set *counts;
   counts = count_set_init();
 
+#if 1
   (*counts)["small[1]"] =   8.0;
   (*counts)["small[2]"] =  25.0;
   (*counts)["small[3]"] =  67.0;
@@ -352,6 +351,7 @@ count_set_init_known()
   (*counts)["smallil(2)[2]"] =  50.0;
   (*counts)["smallil(2)[3]"] = 154.0;
   (*counts)["smallil(2)[4]"] = 757.0;
+#endif
 
   return counts;
 }
@@ -414,15 +414,15 @@ calc_coeffs()
     "splitil[smallil(2)[2],smallil(2)[2],small[2]]",
     "splitil[smallil(2)[3],smallil(2)[3],small[2]]",
     "splitil[smallil(2)[4],smallil(2)[4],small[2]]",
+    "splitil[smallil(4)[1],smallil(4)[1],small[2]]",
+    "splitil[smallil(4)[2],smallil(4)[2],small[2]]",
+    "splitil[smallil(4)[3],smallil(4)[3],small[2]]",
+    "splitil[smallil(4)[4],smallil(4)[4],small[2]]",
+    "splitil[smallil(8)[1],smallil(8)[1],small[2]]",
+    "splitil[smallil(8)[2],smallil(8)[2],small[2]]",
+    "splitil[smallil(8)[3],smallil(8)[3],small[2]]",
+    "splitil[smallil(8)[4],smallil(8)[4],small[2]]",
 #if 0
-    "splitil[smallil(4)[1],smallil(4)[1],small[1]]",
-    "splitil[smallil(4)[2],smallil(4)[2],small[1]]",
-    "splitil[smallil(4)[3],smallil(4)[3],small[1]]",
-    "splitil[smallil(4)[4],smallil(4)[4],small[1]]",
-    "splitil[smallil(8)[1],smallil(8)[1],small[1]]",
-    "splitil[smallil(8)[2],smallil(8)[2],small[1]]",
-    "splitil[smallil(8)[3],smallil(8)[3],small[1]]",
-    "splitil[smallil(8)[4],smallil(8)[4],small[1]]",
     "smallv(2)[2]",
     "smallv(2)[3]",
     "smallv(2)[4]",
@@ -472,9 +472,9 @@ calc_coeffs()
 
     d = ic_predict(counts, known);
 
-    stat = measure(W, "PAPI", "TOT_INS", 1);
+    stat = measure(W, "PAPI", "TOT_INS", true, 1);
 
-    y = stat->mean - OVERHEAD;
+    y = stat->mean;
     y -= d;
 
     matrix_add_row_as_count_set(a, k, counts);
