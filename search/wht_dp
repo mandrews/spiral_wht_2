@@ -4,6 +4,10 @@
 #
 # Author: Michael Andrews <mjand@drexel.edu>
 # $Id$
+#
+# TODO
+#   - Flag for selecting rightmost subspace
+#   - Input for selecting possible transforms
 
 SCRIPT_PATH       = File.dirname(__FILE__) 
 SCRIPT_NAME       = 'wht_dp'
