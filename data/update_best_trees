@@ -5,33 +5,54 @@
 # Author: Michael Andrews <mjand@drexel.edu>
 # $Id$
 
-SCRIPT_PATH     = File.dirname(__FILE__) 
-SCRIPT_NAME     = 'bench'
-PREFIX          = 'carpenter-2.0-'
+$LOAD_PATH << "#{File.dirname(__FILE__)}/../extra"
 
-MEASURE = '../measure/papi/measure -w'
-MAX = 7
-MAX_IL = 4
+require "utils"
 
-def measure(size,plan)
-  plan.gsub!(/smallil(\d)/) { |s| "smallil#{2**$1.to_i}" }
-  cmd = "#{MEASURE} '#{plan}'"
-  t = 0
-  IO.popen(cmd) do |fd|
-    t = fd.gets
+def update_plan(plan)
+  new_plan = plan.dup
+  new_plan.gsub!(/\s*/,'')
+  new_plan.gsub!(/smallil(\d+)/) { |x| "smallil(#{2 **$1.to_i})" }
+
+  if new_plan =~ /smallil/
+    new_plan.gsub!(/split/,'splitil')
   end
 
-  printf("%d,%d %% %s\n", size, t, plan)
-  $stdout.flush
+  new_plan
 end
 
-file  = ARGV[0]
-plans = File.open(file)
-
-plans.each_line do |line|
-  line.chomp!
-  next if line =~ /^#/ or line.empty?
-  size, plan, usec = line.split(/\s*!\s*/)
-  break if size.to_i > 15
-  measure(size,plan)
+def usage(msg = nil)
+  puts "update_best_trees: OLD_BEST_TREES "
+  puts msg unless msg.nil?
+  exit
 end
+
+if $0 == __FILE__ # Main Entry Point
+  usage if ARGV.length < 1
+
+  old_best = ARGV[0]
+  new_best = "#{old_best}.new"
+
+  unless File.exists?(old_best)
+    usage("Could find old besttrees #{old_best}")
+  end
+
+  env = load_runtime_env
+
+  info, plans = load_data(new_best, env)
+
+  File.open(old_best).each_line do |line|
+    line.chomp!
+    next if line =~ /^#/ or line.empty?
+    size, plan, usec = line.split(/\s*!\s*/)
+
+    new_plan = update_plan(plan)
+
+    plans[size.to_s] = {}
+    plans[size.to_s]['plan'] = new_plan
+    plans[size.to_s]['time'] = measure(new_plan, '-e PAPI -m TOT_CYC -a 5 -p 1')
+  end
+
+  save_data(new_best, env, plans, info)
+end
+
