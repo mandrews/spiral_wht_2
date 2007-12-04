@@ -22,12 +22,16 @@ typedef __m128d wht_vector2;
   R0 = _mm_shuffle_pd(R1, R2, _MM_SHUFFLE2(A,B))
 
 #define vload2u(R0,A0,A1) \
-  R0 = _mm_load_sd(&A1); \
-  R0 = _mm_loadh_pd(R0,&A0); 
+  { \
+    wht_vector2 TZ; \
+    R0 = _mm_load_sd(&A0); \
+    TZ = _mm_load_sd(&A1); \
+    R0 = _mm_unpacklo_pd(R0,TZ); \
+  };
 
 #define vstore2u(R0,A0,A1) \
-  _mm_storeh_pd(&A0,R0); \
-  _mm_storel_pd(&A1,R0); 
+  _mm_storeh_pd(&A1,R0); \
+  _mm_storel_pd(&A0,R0); 
 
 #endif/*WHT_DOUBLE*/
 
