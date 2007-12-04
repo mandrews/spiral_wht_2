@@ -1,0 +1,46 @@
+[
+  {
+    "env": {
+      "vector_size": 2,
+      "max_interleave": 3,
+      "type": "double",
+      "compiler_flags": "-O3 -Wall -g -march=nocona -m64 -msse2 -Wall -g",
+      "compiler": "gcc -std=gnu99",
+      "max_unroll": 6
+    },
+    "data": {
+      "6": {
+        "plan": "smallv(2)[6]",
+        "time": 1037.56
+      },
+      "7": {
+        "plan": "splitil[small[2],smallv(2)[5]]",
+        "time": 3161.13
+      },
+      "8": {
+        "plan": "splitil[small[2],smallv(2)[6]]",
+        "time": 6110.57
+      },
+      "1": {
+        "plan": "small[1]",
+        "time": 481.08
+      },
+      "2": {
+        "plan": "small[2]",
+        "time": 431.945
+      },
+      "3": {
+        "plan": "small[3]",
+        "time": 427.757
+      },
+      "4": {
+        "plan": "smallv(2)[4]",
+        "time": 490.066
+      },
+      "5": {
+        "plan": "smallv(2)[5]",
+        "time": 630.125
+      }
+    }
+  }
+]
