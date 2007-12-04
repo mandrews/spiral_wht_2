@@ -42,6 +42,22 @@ Ideas:
   - look into pkg-config for versioning information
 
 Shortrun:
+  - Experiments
+    - Best 1.8, SPIRAL, Normal 2-Children, My Best?
+
+    - All
+        Normal 2-Children, Vectorized 2-Children
+        Normal 3-Children, Vectorized 3-Children
+        ...
+
+    - Only Rightmost
+        Normal 2-Children, Vectorized 2-Children
+        Normal 3-Children, Vectorized 3-Children
+        ...
+
+    - Redo 5000 Samples @ 9,18 for All, Rightmost
+
+    - Include PCA
 
   Look into "Super" Extensions Idea
    - Modularized configure.ac
