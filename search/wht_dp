@@ -15,6 +15,10 @@ DEFAULT_PARAMS    = {
   :best_trees     => SCRIPT_PATH + '/../share/wht_best_trees.txt'
 }
 
+$LOAD_PATH << "#{SCRIPT_PATH}/../extra"
+
+require "utils"
+
 class Options
   require 'optparse'
   attr_reader :params
@@ -69,81 +73,6 @@ class Options
 
 end
 
-require 'yaml'
-
-def load_runtime_env(measure)
-  cmd = "#{measure} -v"
-  env = {}
-  IO.popen(cmd) do |fd|
-    while (line = fd.gets) do
-      line.chomp!
-      case line
-        when /^max_unroll:\s*(\d+)/
-          env['max_unroll'] = $1.to_i
-        when /^max_interleave:\s*(\d+)/
-          env['max_interleave'] = $1.to_i
-        when /^vector_size:\s*(\d+)/
-          env['vector_size'] = $1.to_i
-        when /^CC:\s*(.*)$/
-          env['compiler'] = $1.to_s
-        when /^type:\s*(.*)$/
-          env['type'] = $1.to_s
-        when /^CFLAGS:\s*(.*)$/
-          env['compiler_flags'] = $1.to_s
-      end
-    end
-  end
-  env
-end
-
-def load_entry(env,info)
-  info.each do |e|
-    return e if e['env'] == env
-  end
-
-  # Add a new entry
-  entry = {
-    'env'   => env,
-    'data'  => {}
-  }
-
-  info << entry
-
-  entry
-end
-
-def load_best_trees(file, env)
-  default = [ [], YAML::Omap.new ] # i.e. empty info and trees
-
-  return default unless File.exists?(file)
-
-  info = []
-
-  File.open(file,'r') do |fd|
-    begin
-      yml  = YAML::load_stream(fd)
-      raise "Initializing #{file}" unless yml
-      info = yml.documents[0]
-    rescue => e 
-      puts e.message
-      return default
-    end
-  end
-
-  trees = load_entry(env, info)['data']
-
-  [info, trees]
-
-end
-
-def save_best_trees(file, env, trees, info)
-  load_entry(env,info)['data'] = trees
-
-  File.open(file,'w+') do |fd|
-    YAML::dump(info, fd)
-  end
-end
-
 class Search
   INF = 1.0 / 0.0
   attr_accessor :best
@@ -158,10 +87,10 @@ class Search
     @max_leaf       = params[:max_leaf]
     @debug          = params[:debug]
 
-    @best = YAML::Omap.new
+    @best = {}
 
     for size in 1 .. @max_size do 
-      @best[size] ||= { 'time' => INF, 'plan' => nil }
+      @best[size.to_s] ||= { 'time' => INF, 'plan' => nil }
     end
   end
 
@@ -226,20 +155,20 @@ class Search
 
     plans.each do |p|
       t  = measure(p)
-      tp = @best[size]['time']
+      tp = @best[size.to_s]['time']
       if t < tp
         puts "New Best for #{size} with T=#{t} (T'=#{tp}): #{p}"
-        @best[size]['time'] = t
-        @best[size]['plan'] = p
+        @best[size.to_s]['time'] = t
+        @best[size.to_s]['plan'] = p
       end
     end
   end
 
   def find_best(size)
-    unless @best[size]['plan']
+    unless @best[size.to_s]['plan']
       find(size)
     end
-    @best[size]['plan']
+    @best[size.to_s]['plan']
   end
 
 
@@ -372,11 +301,11 @@ if $0 == __FILE__ # Main Entry Point
   opts = Options.new
   opts.parse(ARGV)
 
-  unless File.exists?(opts.params[:measure])
+  unless File.exists?(opts.params[:measure].split.first)
     opts.die("Could find measure #{opts.params[:measure]}")
   end
 
-  env = load_runtime_env(opts.params[:measure])
+  env = load_runtime_env
 
   dp = Search.new(
     { :min_size       => opts.params[:min_size],
@@ -391,12 +320,12 @@ if $0 == __FILE__ # Main Entry Point
 
   best_trees = opts.params[:best_trees] 
 
-  info, trees = load_best_trees(best_trees, env)
+  info, trees = load_data(best_trees, env)
 
   dp.best = trees
 
   dp.run
 
-  save_best_trees(best_trees, env, dp.best, info)
+  save_data(best_trees, env, dp.best, info)
 end
 

@@ -7,11 +7,12 @@
 
 require 'json/ext'
 
-MEASURE_PATH    = '../measure'
-RANDTREE_PATH   = '../utils'
-CONVERT_PATH    = '../wht'
-CLASSIFY_PATH   = '../wht'
-IC_PATH         = '../model'
+SCRIPT_PATH     = File.dirname(__FILE__) 
+MEASURE_PATH    = "#{SCRIPT_PATH}/../measure"
+RANDTREE_PATH   = "#{SCRIPT_PATH}/../utils"
+CONVERT_PATH    = "#{SCRIPT_PATH}/../wht"
+CLASSIFY_PATH   = "#{SCRIPT_PATH}/../wht"
+IC_PATH         = "#{SCRIPT_PATH}/../model"
 
 def load_runtime_env
   cmd = "#{MEASURE_PATH}/wht_measure -v"
