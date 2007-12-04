@@ -73,14 +73,10 @@ typedef struct split_children split_children;
 
 
 /**
- * \typedef codelet_apply_fp
- *
  * \brief Interface (function pointer signature) for applying codelets to input
  * vector
  *
- * void (*codelet_apply)(Wht *W, long S, wht_value *x);
- *
- * \param Wht     Pointer to wht plan 
+ * \param Wht     Pointer to Wht plan 
  * \param S       Stride at which to access the input vector
  * \param U       Base stride 
  * \param x       Input vector
@@ -88,12 +84,8 @@ typedef struct split_children split_children;
 typedef void (*codelet_apply_fp)(Wht *W, long S, size_t U, wht_value *x);
 
 /**
- * \typedef codelet_transform_fp
- *
  * \brief Interface (function pointer signature) for applying code
  * transformations to codelets 
- *
- * void (*codelet_transform_fp)(Wht *W);
  *
  * \param Wht     Pointer to wht plan 
  */
@@ -105,9 +97,7 @@ typedef void (*codelet_transform_fp)(Wht *W);
 typedef codelet_apply_fp codelet;
 
 /**
- * \struct Wht
- *
- * \brief Tree-like data structure for storing WHT plan.
+ * \brief Annotated tree data structure for storing Wht plan.
  *
  * \todo Wht should be in lower case to follow standard C idiom, a typedef
  * alias can be used for backwards compatability
@@ -120,18 +110,22 @@ struct Wht {
     /**< Recursive method for applying transform to input vector */
 
   void (*free)  (Wht *W);
-    /**< Recursive method for freeing memory allocated by codelet */ 
+    /**< Recursive method for freeing memory allocated by plan */ 
 
   codelet_transform_fp transform;
-    /**< Recursive method for if plan is an accept string in the language L(WHT) */ 
+    /**< Recursive method applying code transformation to plan */
 
   char * (*to_string) (Wht *W); 
-    /**< Recursive method for translating a codelet into a string */ 
+    /**< Recursive method for translating plan into a string */ 
 
   Wht *parent;
+    /**< Pointer to parent node */
 
   size_t left;
+    /**< \f$L\f$ in \f$ {\bf I}_{L} \otimes {\bf W}_{N} \otimes {\bf I}_{R} \f$ */
+
   size_t right;
+    /**< \f$R\f$ in \f$ {\bf I}_{L} \otimes {\bf W}_{N} \otimes {\bf I}_{R} \f$ */
 
   split_children * children; 
     /**< Pointer to split children, should not be allocated unless codelet is a split */
@@ -139,15 +133,15 @@ struct Wht {
   char *name; /**< Identifier for codelet, i.e. 'small' or  'split' */
 
   int params[MAX_CODELET_PARAMS];
+    /**< Parameters for code transformation */
 
-  int attr[MAX_ATTRIBUTES]; /**< Attributes associated with WHT */
+  int attr[MAX_ATTRIBUTES]; /**< Attributes associated with WHT, set by code transformation */
 
   char *error_msg;
+    /**< Error message in case plan construction or transformation goes awry */
 };
 
 /**
- * \struct split_children
- *
  * \brief Stores children of split codelet, i.e smaller WHTs.
  */
 struct split_children {
@@ -157,8 +151,6 @@ struct split_children {
 };
 
 /**
- * \struct codelet_transform_entry
- *
  * \brief Structure for registering new codelet transforms with the package.
  *
  * \see registry.h
@@ -177,8 +169,6 @@ typedef struct {
   /**< Place this at the end of the transform_registry to halt iteration */
 
 /**
- * \struct codelet_apply_entry
- *
  * \brief Structure for registering new computational (unrolled) codelets with the package.
  *
  * \see codelets/codelets_registry.h
@@ -211,25 +201,18 @@ typedef codelet_apply_entry codelet_entry;
  */
 
 /**
- * \fn void * i_malloc(size_t size)
- *
  * \brief Internal malloc routine used inside package.
  *
  * \param   size Size of memory segment to allocated
- * \return  Pointer to memory segment
  *
- * For now this function just ensures optimal memory alignment.
+ * \return  Pointer to memory segment
  */
 void * i_malloc(size_t size);
 
 /**
- * \fn void i_free(void *p);
- *
  * \brief Internal free routine used inside package.
  *
  * \param   p   Pointer to memory segment to be freed.
- *
- * For now this function just calls free.
  */
 void i_free(void *p);
 
@@ -246,8 +229,6 @@ wht_value * random_vector(size_t n);
 void codelet_transform(Wht *W, const char *name, int params[], size_t n);
 
 /**
- * \fn Wht * null_init(char *name, size_t n, int params[], size_t np);
- *
  * \brief Initializes a null codelet
  *
  * \param n       Size of codelet
@@ -261,34 +242,21 @@ Wht * null_init(size_t n, char *name);
 
 
 /**
- * \fn Wht * split_init(char *name, Wht *Ws[], size_t nn, int params[], size_t np);
- *
  * \brief Initializes a split codelet
  *
  * \param Ws      Array of children codelets
  * \param nn      Number of children
- * \return        Pointer to allocated codelet
  *
- * All new split codelets registered with the package should 'derive' from this
- * codelet, i.e. first initialize the codelet with init_split and then
- * proceed to customize the codelet.
+ * \return        Pointer to allocated codelet
  */
 Wht * split_init(Wht *Ws[], size_t nn);
 
 /**
- * \fn Wht * small_init(char *name, size_t n, int params[], size_t np);
- *
  * \brief Initializes a small codelet
  *
- * \param name    Unique identifier for codelet
  * \param n       Size of codelet
- * \param params  Parameters for codelet, typically stored as attributes
- * \param np      Number of elements in parameter array
- * \return        Pointer to allocated codelet
  *
- * All new small codelets registered with the package should 'derive' from this
- * codelet, i.e. first initialize the codelet with init_small and then
- * proceed to customize the codelet.
+ * \return        Pointer to allocated codelet
  */
 Wht * small_init(size_t n);
 
@@ -298,26 +266,12 @@ void null_apply(Wht *W, long S, size_t D, wht_value *x);
 void small_apply(Wht *W, long S, size_t D, wht_value *x);
 
 /**
- * \fn void split_apply(Wht *W, long S, wht_value *x);
- *
  * \brief Recursively apply transform to input vector
  *
  * \param   W   Transform
  * \param   S   Stride to apply transform at
  * \param   D   Base stride
  * \param   x   Input vector
- *
- *  A \f$ {\bf WHT}_{2^n} \f$ can be split into \f$ k \f$ \f$ {\bf WHT} \f$ 's of smaller size
- *  (according to \f$ n = n_1 + n_2 + \cdots + n_t \f$):
- *
-  \f$ 
-   \prod_{i=1}^t ({\bf I}_{2^{n_1 + \cdots + n_{i-1}}} 
-      \otimes {\bf WHT}_{2^{n_i}}
-      \otimes {\bf I}_{2^{n_{i+1} + \cdots + n_t}}) 
-  \f$
- *
- * The \f$ {\bf WHT}_{2^n} \f$ is performed by stepping through this product
- * from right to left.
  */
 void split_apply(Wht *W, long S, size_t D, wht_value *x);
 

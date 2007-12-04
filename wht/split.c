@@ -25,19 +25,19 @@
 
 #include "wht.h"
 
-/* 
- *  A WHT_N can be split into k WHT's of smaller size
- *  (according to N = N_1 * N_2 * ... * N_k):
+/**
+ *  A \f$ {\bf WHT}_{2^n} \f$ can be split into \f$ k \f$ \f$ {\bf WHT} \f$ 's of smaller size
+ *  (according to \f$ n = n_1 + n_2 + \cdots + n_t \f$):
  *
- *                              WHT_N_1 tensor 1_(N/N_1) *
- *     1_N_1             tensor WHT_N_2 tensor 1_(N/N_1N_2) *
- *       ...
- *       ...
- *     1_(N_1...N_(k-1)) tensor WHT_N_k 
+  \f$ 
+   \prod_{i=1}^t ({\bf I}_{2^{n_1 + \cdots + n_{i-1}}} 
+      \otimes {\bf WHT}_{2^{n_i}}
+      \otimes {\bf I}_{2^{n_{i+1} + \cdots + n_t}}) 
+  \f$
  *
- *  The WHT_N is performed by stepping through this product
- *  from right to left.
-*/
+ * The \f$ {\bf WHT}_{2^n} \f$ is performed by stepping through this product
+ * from right to left.
+ */
 void 
 split_apply(Wht *W, long S, size_t U, wht_value *x)
 {
@@ -126,6 +126,11 @@ split_transform(Wht *W)
     (W->children->Ws[i]->transform)(W->children->Ws[i]);
 }
 
+/**
+ * All new split codelets registered with the package should 'derive' from this
+ * codelet, i.e. first initialize the codelet with init_split and then
+ * proceed to customize the codelet.
+ */
 Wht *
 split_init(Wht *Ws[], size_t nn)
 {

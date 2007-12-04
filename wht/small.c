@@ -1,6 +1,11 @@
 #include "wht.h"
 #include "codelets.h"
 
+/**
+ * All new small codelets registered with the package should 'derive' from this
+ * codelet, i.e. first initialize the codelet with init_small and then
+ * proceed to customize the codelet.
+ */
 Wht *
 small_init(size_t n)
 {

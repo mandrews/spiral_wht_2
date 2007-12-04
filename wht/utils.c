@@ -6,6 +6,10 @@
    ==========
 */
 
+/**
+ * For now this function just ensures optimal memory alignment, could be
+ * extended in future.
+ */
 void *
 i_malloc(size_t size) 
 {
@@ -17,6 +21,9 @@ i_malloc(size_t size)
   return p;
 }
 
+/**
+ * For now this function just calls free, could be extended in future.
+ */
 void 
 i_free(void *p) 
 {
