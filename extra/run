@@ -9,22 +9,24 @@ require 'json/add/core'
 
 SAMPLES = 5001
 
-#SIZE = 9
-#
-#METRICS = {
-#  'TOT_CYC' => '-a 0.05 -p 1 -n 50',
-#  'TOT_INS' => '-n 3',
-#  'L1_DCM'  => '-n 500',
-#}
-
-SIZE = 18
+SIZE = 9
 
 METRICS = {
-  'TOT_CYC' => '-n 10 -a 5.0 -p 5.0',
-  'TOT_INS' => '-n 3',
-  'L1_DCM'  => '-n 5  -a 5.0 -p 5.0',
-  'L2_TCM'  => '-n 5  -a 5.0 -p 5.0',
+  #'TOT_CYC' => '-a 0.05 -p 1 -n 50',
+  #'TOT_INS' => '-n 3',
+  #'L1_DCM'  => '-n 500',
+  'FP_OPS'   => '-n 3',
+  'VEC_INS'  => '-n 3',
 }
+
+#SIZE = 18
+#
+#METRICS = {
+#  'TOT_CYC' => '-n 10 -a 5.0 -p 5.0',
+#  'TOT_INS' => '-n 3',
+#  'L1_DCM'  => '-n 5  -a 5.0 -p 5.0',
+#  'L2_TCM'  => '-n 5  -a 5.0 -p 5.0',
+#}
 
 
 TRANSFORMS = {

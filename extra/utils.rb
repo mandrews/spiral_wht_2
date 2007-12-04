@@ -86,3 +86,19 @@ def save_data(file, env, plans, info)
   end
 end
 
+def measure(plan, *args)
+  cmd = "#{MEASURE_PATH}/wht_measure -w '#{plan}' #{args}"
+  puts "Executing #{cmd}" if @debug
+  t = 0
+  IO.popen(cmd) do |fd|
+    t = fd.gets
+  end
+
+  unless t 
+    puts("Could not read: #{cmd}") if @debug
+    return INF
+  else
+    t.to_f
+  end
+end
+
