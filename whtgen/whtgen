@@ -457,6 +457,18 @@ def check_opts(opts)
 
 end
 
+#def parse(args)
+#  args =~ /(\w+)\((.*?)\)*\[(\d+)\]/
+#
+#  i = $1
+#  p = $2.split(/,/).map { |x| x.to_i }
+#  n = $3.to_i
+#
+#  p i
+#  p p
+#  p n
+#end
+
 # Main entry point 
 if $0 == __FILE__ 
   opts = Options.new
