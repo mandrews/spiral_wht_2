@@ -107,7 +107,7 @@ if $0 == __FILE__ # Main Entry Point
   end
 
   for size in 1 .. n do
-    expect_correct(split(small(size) * 2))
+    expect_correct(split(small(size),small(1)))
   end
 
   v = env['vector_size']
@@ -183,16 +183,18 @@ if $0 == __FILE__ # Main Entry Point
       expect_correct(splitil(smallv(1,v,v,0), splitil(smallv(1,v,v,0),smallv(size,v))))
     end
 
+    min_il = i
+
     for size in v .. n do
       # Reject aligned vectors here
       expect_reject(splitil(
-        splitil(smallv(1,v,v,1), small(size)),
-        splitil(smallv(1,v,v,1), small(size))))
+        splitil(smallv(1,v,v,1), small(min_il)),
+        splitil(smallv(1,v,v,1), smallv(min_il,v))))
 
       # Accept general vectors here
       expect_correct(splitil(
-        splitil(smallv(1,v,v,0), small(size)),
-        splitil(smallv(1,v,v,0), small(size))))
+        splitil(smallv(1,v,v,0), small(min_il)),
+        splitil(smallv(1,v,v,0), smallv(min_il,v))))
     end
 
     # Reject when interleaved codelets do not have splitil parent
@@ -208,9 +210,8 @@ if $0 == __FILE__ # Main Entry Point
       expect_reject(smallv(n,v,y,1))
     end
 
-    # NOTE: This fails but I am not sure why
     for size in v .. n do
-      expect_correct(splitil(smallv(size,v,8,0),smallv(3,v)))
+      expect_correct(splitil(smallv(size,v,8,0),smallv(min_il,v)))
     end
 
   end
