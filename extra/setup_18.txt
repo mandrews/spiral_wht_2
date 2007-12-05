@@ -16,9 +16,8 @@
   },
 
   "transforms" : {
-    "vectorize(2,2)" : "-v 2 -i 2",
-    "vectorize(2,4)" : "-v 2 -i 4",
-    "vectorize(2,8)" : "-v 2 -i 8"
+    "vectorize(2,8)"  : "-v 2 -i 8",
+    "vectorize(2,16)" : "-v 2 -i 16"
   },
 
   "no_update" : true

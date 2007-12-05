@@ -6,7 +6,6 @@
 # $Id$
 #
 # TODO
-#   - Flag for selecting rightmost subspace
 #   - Input for selecting possible transforms
 
 SCRIPT_PATH       = File.dirname(__FILE__) 
@@ -16,7 +15,8 @@ DEFAULT_PARAMS    = {
   :max_size       => 15,
   :max_children   => 2,
   :measure        => SCRIPT_PATH + '/wht_measure',
-  :best_trees     => SCRIPT_PATH + '/../share/wht_best_trees.txt'
+  :best_trees     => SCRIPT_PATH + '/../share/wht_best_trees.txt',
+  :subspace       => nil,
 }
 
 $LOAD_PATH << "#{SCRIPT_PATH}/../extra"
@@ -50,6 +50,10 @@ class Options
       o.on("-k", "--max-children=CHILDREN", Integer,
         "Maximum number of children to allow on a split node.") { |x|
         @params[:max_children] = x }
+
+      o.on("-s", "--subspace=SPACE", String,
+        "Confine search to SPACE (presently only RIGHT supported).") { |x|
+        @params[:subspace] = x }
 
       o.on("-m", "--wht-measure=FILE", 
         "Program to measure peformance of WHT tree.") { |x|
@@ -89,6 +93,7 @@ class Search
     @il_max         = params[:il_max]
     @vsize          = params[:vsize]
     @max_leaf       = params[:max_leaf]
+    @subspace       = params[:subspace]
     @debug          = params[:debug]
 
     @best = {}
@@ -130,7 +135,7 @@ class Search
   def find(size)
     plans = []
 
-    g_cp_n(size, 1, @max_children) do |zp|
+    operation = lambda do |zp|
       next if zp.first == size and size > @max_leaf
 
       right = right_codelets(zp.pop,size)
@@ -155,6 +160,13 @@ class Search
         end
       end
 
+    end
+
+    case @subspace 
+      when 'right'
+        g_cp_n_right(size, 1, @max_children, @max_size) { |zp| operation.call(zp) }
+      else
+        g_cp_n(size, 1, @max_children) { |zp| operation.call(zp) }
     end
 
     plans.each do |p|
@@ -191,7 +203,7 @@ class Search
     for k in 1 .. il_max do
       lefts << "smallil(#{2**k})[#{size}]"
       next unless @vsize > 0 and 2**k >= @vsize
-      lefts << "smallv(#{@vsize},#{2**k})[#{size}]"
+      lefts << "smallv(#{@vsize},#{2**k},1)[#{size}]"
     end
     lefts.uniq
   end
@@ -276,6 +288,37 @@ def g_k_cb_n(n,k)
   end
 end
 
+# Generate (enumerate) all k combinations of n
+# given that the trees are rightmost
+# See above
+def rightmost(a,max)
+  b = a.dup
+  b.pop # Do not consider last element
+  c = b.select { |x| x <= max }
+  return (c.size == b.size)
+end
+
+def g_k_cb_n_right(n,k,max)
+  a = (1..k).to_a
+
+  loop do
+    yield a if rightmost(a, max)
+
+    i = k - 1
+    while a[i] == (n - k + i + 1) do
+      i -= 1
+    end
+
+    return if (i < 0)
+
+    a[i] += 1
+
+    for j in i+1 .. k-1 do
+      a[j] = a[i] + j - i
+    end
+  end
+end
+
 # Map a combination to a composition
 # Idea from Dr. Johnson
 # see http://en.wikipedia.org/wiki/Combinadic
@@ -301,6 +344,17 @@ def g_cp_n(n, a, b)
   end
 end
 
+# Generate (enumerate) all k-way compositions of n forall k in a..b
+# given that the trees are rightmost
+def g_cp_n_right(n, a, b, m)
+  max = [n, b].min
+  a.upto(max) do |k|
+    g_k_cb_n_right(n-1,k-1,m-1) do |cb|
+      yield map_cb_to_cp(n,cb)
+    end
+  end
+end
+
 if $0 == __FILE__ # Main Entry Point
   opts = Options.new
   opts.parse(ARGV)
@@ -320,6 +374,7 @@ if $0 == __FILE__ # Main Entry Point
       :vsize          => env['vector_size'],
       :debug          => opts.params[:verbose],
       :measure        => opts.params[:measure],
+      :subspace       => opts.params[:subspace],
     } )
 
   best_trees = opts.params[:best_trees] 

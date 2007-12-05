@@ -37,11 +37,20 @@ Bugs:
 
   - Make large note about antilexographic storing of split children
 
+  - No conditional compilation check for PAPI
+
 Ideas:
 
   - look into pkg-config for versioning information
 
 Shortrun:
+  - Run
+    - Redo 5000 Samples @ 9,18 for Rightmost
+
+  - DP
+   - Flag for selecting rightmost subspace
+   - Input for selecting possible transforms
+
   - Experiments
     - Best 1.8, SPIRAL, Normal 2-Children, My Best?
 
@@ -55,9 +64,18 @@ Shortrun:
         Normal 3-Children, Vectorized 3-Children
         ...
 
-    - Redo 5000 Samples @ 9,18 for All, Rightmost
-
+  - Analysis
     - Include PCA
+
+  - Conversion utility input should just be something like:
+
+      smallv(2,2,1)
+
+    Parse this and let transform take care of rest.  Now registration for
+    conversion is uncessary.
+
+  - Also input to wht_dp should just be smallv(2,2,1), and lookup can be
+    performed on string.
 
   Look into "Super" Extensions Idea
    - Modularized configure.ac
