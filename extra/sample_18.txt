@@ -1,0 +1,25 @@
+{
+  "samples" : 5001,
+  "size" : 18,
+  "min_f" : 1,
+  "max_f" : 4,
+  "min_e" : 1,
+  "max_e" : 8,
+
+  "metrics" : {
+    "TOT_CYC"   : "-n 10 -a 5.0 -p 5.0",
+    "TOT_INS"   : "-n 3",
+    "L1_DCM"    : "-n 5  -a 5.0 -p 5.0",
+    "L2_TCM"    : "-n 5  -a 5.0 -p 5.0",
+    "FP_OPS"    : "-n 3",
+    "VEC_INS"   : "-n 3"
+  },
+
+  "transforms" : {
+    "vectorize(2,2)" : "-v 2 -i 2",
+    "vectorize(2,4)" : "-v 2 -i 4",
+    "vectorize(2,8)" : "-v 2 -i 8"
+  },
+
+  "no_update" : true
+}

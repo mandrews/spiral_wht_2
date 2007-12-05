@@ -55,23 +55,25 @@ def load_entry(env,info)
   entry
 end
 
-def load_data(file, env)
-  default = [[],{}]
-
-  return default unless File.exists?(file)
-
-  info = []
-
+def load_json(file, default)
   File.open(file,'r') do |fd|
     begin
       json  = JSON.load(fd)
       raise "Initializing #{file}" unless json
-      info = json 
+      return json
     rescue => e 
       puts e.message
       return default
     end
   end
+end
+
+def load_data(file, env)
+  default = [[],{}]
+
+  return default unless File.exists?(file)
+
+  info = load_json(file, [])
 
   plans = load_entry(env, info)['data']
 

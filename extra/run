@@ -5,42 +5,7 @@
 # Author: Michael Andrews <mjand@drexel.edu>
 # $Id$
 
-require 'json/add/core'
-
-SAMPLES = 5001
-
-SIZE = 9
-
-METRICS = {
-  #'TOT_CYC' => '-a 0.05 -p 1 -n 50',
-  #'TOT_INS' => '-n 3',
-  #'L1_DCM'  => '-n 500',
-  'FP_OPS'   => '-n 3',
-  'VEC_INS'  => '-n 3',
-}
-
-#SIZE = 18
-#
-#METRICS = {
-#  'TOT_CYC' => '-n 10 -a 5.0 -p 5.0',
-#  'TOT_INS' => '-n 3',
-#  'L1_DCM'  => '-n 5  -a 5.0 -p 5.0',
-#  'L2_TCM'  => '-n 5  -a 5.0 -p 5.0',
-#}
-
-
-TRANSFORMS = {
-#  "vectorize(2,2)" => "-v 2 -i 2",
-#  "vectorize(2,4)" => "-v 2 -i 4",
-#  "vectorize(2,8)" => "-v 2 -i 8",
-  "interleave(2)"  => "-i 2",
-#  "interleave(4)"  => "-i 4",
-#  "interleave(8)"  => "-i 8"
-}
-
-NO_UPDATE = true
-
-def measure(plan, metric, args)
+def mymeasure(plan, metric, args)
   values = `#{MEASURE_PATH}/wht_measure -w '#{plan}' -e PAPI -m #{metric} -s #{args}`.split
   values.map { |x| x.to_f }
 end
@@ -57,13 +22,13 @@ def classify(plan, args = nil)
   `#{CLASSIFY_PATH}/wht_classify -w '#{plan}' #{args}`.chomp
 end
 
-def generate(plans, n, max)
+def generate(plans, o)
   # TODO select plans with no transform
-  return if plans.size >= max
+  return if plans.size >= o['samples']
 
-  a,b,p,q = 1,4,1,4
+  n, a,b,p,q = o['size'], o['min_f'], o['max_f'], o['min_e'], o['max_e']
 
-  for oid in 0 .. max
+  for oid in 0 .. o["samples"]
     plan = random(n,a,b,p,q)
     key = [oid, plan, 'none'].join(': ')
     plans[key] = { 
@@ -74,7 +39,7 @@ def generate(plans, n, max)
   end
 end
 
-def transform(plans, transforms)
+def transform(plans, o)
   tmp = plans.dup
 
   plans.each do |key, node|
@@ -86,7 +51,7 @@ def transform(plans, transforms)
 
     next unless prev == 'none'
 
-    transforms.each do |name, args|
+    o['transforms'].each do |name, args|
       new_plan = convert(plan, args)
       new_key  = [oid, new_plan, name].join(': ')
       tmp[new_key] = {
@@ -97,23 +62,22 @@ def transform(plans, transforms)
     end
   end
 
-
   plans.merge!(tmp)
 end
 
-def test(plans, metrics)
+def test(plans, o)
   plans.each do |key, node|
     index = key.split(/\s*:\s*/)
 
     plan = index[1]
 
-    metrics.each do |metric, params|
-      next if NO_UPDATE and node.has_key?(metric + "_mean")
+    o['metrics'].each do |metric, params|
+      next if o['no_update'] and node.has_key?("#{metric}_mean")
 
-      value = measure(plan, metric, params)
-      node[metric + "_mean" ]    = value[0]
-      node[metric + "_stdev" ]   = value[1]
-      node[metric + "_samples" ] = value[2].to_i
+      value = mymeasure(plan, metric, params)
+      node["#{metric}_mean" ]    = value[0]
+      node["#{metric}_stdev" ]   = value[1]
+      node["#{metric}_samples" ] = value[2].to_i
 
       print '.'
       $stdout.flush
@@ -169,10 +133,12 @@ end
 require 'utils'
 
 if $0 == __FILE__
-  die if ARGV.size < 1
+  die if ARGV.size < 3
 
-  file = ARGV[0]
-  mode = ARGV[1]
+  opts = load_json(ARGV[0], {})
+
+  file = ARGV[1]
+  mode = ARGV[2]
 
   info, data = nil, nil
 
@@ -190,11 +156,11 @@ if $0 == __FILE__
   time {
     case mode
       when 'Generate'
-        generate(data, SIZE, SAMPLES)
+        generate(data, opts)
       when 'Transform'
-        transform(data, TRANSFORMS)
+        transform(data, opts)
       when 'Test'
-        test(data, METRICS)
+        test(data, opts)
       else
         puts "mode #{mode} undefined"
     end
