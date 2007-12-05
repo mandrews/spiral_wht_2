@@ -81,25 +81,23 @@ void
 vector_convert(Wht *W, int params[], size_t n)
 {
   int i;
-  size_t k,v, k_max;
+  size_t k,v;
 
   v = params[0];
   k = params[1];
-
-  k_max = (k >> 1);
 
   transform(W, "splitil", NULL, 0);
 
   int params2[1] = { v };
   transform(W, "smallv", params2, 1);
 
-  for (i = k_max; i >= 1; i--) {
-    int params2[3] = { v, (1 << i), 1};
+  for (i = k; i >= 1; i = (i >> 1)) {
+    int params2[3] = { v, i, 1};
     transform(W, "smallv", params2, 3);
   }
 
-  for (i = k_max; i >= 1; i--) {
-    int params2[3] = { v, (1 << i), 0};
+  for (i = k; i >= 1; i = (i >> 1)) {
+    int params2[3] = { v, i, 1};
     transform(W, "smallv", params2, 3);
   }
 }
