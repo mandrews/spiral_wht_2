@@ -36,9 +36,10 @@ ulong n_choose_k(ulong n, ulong k);
 
 combin::iterator combin_elem_rand(combin * c, uint n);
 
+/* Random combinatic of n given length k */
 combin * combin_k_rand(uint n, uint k);
 
-/* Random combinination given length is between a and b */
+/* Random combinatic of n things given length is between a and b */
 combin * combin_rand(uint n, uint a, uint b);
 
 /* Convert a combinination to a compososition */
@@ -46,6 +47,9 @@ compos * combin_to_compos(uint n, combin *c);
 
 /* Random compososition given length is between a and b */
 compos * compos_rand(uint n, uint a, uint b);
+
+combin * combin_enum_init(uint n, uint k);
+combin * combin_enum_next();
 
 compos_node * compos_tree_rand(uint n, uint a, uint b, uint min, uint max);
 compos_node * compos_tree_rand_right(uint n, uint a, uint b, uint min, uint max);

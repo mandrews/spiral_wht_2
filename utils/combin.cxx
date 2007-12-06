@@ -229,6 +229,115 @@ combin_rand(uint n, uint a, uint b)
   return combin_k_rand(n,k);
 }
 
+combin *
+combin_enum(uint n_init, uint k_init, bool init = false)
+{
+  static combin *elems;
+  static uint n, k, i, j;
+  static combin::reverse_iterator cmb_i;
+  static combin::iterator cmb_j;
+
+  /* Loop until done */
+
+  if (init) {
+    /* 
+     * Initialize:
+     *
+     * elems = [1 .. k]
+     */
+    n = n_init;
+    k = k_init;
+
+    elems = new combin(k);
+
+    cmb_j = elems->begin();
+    for (i = 1; cmb_j != elems->end() && i <= k; i++, cmb_j++)
+      *cmb_j = i;
+
+    return elems;
+
+  } else {
+
+    /*
+     * Flip from right:
+     *
+     * i = k - 1
+     * while a[i] == (n - k + i + 1) do
+     *  i -= 1
+     * end
+     */
+    i = k - 1;
+    cmb_i = elems->rbegin(); 
+    for (; cmb_i != elems->rend() && *cmb_i == (n - k + i + 1); cmb_i++)
+      i--;
+
+    /*
+     * Check to see if enumeration has terminated:
+     *
+     * if (i < 0)
+     *  return
+     */
+    if ((i < 0) || (cmb_i == elems->rend())) {
+      elems->clear();
+      return elems;
+    }
+
+    /* Set cmb_j = cmb_i */
+    cmb_j = elems->begin();
+
+    for (j = 1; j <= i; j++)
+      cmb_j++;
+
+    /*
+     * Flip from left:
+     *
+     *  a[i] += 1
+     *  for j in i+1 .. k-1 do
+     *    a[j] = a[i] + j - i
+     *  end
+     */
+    (*cmb_i)++;
+    for (j = i; (j <= k-1) && (cmb_j != elems->end()); cmb_j++, j++)
+      *cmb_j = *cmb_i + j - i;
+
+    return elems;
+  }
+}
+
+combin *
+combin_enum_init(uint n, uint k)
+{
+  return combin_enum(n, k, true);
+}
+
+combin *
+combin_enum_next()
+{
+  return combin_enum(0, 0, false);
+}
+
+/* Code to use these functions */
+#if 0
+  combin *a;
+  combin::iterator i;
+
+  a = combin_enum_init(5, 3);
+
+  do {
+    for (i = a->begin(); i != a->end(); i++)
+      printf("%d ", *i);
+    printf("\n");
+
+    a = combin_enum_next();
+
+  } while (! a->empty());
+
+  delete a;
+
+  exit(1);
+#endif
+
+
 compos *
 combin_to_compos(uint n, combin *cmb)
 {
