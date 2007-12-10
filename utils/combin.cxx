@@ -389,12 +389,18 @@ compos_tree_rand(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
   compos_node *cpn;
   compos_nodes::iterator cpn_i;
   size_t min_fp;
+  double r;
 
   cpn = new compos_node();
   cpn->value = n;
   cpn->children = new compos_nodes();
 
-  if (n >= min_n && n <= max_n)
+  if (n <= min_n)
+    return cpn;
+
+  r = ((double) random() / (double) RAND_MAX);
+
+  if (n <= max_n && (r >= 0.5))
     return cpn;
 
   /* If n is greater than the largest element, we need to generate a
@@ -423,19 +429,25 @@ compos_node *
 compos_tree_rand_right(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
 {
   compos *cmp;
-  compos::iterator cmp_i;
+  compos::iterator cmp_i, cmp_l;
   compos::iterator cmp_j;
 
   compos_node *cpn;
   compos_nodes::iterator cpn_i;
   size_t min_fp;
   bool rcond;
+  double r;
 
   cpn = new compos_node();
   cpn->value = n;
   cpn->children = new compos_nodes();
 
-  if (n >= min_n && n <= max_n)
+  if (n <= min_n)
+    return cpn;
+
+  r = ((double) random() / (double) RAND_MAX);
+
+  if (n <= max_n && (r >= 0.5))
     return cpn;
 
   /* If n is greater than the largest element, we need to generate a
@@ -445,11 +457,8 @@ compos_tree_rand_right(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
   else
     min_fp = min_f;
 
+  /* TODO: Figure out how to get rid of non determinism */
   cmp = NULL;
-
-  /* NOTE: Possible to get rid of this non deterministic loop mechanism,
-   * if compos_rand can restrict size of elements to between min_n and max_n
-   */
   do {
     if (cmp != NULL) delete cmp;
 
@@ -471,8 +480,16 @@ compos_tree_rand_right(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
 
   cpn->children->resize(cmp->size());
 
-  for (cmp_i = cmp->begin(), cpn_i = cpn->children->begin(); cmp_i != cmp->end(); ++cmp_i, ++cpn_i) 
-    *cpn_i = compos_tree_rand_right(*cmp_i, min_f, max_f, min_n, max_n);
+  cmp_l = --(cmp->end());
+
+  /* NOTE: By setting min_n to cmp_i in recursive call we guarentee that a leaf
+   * node will be returned
+   */
+  for (cmp_i = cmp->begin(), cpn_i = cpn->children->begin(); cmp_i != cmp_l; ++cmp_i, ++cpn_i) 
+    *cpn_i = compos_tree_rand_right(*cmp_i, min_f, max_f, *cmp_i, max_n);
+
+  /* NOTE: Allow the rightmost node to be a tree */
+  *cpn_i = compos_tree_rand_right(*cmp_i, min_f, max_f, min_n, max_n);
 
   delete cmp;
 
