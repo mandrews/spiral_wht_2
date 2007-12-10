@@ -17,6 +17,7 @@ DEFAULT_PARAMS    = {
   :measure        => SCRIPT_PATH + '/wht_measure',
   :best_trees     => SCRIPT_PATH + '/../share/wht_best_trees.txt',
   :subspace       => nil,
+  :transforms     => nil,
 }
 
 $LOAD_PATH << "#{SCRIPT_PATH}/../extra"
@@ -59,6 +60,10 @@ class Options
         "Program to measure peformance of WHT tree.") { |x|
          @params[:measure] = x }
 
+      o.on("-t", "--transformations='A,B,C, ... '", 
+        "Apply the following code transformations to the WHT tree.") { |x|
+         @params[:transforms] = x }
+
       o.on("-f", "--wht-best-trees=FILE", String,
         "File to load/store the best trees found by dynamic programming.") { |x|
          @params[:best_trees] = x }
@@ -99,7 +104,7 @@ class Search
     @best = {}
 
     for size in 1 .. @max_size do 
-      @best[size.to_s] ||= { 'time' => INF, 'plan' => nil }
+      @best[size.to_s] ||= { 'time' => INF, 'plan' => nil, 'oid' => 0}
     end
   end
 
@@ -137,29 +142,10 @@ class Search
 
     operation = lambda do |zp|
       next if zp.first == size and size > @max_leaf
+      plan = zp_to_plan(zp)
 
-      right = right_codelets(zp.pop,size)
-      next if right.nil? or right.empty? 
-
-      lefts = []
-      zp.each_with_index do |z,i|
-        k = size_of_right_tree(zp,i+1)
-        lefts << left_codelets(z,size,k)
-      end
-
-      if lefts.empty? # Basecase
-        plans += right
-        next
-      end
-
-      lefts << right
-
-      combinations(lefts).each do |x|
-        split_codelets.each do |s|
-          plans << "#{s}[#{x.join(',')}]"
-        end
-      end
-
+      plans << plan
+      #plans << `#{SCRIPT_PATH}/../wht/wht_convert -w #{plan} -i 8 -v 2`.chomp!
     end
 
     case @subspace 
@@ -176,6 +162,8 @@ class Search
         puts "New Best for #{size} with T=#{t} (T'=#{tp}): #{p}"
         @best[size.to_s]['time'] = t
         @best[size.to_s]['plan'] = p
+        @best[size.to_s]['oid']  = size
+        @best[size.to_s]['transform']  = 'none'
       end
     end
   end
@@ -187,75 +175,22 @@ class Search
     @best[size.to_s]['plan']
   end
 
-
-  # TODO These should be read in by a user configured file
-  def left_codelets(size, n, m)
-    return [] if size < 2
-
-    lefts = []
-    best = leftify(find_best(size))
-    lefts << best if best
-    return lefts if size > @max_leaf
-
-    lefts << "small[#{size}]"
-
-    il_max = [n, @il_max, m, size].min 
-    for k in 1 .. il_max do
-      lefts << "smallil(#{2**k})[#{size}]"
-      next unless @vsize > 0 and 2**k >= @vsize
-      lefts << "smallv(#{@vsize},#{2**k},1)[#{size}]"
-    end
-    lefts.uniq
-  end
-
-  def right_codelets(size,n)
-    return [find_best(size)] if n > @max_leaf
-
-    rights = [ "small[#{size}]" ]
-    if @vsize > 0 and 2**size > @vsize
-      rights << "smallv(#{@vsize})[#{size}]"
-    end
-    rights.uniq
-  end
-
-  def split_codelets
-    @il_max > 1 ? ["splitil"] : [ "split" ] 
-  end
-
-  def leftify(codelet)
-    return unless codelet
-    codelet.gsub(/smallv\((\d)\)\[(\d)\]/) { |x| "small[#{$2}]" }
-  end
-
-  def size_of_right_tree(zp,n)
-    v = 0
-    zp.reverse.each_with_index do |x,i|
-      break if n >= (zp.size - i)
-      v += x
-    end
-    v
-  end
-
-end
-
-def combinations(a)
-  return a.first if a.size == 1
-
-  h = a.shift
-  t = combinations(a)
-
-  all = []
-  t.each do |y|
-    h.each do |x|
-      if y.class == Array
-        all << [x] + y
+  def zp_to_plan(zp)
+    s = []
+    zp.each do |z|
+      if z > @max_leaf
+        s << find_best(z)
       else
-        all << [x] + [y]
+        s << "small[#{z}]"
       end
     end
-  end
 
-  all
+    if s.size > 1
+      return "split[" + s.join(',') + "]"
+    else
+      return s.first
+    end
+  end
 end
 
 # To generate compositions with elements >= MIN
@@ -375,6 +310,7 @@ if $0 == __FILE__ # Main Entry Point
       :debug          => opts.params[:verbose],
       :measure        => opts.params[:measure],
       :subspace       => opts.params[:subspace],
+      :transforms     => opts.params[:transforms],
     } )
 
   best_trees = opts.params[:best_trees] 
