@@ -128,7 +128,9 @@ stat_unit
 papi_test(Wht *W, wht_value *x, char *metric)
 {
   long_long tmp[1];
+  codelet_apply_fp apply;
 
+  apply = W->apply;
   W->apply = null_apply;
 
   /* Read and reset the counters.
@@ -151,6 +153,8 @@ papi_test(Wht *W, wht_value *x, char *metric)
    * */
   if (PAPI_read_counters(tmp, 1) != PAPI_OK)
     papi_eprintf("Problem reading counters %s:%d.\n", __FILE__, __LINE__);
+
+  W->apply = apply;
 
   return (stat_unit) tmp[0];
 }

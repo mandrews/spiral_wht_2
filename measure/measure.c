@@ -25,13 +25,16 @@ builtin_test(Wht *W, wht_value *x, char *metric)
 {
   /* Microsecond metric */
   double t0, t1;
+  codelet_apply_fp apply;
 
+  apply = W->apply;
   W->apply = null_apply;
 
   t0 = cputime();
   wht_apply(W,x);
   t1 = cputime();
 
+  W->apply = apply;
   return t1 - t0;
 }
 
