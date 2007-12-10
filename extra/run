@@ -10,8 +10,8 @@ def mymeasure(plan, metric, args)
   values.map { |x| x.to_f }
 end
 
-def random(size,a,b,p,q)
-  `#{RANDTREE_PATH}/wht_randtree -n #{size} -a #{a} -b #{b} -p #{p} -q #{q}`.chomp
+def random(size,a,b,p,q,args)
+  `#{RANDTREE_PATH}/wht_randtree -n #{size} -a #{a} -b #{b} -p #{p} -q #{q} #{args}`.chomp
 end
 
 def convert(plan, args)
@@ -26,10 +26,15 @@ def generate(plans, o)
   # TODO select plans with no transform
   return if plans.size >= o['samples']
 
-  n, a,b,p,q = o['size'], o['min_f'], o['max_f'], o['min_e'], o['max_e']
+  n,a,b,p,q,r = o['size'],o['min_f'],o['max_f'],o['min_e'],o['max_e'],o['right']
+
+  args = ""
+  if (not r.nil?) and r
+    args = "-t right"
+  end
 
   for oid in 0 .. o["samples"]
-    plan = random(n,a,b,p,q)
+    plan = random(n,a,b,p,q,args)
     key = [oid, plan, 'none'].join(': ')
     plans[key] = { 
       'oid'       => oid,

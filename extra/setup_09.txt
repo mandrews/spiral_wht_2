@@ -2,22 +2,29 @@
   "samples" : 5001,
   "size" : 9,
   "min_f" : 1,
-  "max_f" : 4,
+  "max_f" : 9,
   "min_e" : 1,
   "max_e" : 8,
+  "right" : true,
 
   "metrics" : {
     "TOT_CYC"   : "-a 0.05 -p 1 -n 50",
     "TOT_INS"   : "-n 3",
-    "L1_DCM"    : "-n 500",
     "FP_OPS"    : "-n 3",
-    "VEC_INS"   : "-n 3"
+    "LD_INS"    : "-n 3",
+    "SR_INS"    : "-n 3",
+    "BR_INS"    : "-n 3",
+    "VEC_INS"   : "-n 3",
+    "L1_DCM"    : "-n 500",
+    "L2_TCM"    : "-n 50 -a 5.0 -p 5.0"
   },
 
   "transforms" : {
+    "vectorize(2,2)"  : "-v 2 -i 2",
+    "vectorize(2,4)"  : "-v 2 -i 4",
     "vectorize(2,8)"  : "-v 2 -i 8",
     "vectorize(2,16)" : "-v 2 -i 16"
   },
 
-  "no_update" : true
+  "no_update" : false
 }
