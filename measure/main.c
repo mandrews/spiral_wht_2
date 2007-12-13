@@ -18,6 +18,7 @@ usage()
   printf(" Measurement Techniques (mutually exclusive):\n");
   printf("    Average (default)\n");
   printf("      -n SAMPLES  Accumulate average for N SAMPLES (default 1).\n");
+  printf("      -k RUN      Accumulate average in run of size K (default 1).\n");
   printf("    Timed Average\n");
   printf("      -t TIME     Accumulate average for TIME seconds.\n");
   printf("    Z-Score\n");
@@ -40,7 +41,7 @@ int
 main(int argc, char **argv)
 {
   char *wht_plan, *extn, *metric;
-  int c, n;
+  int c, n, k;
   double a, p, t;
   bool all, calib;
 
@@ -53,8 +54,9 @@ main(int argc, char **argv)
   p = INFINITY;
   t = INFINITY;
   n = 1;
+  k = 1;
 
-  while ((c = getopt (argc, argv, "hvw:e:sa:p:m:t:n:c")) != -1)
+  while ((c = getopt (argc, argv, "hvw:e:sa:p:m:t:n:k:c")) != -1)
     switch (c) {
       case 'w':
         wht_plan = optarg;
@@ -82,6 +84,9 @@ main(int argc, char **argv)
         break;
       case 'n':
         n = atoi(optarg);
+        break;
+      case 'k':
+        k = atoi(optarg);
         break;
       case 'c':
         calib = true;
@@ -121,11 +126,11 @@ main(int argc, char **argv)
   }
 
   if (a != INFINITY && p != INFINITY)
-    s = measure_with_z_test(W, extn, metric, calib, n, a, p);
+    s = measure_with_z_test(W, extn, metric, calib, k, n, a, p);
   else if (t != INFINITY)
-    s = measure_until(W, extn, metric, calib, t);
+    s = measure_until(W, extn, metric, calib, k, t);
   else
-    s = measure(W, extn, metric, calib, n);
+    s = measure(W, extn, metric, calib, k, n);
 
   buf = stat_to_string(s, all);
 

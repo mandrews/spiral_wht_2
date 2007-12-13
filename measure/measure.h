@@ -19,13 +19,13 @@ struct measure_extension
 
 double cputime();
 
-struct stat * measure(Wht *W, char *extension, char *metric, bool calib, 
+struct stat * measure(Wht *W, char *extension, char *metric, bool calib, size_t run,
   size_t samples);
 
-struct stat * measure_with_z_test(Wht *W, char *extension, char *metric,  bool calib,
+struct stat * measure_with_z_test(Wht *W, char *extension, char *metric,  bool calib, size_t run,
   size_t initial, double alpha, double rho);
 
-struct stat * measure_until(Wht *W, char *extension, char *metric, bool calib,
+struct stat * measure_until(Wht *W, char *extension, char *metric, bool calib, size_t run,
   double time);
 
 char * measure_extension_list();
