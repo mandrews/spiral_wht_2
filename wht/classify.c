@@ -20,26 +20,104 @@
 #include "wht.h"
 #include "getopt.h"
 
-bool
-plan_is_iterative(Wht *W)
+#define max(a,b) ((a > b) ? (a) : (b))
+
+unsigned int
+plan_extent(Wht *W)
 {
   int i;
+  unsigned d;
 
   if (W->children == NULL)
-    return true;
-  else
-    for (i = 0; i < W->children->nn; i++)
-      if (W->children->Ws[i]->children != NULL)
-        return false;
+    return 1;
 
-  return true;
+  d = 0;
+  for (i = 0; i < W->children->nn; i++)
+    d += plan_extent(W->children->Ws[i]);
+
+  return d;
 }
 
-bool
-plan_is_recursive(Wht *W)
+unsigned int
+plan_depth(Wht *W)
 {
-  return (! plan_is_iterative(W));
+  int i;
+  unsigned d;
+
+  if (W->children == NULL)
+    return 1;
+
+  d = 1;
+  for (i = 0; i < W->children->nn; i++)
+    d = max(d, 1 + plan_depth(W->children->Ws[i]));
+
+  return d;
 }
+
+unsigned int
+plan_width(Wht *W)
+{
+  int i;
+  unsigned int nn, mn;
+
+  if (W->children == NULL)
+    return 1;
+
+  nn = W->children->nn;
+  mn = nn;
+
+  for (i = 0; i < nn; i++) 
+    mn = max(mn, plan_width(W->children->Ws[i]));
+
+  return mn;
+}
+
+unsigned int
+plan_last_size(Wht *W)
+{
+  Wht *Wi;
+  unsigned int rs;
+
+  Wi = W;
+  while (Wi->children != NULL) {
+    Wi = Wi->children->Ws[0];
+  }
+
+  rs = Wi->n;
+
+  return rs;
+}
+
+unsigned int
+plan_first_size(Wht *W)
+{
+  size_t nn;
+  unsigned int fs;
+
+  if (W->children == NULL) 
+    return W->n;
+
+  nn = W->children->nn;
+  fs = W->children->Ws[nn - 1]->n;
+
+  return fs;
+}
+
+int
+plan_attrs(Wht *W, size_t attr)
+{
+  int i, d;
+
+  d = max(W->attr[attr], 0);
+  if (W->children == NULL)
+    return d;
+
+  for (i = 0; i < W->children->nn; i++)
+    d += plan_attrs(W->children->Ws[i], attr);
+
+  return d;
+}
+
 
 bool
 plan_is_rightmost(Wht *W)
@@ -110,27 +188,6 @@ plan_is_balanced(Wht *W)
   return accept;
 }
 
-unsigned int
-plan_arity(Wht *W)
-{
-  int i;
-  unsigned int nn, ni, max;
-
-  if (W->children == NULL)
-    return 1;
-
-  nn  = W->children->nn;
-  max = nn;
-
-  for (i = 0; i < nn; i++) {
-    ni = plan_arity(W->children->Ws[i]);
-    if (ni > max)
-      max = ni;
-  }
-
-  return max;
-}
-
 static void
 usage() 
 {
@@ -169,7 +226,7 @@ main(int argc, char **argv)
     usage();
 
   Wht *W;
-  char *buf;
+  unsigned int n;
 
   W = wht_parse(wht_plan);
 
@@ -179,32 +236,29 @@ main(int argc, char **argv)
     exit(1);
   }
 
-  buf = W->to_string(W);
+  n = plan_extent(W);
 
-#if 0
-  printf("%s\n", buf);
-#endif
+  printf("depth:          %u\n", plan_depth(W));
+  printf("extent:         %u\n", n);
+  printf("width:          %u\n", plan_width(W));
+  printf("first:          %u\n", plan_first_size(W));
+  printf("last:           %u\n", plan_last_size(W));
+  printf("interleave:     %f\n", plan_attrs(W,interleave_by) / ((n-1) * 8.0));
+  printf("vectorize:      %f\n", plan_attrs(W,vector_size) / (n * 2.0));
 
-  if (plan_is_iterative(W))
-    printf("iterative ");
-  else
-    printf("recursive ");
 
-  if (plan_is_balanced(W))
-    printf("balanced ");
-  else if (plan_is_rightmost(W))
-    printf("right ");
+  printf("shape:          ");
+  if (plan_is_rightmost(W))
+    printf("right");
   else if (plan_is_leftmost(W))
-    printf("left ");
+    printf("left");
+  else if (plan_is_balanced(W))
+    printf("balanced");
   else
-    printf("mixed ");
-
-  printf("%d-arity ", plan_arity(W));
-
+    printf("mixed");
   printf("\n");
 
   wht_free(W);
-  free(buf);
 
   return 0;
 }

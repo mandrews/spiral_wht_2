@@ -75,6 +75,8 @@ small_vector_transform(Wht *W)
 
   if (W->apply == NULL) 
     return error_msg_set(W, "could not find codelet");
+
+  W->attr[vector_size] = v;
 }
 
 void
@@ -97,7 +99,7 @@ vector_convert(Wht *W, int params[], size_t n)
   }
 
   for (i = k; i >= 1; i = (i >> 1)) {
-    int params2[3] = { v, i, 1};
+    int params2[3] = { v, i, 0};
     transform(W, "smallv", params2, 3);
   }
 }
