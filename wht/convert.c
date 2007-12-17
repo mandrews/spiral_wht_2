@@ -76,12 +76,15 @@ main(int argc, char **argv)
   char *buf;
 
   W = wht_parse(wht_plan);
+  codelet_transform_undo_recursive(W);
 
+#if 0
   if (wht_error_msg(W) != NULL) {
     printf("rejected, %s\n", wht_error_msg(W));
     wht_free(W);
     exit(1);
   }
+#endif
 
   if (vectorize > 0 && interleave > 0) {
     int params[] = { vectorize, interleave };
