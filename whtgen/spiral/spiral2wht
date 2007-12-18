@@ -30,7 +30,7 @@ foreach $file (@files) {
   open(FD, $file) or die "Could not open $file to read.";
   while ($line = <FD>) {
     if ($line =~ /void WHT_(\d+).*/) {
-      if ((1 << $size) == $1) {
+      if ($size == $1) {
         $codelet = $file;
         last;
       }
@@ -52,7 +52,7 @@ while ($line = <FD>) {
   next if $line =~ /^#include/; # Skip SPIRAL includes
 
   if ($line =~ /void WHT_(\d+).*/) {
-    $size = (log($1) / log(2));
+    $size = $1;
   }
 
   $line =~ s/void WHT_(\d+).*/void $call\_$size($interface) {/;
