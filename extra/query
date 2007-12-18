@@ -27,6 +27,13 @@ if __FILE__ == $0
   env = load_runtime_env
   info, plans = load_data(data, env)
 
+  enum = {
+    'right'     => 1,
+    'left'      => 2,
+    'balanced'  => 3,
+    'mixed'     => 4
+  }
+
   case mode
     when 'SELECT'
       # Place header
@@ -47,7 +54,11 @@ if __FILE__ == $0
         node.each do |key,value|
           i = selects.index(key)
           next if i.nil?
-          row[i] = value
+          unless enum[value].nil?
+            row[i] = enum[value]
+          else
+            row[i] = value
+          end
         end
 
         out[oid] = row

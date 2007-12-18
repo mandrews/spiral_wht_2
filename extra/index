@@ -16,19 +16,60 @@ def index(plans)
   return index
 end
 
+def deindex(index)
+  plans = {} 
+  index.each do |k,v|
+    uniq = k.split(/\s*:\s*/)
+    plans[uniq[0]] = v
+  end
+  return plans 
+end
+
+def minmax(plans)
+  plans.each do |k,v|
+    plans[k]["TOT_CYC_min"] = plans[k]["TOT_CYC_mean"] - plans[k]["TOT_CYC_stdev"]
+    plans[k]["TOT_CYC_max"] = plans[k]["TOT_CYC_mean"] + plans[k]["TOT_CYC_stdev"]
+  end
+  return plans
+end
+
+def classify(plans)
+  plans.each do |k,v|
+    info = classify_exec(plans[k]['plan'])
+    plans[k].merge!(info)
+  end
+  return plans
+end
+
+MODES = [ "INDEX", "DEINDEX", "MIN", "MAX", "CLASSIFY" ]
+
 def die
-  puts "query: FILE "
+  puts "query: FILE [#{MODES.join('|')}]"
   exit 1
 end
 
 if __FILE__ == $0
-  die if ARGV.size < 1
+  die if ARGV.size < 2
   data = ARGV[0]
+  mode = ARGV[1]
+
+  die unless MODES.include?(mode)
 
   env = load_runtime_env
   info, plans = load_data(data, env)
 
-  plans = index(plans)
+  case mode
+    when "INDEX"
+      plans = index(plans)
+    when "DEINDEX"
+      plans = deindex(plans)
+    when "MIN" 
+      plans = minmax(plans)
+    when "MAX" 
+      plans = minmax(plans)
+    when "CLASSIFY" 
+      plans = classify(plans)
+  end
 
   save_data(data, env, plans, info)
 end

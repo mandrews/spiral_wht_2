@@ -104,3 +104,24 @@ def measure(plan, *args)
   end
 end
 
+def classify_exec(plan, *args)
+  cmd = "#{CLASSIFY_PATH}/wht_classify -w '#{plan}' #{args}"
+  puts "Executing #{cmd}" if @debug
+  t = 0
+  IO.popen(cmd) do |fd|
+    t = fd.readlines
+  end
+
+  h = {}
+  t.each do |l|
+    k,v = l.split(/\s*:\s*/)
+    h[k] = v.chomp
+  end
+
+  if h.empty?
+    puts("Could not read: #{cmd}") if @debug
+  end
+
+  return h
+end
+
