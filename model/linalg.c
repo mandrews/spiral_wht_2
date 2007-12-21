@@ -67,33 +67,18 @@ matrix_col_copy(struct matrix *a, size_t k, struct matrix *b, size_t l)
 }
 
 void
-matrix_row_add(struct matrix *a, size_t k, double row[], size_t p)
+matrix_row_copy(struct matrix *a, size_t k, struct matrix *b, size_t l)
 {
   size_t n;
   int j;
 
+  assert(a->n == b->n);
+
   n = a->n;
 
-  assert(p == n);
-
   for (j = 0; j < n; j++)
-    matrix_elem(a,k,j) = row[j];
+    matrix_elem(b,l,j) = matrix_elem(a,k,j);
 }
-
-void
-matrix_col_add(struct matrix *a, size_t k, double col[], size_t p)
-{
-  size_t m;
-  int i;
-
-  m = a->m;
-
-  assert(p == m);
-
-  for (i = 0; i < m; i++)
-    matrix_elem(a,i,k) = col[i];
-}
-
 
 struct matrix *
 matrix_transpose(struct matrix *a)

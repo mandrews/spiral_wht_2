@@ -41,7 +41,35 @@ count_set_add(count_set *into, count_set *from)
 }
 
 void
-matrix_add_row_as_count_set(struct matrix *a, size_t k, count_set *r)
+matrix_row_to_count_set(struct matrix *a, size_t k, count_set *r)
+{
+  size_t n, j;
+  count_set_iter i;
+
+  n = a->n;
+
+  assert(k <= n);
+
+  for (j = 0, i = r->begin(); j < n && i != r->end(); j++, i++) 
+    i->second = matrix_elem(a,k,j);
+}
+
+void
+matrix_col_to_count_set(struct matrix *a, size_t k, count_set *r)
+{
+  size_t m, j;
+  count_set_iter i;
+
+  m = a->m;
+
+  assert(k <= m);
+
+  for (j = 0, i = r->begin(); j < m && i != r->end(); j++, i++) 
+    i->second = matrix_elem(a,j,k);
+}
+
+void
+count_set_to_matrix_row(count_set *r, struct matrix *a, size_t k)
 {
   size_t n, j;
   count_set_iter i;
@@ -55,7 +83,7 @@ matrix_add_row_as_count_set(struct matrix *a, size_t k, count_set *r)
 }
 
 void
-col_to_count_set(struct matrix *a, size_t k, count_set *r)
+count_set_to_matrix_col(count_set *r, struct matrix *a, size_t k)
 {
   size_t m, j;
   count_set_iter i;
@@ -65,7 +93,7 @@ col_to_count_set(struct matrix *a, size_t k, count_set *r)
   assert(k <= m);
 
   for (j = 0, i = r->begin(); j < m && i != r->end(); j++, i++) 
-    i->second = matrix_elem(a,j,k);
+    matrix_elem(a,j,k) = i->second;
 }
 
 count_set *
@@ -440,7 +468,7 @@ calc_coeffs()
 
     y = stat->mean;
 
-    matrix_add_row_as_count_set(a, k, counts);
+		count_set_to_matrix_row(counts, a, k);
     matrix_elem(b,k,0) = y;
 
     wht_free(W);
@@ -450,7 +478,7 @@ calc_coeffs()
 
   c = matrix_least_squares_error(a,b);
 
-  col_to_count_set(c,0,coeffs);
+	matrix_col_to_count_set(c,0,coeffs);
 
   matrix_free(a);
   matrix_free(b);
