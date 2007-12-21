@@ -337,26 +337,6 @@ count_set_init()
 }
 
 count_set *
-count_set_init_known()
-{
-  count_set *counts;
-  counts = count_set_init();
-
-#if 1
-  (*counts)["small[1]"] =   8.0;
-  (*counts)["small[2]"] =  25.0;
-  (*counts)["small[3]"] =  67.0;
-  (*counts)["small[4]"] = 190.0;
-  (*counts)["smallil(2)[1]"] =  16.0;
-  (*counts)["smallil(2)[2]"] =  50.0;
-  (*counts)["smallil(2)[3]"] = 154.0;
-  (*counts)["smallil(2)[4]"] = 757.0;
-#endif
-
-  return counts;
-}
-
-count_set *
 ic_counts(Wht *W, size_t max)
 {
   size_t k;
@@ -389,19 +369,6 @@ ic_counts(Wht *W, size_t max)
   return counts;
 }
 
-void
-update_coeffs_with_known(count_set *coeffs, count_set * known)
-{
-  count_set_iter i, j;
-
-  i = known->begin();
-  j = coeffs->begin();
-  for (; i != known->end() && j != known->end(); i++, j++) {
-    if (i->second != 0.0)
-      j->second = i->second;
-  }
-}
-
 count_set *
 calc_coeffs()
 {
@@ -410,55 +377,54 @@ calc_coeffs()
     "small[2]",
     "small[3]",
     "small[4]",
-    "splitil[smallil(2)[1],smallil(2)[1],small[2]]",
-    "splitil[smallil(2)[2],smallil(2)[2],small[2]]",
-    "splitil[smallil(2)[3],smallil(2)[3],small[2]]",
-    "splitil[smallil(2)[4],smallil(2)[4],small[2]]",
-    "splitil[smallil(4)[1],smallil(4)[1],small[2]]",
-    "splitil[smallil(4)[2],smallil(4)[2],small[2]]",
-    "splitil[smallil(4)[3],smallil(4)[3],small[2]]",
-    "splitil[smallil(4)[4],smallil(4)[4],small[2]]",
-    "splitil[smallil(8)[1],smallil(8)[1],small[2]]",
-    "splitil[smallil(8)[2],smallil(8)[2],small[2]]",
-    "splitil[smallil(8)[3],smallil(8)[3],small[2]]",
-    "splitil[smallil(8)[4],smallil(8)[4],small[2]]",
+    "splitil[smallil(2)[1],small[1]]",
+    "splitil[smallil(2)[2],small[1]]",
+    "splitil[smallil(2)[3],small[1]]",
+    "splitil[smallil(2)[4],small[1]]",
+    "splitil[smallil(4)[1],small[1]]",
+    "splitil[smallil(4)[2],small[1]]",
+    "splitil[smallil(4)[3],small[1]]",
+    "splitil[smallil(4)[4],small[1]]",
+    "splitil[smallil(8)[1],small[1]]",
+    "splitil[smallil(8)[2],small[1]]",
+    "splitil[smallil(8)[3],small[1]]",
+    "splitil[smallil(8)[4],small[1]]",
 #if 0
     "smallv(2)[2]",
     "smallv(2)[3]",
     "smallv(2)[4]",
-    "splitil[smallv(2,2,1)[2],smallv(2,2,1)[2],small[1]]",
-    "splitil[smallv(2,2,1)[3],smallv(2,2,1)[3],small[1]]",
-    "splitil[smallv(2,2,1)[4],smallv(2,2,1)[4],small[1]]",
-    "splitil[smallv(2,4,1)[2],smallv(2,4,1)[2],small[2]]",
-    "splitil[smallv(2,4,1)[3],smallv(2,4,1)[3],small[2]]",
-    "splitil[smallv(2,4,1)[4],smallv(2,4,1)[4],small[2]]",
-    "splitil[smallv(2,8,1)[2],smallv(2,8,1)[2],small[3]]",
-    "splitil[smallv(2,8,1)[3],smallv(2,8,1)[3],small[3]]",
-    "splitil[smallv(2,8,1)[4],smallv(2,8,1)[4],small[3]]",
+    "splitil[smallv(2,2,1)[2],small[1]]",
+    "splitil[smallv(2,2,1)[3],small[1]]",
+    "splitil[smallv(2,2,1)[4],small[1]]",
+    "splitil[smallv(2,4,1)[2],small[1]]",
+    "splitil[smallv(2,4,1)[3],small[1]]",
+    "splitil[smallv(2,4,1)[4],small[1]]",
+    "splitil[smallv(2,8,1)[2],small[1]]",
+    "splitil[smallv(2,8,1)[3],small[1]]",
+    "splitil[smallv(2,8,1)[4],small[1]]",
 #endif
-    "split[small[2],small[2],small[2]]",
-    "split[split[small[2]],small[2],split[small[2]]]",
-    "split[small[2],split[small[2],small[2]]]",
-    "split[split[small[2],small[2]],small[2]]",
-    "splitil[small[2],small[2],small[2]]",
-    "splitil[splitil[small[2]],small[2],splitil[small[2]]]",
-    "splitil[small[2],splitil[small[2],small[2]]]",
-    "splitil[splitil[small[2],small[2]],small[2]]",
+    "split[small[1],small[1],small[1]]",
+    "split[split[small[1]],small[1],split[small[1]]]",
+    "split[small[1],split[small[1],small[1]]]",
+    "split[split[small[1],small[1]],small[1]]",
+    "splitil[small[1],small[1],small[1]]",
+    "splitil[splitil[small[1]],small[1],splitil[small[1]]]",
+    "splitil[small[1],splitil[small[1],small[1]]]",
+    "splitil[splitil[small[1],small[1]],small[1]]",
     NULL
   };
 
   char **elem;
   size_t max, k, m;
   struct stat *stat;
-  count_set *counts, *coeffs, *known;
+  count_set *counts, *coeffs;
   struct matrix *a, *b, *c;
-  double y, d;
+  double y;
   Wht *W;
 
   max = 4;
 
   coeffs = count_set_init();
-  known  = count_set_init_known();
 
   m = coeffs->size();
 
@@ -470,12 +436,9 @@ calc_coeffs()
     
     counts = ic_counts(W, max);
 
-    d = ic_predict(counts, known);
-
-    stat = measure(W, "PAPI", "TOT_INS", true, 1);
+    stat = measure(W, "PAPI", "TOT_INS", true, 1, 1);
 
     y = stat->mean;
-    y -= d;
 
     matrix_add_row_as_count_set(a, k, counts);
     matrix_elem(b,k,0) = y;
@@ -489,13 +452,9 @@ calc_coeffs()
 
   col_to_count_set(c,0,coeffs);
 
-  update_coeffs_with_known(coeffs, known);
-
   matrix_free(a);
   matrix_free(b);
   matrix_free(c);
-
-  delete known;
 
   return coeffs;
 }
@@ -537,7 +496,7 @@ main()
 
   plan = (char *) malloc(sizeof(char) * 255);
 
-  while (gets(plan) != NULL) {
+  while (fgets(plan, 255, stdin) != NULL) {
 
     W = wht_parse(plan);
 
