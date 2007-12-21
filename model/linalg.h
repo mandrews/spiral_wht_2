@@ -1,6 +1,8 @@
 #ifndef LINALG_H
 #define LINALG_H
 
+#include <stdlib.h>
+
 struct matrix {
   double *v;
   size_t m;

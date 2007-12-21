@@ -4,109 +4,22 @@ extern "C" {
 #include "linalg.h"
 }
 
-#include <stdlib.h>
-
-#include <string>
-#include <map>
-#include <vector>
-
-using std::string;
-using std::vector;
-using std::map;
-
-/* Annotated matrix */
-
-typedef map<const string, double> count_set;
-typedef map<const string, double>::iterator count_set_iter;
+#include "labeled_vector.h"
 
 double
-ic_predict(count_set *counts, count_set *coeffs);
+ic_predict(labeled_vector *counts, labeled_vector *coeffs);
 
-void
-count_set_merge(count_set *into, count_set *from)
-{
-  count_set_iter i;
-
-  for (i = from->begin(); i != from->end(); i++)
-    (*into)[i->first] = i->second;
-}
-
-void
-count_set_add(count_set *into, count_set *from)
-{
-  count_set_iter i;
-
-  for (i = from->begin(); i != from->end(); i++)
-    (*into)[i->first] += i->second;
-}
-
-void
-matrix_row_to_count_set(struct matrix *a, size_t k, count_set *r)
-{
-  size_t n, j;
-  count_set_iter i;
-
-  n = a->n;
-
-  assert(k <= n);
-
-  for (j = 0, i = r->begin(); j < n && i != r->end(); j++, i++) 
-    i->second = matrix_elem(a,k,j);
-}
-
-void
-matrix_col_to_count_set(struct matrix *a, size_t k, count_set *r)
-{
-  size_t m, j;
-  count_set_iter i;
-
-  m = a->m;
-
-  assert(k <= m);
-
-  for (j = 0, i = r->begin(); j < m && i != r->end(); j++, i++) 
-    i->second = matrix_elem(a,j,k);
-}
-
-void
-count_set_to_matrix_row(count_set *r, struct matrix *a, size_t k)
-{
-  size_t n, j;
-  count_set_iter i;
-
-  n = a->n;
-
-  assert(k <= n);
-
-  for (j = 0, i = r->begin(); j < n && i != r->end(); j++, i++) 
-    matrix_elem(a,k,j) = i->second;
-}
-
-void
-count_set_to_matrix_col(count_set *r, struct matrix *a, size_t k)
-{
-  size_t m, j;
-  count_set_iter i;
-
-  m = a->m;
-
-  assert(k <= m);
-
-  for (j = 0, i = r->begin(); j < m && i != r->end(); j++, i++) 
-    matrix_elem(a,j,k) = i->second;
-}
-
-count_set *
+labeled_vector *
 alpha_n(Wht *W)
 {
   Wht *Wi;
   size_t n, ni, nn, i;
-  count_set *counts, *tmp_counts;
+  labeled_vector *counts, *tmp_counts;
   string key;
 
-  count_set_iter j;
+  labeled_vector_iter j;
 
-  counts = new count_set();
+  counts = new labeled_vector();
 
   if (W->children == NULL)
     return counts;
@@ -146,18 +59,18 @@ small_to_key(Wht *W)
   return key;
 }
 
-count_set *
+labeled_vector *
 alpha_k(Wht *W, size_t k)
 {
   Wht *Wi;
   size_t n, ni, nn;
   int i;
-  count_set *counts, *tmp_counts;
+  labeled_vector *counts, *tmp_counts;
   string key;
 
-  count_set_iter j;
+  labeled_vector_iter j;
 
-  counts = new count_set();
+  counts = new labeled_vector();
 
   if (W->children == NULL) {
     key = small_to_key(W);
@@ -194,19 +107,19 @@ alpha_k(Wht *W, size_t k)
   return counts;
 }
 
-count_set *
+labeled_vector *
 beta_1(Wht *W)
 {
 
   Wht *Wi;
   size_t n, ni, nn;
   int i;
-  count_set *counts, *tmp_counts;
+  labeled_vector *counts, *tmp_counts;
   string key;
 
-  count_set_iter j;
+  labeled_vector_iter j;
 
-  counts = new count_set();
+  counts = new labeled_vector();
 
   if (W->children == NULL)
     return counts;
@@ -234,18 +147,18 @@ beta_1(Wht *W)
   return counts;
 }
 
-count_set *
+labeled_vector *
 beta_2(Wht *W)
 {
   Wht *Wi;
   size_t n, ni, nj, nn;
   int i;
-  count_set *counts, *tmp_counts;
+  labeled_vector *counts, *tmp_counts;
   string key;
 
-  count_set_iter j;
+  labeled_vector_iter j;
 
-  counts = new count_set();
+  counts = new labeled_vector();
 
   if (W->children == NULL)
     return counts;
@@ -275,18 +188,18 @@ beta_2(Wht *W)
   return counts;
 }
 
-count_set *
+labeled_vector *
 beta_3(Wht *W)
 {
   Wht *Wi;
   size_t n, ni, nn;
   int i;
-  count_set *counts, *tmp_counts;
+  labeled_vector *counts, *tmp_counts;
   string key;
 
-  count_set_iter j;
+  labeled_vector_iter j;
 
-  counts = new count_set();
+  counts = new labeled_vector();
 
   if (W->children == NULL)
     return counts;
@@ -316,11 +229,11 @@ beta_3(Wht *W)
   return counts;
 }
 
-count_set *
-count_set_init()
+labeled_vector *
+labeled_vector_init()
 {
-  count_set *counts;
-  counts = new count_set();
+  labeled_vector *counts;
+  counts = new labeled_vector();
 
   (*counts)["small[1]"] = 0.0;
   (*counts)["small[2]"] = 0.0;
@@ -364,40 +277,40 @@ count_set_init()
   return counts;
 }
 
-count_set *
+labeled_vector *
 ic_counts(Wht *W, size_t max)
 {
   size_t k;
-  count_set *counts, *tmp_counts;
+  labeled_vector *counts, *tmp_counts;
 
-  counts = count_set_init();
+  counts = labeled_vector_init();
 
   tmp_counts = alpha_n(W);
-  count_set_add(counts, tmp_counts);
+  labeled_vector_add(counts, tmp_counts);
   delete tmp_counts;
 
   tmp_counts = beta_1(W);
-  count_set_add(counts, tmp_counts);
+  labeled_vector_add(counts, tmp_counts);
   delete tmp_counts;
 
   tmp_counts = beta_2(W);
-  count_set_add(counts, tmp_counts);
+  labeled_vector_add(counts, tmp_counts);
   delete tmp_counts;
 
   tmp_counts = beta_3(W);
-  count_set_add(counts, tmp_counts);
+  labeled_vector_add(counts, tmp_counts);
   delete tmp_counts;
 
   for (k = 1; k <= max; k++) {
     tmp_counts = alpha_k(W,k);
-    count_set_add(counts, tmp_counts);
+    labeled_vector_add(counts, tmp_counts);
     delete tmp_counts;
   }
 
   return counts;
 }
 
-count_set *
+labeled_vector *
 calc_coeffs()
 {
   char *basis[] = {
@@ -445,14 +358,14 @@ calc_coeffs()
   char **elem;
   size_t max, k, m;
   struct stat *stat;
-  count_set *counts, *coeffs;
+  labeled_vector *counts, *coeffs;
   struct matrix *a, *b, *c;
   double y;
   Wht *W;
 
   max = 4;
 
-  coeffs = count_set_init();
+  coeffs = labeled_vector_init();
 
   m = coeffs->size();
 
@@ -468,7 +381,7 @@ calc_coeffs()
 
     y = stat->mean;
 
-		count_set_to_matrix_row(counts, a, k);
+		labeled_vector_to_matrix_row(counts, a, k);
     matrix_elem(b,k,0) = y;
 
     wht_free(W);
@@ -478,7 +391,7 @@ calc_coeffs()
 
   c = matrix_least_squares_error(a,b);
 
-	matrix_col_to_count_set(c,0,coeffs);
+	matrix_col_to_labeled_vector(c,0,coeffs);
 
   matrix_free(a);
   matrix_free(b);
@@ -488,9 +401,9 @@ calc_coeffs()
 }
 
 double
-ic_predict(count_set *counts, count_set *coeffs)
+ic_predict(labeled_vector *counts, labeled_vector *coeffs)
 {
-  count_set_iter i, j;
+  labeled_vector_iter i, j;
   double sum;
 
   i = counts->begin();
@@ -509,9 +422,9 @@ main()
 {
   Wht *W;
   char *plan;
-  count_set *counts;
-  count_set_iter i;
-  count_set *coeffs;
+  labeled_vector *counts;
+  labeled_vector_iter i;
+  labeled_vector *coeffs;
 
   coeffs = calc_coeffs();
 
