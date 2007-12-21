@@ -6,7 +6,7 @@
 #ifndef	PAPI_UTILS_H
 #define PAPI_UTILS_H
 
-#include <papi.h>
+#include "papi.h"
 
 #include "wht.h"
 #include "stat.h"

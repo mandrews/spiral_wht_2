@@ -1,29 +1,24 @@
-if PAPI_MEASURE
+if HAVE_PAPI
 OPT_SUBDIRS = papi
-OPT_CPPLAGS = -I $(PAPI_PATH)/include
+OPT_LIBADDS = $(top_builddir)/measure/papi/libpapi_utils.la
 else
 OPT_SUBDIRS =
-OPT_CPPLAGS = 
+OPT_LIBADDS  = 
 endif
 
 SUBDIRS = $(OPT_SUBDIRS)
 
-AM_CPPFLAGS = -I$(top_srcdir)/wht -I$(top_srcdir)/measure/papi $(OPT_CPPLAGS)
+AM_CPPFLAGS = -I$(top_srcdir)/wht 
 
 noinst_LTLIBRARIES = libmeasure.la
 
 libmeasure_la_SOURCES = stat.h stat.c measure.c measure.h invnorm.c
 
-libmeasure_la_LIBADD  = $(top_builddir)/wht/libwht.la \
-	$(top_builddir)/measure/papi/libpapi_utils.la
-
+libmeasure_la_LIBADD  = $(top_builddir)/wht/libwht.la $(OPT_LIBADDS)
 
 bin_PROGRAMS = wht_measure
 
 wht_measure_SOURCES = main.c
 
-wht_measure_LDADD = libmeasure.la \
-	$(PAPI_PATH)/lib/libpapi.so
+wht_measure_LDADD = libmeasure.la 
 
-# This hard codes the papi library path into the executable
-wht_measure_LDFLAGS = -rpath $(PAPI_PATH)/lib

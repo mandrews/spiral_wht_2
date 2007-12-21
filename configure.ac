@@ -1,5 +1,5 @@
 #  Process this file with autoconf to produce a configure script.
-AC_INIT(spiral_wht, 2.0-pre-3, mjand@drexel.edu)
+AC_INIT([spiral_wht],[2.0-pre-3],[mjand@drexel.edu])
 AC_CONFIG_HEADERS([config.h])
 
 AM_INIT_AUTOMAKE(1.9)
@@ -12,8 +12,8 @@ AC_CANONICAL_HOST
 # 
 #  M A I N T A I N E R   P A R A M E T E R S
 # 
-MAX_UNROLL_PKG=8
-MAX_INTERLEAVE_PKG=4
+MAX_UNROLL_PKG=4
+MAX_INTERLEAVE_PKG=3
 MAX_VECTOR_PKG=2
 
 AC_SUBST(MAX_UNROLL_PKG)
@@ -25,7 +25,7 @@ AC_SUBST(MAX_VECTOR_PKG)
 # 
 #  D E F A U L T   P A R A M E T E R S
 # 
-MAX_UNROLL=6
+MAX_UNROLL=4
 MAX_INTERLEAVE=0
 VECTOR_SIZE=0
 
@@ -37,7 +37,7 @@ fi
 #  T R A N S F O R M   T Y P E
 # 
 AC_ARG_ENABLE([double], 
-  [AC_HELP_STRING([--enable-double], 
+  [AS_HELP_STRING([--enable-double],
     [compile with double precision floating point (default is enabled) ])], 
   [ok=$enableval], 
   [ok=yes])
@@ -50,8 +50,8 @@ if test "$ok" = "yes"; then
 fi
 
 AC_ARG_ENABLE([float], 
-  [AC_HELP_STRING([--enable-float], 
-    [compile wht with single precision floating point (default is disabled)])], 
+  [AS_HELP_STRING([--enable-float],
+   [compile wht with single precision floating point (default is disabled)])], 
   [ok=$enableval], 
   [ok=no])
 
@@ -72,7 +72,7 @@ fi
 #  M A X    C O D E L E T    S I Z E
 # 
 AC_ARG_ENABLE([max_unroll], 
-  [AC_HELP_STRING([--enable-max-unroll=N], 
+  [AS_HELP_STRING([--enable-max-unroll=N],
     [maximum unrolled codelet size (default is 6)])],
   [max_unroll=$enableval], 
   [max_unroll=$MAX_UNROLL])
@@ -90,7 +90,7 @@ AC_DEFINE_UNQUOTED(WHT_MAX_UNROLL,$max_unroll,
 #  M A X   I N T E R L E A V E    F A C T O R 
 # 
 AC_ARG_ENABLE([interleave], 
-  [AC_HELP_STRING([--enable-interleave=K], 
+  [AS_HELP_STRING([--enable-interleave=K],
     [interleave 2^K loop iterations in codelet (default is disabled)])],
   [interleave=$enableval], 
   [interleave=$MAX_INTERLEAVE])
@@ -108,7 +108,7 @@ AC_DEFINE_UNQUOTED(WHT_MAX_INTERLEAVE,$interleave,
 #  V E C T O R I Z A T I O N
 # 
 AC_ARG_ENABLE([sse], 
-  [AC_HELP_STRING([--enable-sse],
+  [AS_HELP_STRING([--enable-sse],
     [enable SSE optimizations (default is disabled)])], 
   [have_sse=$enableval], 
   [have_sse=no])
@@ -128,7 +128,7 @@ if test "$have_sse" = "yes"; then
 fi
 
 AC_ARG_ENABLE([sse2], 
-  [AC_HELP_STRING([--enable-sse2],
+  [AS_HELP_STRING([--enable-sse2],
     [enable SSE2 optimizations (default is disabled)])], 
   [have_sse2=$enableval], 
   [have_sse2=no])
@@ -148,39 +148,39 @@ if test "$have_sse2" = "yes"; then
   VECTOR_SIZE=2
 
 fi
-AC_DEFINE_UNQUOTED(WHT_VECTOR_SIZE,$VECTOR_SIZE,
-  [Size of vector to use.])
+
+AC_DEFINE_UNQUOTED(WHT_VECTOR_SIZE,$VECTOR_SIZE, [Size of vector to use.])
+
+# Checks for library functions.
+AC_FUNC_MALLOC
+AC_FUNC_REALLOC
+AC_CHECK_FUNCS([memset strdup])
+AC_SEARCH_LIBS([sqrtl],[m],[], AC_MSG_ERROR([required sqrtl symbol not found]))
+AC_SEARCH_LIBS([ceil],[m],[], AC_MSG_ERROR([required ceil symbol not found]))
 
 
 # 
 #  P A P I    M E A S U R E
 # 
 AC_ARG_WITH([papi], 
-  [AC_HELP_STRING([--with-papi=PATH],
+  [AS_HELP_STRING([--with-papi=PATH],
     [compile with PAPI support, PATH is location of PAPI install])], 
   [papi_path=$withval], 
   [papi_path="no"])
 
-AM_CONDITIONAL(PAPI_MEASURE, test "$papi_path" != "no")
+AM_CONDITIONAL(HAVE_PAPI, test "$papi_path" != "no")
 
-PAPI_PATH=$papi_path
-AC_SUBST(PAPI_PATH)
+if test "$papi_path" != "no"; then
+  LDFLAGS="$LDFLAGS -L$papi_path/lib"
+  CPPFLAGS="$CPPFLAGS -I$papi_path/include"
 
-AC_ARG_ENABLE([cache-size-kb], 
-  [AC_HELP_STRING([--enable-cache-size-kb=KB)],
-    [size of L2 cache in KB (default is 8 KB)])], 
-  [cache_size_kb=$enableval], 
-  [cache_size_kb=8])
+  AC_DEFINE(HAVE_PAPI, [], [Compile with PAPI] )
 
-CACHE_SIZE_KB=$cache_size_kb
-AC_SUBST(CACHE_SIZE_KB)
+  AC_CHECK_HEADER([papi.h],[],
+    AC_MSG_ERROR([required header file for --with-papi not found]))
 
-#  TODO not sure why this doesn't work
-#  if test "$enable_papi" = "yes"; then
-#    AC_CHECK_HEADERS("$PAPI_PATH/include/papi.h",,
-#      AC_MSG_ERROR([required header file for --enable-papi not found]))
-#  fi
-
+  LIBS="$LIBS -lpapi"
+fi
 
 #  Checks for programs.
 AC_PROG_CC
@@ -215,14 +215,6 @@ AC_TYPE_UINT16_T
 AC_TYPE_UINT32_T
 AC_TYPE_UINT8_T
 AC_C_VOLATILE
-
-# Checks for library functions.
-AC_FUNC_MALLOC
-AC_FUNC_REALLOC
-AC_CHECK_FUNCS([memset strdup])
-AC_SEARCH_LIBS([sqrtl],[m],[], AC_MSG_ERROR([required sqrtl symbol not found]))
-AC_SEARCH_LIBS([ceil],[m],[], AC_MSG_ERROR([required ceil symbol not found]))
-
 
 #  Add gcc warnings, in maintainer mode only
 if test "$USE_MAINTAINER_MODE" = yes; then
