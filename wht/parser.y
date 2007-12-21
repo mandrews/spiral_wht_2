@@ -65,8 +65,6 @@ struct Wht *wht_root;
 %type <Ws> nodes 
 %type <Ps> params
 
-/* %destructor { wht_free($$); } IDENT */
-
 %start node
 
 %%
