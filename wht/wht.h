@@ -161,6 +161,7 @@ struct split_children {
  */
 typedef struct {
   char    name[MAX_CODELET_NAME_SIZE];
+  /* XXX add entry for storing parameters */
   size_t  params;
   codelet_transform_fp call;
 } codelet_transform_entry;
