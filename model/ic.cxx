@@ -355,7 +355,7 @@ calc_coeffs()
     NULL
   };
 
-  char **elem;
+  char **plan;
   size_t max, k, m;
   struct stat *stat;
   labeled_vector *counts, *coeffs;
@@ -372,8 +372,8 @@ calc_coeffs()
   a = matrix_init(m,m);
   b = matrix_init(m,1);
 
-  for (elem = basis, k = 0; *elem != NULL; elem++, k++) {
-    W = wht_parse(*elem);
+  for (plan = basis, k = 0; *plan != NULL; plan++, k++) {
+    W = wht_parse(*plan);
     
     counts = ic_counts(W, max);
 

@@ -1,7 +1,7 @@
 %{
 #include <stdlib.h>
 #include <stdio.h>
-#include <strings.h>
+#include <string.h>
 
 #include "store.h"
 
@@ -12,12 +12,12 @@ elem *elem_root;
 
 %union {
   struct elem      *elem_type;
-  char              *c_str_type;
+  char             *cstr_type;
 }
 
 /* union type             token */
-%token <c_str_type>       STRING_TOKEN
-%token <null_type>        NULL_TOKEN
+%token <cstr_type>       TEXT_TOKEN
+%token <nil_type>        NIL_TOKEN
 
 /* union type             rule */
 %type <elem_type>         elem
@@ -26,9 +26,9 @@ elem *elem_root;
 %type <elem_type>         hash_pair
 %type <elem_type>         list
 %type <elem_type>         list_elems
-%type <elem_type>         string
-%type <elem_type>         null
-%type <c_str_type>        key
+%type <elem_type>         text
+%type <elem_type>         nil
+%type <cstr_type>         key
 
 %start elem 
 
@@ -45,12 +45,12 @@ elem:
       $$ = $1;
       elem_root = $$;
     }
-  | string
+  | text
     {
       $$ = $1;
       elem_root = $$;
     }
-  | null
+  | nil
     {
       $$ = $1;
       elem_root = $$;
@@ -92,16 +92,16 @@ hash_pair:
   ;
 
 key:
-    '"' STRING_TOKEN  '"'
+    '"' TEXT_TOKEN  '"'
     {
       $$ = $2;
     }
   ;
 
-string:
-    '"' STRING_TOKEN  '"'
+text:
+    '"' TEXT_TOKEN  '"'
     {
-      $$ = string_init($2);
+      $$ = text_init($2);
       // free($2);
     }
   ;
@@ -132,10 +132,10 @@ list_elems:
     }
   ;
 
-null:
-    NULL_TOKEN
+nil:
+    NIL_TOKEN
     {
-      $$ = null_init();
+      $$ = nil_init();
     }
   ;
 

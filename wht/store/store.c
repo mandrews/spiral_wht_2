@@ -8,7 +8,6 @@
 const size_t INDENT = 2;
 
 /* Internal forward declarations */
-
 elem * elem_init_abstract();
 elem * elem_copy_dispatch(elem *e);
 void elem_free_abstract(elem *e);
@@ -28,6 +27,7 @@ char * hash_to_s_indent(hash *h, size_t indent);
 pair * list_find_pair(list *l, size_t index);
 char * list_to_s_indent(list *l, size_t indent);
 
+#if 0
 char * 
 itoa(int i)
 {
@@ -43,6 +43,7 @@ itoa(int i)
 
   return buf;
 }
+#endif
 
 elem * 
 elem_init_abstract()
@@ -65,10 +66,10 @@ elem_copy_dispatch(elem *e)
       return hash_copy(e);
     case LIST_TYPE:
       return list_copy(e);
-    case STRING_TYPE:
-      return string_copy(e);
-    case NULL_TYPE:
-      return null_init();
+    case TEXT_TYPE:
+      return text_copy(e);
+    case NIL_TYPE:
+      return nil_init();
     default:
       assert(false);
   }
@@ -114,11 +115,11 @@ elem_free_dispatch(elem *e)
     case LIST_TYPE:
       list_free(e);
       break;
-    case STRING_TYPE:
-      string_free(e);
+    case TEXT_TYPE:
+      text_free(e);
       break;
-    case NULL_TYPE:
-      null_free(e);
+    case NIL_TYPE:
+      nil_free(e);
       break;
     default:
       assert(false);
@@ -139,10 +140,10 @@ elem_to_s_dispatch(elem *e, size_t indent)
       return hash_to_s_indent(e, indent);
     case LIST_TYPE:
       return list_to_s_indent(e, indent);
-    case STRING_TYPE:
-      return string_to_s(e);
-    case NULL_TYPE:
-      return null_to_s(e);
+    case TEXT_TYPE:
+      return text_to_s(e);
+    case NIL_TYPE:
+      return nil_to_s(e);
     default:
       assert(false);
   }
@@ -282,95 +283,95 @@ pair_to_s_indent(pair *p, size_t indent)
   return buf;
 }
 
-null * 
-null_init()
+nil * 
+nil_init()
 {
   elem *e;
 
   e = elem_init_abstract();
-  e->type = NULL_TYPE;
+  e->type = NIL_TYPE;
 
   return e;
 }
 
-null *
-null_copy(null *n)
+nil *
+nil_copy(nil *n)
 {
-  assert(n->type == NULL_TYPE);
-  return null_init();
+  assert(n->type == NIL_TYPE);
+  return nil_init();
 }
 
 void 
-null_free(null *n)
+nil_free(nil *n)
 {
   if (n == NULL)
     return;
 
-  assert(n->type == NULL_TYPE);
+  assert(n->type == NIL_TYPE);
   elem_free_abstract(n);
 }
 
 char *
-null_to_s(null *n)
+nil_to_s(nil *n)
 {
-  assert(n->type == NULL_TYPE);
-  return strdup("null");
+  assert(n->type == NIL_TYPE);
+  return strdup("nil");
 }
 
 /*
- * S T R I N G
+ * T E X T
  */
 
-string * 
-string_init(char *s)
+text * 
+text_init(char *s)
 {
   elem *e;
 
   e = elem_init_abstract();
-  e->data->string = strdup(s);
-  e->type = STRING_TYPE;
+  e->data->text = strdup(s);
+  e->type = TEXT_TYPE;
 
   return e;
 }
 
-string *
-string_copy(string *s)
+text *
+text_copy(text *s)
 {
-  assert(s->type == STRING_TYPE);
-  return string_init(s->data->string);
+  assert(s->type == TEXT_TYPE);
+  return text_init(s->data->text);
 }
 
 void 
-string_free(string *s)
+text_free(text *s)
 {
   if (s == NULL)
     return;
 
-  assert(s->type == STRING_TYPE);
+  assert(s->type == TEXT_TYPE);
 
   /* NOTE: Import that this free'd first */
-  if (s->data->string != NULL)
-    free(s->data->string);
+  if (s->data->text != NULL)
+    free(s->data->text);
 
   elem_free_abstract(s);
 }
 
 char *
-string_to_s(string *s)
+text_to_s(text *s)
 {
-  assert(s->type == STRING_TYPE);
+  assert(s->type == TEXT_TYPE);
 
   char *buf;
   size_t m, n;
 
-  m = strlen(s->data->string);
+  m = strlen(s->data->text);
   n = 3 /*"X"\0*/;
   buf = malloc(sizeof(char) * (m + n));
 
   strcpy(buf, "\"");
 
-  if (s->data->string != NULL) 
-    strcat(buf, s->data->string);
+  if (s->data->text != NULL) 
+    strcat(buf, s->data->text);
 
   strcat(buf, "\"");
 
@@ -503,11 +504,11 @@ hash_merge(hash *dst, hash *src)
 list * 
 list_init(size_t size)
 {
-  null *n;
+  nil *n;
   list *l;
   size_t i;
 
-  n = null_init();
+  n = nil_init();
   l = elem_init_abstract();
   l->type = LIST_TYPE;
 
@@ -515,7 +516,7 @@ list_init(size_t size)
   for (i = 0; i < size; i++)
     list_insert(l, i, n);
 
-  null_free(n);
+  nil_free(n);
 
   return l;
 }

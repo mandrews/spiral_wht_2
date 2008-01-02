@@ -8,18 +8,18 @@
 typedef struct elem elem;
 typedef struct pair pair;
 
-typedef elem string;
+typedef elem text;
 typedef elem hash;
 typedef elem list;
-typedef elem null;
+typedef elem nil;
 
-enum type { NULL_TYPE = 0, STRING_TYPE = 1, HASH_TYPE = 2, LIST_TYPE = 3};
+enum type { NIL_TYPE = 0, TEXT_TYPE = 1, HASH_TYPE = 2, LIST_TYPE = 3};
 
 struct elem {
   enum type type;
 
   union {
-    char   *string;
+    char   *text;
   } *data;
 
   size_t size;
@@ -29,7 +29,7 @@ struct elem {
 struct pair {
   char   *key;
   int     index;
-  elem   *elem;
+  struct elem   *elem;
 
   UT_hash_handle hh;
 };
@@ -37,15 +37,15 @@ struct pair {
 void elem_free(elem *e);
 char * elem_to_s(elem *e);
 
-null * null_init();
-null * null_copy(null *n);
-void null_free(null *n);
-char * null_to_s(null *n);
+nil * nil_init();
+nil * nil_copy(nil *n);
+void nil_free(nil *n);
+char * nil_to_s(nil *n);
 
-string * string_init(char *s);
-string * string_copy(string *s);
-void string_free(string *s);
-char * string_to_s(string *s);
+text * text_init(char *s);
+text * text_copy(text *s);
+void text_free(text *s);
+char * text_to_s(text *s);
 
 hash * hash_init();
 hash * hash_copy(hash *h);
