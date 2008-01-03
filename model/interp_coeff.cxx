@@ -7,11 +7,14 @@ extern "C" {
 #include "labeled_vector.h"
 #include "ic_count.h"
 
+using std::cout;
+using std::endl;
+
 void 
 interp_coeff(labeled_vector *basis, labeled_vector *count)
 {
   labeled_vector *coeffs, *counts;
-  labeled_vector::iterator i;
+  labeled_vector_iter i;
   size_t k, m, max;
   struct matrix *a, *b, *c;
   char *tmp;
@@ -32,6 +35,7 @@ interp_coeff(labeled_vector *basis, labeled_vector *count)
     counts = ic_count(W, basis, max);
 
     labeled_vector_to_matrix_row(counts, a, k);
+
     matrix_elem(b,k,0) = i->second;
 
     wht_free(W);
