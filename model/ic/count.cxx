@@ -1,5 +1,8 @@
 #include "count.h"
 
+#include <sstream>
+#include <string>
+
 string 
 small_to_key(Wht *W)
 {
@@ -226,21 +229,14 @@ beta_3(Wht *W)
 
 counts::counts(size_t max)
 {
-#if 0
   size_t i;
 
-  for (i = 1; i <= max; i++)
-    this[string("small[") + string(i) + string("]")] = 0.0;
-#endif
+  for (i = 1; i <= max; i++) {
+    std::ostringstream key;
+    key  << "small[" << i << "]";
+    (*this)[key.str()] = 0.0;
+  }
 
-  (*this)["small[1]"] = 0.0;
-  (*this)["small[2]"] = 0.0;
-  (*this)["small[3]"] = 0.0;
-  (*this)["small[4]"] = 0.0;
-  (*this)["small[5]"] = 0.0;
-  (*this)["small[6]"] = 0.0;
-  (*this)["small[7]"] = 0.0;
-  (*this)["small[8]"] = 0.0;
   (*this)["split_alpha"] = 0.0;
   (*this)["split_beta_1"] = 0.0;
   (*this)["split_beta_2"] = 0.0;
