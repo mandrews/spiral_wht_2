@@ -7,7 +7,7 @@ AM_LFLAGS = --header-file=scanner.h
 AM_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/wht/codelets
 
 
-SUBDIRS = codelets store
+SUBDIRS = codelets 
 
 lib_LTLIBRARIES = libwht.la
 

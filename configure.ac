@@ -233,12 +233,12 @@ AC_DEFINE_UNQUOTED(WHT_CFLAGS,"$CFLAGS",
 AC_CONFIG_FILES([
    Makefile
    wht/Makefile
-   wht/store/Makefile
    wht/codelets/Makefile
    measure/Makefile
    measure/papi/Makefile
    search/Makefile
    model/Makefile
+   model/ic/Makefile
    utils/Makefile
    tests/Makefile
 ])
