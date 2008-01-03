@@ -1,5 +1,4 @@
 #include "count.h"
-#include "labeled_vector.h"
 
 string 
 small_to_key(Wht *W)
@@ -13,20 +12,20 @@ small_to_key(Wht *W)
   return key;
 }
 
-labeled_vector *
+counts *
 alpha_n(Wht *W)
 {
   Wht *Wi;
   size_t n, ni, nn, i;
-  labeled_vector *counts, *tmp_counts;
+  counts *x, *t;
   string key;
 
-  labeled_vector_iter j;
+  counts_iter j;
 
-  counts = new labeled_vector();
+  x = new counts();
 
   if (W->children == NULL)
-    return counts;
+    return x;
 
   n  = W->n;
   nn = W->children->nn;
@@ -34,45 +33,45 @@ alpha_n(Wht *W)
   key.append(W->name);
   key.append("_alpha");
 
-  (*counts)[key] = 1;
+  (*x)[key] = 1;
 
   for (i = 0; i < nn; i++) {
     Wi = W->children->Ws[i];
     ni = Wi->n;
 
-    tmp_counts = alpha_n(Wi);
+    t = alpha_n(Wi);
 
-    for (j = tmp_counts->begin(); j != tmp_counts->end(); j++) 
-      (*counts)[j->first] += ((1 << (n - ni)) * (*tmp_counts)[j->first]);
+    for (j = t->begin(); j != t->end(); j++) 
+      (*x)[j->first] += ((1 << (n - ni)) * (*t)[j->first]);
 
-    delete tmp_counts;
+    delete t;
   }
 
-  return counts;
+  return x;
 }
 
-labeled_vector *
+counts *
 alpha_k(Wht *W, size_t k)
 {
   Wht *Wi;
   size_t n, ni, nn;
   int i;
-  labeled_vector *counts, *tmp_counts;
+  counts *x, *t;
   string key;
 
-  labeled_vector_iter j;
+  counts_iter j;
 
-  counts = new labeled_vector();
+  x = new counts();
 
   if (W->children == NULL) {
     key = small_to_key(W);
 
     if (W->n == (int) k)
-      (*counts)[key] = 1;
+      (*x)[key] = 1;
     else
-      (*counts)[key] = 0;
+      (*x)[key] = 0;
 
-    return counts;
+    return x;
   }
 
   n  = W->n;
@@ -82,7 +81,7 @@ alpha_k(Wht *W, size_t k)
     Wi = W->children->Ws[i];
     ni = Wi->n;
 
-    tmp_counts = alpha_k(Wi,k);
+    t = alpha_k(Wi,k);
 
     int il = 1;
 #if 1
@@ -90,31 +89,31 @@ alpha_k(Wht *W, size_t k)
       il = Wi->attr[interleave_by];
 #endif
 
-    for (j = tmp_counts->begin(); j != tmp_counts->end(); j++) 
-      (*counts)[j->first] += (((1 << (n - ni)) * j->second) / il);
+    for (j = t->begin(); j != t->end(); j++) 
+      (*x)[j->first] += (((1 << (n - ni)) * j->second) / il);
 
-    delete tmp_counts;
+    delete t;
   }
 
-  return counts;
+  return x;
 }
 
-labeled_vector *
+counts *
 beta_1(Wht *W)
 {
 
   Wht *Wi;
   size_t n, ni, nn;
   int i;
-  labeled_vector *counts, *tmp_counts;
+  counts *x, *t;
   string key;
 
-  labeled_vector_iter j;
+  counts_iter j;
 
-  counts = new labeled_vector();
+  x = new counts();
 
   if (W->children == NULL)
-    return counts;
+    return x;
 
   n  = W->n;
   nn = W->children->nn;
@@ -122,38 +121,38 @@ beta_1(Wht *W)
   key.append(W->name);
   key.append("_beta_1");
 
-  (*counts)[key] = nn;
+  (*x)[key] = nn;
 
   for (i = nn - 1; i >= 0; i--) {
     Wi = W->children->Ws[i];
     ni = Wi->n;
 
-    tmp_counts = beta_1(Wi);
+    t = beta_1(Wi);
 
-    for (j = tmp_counts->begin(); j != tmp_counts->end(); j++) 
-      (*counts)[j->first] += ((1 << (n - ni)) * (*tmp_counts)[j->first]);
+    for (j = t->begin(); j != t->end(); j++) 
+      (*x)[j->first] += ((1 << (n - ni)) * (*t)[j->first]);
 
-    delete tmp_counts;
+    delete t;
   }
 
-  return counts;
+  return x;
 }
 
-labeled_vector *
+counts *
 beta_2(Wht *W)
 {
   Wht *Wi;
   size_t n, ni, nj, nn;
   int i;
-  labeled_vector *counts, *tmp_counts;
+  counts *x, *t;
   string key;
 
-  labeled_vector_iter j;
+  counts_iter j;
 
-  counts = new labeled_vector();
+  x = new counts();
 
   if (W->children == NULL)
-    return counts;
+    return x;
 
   n  = W->n;
   nn = W->children->nn;
@@ -161,40 +160,40 @@ beta_2(Wht *W)
   key.append(W->name);
   key.append("_beta_2");
 
-  (*counts)[key] = 0;
+  (*x)[key] = 0;
 
   for (i = nn - 1, nj = 0; i >= 0; i--, nj += ni) {
     Wi = W->children->Ws[i];
     ni = Wi->n;
 
-    tmp_counts = beta_2(Wi);
+    t = beta_2(Wi);
 
-    for (j = tmp_counts->begin(); j != tmp_counts->end(); j++) 
-      (*counts)[j->first] += ((1 << (n - ni)) * (*tmp_counts)[j->first]);
+    for (j = t->begin(); j != t->end(); j++) 
+      (*x)[j->first] += ((1 << (n - ni)) * (*t)[j->first]);
 
-    (*counts)[key] +=  (1 << nj);
+    (*x)[key] +=  (1 << nj);
 
-    delete tmp_counts;
+    delete t;
   }
 
-  return counts;
+  return x;
 }
 
-labeled_vector *
+counts *
 beta_3(Wht *W)
 {
   Wht *Wi;
   size_t n, ni, nn;
   int i;
-  labeled_vector *counts, *tmp_counts;
+  counts *x, *t;
   string key;
 
-  labeled_vector_iter j;
+  counts_iter j;
 
-  counts = new labeled_vector();
+  x = new counts();
 
   if (W->children == NULL)
-    return counts;
+    return x;
 
   n  = W->n;
   nn = W->children->nn;
@@ -202,30 +201,30 @@ beta_3(Wht *W)
   key.append(W->name);
   key.append("_beta_3");
 
-  (*counts)[key] = 0;
+  (*x)[key] = 0;
 
   for (i = nn - 1; i >= 0; i--) {
     Wi = W->children->Ws[i];
     ni = Wi->n;
 
-    tmp_counts = beta_3(Wi);
+    t = beta_3(Wi);
 
-    for (j = tmp_counts->begin(); j != tmp_counts->end(); j++) 
-      (*counts)[j->first] += ((1 << (n - ni)) * (*tmp_counts)[j->first]);
+    for (j = t->begin(); j != t->end(); j++) 
+      (*x)[j->first] += ((1 << (n - ni)) * (*t)[j->first]);
 
-    (*counts)[key] +=  (1 << (n - ni));
+    (*x)[key] +=  (1 << (n - ni));
 
-    delete tmp_counts;
+    delete t;
   }
 
-  return counts;
+  return x;
 }
 
-labeled_vector *
+counts *
 default_basis(size_t max)
 {
-  labeled_vector *basis;
-  basis = new labeled_vector();
+  counts *basis;
+  basis = new counts();
 #if 0
   size_t i;
 
@@ -249,36 +248,59 @@ default_basis(size_t max)
   return basis;
 }
 
-labeled_vector *
+counts &
+counts::operator+=(counts &x)
+{
+  counts_iter i;
+
+  for (i = x.begin(); i != x.end(); i++)
+    (*this)[i->first] += x[i->first];
+
+  return (*this);
+}
+
+ostream&
+operator<<(ostream& o, counts &x) 
+{
+  counts_iter i;
+
+  for (i = x.begin(); i != x.end(); i++)
+    o << i->first << " : "<< i->second << std::endl;
+
+  return o;
+}
+
+
+counts *
 count(Wht *W, size_t max)
 {
   size_t k;
-  labeled_vector *counts, *tmp_counts;
+  counts *x, *t;
 
-  counts = default_basis(max);
+  x = default_basis(max);
 
-  tmp_counts = alpha_n(W);
-  *counts += *tmp_counts;
-  delete tmp_counts;
+  t = alpha_n(W);
+  *x += *t;
+  delete t;
 
-  tmp_counts = beta_1(W);
-  *counts += *tmp_counts;
-  delete tmp_counts;
+  t = beta_1(W);
+  *x += *t;
+  delete t;
 
-  tmp_counts = beta_2(W);
-  *counts += *tmp_counts;
-  delete tmp_counts;
+  t = beta_2(W);
+  *x += *t;
+  delete t;
 
-  tmp_counts = beta_3(W);
-  *counts += *tmp_counts;
-  delete tmp_counts;
+  t = beta_3(W);
+  *x += *t;
+  delete t;
 
   for (k = 1; k <= max; k++) {
-    tmp_counts = alpha_k(W,k);
-    *counts += *tmp_counts;
-    delete tmp_counts;
+    t = alpha_k(W,k);
+    *x += *t;
+    delete t;
   }
 
-  return counts;
+  return x;
 }
 

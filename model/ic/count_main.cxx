@@ -6,7 +6,6 @@ extern "C" {
 #include <iostream>
 
 #include "count.h"
-#include "labeled_vector.h"
 
 using std::cout;
 
@@ -48,11 +47,11 @@ main(int argc, char **argv)
     usage();
 
   Wht *W;
-  labeled_vector *v;
+  counts *v;
 
   W = wht_parse(plan);
 
-  v = count(W, 4);
+  v = count(W, 8);
 
   cout << (*v);
 
