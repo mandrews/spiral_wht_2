@@ -16,6 +16,7 @@ usage()
   printf("    -h        Show this help message.\n");
   printf("    -v        Show build information.\n");
   printf("    -w        WHT plan.\n");
+  printf("    -b        Basis, i.e. extra codelets to count.\n");
   exit(1);
 }
 
@@ -23,16 +24,21 @@ int
 main(int argc, char **argv)
 {
   char *plan;
+  char *basis_file;
   int c;
 
   plan = NULL;
+  basis_file = NULL;
 
   opterr = 0;
 
-  while ((c = getopt (argc, argv, "hvw:")) != -1)
+  while ((c = getopt (argc, argv, "hvw:b:")) != -1)
     switch (c) {
       case 'w':
         plan = optarg;
+        break;
+      case 'b':
+        basis_file = optarg;
         break;
       case 'h':
         usage();
@@ -47,16 +53,22 @@ main(int argc, char **argv)
     usage();
 
   Wht *W;
-  counts *v;
+  counts x;
+  FILE *fd;
 
   W = wht_parse(plan);
 
-  v = count(W, 8);
+  if (basis_file != NULL) {
+    fd = fopen(basis_file, "r");
+    x.load(fd);
+    fclose(fd);
+  }
 
-  cout << (*v);
+  count(W, x);
+
+  cout << x;
 
   wht_free(W);
-  delete v;
 
   return 0;
 }

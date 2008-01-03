@@ -12,6 +12,10 @@ small_to_key(Wht *W)
   return key;
 }
 
+/*
+ * TODO: see if we can replace these type of signature with more c++ like:
+    void alpha_n(Wht *W, counts& x)
+*/
 counts *
 alpha_n(Wht *W)
 {
@@ -220,32 +224,29 @@ beta_3(Wht *W)
   return x;
 }
 
-counts *
-default_basis(size_t max)
+counts::counts(size_t max)
 {
-  counts *basis;
-  basis = new counts();
 #if 0
   size_t i;
 
   for (i = 1; i <= max; i++)
-    basis[string("small[") + string(i) + string("]")] = 0.0;
+    this[string("small[") + string(i) + string("]")] = 0.0;
 #endif
 
-  (*basis)["small[1]"] = 0.0;
-  (*basis)["small[2]"] = 0.0;
-  (*basis)["small[3]"] = 0.0;
-  (*basis)["small[4]"] = 0.0;
-  (*basis)["small[5]"] = 0.0;
-  (*basis)["small[6]"] = 0.0;
-  (*basis)["small[7]"] = 0.0;
-  (*basis)["small[8]"] = 0.0;
-  (*basis)["split_alpha"] = 0.0;
-  (*basis)["split_beta_1"] = 0.0;
-  (*basis)["split_beta_2"] = 0.0;
-  (*basis)["split_beta_3"] = 0.0;
+  (*this)["small[1]"] = 0.0;
+  (*this)["small[2]"] = 0.0;
+  (*this)["small[3]"] = 0.0;
+  (*this)["small[4]"] = 0.0;
+  (*this)["small[5]"] = 0.0;
+  (*this)["small[6]"] = 0.0;
+  (*this)["small[7]"] = 0.0;
+  (*this)["small[8]"] = 0.0;
+  (*this)["split_alpha"] = 0.0;
+  (*this)["split_beta_1"] = 0.0;
+  (*this)["split_beta_2"] = 0.0;
+  (*this)["split_beta_3"] = 0.0;
 
-  return basis;
+  this->max = max;
 }
 
 counts &
@@ -270,37 +271,62 @@ operator<<(ostream& o, counts &x)
   return o;
 }
 
+void
+counts::load(FILE *fd)
+{
+  char *buf;
+  size_t max = 256;
+  string line, plan, num;
 
-counts *
-count(Wht *W, size_t max)
+  buf = (char *) malloc(sizeof(char) * max);
+
+  /* TODO: replace with STL string::getline */
+  while (getline(&buf, &max, fd) > 0) {
+    line = string(buf);
+    line = line.substr(0, line.find("\n")); /* Chomp! */
+
+    if (line.empty())
+      continue;
+
+    if (line.find(" : ") != string::npos) {
+      plan = line.substr(0, line.find(" : "));
+      num  = line.substr(line.find(" : ") + 3, line.length());
+
+      (*this)[plan] = atof(num.c_str());
+    } else {
+      (*this)[line] = 0.0;
+    }
+  }
+
+  free(buf);
+}
+
+void
+count(Wht *W, counts &x)
 {
   size_t k;
-  counts *x, *t;
-
-  x = default_basis(max);
+  counts *t;
 
   t = alpha_n(W);
-  *x += *t;
+  x += *t;
   delete t;
 
   t = beta_1(W);
-  *x += *t;
+  x += *t;
   delete t;
 
   t = beta_2(W);
-  *x += *t;
+  x += *t;
   delete t;
 
   t = beta_3(W);
-  *x += *t;
+  x += *t;
   delete t;
 
-  for (k = 1; k <= max; k++) {
+  for (k = 1; k <= x.max; k++) {
     t = alpha_k(W,k);
-    *x += *t;
+    x += *t;
     delete t;
   }
-
-  return x;
 }
 

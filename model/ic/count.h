@@ -16,11 +16,16 @@ using std::ostream;
 class counts : public map<string, double> 
 {
   public:
+  counts(size_t max = WHT_MAX_UNROLL);
   counts& operator+=(counts &v);
   friend ostream& operator<<(ostream& o, counts &v);
+  void load(FILE *fd);
+
+  size_t max;
 };
+
 typedef counts::iterator counts_iter;
 
-counts * count(Wht *W, size_t max);
+void count(Wht *W, counts &x);
 
 #endif/*IC_COUNT_H*/
