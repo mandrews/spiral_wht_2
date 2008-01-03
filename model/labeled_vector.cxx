@@ -76,3 +76,61 @@ labeled_vector_to_matrix_col(labeled_vector *r, struct matrix *a, size_t k)
     matrix_elem(a,j,k) = i->second;
 }
 
+labeled_vector *
+load_labeled_vector(FILE *fd)
+{
+  char *buf;
+  size_t max = 256;
+  labeled_vector *basis;
+  string line, plan, num;
+
+  buf = (char *) malloc(sizeof(char) * max);
+
+  basis = new labeled_vector();
+
+  while (getline(&buf, &max, fd) > 0) {
+    line = string(buf);
+    line = line.substr(0, line.find("\n")); /* Chomp! */
+
+    if (line.empty())
+      continue;
+
+    if (line.find(" : ") != string::npos) {
+      plan = line.substr(0, line.find(" : "));
+      num  = line.substr(line.find(" : ") + 3, line.length());
+
+      (*basis)[plan] = atof(num.c_str());
+    } else {
+      (*basis)[line] = 0.0;
+    }
+  }
+
+  free(buf);
+
+  return basis;
+}
+
+void
+save_labeled_vector(FILE *fd, labeled_vector *v)
+{
+  labeled_vector::iterator i;
+
+  for (i = v->begin(); i != v->end(); i++) {
+    fprintf(fd, "%s : %f\n", i->first.c_str(), i->second);
+  }
+}
+
+
+labeled_vector *
+labeled_vector_copy(labeled_vector *src)
+{
+  labeled_vector *dst;
+  labeled_vector::iterator i;
+
+  dst = new labeled_vector();
+
+  for (i = src->begin(); i != src->end(); i++)
+    (*dst)[i->first] = i->second;
+
+  return dst;
+}

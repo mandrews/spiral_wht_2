@@ -1,13 +1,13 @@
 extern "C" {
-#include "wht.h"
-#include "measure.h"
 #include "linalg.h"
 }
 
-#include "labeled_vector.h"
+#include "ic_count.h"
 
+#if 0
 double
 ic_predict(labeled_vector *counts, labeled_vector *coeffs);
+#endif
 
 labeled_vector *
 alpha_n(Wht *W)
@@ -228,7 +228,7 @@ beta_3(Wht *W)
 
   return counts;
 }
-
+#if 0
 labeled_vector *
 labeled_vector_init()
 {
@@ -276,14 +276,15 @@ labeled_vector_init()
 
   return counts;
 }
+#endif
 
 labeled_vector *
-ic_counts(Wht *W, size_t max)
+ic_count(Wht *W, labeled_vector *basis, size_t max)
 {
   size_t k;
   labeled_vector *counts, *tmp_counts;
 
-  counts = labeled_vector_init();
+  counts = labeled_vector_copy(basis);
 
   tmp_counts = alpha_n(W);
   labeled_vector_add(counts, tmp_counts);
@@ -310,6 +311,7 @@ ic_counts(Wht *W, size_t max)
   return counts;
 }
 
+#if 0
 labeled_vector *
 calc_coeffs()
 {
@@ -399,7 +401,9 @@ calc_coeffs()
 
   return coeffs;
 }
+#endif
 
+#if 0
 double
 ic_predict(labeled_vector *counts, labeled_vector *coeffs)
 {
@@ -415,8 +419,9 @@ ic_predict(labeled_vector *counts, labeled_vector *coeffs)
 
   return sum;
 }
+#endif
 
-
+#if 0
 int 
 main()
 {
@@ -468,3 +473,4 @@ main()
 
   return 0;
 }
+#endif
