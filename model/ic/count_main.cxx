@@ -60,7 +60,7 @@ main(int argc, char **argv)
 
   if (basis_file != NULL) {
     fd = fopen(basis_file, "r");
-    x.load(fd);
+    x.load_basis(fd);
     fclose(fd);
   }
 

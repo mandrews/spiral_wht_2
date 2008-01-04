@@ -309,6 +309,17 @@ counts::load(FILE *fd)
 }
 
 void
+counts::load_basis(FILE *fd)
+{
+  counts_iter i;
+
+  load(fd);
+
+  for (i = this->begin(); i != this->end(); i++)
+    i->second = 0.0;
+}
+
+void
 count(Wht *W, counts &x)
 {
   size_t k;

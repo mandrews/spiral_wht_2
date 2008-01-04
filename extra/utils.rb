@@ -128,18 +128,15 @@ end
 
 def count_sse_exec(plan)
   h = {}
-  p "here"
-  #['shuffle', 'unpack', 'scalar_add', 'vector_add', 'scalar_add', 'scalar_mov'].each do |mode|
-  ['shuffle'].each do |mode|
+  ['shuffle', 'unpack', 'scalar_add', 'vector_add', 'scalar_add', 'scalar_mov'].each do |mode|
     cmd = "bash #{IC_PATH}/count_sse.sh '#{plan}' #{mode}"
-    puts "Executing #{cmd}" 
-   # if @debug
+    puts "Executing #{cmd}"  if @debug
     t = 0
     IO.popen(cmd) do |fd|
       t = fd.readlines
     end
 
-    h[mode] = t.to_i
+    h[mode] = t.first.to_i
   end
   return h
 end
