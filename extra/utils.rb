@@ -12,7 +12,7 @@ MEASURE_PATH    = "#{SCRIPT_PATH}/../measure"
 RANDTREE_PATH   = "#{SCRIPT_PATH}/../utils"
 CONVERT_PATH    = "#{SCRIPT_PATH}/../wht"
 CLASSIFY_PATH   = "#{SCRIPT_PATH}/../wht"
-IC_PATH         = "#{SCRIPT_PATH}/../model"
+IC_PATH         = "#{SCRIPT_PATH}/../model/ic"
 
 def load_runtime_env
   cmd = "#{MEASURE_PATH}/wht_measure -v"
@@ -122,6 +122,25 @@ def classify_exec(plan, *args)
     puts("Could not read: #{cmd}") if @debug
   end
 
+  return h
+end
+
+
+def count_sse_exec(plan)
+  h = {}
+  p "here"
+  #['shuffle', 'unpack', 'scalar_add', 'vector_add', 'scalar_add', 'scalar_mov'].each do |mode|
+  ['shuffle'].each do |mode|
+    cmd = "bash #{IC_PATH}/count_sse.sh '#{plan}' #{mode}"
+    puts "Executing #{cmd}" 
+   # if @debug
+    t = 0
+    IO.popen(cmd) do |fd|
+      t = fd.readlines
+    end
+
+    h[mode] = t.to_i
+  end
   return h
 end
 

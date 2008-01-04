@@ -41,10 +41,18 @@ def classify(plans)
   return plans
 end
 
-MODES = [ "INDEX", "DEINDEX", "MIN", "MAX", "CLASSIFY" ]
+def count_sse(plans)
+  plans.each do |k,v|
+    info = count_sse_exec(plans[k]['plan'])
+    plans[k].merge!(info)
+  end
+  return plans
+end
+
+MODES = [ "INDEX", "DEINDEX", "MIN", "MAX", "CLASSIFY", "COUNT_SSE" ]
 
 def die
-  puts "query: FILE [#{MODES.join('|')}]"
+  puts "index: FILE [#{MODES.join('|')}]"
   exit 1
 end
 
@@ -69,6 +77,8 @@ if __FILE__ == $0
       plans = minmax(plans)
     when "CLASSIFY" 
       plans = classify(plans)
+    when "COUNT_SSE" 
+      plans = count_sse(plans)
   end
 
   save_data(data, env, plans, info)
