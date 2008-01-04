@@ -16,9 +16,14 @@ using std::ostream;
 class counts : public map<string, double> 
 {
   public:
+
   counts(size_t max = WHT_MAX_UNROLL);
-  counts& operator+=(counts &v);
-  friend ostream& operator<<(ostream& o, counts &v);
+
+  counts& operator+=(counts &x);
+  counts& operator*=(counts &x);
+
+  friend ostream& operator<<(ostream& o, counts &x);
+
   void load(FILE *fd);
 
   size_t max;

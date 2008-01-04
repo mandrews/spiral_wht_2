@@ -256,6 +256,17 @@ counts::operator+=(counts &x)
   return (*this);
 }
 
+counts &
+counts::operator*=(counts &x)
+{
+  counts_iter i;
+
+  for (i = x.begin(); i != x.end(); i++)
+    (*this)[i->first] *= x[i->first];
+
+  return (*this);
+}
+
 ostream&
 operator<<(ostream& o, counts &x) 
 {
