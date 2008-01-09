@@ -128,7 +128,7 @@ end
 
 def count_sse_exec(plan)
   h = {}
-  ['shuffle', 'unpack', 'scalar_add', 'vector_add', 'scalar_add', 'scalar_mov'].each do |mode|
+  ['shuffle', 'unpack', 'scalar_add', 'vector_add', 'scalar_mov', 'vector_mov'].each do |mode|
     cmd = "bash #{IC_PATH}/count_sse.sh '#{plan}' #{mode}"
     puts "Executing #{cmd}"  if @debug
     t = 0
