@@ -12,9 +12,9 @@ AC_CANONICAL_HOST
 # 
 #  M A I N T A I N E R   P A R A M E T E R S
 # 
-MAX_UNROLL_PKG=4
-MAX_INTERLEAVE_PKG=3
-MAX_VECTOR_PKG=2
+MAX_UNROLL_PKG=8
+MAX_INTERLEAVE_PKG=4
+MAX_VECTOR_PKG=4
 
 AC_SUBST(MAX_UNROLL_PKG)
 AC_SUBST(MAX_INTERLEAVE_PKG)
@@ -125,6 +125,11 @@ if test "$have_sse" = "yes"; then
   CFLAGS="$CFLAGS -msse"
 
   VECTOR_SIZE=4
+
+  if test $VECTOR_SIZE -gt $MAX_VECTOR_PKG; then
+    AC_MSG_ERROR([--enable-sse vectors are larger than package was built for])
+  fi
+
 fi
 
 AC_ARG_ENABLE([sse2], 
@@ -146,6 +151,10 @@ if test "$have_sse2" = "yes"; then
   CFLAGS="$CFLAGS -msse2"
 
   VECTOR_SIZE=2
+
+  if test $VECTOR_SIZE -gt $MAX_VECTOR_PKG; then
+    AC_MSG_ERROR([--enable-sse2 vectors are larger than package was built for])
+  fi
 
 fi
 
