@@ -31,11 +31,7 @@ small_interleave_transform(Wht *W)
   if (k > W->right) 
     return error_msg_set(W, "interleave factor must be <= %d", W->right);
 
-  /* XXX: 
-   *
-  W->apply = codelet_apply_lookup(W->to_string());
-   */
-  W->apply = codelet_apply_lookup(W->n, "smallil", W->params, 1);
+  W->apply = codelet_apply_lookup(W);
 
   if (W->apply == NULL) 
     return error_msg_set(W, "could not find codelet");

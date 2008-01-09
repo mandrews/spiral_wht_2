@@ -43,14 +43,14 @@ sub function_name {
 
 # Generate unaligned unrolled codelets
 for ($i=1;$i<=$small;$i++) {
-  push(@codelets,($i, "small",  [], "s_$i.c", "-n $i"));
+  push(@codelets,("small[$i]",  "s_$i.c"));
 }
 
 # Generate aligned vectorized codelets
 for ($k=1;$k<=$vector;$k++) {
   $v = 2**$k;
   for ($i=$k+1;$i<=$small;$i++) {
-    push(@codelets,($i, "smallv", [ $v ], "s_$i\_v\_$v\_a.c", "-n $i -v $v -a"));
+    push(@codelets,("smallv($v)[$i]",  "s_$i\_v\_$v\_a.c"));
   }
 }
 
@@ -58,7 +58,7 @@ for ($k=1;$k<=$vector;$k++) {
 for ($i=1;$i<=$small;$i++) {
   for ($j=1;$j<=$interleave;$j++) {
     $k = 2**$j;
-    push(@codelets,($i, "smallil", [ $k ], "s_$i\_il\_$k.c", "-n $i -i $k"));
+    push(@codelets,("smallil($k)[$i]", "s_$i\_il\_$k.c"));
   }
 }
 
@@ -69,8 +69,8 @@ for ($i=1;$i<=$small;$i++) {
     for ($k=1;$k<=$vector;$k++) {
       $v = 2**$k;
       next unless $j >= $k; 
-      push(@codelets,($i, "smallv", [ $v, $l, 0 ], "s_$i\_il\_$l\_v$v.c", "-n $i -i $l -v $v"));
-      push(@codelets,($i, "smallv", [ $v, $l, 1 ], "s_$i\_il\_$l\_v$v\_a.c", "-n $i -i $l -v $v -a"));
+      push(@codelets,("smallv($v,$l,0)[$i]", "s_$i\_il\_$l\_v\_$v.c"));
+      push(@codelets,("smallv($v,$l,1)[$i]", "s_$i\_il\_$l\_v\_$v\_a.c"));
     }
   }
 }
@@ -80,18 +80,12 @@ $structs  = "";
 $depends  = "";
 
 while (@codelets) {
-  $size     = shift @codelets;
   $name     = shift @codelets;
-  $params   = shift @codelets;
   $file     = shift @codelets;
-  $args     = shift @codelets;
 
-  $n        = scalar(@$params);
-  $params   = join(',', @$params) || '0';
-
-  print "Generate:  $whtgen $args > $file\n";
-  `$whtgen $args > $file`; # Generate codelet
-  $call = function_name($file); # Grep for codelet function name
+  print "Generate:  $whtgen $name > $path/$file\n";
+  `$whtgen '$name' > $path/$file`; # Generate codelet
+  $call = function_name("$path/$file"); # Grep for codelet function name
 
   print "Register: $name in $registry\n";
 
@@ -100,9 +94,8 @@ while (@codelets) {
   # Add to external declarations
   $externs .= "extern codelet $call\;\n"; 
   # Add to registry table
-  $structs .= "  { $size, \"$name\", 
-    { $params }, $n,
-    (codelet) &$call }, \n"; 
+  $structs .= "  { \"$name\", 
+    (codelet_apply_fp) &$call }, \n"; 
 }
 
 # Output the C registry array (see codelets.c)
@@ -113,18 +106,18 @@ print FD <<TEXT
 
 $externs
 
-static const codelet_entry
-wht_codelet_registry[] =
+static const codelet_apply_entry
+codelet_apply_registry[] =
 {
 $structs
-CODELET_REGISTRY_END
+CODELET_APPLY_ENTRY_END
 };
 TEXT
 ;
 close(FD);
 
 # Output the automake dependancies (see Makefile.am)
-open(FD, ">.codelets");
+open(FD, ">$path/.codelets");
 print FD "CODELETS = $depends\n";
 close(FD);
 

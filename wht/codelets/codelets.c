@@ -1,35 +1,24 @@
 #include "codelets.h"
 #include "codelet_registry.h"
 
-bool
-params_equal(int a[], int b[], size_t n)
+codelet_apply_fp 
+codelet_apply_lookup(Wht *W)
 {
-  size_t i;
+  codelet_apply_entry *p;
+  codelet_apply_fp call;
+  char *name;
 
-  for (i = 0; i < n; i++)
-    if (a[i] != b[i])
-      return false;
+  name = W->to_string(W);
+  call = NULL; /* Did not find codelet in table */
 
-  return true;
-}
-
-#define NOT_END(p)  ((p != NULL) && (p->size != 0))
-
-/** \todo Lookup based on string, not params list */
-
-codelet codelet_apply_lookup(size_t size, const char *name, int params[], size_t n)
-{
-  codelet_entry *p;
-
-  for (p = (codelet_entry *) wht_codelet_registry; NOT_END(p); p++)
-    if ((size == p->size) &&
-        (strncmp(name, p->name, MAX_CODELET_NAME_SIZE) == 0) &&
-        (n == p->n) &&
-        (params_equal(params, p->params, n))) {
-      return p->call;
+  p = (codelet_apply_entry *) codelet_apply_registry; 
+  for (; p != NULL && (codelet_apply_fp) p->call != NULL; ++p)
+    if (strcmp(name, p->name) == 0) {
+      call = p->call;
+      break;
     }
 
-  return NULL; /* Did not find codelet in table */
+  free(name);
+  return call;
 }
 
-#undef NOT_END

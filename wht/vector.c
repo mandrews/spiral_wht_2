@@ -31,7 +31,7 @@ small_right_vector_transform(Wht *W)
   if (! (rightmost_tree(W) && (W->right == 1)))
     return error_msg_set(W, "must be rightmost codelet in plan");
 
-  W->apply = codelet_apply_lookup(W->n, "smallv", W->params, 1);
+  W->apply = codelet_apply_lookup(W);
 
   if (W->apply == NULL) 
     return error_msg_set(W, "could not find codelet");
@@ -71,7 +71,7 @@ small_vector_transform(Wht *W)
   W->params[1] = k;
   W->params[2] = a;
 
-  W->apply = codelet_apply_lookup(W->n, "smallv", W->params, 3);
+  W->apply = codelet_apply_lookup(W);
 
   if (W->apply == NULL) 
     return error_msg_set(W, "could not find codelet");

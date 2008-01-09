@@ -174,27 +174,16 @@ typedef struct {
  *
  * \see codelets/codelets_registry.h
  *
- * \param size    Size of WHT computed by codelet
  * \param name    Identifier associated with codelet
- * \param params  Parameters assocaited with codelet
- * \param n       Number of parameters assocaited by codelet
  * \param call    Interface to initialize codelet codelet
  */
 typedef struct {
-  size_t  size;
-  char    name[MAX_CODELET_NAME_SIZE];
-  int     params[MAX_CODELET_PARAMS];
-  size_t  n;
+  char  *name;
   codelet_apply_fp call;
 } codelet_apply_entry;
 
-#define CODELET_APPLY_ENTRY_END { 0, "", { 0 }, 0, (codelet_apply_fp) NULL }
-
-
-/**
- *\todo Remove this typedef alias once codelet registry is created with this new type
- */
-typedef codelet_apply_entry codelet_entry;
+#define CODELET_APPLY_ENTRY_END { "", (codelet_apply_fp) NULL }
+  /**< Place this at the end of the transform_registry to halt iteration */
 
 
 /*

@@ -71,7 +71,8 @@ codelet_transform_lookup(const char *name, size_t params)
 {
   codelet_transform_entry *p;
 
-  for (p = (codelet_transform_entry *) codelet_transforms_registry; p != NULL && (codelet_transform_fp) p->call != NULL; ++p)
+  p = (codelet_transform_entry *) codelet_transforms_registry; 
+  for (; p != NULL && (codelet_transform_fp) p->call != NULL; ++p)
     if ((strncmp(name, p->name, MAX_CODELET_NAME_SIZE) == 0) && (params == p->params))
       return p->call;
 
@@ -128,7 +129,7 @@ codelet_transform_undo(Wht *W)
 
   if (W->children == NULL) {
     W->name       = strdup("small");
-    W->apply      = codelet_apply_lookup(W->n, "small", NULL, 0);
+    W->apply      = codelet_apply_lookup(W);
     W->transform  = null_transform;
     W->error_msg  = NULL;
   } else {

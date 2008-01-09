@@ -211,7 +211,7 @@ if $0 == __FILE__ # Main Entry Point
     end
 
     for size in v .. n do
-      expect_correct(splitil(smallv(size,v,8,0),smallv(min_il,v)))
+      expect_correct(splitil(smallv(size,v,min_il,0),smallv(min_il,v)))
     end
 
   end
