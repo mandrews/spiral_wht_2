@@ -2,7 +2,7 @@
 
 function usage() 
 {
-  echo "count_see wht_plan [shuffle | unpack | scalar_add | vector_add | scalar_add | scalar_mov]"
+  echo "count_see wht_plan [shuffle | unpack | scalar_add | vector_add | scalar_mov | vector_mov]"
   exit 1
 }
 
