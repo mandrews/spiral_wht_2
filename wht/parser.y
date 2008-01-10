@@ -128,7 +128,7 @@ params:
 int
 yyerror(const char *s)
 {
-  wht_error(s);
+  wht_exit(s);
 }
 
 struct Wht* 
@@ -174,7 +174,7 @@ nodes_append(struct nodes *p, struct Wht *x)
   p->size++;
 
   if (p->size > MAX_SPLIT_NODES)
-    wht_error("number of codelets exheeded maximum.");
+    wht_exit("number of codelets exheeded maximum.");
 
   return p;
 }
@@ -201,7 +201,7 @@ params_append(struct params *p, int x)
   p->size++;
 
   if (p->size > MAX_CODELET_PARAMS)
-    wht_error("codelet parameters exheeded maximum.");
+    wht_exit("codelet parameters exheeded maximum.");
 
   return p;
 }

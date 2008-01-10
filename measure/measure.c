@@ -140,7 +140,7 @@ measure(Wht *W, char *name, char *metric, bool calib, size_t run,
   extension = measure_extension_find(name);
 
   if (extension == NULL) 
-    wht_error("No extension registered for %s\n", metric);
+    wht_exit("No extension registered for %s\n", metric);
 
   extension->init(metric);
 
@@ -166,7 +166,7 @@ measure_with_z_test(Wht *W, char *name, char *metric, bool calib, size_t run,
   extension = measure_extension_find(name);
 
   if (extension == NULL) 
-    wht_error("No extension registered for %s\n", metric);
+    wht_exit("No extension registered for %s\n", metric);
 
   z = invnorm(alpha);
 
@@ -196,7 +196,7 @@ measure_until(Wht *W, char *name, char *metric, bool calib, size_t run,
   extension = measure_extension_find(name);
 
   if (extension == NULL) 
-    wht_error("No extension registered for %s\n", metric);
+    wht_exit("No extension registered for %s\n", metric);
 
   extension->init(metric);
 

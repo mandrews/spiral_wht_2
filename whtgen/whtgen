@@ -310,7 +310,7 @@ class Generator
     end
 
     footer  = ""
-    footer += "#else\n   wht_error(\"initialization guards should prevent this message\");\n" 
+    footer += "#else\n   wht_exit(\"initialization guards should prevent this message\");\n" 
 		footer += "#endif\n"
     header + decls + body + footer + "}\n"
   end
@@ -416,6 +416,8 @@ def parse(args)
     name  = $1.nil? ? usage : $1.to_s
     size  = $2.nil? ? usage : $2.to_i
     param = []
+  else 
+    usage
   end
 
   opts = {
@@ -452,6 +454,7 @@ end
 
 # Main entry point 
 if $0 == __FILE__ 
+  usage unless ARGV.size > 0
   opts = parse(ARGV[0])
 
   m = opts[:size]
@@ -497,6 +500,8 @@ if $0 == __FILE__
     when :interleave
       g.name = "apply_small#{m}_il#{k}"
       g.interleave(k)
+    else
+      g.name = "apply_small#{m}"
   end
 
   puts g

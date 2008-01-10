@@ -17,7 +17,7 @@ i_malloc(size_t size)
 
   p = malloc(size);
   if (p == NULL)
-    wht_error("out of memory in malloc()");
+    wht_exit("out of memory in malloc()");
   return p;
 }
 

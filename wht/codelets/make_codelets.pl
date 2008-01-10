@@ -92,7 +92,7 @@ while (@codelets) {
   # Add to Makefile dependancies
   $depends .= "$file "; 
   # Add to external declarations
-  $externs .= "extern codelet $call\;\n"; 
+  $externs .= "extern codelet_apply_fp $call\;\n"; 
   # Add to registry table
   $structs .= "  { \"$name\", 
     (codelet_apply_fp) &$call }, \n"; 

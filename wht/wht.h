@@ -92,11 +92,6 @@ typedef void (*codelet_apply_fp)(Wht *W, long S, size_t U, wht_value *x);
 typedef void (*codelet_transform_fp)(Wht *W);
 
 /**
- *\todo Remove this typedef alias once codelet registry is created with this new type
- */
-typedef codelet_apply_fp codelet;
-
-/**
  * \brief Annotated tree data structure for storing Wht plan.
  *
  * \todo Wht should be in lower case to follow standard C idiom, a typedef
@@ -314,11 +309,6 @@ void transform_from_string(Wht *W, const char *transform);
     fprintf (stderr, "\n"); \
     exit(-1); \
   }
-
-/**
- * \todo Remove this alias once change has been made in codelet generator
- */
-#define wht_error wht_exit
 
 #endif/* WHT_H */
 
