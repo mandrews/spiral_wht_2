@@ -17,11 +17,14 @@
  *
  */
 
+#define _GNU_SOURCE
 
 #include "wht.h"
 
 #include "getopt.h"
 #include <string.h>
+
+#include <stdio.h>
 
 static void
 usage() 
@@ -37,22 +40,23 @@ usage()
 int
 main(int argc, char **argv)
 {
-  char *wht_plan;
-  char *wht_transform;
+  char *plan, *func;
+  size_t len;
   int c;
 
-  wht_plan    = NULL;
-  wht_transform   = NULL;
+  plan  = NULL;
+  func  = NULL;
+  len   = 0;
 
   opterr = 0;
 
   while ((c = getopt (argc, argv, "hvw:t:")) != -1)
     switch (c) {
       case 'w':
-        wht_plan = optarg;
+        plan = strdup(optarg);
         break;
       case 't':
-        wht_transform = optarg;
+        func = strdup(optarg);
         break;
       case 'h':
         usage();
@@ -63,17 +67,21 @@ main(int argc, char **argv)
         usage();
     }
 
-  if (wht_plan == NULL)
+  if (func == NULL)
     usage();
 
-  Wht *W, *T;
+  if (plan == NULL)
+    getline(&plan, &len, stdin);
+
+  Wht *W;
   char *buf;
 
-  W = wht_parse(wht_plan);
-  transform_from_string(W, wht_transform);
+  W = wht_parse(plan);
+
+  transform_from_string(W, func);
 
   if (wht_error_msg(W) != NULL) {
-    printf("rejected, %s\n", wht_error_msg(W));
+    fprintf(stderr, "rejected, %s\n", wht_error_msg(W));
     wht_free(W);
     exit(1);
   }
@@ -82,6 +90,8 @@ main(int argc, char **argv)
   printf("%s\n", buf);
 
   free(buf);
+  free(plan);
+  free(func);
 
   wht_free(W);
 
