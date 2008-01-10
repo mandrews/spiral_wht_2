@@ -36,10 +36,19 @@ null_to_string(Wht *W)
 
   size_t bufsize;
   char *buf;
+  char *params;
 
-  bufsize = IDENT_SIZE + DIGIT_SIZE + 3; /*i.e. IDENT [ DIGIT ] \0*/
-  buf = i_malloc(sizeof(char) * bufsize);
-  snprintf(buf, bufsize, "%s[%d]", W->name, W->n);
+  if (W->n_params == 0) {
+    bufsize = IDENT_SIZE + DIGIT_SIZE + 3; /*i.e. IDENT [ DIGIT ] \0*/
+    buf = i_malloc(sizeof(char) * bufsize);
+    snprintf(buf, bufsize, "%s[%d]", W->name, W->n);
+  } else {
+    params = params_to_string(W->params, W->n_params);
+    bufsize = IDENT_SIZE + DIGIT_SIZE + 5 + strlen(params); /*i.e. IDENT (...) [ DIGIT ] \0*/
+    buf = i_malloc(sizeof(char) * bufsize);
+    snprintf(buf, bufsize, "%s(%s)[%d]", W->name, params, W->n);
+    i_free(params);
+  }
 
   return buf;
 }
@@ -64,6 +73,7 @@ null_init(size_t n, char *name)
   W->right     = 1;
   W->parent    = NULL;
   W->children  = NULL;
+  W->n_params  = 0;
 
   for (i = 0; i < MAX_ATTRIBUTES; i++)
     W->attr[i] = UNSET_ATTRIBUTE;

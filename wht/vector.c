@@ -65,11 +65,18 @@ small_vector_transform(Wht *W)
   W->params[0] = k;
   W->params[1] = UNSET_PARAMETER;
   W->params[2] = UNSET_PARAMETER;
+  W->n_params = 1;
+  free(W->name);
+  W->name = strdup("smallil");
+
   small_interleave_transform(W);
 
   W->params[0] = v;
   W->params[1] = k;
   W->params[2] = a;
+  W->n_params = 3;
+  free(W->name);
+  W->name = strdup("smallv");
 
   W->apply = codelet_apply_lookup(W);
 
@@ -79,6 +86,7 @@ small_vector_transform(Wht *W)
   W->attr[vector_size] = v;
 }
 
+#if 0
 void
 vector_convert(Wht *W, int params[], size_t n)
 {
@@ -103,4 +111,4 @@ vector_convert(Wht *W, int params[], size_t n)
     transform(W, "smallv", params2, 3);
   }
 }
-
+#endif

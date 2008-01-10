@@ -66,56 +66,74 @@ dump(Wht *W, FILE *fd)
     dump(W->children->Ws[i], fd);
 }
 
+char * 
+i_itoa(int i)
+{
+  const size_t n = sizeof(int) * 8; 
+  /* NOTE: n should log[10](length of maximum integer)
+   * This should work since log[2](x) > log[10](x) 
+   */
+
+  char *buf;
+  buf = malloc(sizeof(char) * n);
+
+  snprintf(buf, n, "%d", i);
+
+  return buf;
+}
+
 codelet_transform_fp 
-codelet_transform_lookup(const char *name, size_t params)
+codelet_transform_lookup(const char *name, size_t params, bool small)
 {
   codelet_transform_entry *p;
 
   p = (codelet_transform_entry *) codelet_transforms_registry; 
   for (; p != NULL && (codelet_transform_fp) p->call != NULL; ++p)
-    if ((strncmp(name, p->name, MAX_CODELET_NAME_SIZE) == 0) && (params == p->params))
+    if ((strncmp(name, p->name, MAX_CODELET_NAME_SIZE) == 0) && (params == p->params) && (small == p->small))
       return p->call;
 
   return NULL;
 }
 
 void
-codelet_transform(Wht *W, const char *name, int params[], size_t n)
+codelet_transform(Wht *W, const char *name, int params[], size_t n, bool small)
 {
   codelet_transform_fp f;
   int i;
 
-  f = codelet_transform_lookup(name, n);
+  /* Only attempt to apply small transforms to smalls and visa versa */
+  if ((small && W->children != NULL) || ((!small) && W->children == NULL))
+    return;
 
-  if (f == NULL)
+  f = codelet_transform_lookup(name, n, small);
+
+  if (f == NULL) 
     wht_exit("%s was not registered in the transform table", name);
 
   W->transform = f;
+  W->n_params = n;
 
   for (i = 0; i < n; i++)
     W->params[i] = params[i];
 
   i_free(W->name);
 
-  if (n > 0)
-    W->name = append_params_to_name(name, params, n);
-  else
-    W->name = strdup(name);
+  W->name = strdup(name);
 }
 
 void
-codelet_transform_recursive(Wht *W, const char *name, int params[], size_t n)
+codelet_transform_recursive(Wht *W, const char *name, int params[], size_t n, bool small)
 {
   int i;
 
   if ((strcmp(W->name, "small") == 0) || (strcmp(W->name, "split") == 0))
-    codelet_transform(W, name, params, n);
+    codelet_transform(W, name, params, n, small);
 
   if (W->children == NULL)
     return;
 
   for (i = 0; i < W->children->nn; i++)
-    codelet_transform_recursive(W->children->Ws[i], name, params, n);
+    codelet_transform_recursive(W->children->Ws[i], name, params, n, small);
 }
 
 void
@@ -127,16 +145,17 @@ codelet_transform_undo(Wht *W)
   if (W->error_msg != NULL)
     i_free(W->error_msg);
 
+  W->n_params   = 0; /* XXX: Reset params */
+  W->error_msg  = NULL;
+
   if (W->children == NULL) {
     W->name       = strdup("small");
     W->apply      = codelet_apply_lookup(W);
     W->transform  = null_transform;
-    W->error_msg  = NULL;
   } else {
     W->name       = strdup("split");
     W->apply      = split_apply;
     W->transform  = split_transform;
-    W->error_msg  = NULL;
   }
 }
 
@@ -156,14 +175,31 @@ codelet_transform_undo_recursive(Wht *W)
 }
 
 void
-transform(Wht *W, const char *name, int params[], size_t n)
+transform_from_string(Wht *W, const char *transform)
 {
+  Wht *T;
+  T = parse(transform);
+
+  char   *name;
+  int    *params;
+  size_t  n;
+  bool    small;
+
+  name    = T->name;
+  params  = T->params;
+  n       = T->n_params;
+  small   = (bool) (T->children == NULL);
+
+  /* Backtrack any previous errors */
+  codelet_transform_undo_recursive(W);
   /* Tag with transform function */
-  codelet_transform_recursive(W, name, params, n);
+  codelet_transform_recursive(W, name, params, n, small);
   /* Apply transform function */
   W->transform(W);
   /* Backtrack when error occurs */
   codelet_transform_undo_recursive(W);
+
+  wht_free(T);
 }
 
 void 
@@ -214,7 +250,7 @@ error_msg_get(Wht *W)
 }
 
 char *
-append_params_to_name(const char *name, int params[], size_t n)
+params_to_string(int params[], size_t n)
 {
   const size_t DIGIT_SIZE = 32;
   size_t bufsize;
@@ -222,14 +258,12 @@ append_params_to_name(const char *name, int params[], size_t n)
   char *buf;
   char tmp[DIGIT_SIZE];
 
-  bufsize = strlen(name) + DIGIT_SIZE*n + (n-1) + 3; 
-   /* n DIGITS + (n-1) COMMAS + '(' + ')' + '\0' */
+  bufsize = DIGIT_SIZE*n + (n-1) + 1; 
+   /* n DIGITS + (n-1) COMMAS + '\0' */
 
   buf = i_malloc(sizeof(char) * bufsize);
 
   buf[0] = '\0';
-  strncat(buf, name, strlen(name));
-  strncat(buf, "(", 1);
 
   for (i = 0; i < n; i++) {
     snprintf(tmp, DIGIT_SIZE, "%d", params[i]);
@@ -238,8 +272,6 @@ append_params_to_name(const char *name, int params[], size_t n)
     if (i != n - 1)
       strncat(buf, ",", 1);
   }
-
-  strncat(buf, ")", 1);
 
   return buf;
 }

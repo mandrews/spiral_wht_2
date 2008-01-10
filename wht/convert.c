@@ -21,15 +21,16 @@
 #include "wht.h"
 
 #include "getopt.h"
+#include <string.h>
 
 static void
 usage() 
 {
-  printf("Usage: wht_convert -w PLAN [OPTIONS]\n\n");
-  printf("    -h        Show this help message.\n");
-  printf("    -v        Show build information.\n");
-  printf("    -w PLAN   Verify correctness of PLAN.\n");
-  printf("    -i FACTOR Interleave PLAN by FACTOR.\n");
+  printf("Usage: wht_convert -w PLAN -t TRANSFORM [OPTIONS]\n\n");
+  printf("    -h            Show this help message.\n");
+  printf("    -v            Show build information.\n");
+  printf("    -w PLAN       Verify correctness of PLAN.\n");
+  printf("    -t TRANSFORM  Transform plan with.\n");
   exit(1);
 }
 
@@ -37,34 +38,27 @@ int
 main(int argc, char **argv)
 {
   char *wht_plan;
-  int interleave;
-  int vectorize;
+  char *wht_transform;
   int c;
 
-  wht_plan = NULL;
-  interleave = -1;
-  vectorize  = -1;
+  wht_plan    = NULL;
+  wht_transform   = NULL;
 
   opterr = 0;
 
-  while ((c = getopt (argc, argv, "hw:i:v:")) != -1)
+  while ((c = getopt (argc, argv, "hvw:t:")) != -1)
     switch (c) {
       case 'w':
         wht_plan = optarg;
         break;
-      case 'i':
-        interleave = abs(atoi(optarg));
-        break;
-      case 'v':
-        vectorize = abs(atoi(optarg));
+      case 't':
+        wht_transform = optarg;
         break;
       case 'h':
         usage();
-#if 0
       case 'v':
         wht_info();
         exit(0);
-#endif
       default:
         usage();
     }
@@ -72,30 +66,11 @@ main(int argc, char **argv)
   if (wht_plan == NULL)
     usage();
 
-  Wht *W;
+  Wht *W, *T;
   char *buf;
 
   W = wht_parse(wht_plan);
-  codelet_transform_undo_recursive(W);
-
-#if 0
-  if (wht_error_msg(W) != NULL) {
-    printf("rejected, %s\n", wht_error_msg(W));
-    wht_free(W);
-    exit(1);
-  }
-#endif
-
-  if (vectorize > 0 && interleave > 0) {
-    int params[] = { vectorize, interleave };
-    vector_convert(W, params, 2);
-  } else if (vectorize > 0) {
-    int params[] = { vectorize, vectorize };
-    vector_convert(W, params, 2);
-  } else if (interleave > 0) {
-    int params[] = { interleave };
-    interleave_convert(W, params, 1);
-  } 
+  transform_from_string(W, wht_transform);
 
   if (wht_error_msg(W) != NULL) {
     printf("rejected, %s\n", wht_error_msg(W));
@@ -105,6 +80,7 @@ main(int argc, char **argv)
 
   buf = wht_to_string(W);
   printf("%s\n", buf);
+
   free(buf);
 
   wht_free(W);

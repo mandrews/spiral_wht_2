@@ -135,6 +135,8 @@ struct Wht {
   int params[MAX_CODELET_PARAMS];
     /**< Parameters for code transformation */
 
+  size_t n_params;
+
   int attr[MAX_ATTRIBUTES]; /**< Attributes associated with WHT, set by code transformation */
 
   char *error_msg;
@@ -163,10 +165,11 @@ typedef struct {
   char    name[MAX_CODELET_NAME_SIZE];
   /* XXX add entry for storing parameters */
   size_t  params;
+  bool    small;
   codelet_transform_fp call;
 } codelet_transform_entry;
 
-#define TRANSFORM_ENTRY_END { "", 0, NULL } 
+#define TRANSFORM_ENTRY_END { "", 0, true, NULL } 
   /**< Place this at the end of the transform_registry to halt iteration */
 
 /**
@@ -206,6 +209,8 @@ void * i_malloc(size_t size);
  */
 void i_free(void *p);
 
+char * i_itoa(int i);
+
 Wht * parse(char *s);
 
 void info(void);
@@ -216,7 +221,7 @@ wht_value max_norm(const wht_value *x, const wht_value *y, size_t N);
 
 wht_value * random_vector(size_t n);
 
-void codelet_transform(Wht *W, const char *name, int params[], size_t n);
+void codelet_transform(Wht *W, const char *name, int params[], size_t n, bool small);
 
 /**
  * \brief Initializes a null codelet
@@ -287,9 +292,7 @@ void error_msg_set(Wht *W, char *format, ...);
 
 char * error_msg_get(Wht *W);
 
-char * append_params_to_name(const char *ident, int params[], size_t n);
-
-void transform(Wht *W, const char *name, int params[], size_t n);
+void transform_from_string(Wht *W, const char *transform);
 
 /**
  * \todo Move these macros to an external interface.

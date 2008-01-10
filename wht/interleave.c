@@ -83,6 +83,7 @@ split_interleave_transform(Wht *W)
   split_transform(W);
 }
 
+#if 0
 void
 interleave_convert(Wht *W, int params[], size_t n)
 {
@@ -98,4 +99,4 @@ interleave_convert(Wht *W, int params[], size_t n)
     transform(W, "smallil", params, 1);
   }
 }
-
+#endif

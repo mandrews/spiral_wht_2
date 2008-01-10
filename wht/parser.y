@@ -22,20 +22,17 @@ struct params
   size_t size;
 };
 
-struct Wht* 
-parse_split(char *ident, struct nodes *nodes, struct params *params);
+struct Wht* parse_split(char *ident, struct nodes *nodes, struct params *params);
 
-struct Wht* 
-parse_small(char *ident, size_t size, struct params *params);
+struct Wht* parse_small(char *ident, size_t size, struct params *params);
 
-struct nodes *
-nodes_append(struct nodes *p, struct Wht *x);
+struct nodes * nodes_append(struct nodes *p, struct Wht *x);
 
-struct params *
-params_append(struct params *p, int i);
+struct nodes * empty_nodes();
 
-struct params *
-empty_params();
+struct params * params_append(struct params *p, int i);
+
+struct params * empty_params();
 
 /* This symbol points to the root of the parsed wht tree */
 struct Wht *wht_root;
@@ -109,10 +106,15 @@ nodes:
   {
     $$ = nodes_append(NULL, $1);
   }
+
   ;
 
 params:
-    params ',' NUMBER
+    /* Empty string */
+  {
+    $$ = empty_params();
+  }
+  | params ',' NUMBER
   {
     $$ = params_append($1,$3);
   }
@@ -136,8 +138,8 @@ parse_split(char *ident, struct nodes *nodes, struct params *params)
 
   W = split_init(nodes->values, nodes->size);
 
-  if (strcmp(ident, "split") != 0) 
-    codelet_transform(W, ident, params->values, params->size);
+  if (strcmp(ident, "split") != 0)  /* Do not apply transform to builtins */
+    codelet_transform(W, ident, params->values, params->size, false);
 
   i_free(ident);
   i_free(params);
@@ -153,8 +155,8 @@ parse_small(char *ident, size_t size, struct params *params)
 
   W = small_init(size);
 
-  if (strcmp(ident, "small") != 0) 
-    codelet_transform(W, ident, params->values, params->size);
+  if (strcmp(ident, "small") != 0)  /* Do not apply transform to builtins */
+    codelet_transform(W, ident, params->values, params->size, true);
 
   i_free(ident);
   i_free(params);
@@ -165,10 +167,8 @@ parse_small(char *ident, size_t size, struct params *params)
 struct nodes *
 nodes_append(struct nodes *p, struct Wht *x)
 {
-  if (p == NULL) {
-    p = i_malloc(sizeof(*p));
-    p->size = 0;
-  }
+  if (p == NULL) 
+    p = empty_nodes();
 
   p->values[p->size] = x;
   p->size++;
@@ -178,6 +178,18 @@ nodes_append(struct nodes *p, struct Wht *x)
 
   return p;
 }
+
+struct nodes *
+empty_nodes() 
+{
+  struct nodes *p;
+
+  p = i_malloc(sizeof(*p));
+  p->size = 0;
+
+  return p;
+}
+
 
 struct params *
 params_append(struct params *p, int x)
