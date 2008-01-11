@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# whtgen.rb
+# whtgen-simd
 #
 # Author: Michael Andrews <mjand@drexel.edu>
 # $Id$
@@ -9,7 +9,7 @@
 #      decrement ref count when tmp is output
 #      reuse tmps that have 0 ref count
 
-
+SCRIPT_NAME     = File.basename(__FILE__)
 SCRIPT_PATH     = File.dirname(__FILE__) 
 INDENT          = "  "
 
@@ -394,14 +394,14 @@ end
 
 def usage(msg = "")
   puts msg unless msg.empty?
-  puts "whtgen: CODELET"
+  puts "#{SCRIPT_NAME}: CODELET"
   puts
   puts "  small[N]            Unrolled codelet of size 2^N"
-  puts "  smallv(V)[N]        Unrolled codelet of size 2^n vectorized by V"
-  puts "  smallil(I)[N]       Unrolled codelet of size 2^n interleaved by I"
-  puts "  smallv(V,I,1)[N]    Unrolled codelet of size 2^n interleaved by I,"
+  puts "  smallv(V)[N]        Unrolled codelet of size 2^N vectorized by V"
+  puts "  smallil(I)[N]       Unrolled codelet of size 2^N interleaved by I"
+  puts "  smallv(V,I,1)[N]    Unrolled codelet of size 2^N interleaved by I,"
   puts "                      vectorized by V, with aligned loads"
-  puts "  smallv(V,I,0)[N]    Unrolled codelet of size 2^n interleaved by I,"
+  puts "  smallv(V,I,0)[N]    Unrolled codelet of size 2^N interleaved by I,"
   puts "                      vectorized by V, with unaligned loads"
   exit
 end
