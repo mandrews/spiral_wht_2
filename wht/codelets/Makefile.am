@@ -5,12 +5,12 @@ noinst_LTLIBRARIES = libwht_codelets.la
 
 include .codelets # defines $(CODELETS)
 
-BUILT_SOURCES= codelet_registry.h $(CODELETS) 
+BUILT_SOURCES= codelet_registry.h $(CODELETS) $(top_builddir)/whtgen/whtgen
 
 libwht_codelets_la_SOURCES = codelets.c codelets.h $(BUILT_SOURCES)
 
 if MAINTAINER_MODE	
-codelet_registry.h:
-	$(PERL) $(srcdir)/make_codelets.pl -m $(MAX_UNROLL_PKG) -l $(MAX_INTERLEAVE_PKG) -v $(MAX_VECTOR_PKG)
+codelet_registry.h: 
+	$(MAKE_CODELET_TARGETS)
 endif # MAINTAINER_MODE
 

@@ -239,10 +239,15 @@ AC_DEFINE_UNQUOTED(WHT_CC,"$CC",
 AC_DEFINE_UNQUOTED(WHT_CFLAGS,"$CFLAGS",
   [the compiler flags used to compile this.])
 
+MAKE_CODELET_TARGETS="$PERL $srcdir/make_codelets.pl -m $MAX_UNROLL_PKG"
+#-l $MAX_INTERLEAVE_PKG -v $MAX_VECTOR_PKG"
+AC_SUBST(MAKE_CODELET_TARGETS)
+
 AC_CONFIG_FILES([
    Makefile
    wht/Makefile
    wht/codelets/Makefile
+   whtgen/Makefile
    measure/Makefile
    measure/papi/Makefile
    search/Makefile

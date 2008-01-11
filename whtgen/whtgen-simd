@@ -13,6 +13,44 @@ SCRIPT_NAME     = File.basename(__FILE__)
 SCRIPT_PATH     = File.dirname(__FILE__) 
 INDENT          = "  "
 
+class Options
+  require 'optparse'
+  attr_reader :params
+  attr_reader :options
+  def initialize
+
+    @params = {
+      :size             => nil,
+      :vector_size      => 1,
+      :interleave_by    => 1,
+      :aligned          => false,
+    }
+
+    @options = OptionParser.new do |o|
+      o.banner = "Usage: #{SCRIPT_NAME} [OPTIONS]"
+      o.separator ""
+      o.on("-h", "--help", 
+        "Show this help message.") { puts @options.to_s; exit }
+
+      o.on("-n", "--wht-size=SIZE", Integer,
+        "Size of WHT to unroll.") { |x| @params[:size] = x.to_i } 
+
+      o.on("-v", "--vector-size=SIZE", Integer,
+        "Vector size.") { |x| @params[:vector_size] = x.to_i }
+
+      o.on("-i", "--interleave-by=FACTOR", Integer,
+        "Loop interleaving factor.") { |x| @params[:interleave_by] = x.to_i } 
+
+      o.on("-a", "--aligned", 
+        "Access aligned memory, i.e. at unit stride.") { |x| @params[:aligned] = true }
+
+      o.on("-d", "--debug",
+        "Turn on debuging.") { $DEBUG = true }
+
+    end
+  end
+end
+
 def assert
   raise "assert failed" unless yield
 end
@@ -392,75 +430,43 @@ class Generator
 
 end
 
-def usage(msg = "")
-  puts msg unless msg.empty?
-  puts "#{SCRIPT_NAME}: CODELET"
-  puts
-  puts "  small[N]            Unrolled codelet of size 2^N"
-  puts "  smallv(V)[N]        Unrolled codelet of size 2^N vectorized by V"
-  puts "  smallil(I)[N]       Unrolled codelet of size 2^N interleaved by I"
-  puts "  smallv(V,I,1)[N]    Unrolled codelet of size 2^N interleaved by I,"
-  puts "                      vectorized by V, with aligned loads"
-  puts "  smallv(V,I,0)[N]    Unrolled codelet of size 2^N interleaved by I,"
-  puts "                      vectorized by V, with unaligned loads"
+def die(msg)
+  puts msg
   exit
 end
 
-def parse(args)
-  if args =~ /(\w+)\((.*?)\)\[\s*(\d+)\s*\]/
-    name  = $1.nil? ? usage : $1.to_s
-    size  = $3.nil? ? usage : $3.to_i
-    # NOTE: regex in the statement clobbers $3
-    param = $2.nil? ? [] : $2.split(/\s*,\s*/).map { |x| x.to_i } 
-  elsif args =~ /(\w+)\[(\d+)\]/
-    name  = $1.nil? ? usage : $1.to_s
-    size  = $2.nil? ? usage : $2.to_i
-    param = []
-  else 
-    usage
+def parse_opts(opts, args)
+  begin
+    opts.options.parse!(args)
+  rescue => e
+    die(e.message)
+  end
+end
+
+def check_opts(opts)
+  die(" -n SIZE required") unless opts.params[:size]
+
+  k = opts.params[:interleave_by] * (2**opts.params[:size]) 
+  v = opts.params[:vector_size]
+
+  unless k > v
+    die("SIZE x INTERLEAVED_BY must be greater than VECTOR_SIZE")
   end
 
-  opts = {
-      :size             => size,
-      :vector_size      => 1,
-      :interleave_by    => 1,
-      :aligned          => false,
-  }
-
-  case [name, param.size]
-    when ['small',    0]
-    when ['smallv',   1]
-      opts[:vector_size]    = param[0]
-      opts[:aligned]        = true
-    when ['smallv',   3]
-      opts[:vector_size]    = param[0]
-      opts[:interleave_by]  = param[1]
-      opts[:aligned]        = param[2] == 1 ? true : false
-    when ['smallil',  1]
-      opts[:interleave_by]  = param[0]
-    else
-      usage
-  end
-
-  a = opts[:interleave_by] * (2**opts[:size]) 
-  b = opts[:vector_size]
-
-  unless a > b
-    usage("SIZE x INTERLEAVED_BY must be greater than VECTOR_SIZE")
-  end
-
-  return opts
 end
 
 # Main entry point 
 if $0 == __FILE__ 
-  usage unless ARGV.size > 0
-  opts = parse(ARGV[0])
+  opts = Options.new
 
-  m = opts[:size]
-  v = opts[:vector_size]
-  k = opts[:interleave_by]
-  a = opts[:aligned] 
+  parse_opts(opts, ARGV)
+
+  m = opts.params[:size]
+  v = opts.params[:vector_size]
+  k = opts.params[:interleave_by]
+  a = opts.params[:aligned] 
+
+  check_opts(opts)
 
   n = 2**m
 

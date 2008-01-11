@@ -17,13 +17,14 @@ use File::Basename qw/ dirname /;
 $opts = 'm:v:l:';
 getopts($opts, \%opt);
 
-$small      = $opt{m} || 6;
-$vector     = $opt{v} || 2;
-$interleave = $opt{l} || 4;
+$small          = $opt{m} || 0;
+$vector         = $opt{v} || 0;
+$interleave     = $opt{l} || 0;
 
-$path       = dirname($0);
-$whtgen     = "$path/../../whtgen/whtgen";
-$registry   = "$path/codelet_registry.h";
+$path           = dirname($0);
+$whtgen         = "$path/../../whtgen/whtgen";
+$whtgen_simd    = "$path/../../whtgen/whtgen-simd";
+$registry       = "$path/codelet_registry.h";
 
 @codelets = ();
 
@@ -43,14 +44,14 @@ sub function_name {
 
 # Generate unaligned unrolled codelets
 for ($i=1;$i<=$small;$i++) {
-  push(@codelets,("small[$i]",  "s_$i.c"));
+  push(@codelets,("-n $i", "small[$i]",  "s_$i.c"));
 }
 
 # Generate aligned vectorized codelets
 for ($k=1;$k<=$vector;$k++) {
   $v = 2**$k;
   for ($i=$k+1;$i<=$small;$i++) {
-    push(@codelets,("smallv($v)[$i]",  "s_$i\_v\_$v\_a.c"));
+    push(@codelets,("-n $i -v $v -a", "smallv($v)[$i]",  "s_$i\_v\_$v\_a.c"));
   }
 }
 
@@ -58,7 +59,7 @@ for ($k=1;$k<=$vector;$k++) {
 for ($i=1;$i<=$small;$i++) {
   for ($j=1;$j<=$interleave;$j++) {
     $k = 2**$j;
-    push(@codelets,("smallil($k)[$i]", "s_$i\_il\_$k.c"));
+    push(@codelets,("-n $i -i $i", "smallil($k)[$i]", "s_$i\_il\_$k.c"));
   }
 }
 
@@ -69,8 +70,8 @@ for ($i=1;$i<=$small;$i++) {
     for ($k=1;$k<=$vector;$k++) {
       $v = 2**$k;
       next unless $j >= $k; 
-      push(@codelets,("smallv($v,$l,0)[$i]", "s_$i\_il\_$l\_v\_$v.c"));
-      push(@codelets,("smallv($v,$l,1)[$i]", "s_$i\_il\_$l\_v\_$v\_a.c"));
+      push(@codelets,("-n $i -v $v -i $l   ", "smallv($v,$l,0)[$i]", "s_$i\_il\_$l\_v\_$v.c"));
+      push(@codelets,("-n $i -v $v -i $l -a", "smallv($v,$l,1)[$i]", "s_$i\_il\_$l\_v\_$v\_a.c"));
     }
   }
 }
@@ -80,11 +81,12 @@ $structs  = "";
 $depends  = "";
 
 while (@codelets) {
+  $args     = shift @codelets;
   $name     = shift @codelets;
   $file     = shift @codelets;
 
-  print "Generate:  $whtgen $name > $path/$file\n";
-  `$whtgen '$name' > $path/$file`; # Generate codelet
+  print "Generate:  $whtgen $args > $path/$file\n";
+  `$whtgen $args > $path/$file`; # Generate codelet
   $call = function_name("$path/$file"); # Grep for codelet function name
 
   print "Register: $name in $registry\n";

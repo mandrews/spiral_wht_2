@@ -9,13 +9,14 @@ AM_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/wht/codelets
 
 SUBDIRS = codelets 
 
-lib_LTLIBRARIES = libwht.la
-
 libwht_la_SOURCES = null.c direct.c small.c split.c utils.c wht.c \
 										scanner.l parser.y \
 										interleave.c vector.c
 
+lib_LTLIBRARIES = libwht.la
+
 libwht_la_LIBADD  = $(top_builddir)/wht/codelets/libwht_codelets.la
+
 
 # TODO should utilize WHT_SUFFIX to disambiguate types
 bin_PROGRAMS 					= wht_verify wht_convert wht_classify

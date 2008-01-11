@@ -36,8 +36,6 @@ Bugs:
 
   - Make large note about antilexographic storing of split children
 
-  - make maintainer-clean should wipe out .codelets
-
   - unaligned vector codelets are broken for sse
 
   - interleave parameter should be specified as K not 2^K

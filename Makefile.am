@@ -1,5 +1,10 @@
 OPTIONS_AUTOMAKE=gnu
-EXTRA_DIST=whtgen doc 
+EXTRA_DIST=doc 
 
-SUBDIRS=wht measure search model utils tests
+SUBDIRS=whtgen wht measure search model utils tests
+
+# Remove dependancy information
+maintainer-clean-local:
+	echo 'CODELETS =  ' > $(top_srcdir)/wht/codelets/.codelets
+	
 
