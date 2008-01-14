@@ -180,6 +180,9 @@ typedef struct {
   codelet_apply_fp call;
 } codelet_apply_entry;
 
+#define CODELET_APPLY_ENTRY(NAME,FUNC) \
+  { NAME, (codelet_apply_fp) &FUNC }
+
 #define CODELET_APPLY_ENTRY_END { "", (codelet_apply_fp) NULL }
   /**< Place this at the end of the transform_registry to halt iteration */
 

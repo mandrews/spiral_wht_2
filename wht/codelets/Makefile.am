@@ -11,6 +11,7 @@ libwht_codelets_la_SOURCES = codelets.c codelets.h $(BUILT_SOURCES)
 
 if MAINTAINER_MODE	
 codelet_registry.h: 
-	$(MAKE_CODELET_TARGETS)
+	$(BASH) make_small_codelets.sh -n $(MAX_UNROLL_PKG)
+	$(PERL) register_codelets.pl $(srcdir)
 endif # MAINTAINER_MODE
 
