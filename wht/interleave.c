@@ -8,7 +8,7 @@ small_interleave_transform(Wht *W)
 
   k = W->params[0];
 
-  k_max = (1 << WHT_MAX_INTERLEAVE);
+  k_max = WHT_MAX_INTERLEAVE;
 
   /* Check that codelet is small */
   if (W->children != NULL)

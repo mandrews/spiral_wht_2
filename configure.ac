@@ -13,7 +13,7 @@ AC_CANONICAL_HOST
 #  M A I N T A I N E R   P A R A M E T E R S
 # 
 MAX_UNROLL_PKG=4
-MAX_INTERLEAVE_PKG=2
+MAX_INTERLEAVE_PKG=4
 MAX_VECTOR_PKG=2
 
 AC_SUBST(MAX_UNROLL_PKG)
@@ -91,7 +91,7 @@ AC_DEFINE_UNQUOTED(WHT_MAX_UNROLL,$max_unroll,
 # 
 AC_ARG_ENABLE([interleave], 
   [AS_HELP_STRING([--enable-interleave=K],
-    [interleave 2^K loop iterations in codelet (default is disabled)])],
+    [interleave K loop iterations in codelet (default is disabled)])],
   [interleave=$enableval], 
   [interleave=$MAX_INTERLEAVE])
 

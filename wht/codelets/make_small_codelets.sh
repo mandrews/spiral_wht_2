@@ -11,14 +11,14 @@ path=`dirname $0`
 whtgen="$path/../../whtgen/whtgen"
 
 n=0
-while getopts "n:b:" i; do
+while getopts "n:" i; do
   case "$i" in
     "n") n=$OPTARG;
     ;;
   esac
 done
 
-if [ "$n" -eq 0 ] ; then
+if [ "$n" -lt 1 ] ; then
   usage;
 fi
 

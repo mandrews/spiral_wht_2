@@ -70,6 +70,10 @@ def expect_error(plan)
   end
 end
 
+def power_of_2(x)
+  return (x == (1 << (Math.log(x) / Math.log(2))))
+end
+
 def split(*a)
   "split[" + a.join(',') + "]"
 end
@@ -133,42 +137,42 @@ if $0 == __FILE__ # Main Entry Point
     end
   end 
 
-  i = env['max_interleave']
+  k = env['max_interleave']
 
-  if i > 0
+  if k > 0
     puts "\nInterleave Tests (1)"
     puts
 
-    for x in 1 .. i do
-      y = 2**x
-      expect_correct(splitil(smallil(1,y)*1, small(n)))
-      expect_correct(splitil(smallil(1,y)*2, small(n)))
+    for x in 2 .. k do
+      next unless power_of_2(x)
+      expect_correct(splitil(smallil(1,x)*1, small(n)))
+      expect_correct(splitil(smallil(1,x)*2, small(n)))
     end
 
     # Need to use splitil with smallil
-    for x in 1 .. i do
-      y = 2**x
-      expect_reject(split(smallil(1,y)*1, small(n)))
-      expect_reject(split(smallil(1,y)*2, small(n)))
+    for x in 2 .. k do
+      next unless power_of_2(x)
+      expect_reject(split(smallil(1,x)*1, small(n)))
+      expect_reject(split(smallil(1,x)*2, small(n)))
     end
 
-    for x in i+1 .. 2*i do
-      y = 2**x
-      expect_reject(splitil(smallil(1,y)*1, small(n)))
+    for x in 2*k .. 2*(k+1) do
+      next unless power_of_2(x)
+      expect_reject(splitil(smallil(1,x)*1, small(n)))
     end
 
-    for x in 2 .. i do
-      y = 2**x
-      expect_reject(splitil(smallil(1,y)*1, small(1)))
+    for x in 4 .. k do
+      next unless power_of_2(x)
+      expect_reject(splitil(smallil(1,x)*1, small(1)))
     end
 
-    for x in 2 .. i do
-      y = 2**x
-      expect_reject(smallil(n,y))
+    for x in 2 .. k do
+      next unless power_of_2(x)
+      expect_reject(smallil(n,x))
     end
   end 
 
-  if v > 0 and i > 0
+  if v > 0 and k > 0
     puts "\nVectorization Tests (2)"
     puts
 
@@ -183,18 +187,18 @@ if $0 == __FILE__ # Main Entry Point
       expect_correct(splitil(smallv(1,v,v,0), splitil(smallv(1,v,v,0),smallv(size,v))))
     end
 
-    min_il = i
+    min_k = k
 
     for size in v .. n do
       # Reject aligned vectors here
       expect_reject(splitil(
-        splitil(smallv(1,v,v,1), small(min_il)),
-        splitil(smallv(1,v,v,1), smallv(min_il,v))))
+        splitil(smallv(1,v,v,1), small(min_k)),
+        splitil(smallv(1,v,v,1), smallv(min_k,v))))
 
       # Accept general vectors here
       expect_correct(splitil(
-        splitil(smallv(1,v,v,0), small(min_il)),
-        splitil(smallv(1,v,v,0), smallv(min_il,v))))
+        splitil(smallv(1,v,v,0), small(min_k)),
+        splitil(smallv(1,v,v,0), smallv(min_k,v))))
     end
 
     # Reject when interleaved codelets do not have splitil parent
@@ -204,14 +208,14 @@ if $0 == __FILE__ # Main Entry Point
     end
 
     # Reject when interleaved codelets do not have parent
-    for x in 2 .. i do
-      y = 2**x
-      expect_reject(smallv(n,v,y,0))
-      expect_reject(smallv(n,v,y,1))
+    for x in 2 .. k do
+      next unless power_of_2(x)
+      expect_reject(smallv(n,v,x,0))
+      expect_reject(smallv(n,v,x,1))
     end
 
     for size in v .. n do
-      expect_correct(splitil(smallv(size,v,min_il,0),smallv(min_il,v)))
+      expect_correct(splitil(smallv(size,v,min_k,0),smallv(min_k,v)))
     end
 
   end
