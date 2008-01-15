@@ -83,20 +83,3 @@ split_interleave_transform(Wht *W)
   split_transform(W);
 }
 
-#if 0
-void
-interleave_convert(Wht *W, int params[], size_t n)
-{
-  int i;
-  size_t k_max;
-
-  transform(W, "splitil", NULL, 0);
-
-  k_max = (params[0] >> 1);
-
-  for (i = k_max; i >= 1; i--) {
-    int params[] = { (1 << i) };
-    transform(W, "smallil", params, 1);
-  }
-}
-#endif

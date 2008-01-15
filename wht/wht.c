@@ -175,7 +175,7 @@ codelet_transform_undo_recursive(Wht *W)
 }
 
 void
-transform_from_string(Wht *W, const char *transform)
+transform_from_string(Wht *W, char *transform)
 {
   Wht *T;
   T = parse(transform);
@@ -247,32 +247,5 @@ error_msg_get(Wht *W)
   }
 
   return NULL;
-}
-
-char *
-params_to_string(int params[], size_t n)
-{
-  const size_t DIGIT_SIZE = 32;
-  size_t bufsize;
-  int i;
-  char *buf;
-  char tmp[DIGIT_SIZE];
-
-  bufsize = DIGIT_SIZE*n + (n-1) + 1; 
-   /* n DIGITS + (n-1) COMMAS + '\0' */
-
-  buf = i_malloc(sizeof(char) * bufsize);
-
-  buf[0] = '\0';
-
-  for (i = 0; i < n; i++) {
-    snprintf(tmp, DIGIT_SIZE, "%d", params[i]);
-    strncat(buf, tmp, strlen(tmp));
-
-    if (i != n - 1)
-      strncat(buf, ",", 1);
-  }
-
-  return buf;
 }
 

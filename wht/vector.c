@@ -1,6 +1,8 @@
 #include "wht.h"
 #include "codelets.h"
 
+extern void small_interleave_transform(Wht *W);
+
 bool
 rightmost_tree(Wht *W)
 {
@@ -86,29 +88,3 @@ small_vector_transform(Wht *W)
   W->attr[vector_size] = v;
 }
 
-#if 0
-void
-vector_convert(Wht *W, int params[], size_t n)
-{
-  int i;
-  size_t k,v;
-
-  v = params[0];
-  k = params[1];
-
-  transform(W, "splitil", NULL, 0);
-
-  int params2[1] = { v };
-  transform(W, "smallv", params2, 1);
-
-  for (i = k; i >= 1; i = (i >> 1)) {
-    int params2[3] = { v, i, 1};
-    transform(W, "smallv", params2, 3);
-  }
-
-  for (i = k; i >= 1; i = (i >> 1)) {
-    int params2[3] = { v, i, 0};
-    transform(W, "smallv", params2, 3);
-  }
-}
-#endif

@@ -10,12 +10,12 @@ Milestones:
 
   - Retooled version of GA
 
-  - Retool old versions of whtgen
-
   - Perl or C version of whtgen
     - Should accept sse and sse2 flags (shuf is platform specific)
 
   - More perl test targets
+
+  - Integrate PAPI instruction count interpolation into IC Model
 
 Bugs:
 
@@ -38,5 +38,10 @@ Bugs:
 
   - unaligned vector codelets are broken for sse
 
-  - interleave parameter should be specified as K not 2^K
+  - build process needs to be documented
+
+  - extension writing process needs to be documented
+
+
+
 

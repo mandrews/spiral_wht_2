@@ -1,4 +1,8 @@
-EXTRA_DIST = wht.h wht_vector.h registry.h
+EXTENSION_FILES = interleave.c vector.c
+EXTENSION_DISTS = simd.h
+
+EXTRA_DIST = wht.h registry.h $(EXTENSION_DISTS)
+
 BUILT_SOURCES = scanner.h scanner.c parser.h parser.c 
 
 AM_YFLAGS = -d
@@ -10,8 +14,7 @@ AM_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/wht/codelets
 SUBDIRS = codelets 
 
 libwht_la_SOURCES = null.c direct.c small.c split.c utils.c wht.c \
-										scanner.l parser.y \
-										interleave.c vector.c
+										scanner.l parser.y $(EXTENSION_FILES)
 
 lib_LTLIBRARIES = libwht.la
 

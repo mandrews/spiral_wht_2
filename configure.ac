@@ -99,10 +99,6 @@ if test $interleave -gt $MAX_INTERLEAVE_PKG; then
   AC_MSG_ERROR([--enable-interleave larger than package was built for])
 fi
 
-AC_DEFINE_UNQUOTED(WHT_MAX_INTERLEAVE,$interleave,
-  [interleave 2^K loop iterations in codelet])
-
-
 
 # 
 #  V E C T O R I Z A T I O N
@@ -128,6 +124,10 @@ if test "$have_sse" = "yes"; then
 
   if test $VECTOR_SIZE -gt $MAX_VECTOR_PKG; then
     AC_MSG_ERROR([--enable-sse vectors are larger than package was built for])
+  fi
+
+  if test $interleave -eq 0; then
+    interleave=$VECTOR_SIZE;
   fi
 
 fi
@@ -156,9 +156,18 @@ if test "$have_sse2" = "yes"; then
     AC_MSG_ERROR([--enable-sse2 vectors are larger than package was built for])
   fi
 
+  if test $interleave -eq 0; then
+    interleave=$VECTOR_SIZE;
+  fi
+
 fi
 
 AC_DEFINE_UNQUOTED(WHT_VECTOR_SIZE,$VECTOR_SIZE, [Size of vector to use.])
+
+AC_DEFINE_UNQUOTED(WHT_MAX_INTERLEAVE,$interleave,
+  [interleave K loop iterations in codelet])
+
+
 
 # Checks for library functions.
 AC_FUNC_MALLOC

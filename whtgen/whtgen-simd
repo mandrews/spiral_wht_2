@@ -360,6 +360,7 @@ STRUCTS: {
 */
 
 #include "wht.h"
+#include "simd.h"
 
 void #{@name}(Wht *W, long S, long U, wht_value *x)
 {

@@ -8,7 +8,6 @@
 #define WHT_H
 
 #include "config.h"
-#include "wht_vector.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -158,32 +157,18 @@ struct split_children {
  */
 typedef struct {
   char    name[MAX_CODELET_NAME_SIZE];
-  /* XXX add entry for storing parameters */
   size_t  params;
   bool    small;
   codelet_transform_fp call;
 } codelet_transform_entry;
 
+#define SPLIT_TRANSFORM_ENTRY(NAME, N, FUNC) \
+  { NAME, N, false, (codelet_transform_fp) &FUNC }
+
+#define SMALL_TRANSFORM_ENTRY(NAME, N, FUNC) \
+  { NAME, N,  true, (codelet_transform_fp) &FUNC }
+
 #define TRANSFORM_ENTRY_END { "", 0, true, NULL } 
-  /**< Place this at the end of the transform_registry to halt iteration */
-
-/**
- * \brief Structure for registering new computational (unrolled) codelets with the package.
- *
- * \see codelets/codelets_registry.h
- *
- * \param name    Identifier associated with codelet
- * \param call    Interface to initialize codelet codelet
- */
-typedef struct {
-  char  *name;
-  codelet_apply_fp call;
-} codelet_apply_entry;
-
-#define CODELET_APPLY_ENTRY(NAME,FUNC) \
-  { NAME, (codelet_apply_fp) &FUNC }
-
-#define CODELET_APPLY_ENTRY_END { "", (codelet_apply_fp) NULL }
   /**< Place this at the end of the transform_registry to halt iteration */
 
 
@@ -290,7 +275,7 @@ void error_msg_set(Wht *W, char *format, ...);
 
 char * error_msg_get(Wht *W);
 
-void transform_from_string(Wht *W, const char *transform);
+void transform_from_string(Wht *W, char *transform);
 
 /**
  * \todo Move these macros to an external interface.

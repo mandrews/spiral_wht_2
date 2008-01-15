@@ -4,18 +4,41 @@
 #include "wht.h"
 
 /* Transform extensions to core package */
+#if ((WHT_MAX_INTERLEAVE > 0) || (WHT_VECTOR_SIZE > 0))
 void split_interleave_transform(Wht *W);
+#endif
+
+#if ((WHT_MAX_INTERLEAVE > 0)) 
 void small_interleave_transform(Wht *W);
+#endif
+
+#if ((WHT_MAX_INTERLEAVE > 0) && (WHT_VECTOR_SIZE > 0))
 void small_vector_transform(Wht *W);
+#endif
+
+#if ((WHT_VECTOR_SIZE > 0))
 void small_right_vector_transform(Wht *W);
+#endif
 
 static const codelet_transform_entry 
 codelet_transforms_registry[] = {
-  /* XXX: TRANSFORM_ENTRY() */
-  { "splitil" ,     0, false, (codelet_transform_fp) &split_interleave_transform},
-  { "smallil" ,     1,  true, (codelet_transform_fp) &small_interleave_transform},
-  { "smallv" ,      3,  true, (codelet_transform_fp) &small_vector_transform},
-  { "smallv" ,      1,  true, (codelet_transform_fp) &small_right_vector_transform},
+
+#if ((WHT_MAX_INTERLEAVE > 0) || (WHT_VECTOR_SIZE > 0))
+  SPLIT_TRANSFORM_ENTRY("splitil", 0, split_interleave_transform),
+#endif
+
+#if ((WHT_MAX_INTERLEAVE > 0)) 
+  SMALL_TRANSFORM_ENTRY("smallil", 1, small_interleave_transform),
+#endif
+
+#if ((WHT_MAX_INTERLEAVE > 0) && (WHT_VECTOR_SIZE > 0))
+  SMALL_TRANSFORM_ENTRY("smallv",  3, small_vector_transform),
+#endif
+
+#if ((WHT_VECTOR_SIZE > 0))
+  SMALL_TRANSFORM_ENTRY("smallv",  1, small_right_vector_transform),
+#endif
+
   TRANSFORM_ENTRY_END /* This halts iteration on the registry */
 };
 
