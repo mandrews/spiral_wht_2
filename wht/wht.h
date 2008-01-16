@@ -146,32 +146,6 @@ struct split_children {
   Wht *Ws[MAX_SPLIT_NODES];        /**< Smaller WHTs        */
 };
 
-/**
- * \brief Structure for registering new codelet transforms with the package.
- *
- * \see registry.h
- *
- * \param name    Identifier associated with transform
- * \param params  Number of parameters accepted by transform
- * \param call    Interface to transform codelet
- */
-typedef struct {
-  char    name[MAX_CODELET_NAME_SIZE];
-  size_t  params;
-  bool    small;
-  codelet_transform_fp call;
-} codelet_transform_entry;
-
-#define SPLIT_TRANSFORM_ENTRY(NAME, N, FUNC) \
-  { NAME, N, false, (codelet_transform_fp) &FUNC }
-
-#define SMALL_TRANSFORM_ENTRY(NAME, N, FUNC) \
-  { NAME, N,  true, (codelet_transform_fp) &FUNC }
-
-#define TRANSFORM_ENTRY_END { "", 0, true, NULL } 
-  /**< Place this at the end of the transform_registry to halt iteration */
-
-
 /*
  * Functions
  */

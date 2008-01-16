@@ -1,0 +1,71 @@
+/**
+\page install INSTALL
+
+\section _unix In a UNIX environment:
+
+-# Unpack the archive:
+  \code
+  tar -zxf spiral_wht-2.0.tar.gz SRC_DIR  
+  \endcode
+-# Optionally, create a build directory so that the source directory doesn't get 
+   polluted with object files and temporaries:
+  \code
+  mkdir BUILD_DIR; cd BUILD_DIR
+  \endcode
+  Otherwise assume that SRC_DIR and BUILD_DIR are the same.
+-# Next, choose from various optimizations listed by:
+  \code
+  ../SRC_DIR/configure --help
+  \endcode
+  Some noteworthy options are:
+  \verbatim
+    Usage: ./configure [OPTION]... [VAR=VALUE]...
+
+    Optional Features:
+      --enable-double         compile with double precision floating point
+                              (default is enabled)
+      --enable-float          compile wht with single precision floating point
+                              (default is disabled)
+      --enable-max-unroll=N   maximum unrolled codelet size (default is 6)
+      --enable-interleave=K   interleave K loop iterations in codelet (default
+                              is disabled)
+      --enable-sse            enable SSE optimizations (default is disabled)
+      --enable-sse2           enable SSE2 optimizations (default is disabled)
+
+    Optional Packages:
+      --with-papi=PATH        compile with PAPI support, PATH is location of PAPI
+  \endverbatim
+-# Once you have selected appropriate optimizations, configure with an
+  installation directory:
+  \code
+  ../SRC_DIR/configure --prefix=INSTALL_DIR [OPTIONS]
+  \endcode
+-# Compile and install the package:
+  \code
+  make
+  make install
+  \endcode
+-# Later on, you may want to uninstall the package:
+  \code
+  make uninstall
+  \endcode
+\section _win32 In a Windows environment:
+
+Presently there is no native Windows support for this package.  Downloading and
+installing the Cygwin environment may work.
+  \par
+  http://www.cygwin.com
+
+\section _manifest Installed files
+
+  For using the programs and libraries installed by the package see the MANIFEST
+  file.
+
+\section _contact Contact Information
+
+For questions and problems, please contact
+
+  \par
+  mjand@drexel.edu
+
+*/

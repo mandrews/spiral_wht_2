@@ -6,7 +6,7 @@ function usage()
   exit 1
 }
 
-function to_text() 
+function to_txt() 
 {
   html=$1
   text=$2
@@ -15,21 +15,18 @@ function to_text()
 
 }
 
+# Syntax highlight languages that are unsupported by Doxygen
 function highlight_extra()
 {
   html=$1
   name=$2
   synx=$3
-  doxy="doc/extra/${html}.dox"
-  css="doc/html/highlight.css"
+  doxy="doc/tmp/${html}.dox"
   echo '/**' > ${doxy}
   echo "\page ${html} ${name}" >> ${doxy}
   echo "\htmlonly" >> ${doxy}
-  #echo '<link href="highlight.css" rel="stylesheet" type="text/css">' >> ${doxy}
   echo '<div class="fragment"><pre class="fragment">' >> ${doxy}
   source-highlight -n -s ${synx} < ${name} >> ${doxy}
-
-  # highlight -c ${css} -f -j 5 -l -m 0 -S ${synx} -i ${name} >> ${doxy}
   echo '</div></pre>' >> ${doxy}
   echo "\endhtmlonly" >> ${doxy}
   echo "*/" >> ${doxy}
@@ -45,7 +42,7 @@ while getopts "v:" i; do
   esac
 done
 
-echo 'Highlighting Makefile(s)'
+echo 'Highlighting Unsupported Files'
 highlight_extra 'wht_Makefile_am' 'wht/Makefile.am' 'am'
 
 echo 'Rebuilding Doxygen (use -v to see output)'
@@ -66,5 +63,6 @@ case ${v} in
 esac;
 
 echo 'Converting HTML to Text'
-to_text doc/html/readme.html README
-to_text doc/html/authors.html AUTHORS
+to_txt doc/html/readme.html README
+to_txt doc/html/authors.html AUTHORS
+to_txt doc/html/install.html INSTALL

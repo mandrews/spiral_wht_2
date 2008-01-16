@@ -1,18 +1,21 @@
 /**
 \page readme README
 
-\section _overview Overview
+\section _description Description
 
   The WHT package exists for mostly for pedagogical purposes and serves as a 
-  reference model for exploring architecture specific optimizations.
+  reference model for exploring and experimenting with 
+  architecture specific optimizations.
 
   This package is a modified version of the Spiral WHT 1.8 package:
 
   \par
     http://www.spiral.net/software/wht.html
 
+  \attention 
   It is presently a prelease, and some features and data structures will change
   before the next release.
+  
 
 \section _background Background
   This package has been created as part of the SPIRAL project:
@@ -24,12 +27,12 @@
   optimization, and platform adaptation of digital signal
   processing (DSP) algorithms.   
 
-  The original design of this package was based on an fft package 
+  The original design of this package was based on an FFT package 
   by Sebastian Egner:
 
   \par
-   
    http://avalon.ira.uka.de/home/egner
+
   The latest version incorporates a more modular design based on the FFTW package
   by Matteo Frigo, and Steven G. Johnson:
 

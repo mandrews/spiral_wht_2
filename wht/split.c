@@ -18,7 +18,7 @@
  */
 
 /**
- * \file split.c
+ * \file wht/split.c
  *
  * \brief Implementation of methods for applying WHT recursive split
  */
@@ -51,7 +51,7 @@ split_apply(Wht *W, long S, size_t U, wht_value *x)
   S1 = 1;
 
 
-  /* step through the smaller whts */
+  /* Iterate over children WHTs, stored anti lexigraphically  */
   for (i = 0; i < nn; i++) {
     Ni = W->children->ns[i];
     R /= Ni;
@@ -93,7 +93,7 @@ split_to_string(Wht *W)
 
   resize = bufsize;
 
-  /* Iterate over children whts, stored anti lexigraphically  */
+  /* Iterate over children WHTs, stored anti lexigraphically  */
   for (i = 0; i < nn; i++) {
     j       = nn - i - 1;
     tmp     = W->children->Ws[j]->to_string(W->children->Ws[j]);
@@ -126,11 +126,6 @@ split_transform(Wht *W)
     (W->children->Ws[i]->transform)(W->children->Ws[i]);
 }
 
-/**
- * All new split codelets registered with the package should 'derive' from this
- * codelet, i.e. first initialize the codelet with init_split and then
- * proceed to customize the codelet.
- */
 Wht *
 split_init(Wht *Ws[], size_t nn)
 {
