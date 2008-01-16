@@ -21,9 +21,8 @@
 
 #include "wht.h"
 
-#include "getopt.h"
+#include <getopt.h>
 #include <string.h>
-
 #include <stdio.h>
 
 static void
@@ -67,11 +66,14 @@ main(int argc, char **argv)
         usage();
     }
 
-  if (func == NULL)
-    usage();
-
   if (plan == NULL)
     getline(&plan, &len, stdin);
+
+  if (plan == NULL)
+    usage();
+
+  if (func == NULL)
+    usage();
 
   Wht *W;
   char *buf;

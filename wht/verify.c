@@ -30,9 +30,13 @@
 */
 
 
+#define _GNU_SOURCE
+
 #include "wht.h"
 
-#include "getopt.h"
+#include <getopt.h>
+#include <string.h>
+#include <stdio.h>
 
 static void
 usage() 
@@ -48,6 +52,7 @@ int
 main(int argc, char **argv)
 {
   char *wht_plan;
+  size_t len;
   int c;
 
   wht_plan = NULL;
@@ -57,7 +62,7 @@ main(int argc, char **argv)
   while ((c = getopt (argc, argv, "hvw:")) != -1)
     switch (c) {
       case 'w':
-        wht_plan = optarg;
+        wht_plan = strdup(optarg);
         break;
       case 'h':
         usage();
@@ -67,6 +72,9 @@ main(int argc, char **argv)
       default:
         usage();
     }
+
+  if (wht_plan == NULL)
+    getline(&wht_plan, &len, stdin);
 
   if (wht_plan == NULL)
     usage();
@@ -103,10 +111,6 @@ main(int argc, char **argv)
 
   buf = W->to_string(W);
 
-#if 0
-  printf("%s\n", buf);
-#endif
-
   if (wht_max_norm(x,y,N) < WHT_STABILITY_THRESHOLD)
     printf("correct\n");   
   else
@@ -119,6 +123,7 @@ main(int argc, char **argv)
   free(y);
 
   free(buf);
+  free(wht_plan);
 
   return 0;
 }
