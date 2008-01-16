@@ -1,13 +1,12 @@
 #!/usr/bin/env perl
-#  make_codelets.pl
+#  register_codelets.pl
 #
-#  Generate codelets and register them in a C array and with the automake
+#  Registers codelets in the codelets_registry and with the automake
 #  system.
 #
 #  Author: Michael Andrews <mjand@drexel.edu>
 #  Version: 
 #  Date:
-#
 
 use File::Basename qw/ basename dirname /;
 

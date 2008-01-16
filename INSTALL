@@ -35,7 +35,7 @@ Some noteworthy options are:
     --enable-float          compile wht with single precision floating point
                             (default is disabled)
     --enable-max-unroll=N   maximum unrolled codelet size (default is 6)
-    --enable-interleave=K   interleave 2^K loop iterations in codelet (default
+    --enable-interleave=K   interleave K loop iterations in codelet (default
                             is disabled)
     --enable-sse            enable SSE optimizations (default is disabled)
     --enable-sse2           enable SSE2 optimizations (default is disabled)

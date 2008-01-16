@@ -37,3 +37,4 @@ wht_classify_LDADD		= libwht.la
 # See: http://lists.gnu.org/archive/html/automake/2007-11/msg00001.html
 scanner.h:
 	$(LEX) --outfile=scanner.c scanner.l
+

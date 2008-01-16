@@ -17,6 +17,8 @@ Milestones:
 
   - Integrate PAPI instruction count interpolation into IC Model
 
+  - Decouple randtree from wht build constraints
+
 Bugs:
 
   - Some minor memory leak issues with parser.y
@@ -41,7 +43,4 @@ Bugs:
   - build process needs to be documented
 
   - extension writing process needs to be documented
-
-
-
 
