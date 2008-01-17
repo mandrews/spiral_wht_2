@@ -19,7 +19,7 @@ parse(char *in)
 
   W = wht_root;
 
-  W->transform(W);
+  rule_apply(W);
 
   yy_delete_buffer(buf);
 
@@ -51,7 +51,7 @@ dump(Wht *W, FILE *fd)
   fprintf(fd, "parent:       %-p\n",   W->parent);
   fprintf(fd, "apply:        %-p\n",   W->apply);
   fprintf(fd, "free:         %-p\n",   W->free);
-  fprintf(fd, "transform:    %-p\n",   W->transform);
+  fprintf(fd, "rule:         %-p\n",   W->rule);
   fprintf(fd, "to_string:    %-p\n",   W->to_string);
   fprintf(fd, "error_msg:    %-s\n",   W->error_msg);
   fprintf(fd, "\n");
@@ -82,62 +82,130 @@ i_itoa(int i)
   return buf;
 }
 
-codelet_transform_fp 
-codelet_transform_lookup(const char *name, size_t params, bool small)
+rule_data *
+rule_data_init()
 {
-  codelet_transform_entry *p;
+  size_t i;
+  rule_data *rule;
 
-  p = (codelet_transform_entry *) codelet_transforms_registry; 
-  for (; p != NULL && (codelet_transform_fp) p->call != NULL; ++p)
-    if ((strncmp(name, p->name, MAX_CODELET_NAME_SIZE) == 0) && (params == p->params) && (small == p->small))
-      return p->call;
+  rule = i_malloc(sizeof(*rule));
+
+  rule->ident[0] = '\0';
+
+  rule->n = 0;
+
+  for (i = 0; i < MAX_RULE_PARAMS; i++)
+    rule->params[i] = UNSET_PARAMETER;
+
+  rule->call = NULL;
+
+  return rule;
+}
+
+rule_data *
+rule_data_copy(rule_data *src)
+{
+  int i;
+  rule_data *dst;
+
+  dst = rule_data_init();
+
+  dst->n        = src->n;
+  dst->is_small = src->is_small;
+  dst->call     = src->call;
+
+  strcpy(dst->ident, src->ident);
+
+  for (i = 0; i < MAX_RULE_PARAMS; i++)
+    dst->params[i] = src->params[i];
+
+  return dst;
+}
+
+void
+rule_data_free(rule_data *rule)
+{
+  i_free(rule);
+}
+
+void
+rule_apply(Wht *W)
+{
+  if (W->children == NULL) {
+    if (W->rule->call != NULL)
+      return W->rule->call(W);
+    else
+      return;
+  }
+
+  size_t i, nn;
+
+  nn = W->children->nn;
+
+  if (W->rule->call != NULL)
+    W->rule->call(W);
+
+  for (i = 0; i < nn; i++) 
+    rule_apply(W->children->Ws[i]);
+}
+
+rule_data *
+rule_lookup(const char *ident, size_t n, bool is_small)
+{
+  rule_data *p;
+
+  p = (rule_data *) rule_registry; 
+  for (; p != NULL && (rule_fp) p->call != NULL; ++p) {
+    if ((n == p->n) && 
+        (is_small == p->is_small) &&
+        (strncmp(ident, p->ident, MAX_RULE_IDENT_SIZE) == 0)) {
+      return p;
+    }
+  }
 
   return NULL;
 }
 
 void
-codelet_transform(Wht *W, const char *name, int params[], size_t n, bool small)
+rule_attach(Wht *W, const char *ident, int params[], size_t n, bool is_small)
 {
-  codelet_transform_fp f;
   int i;
+  rule_data *p;
 
-  /* Only attempt to apply small transforms to smalls and visa versa */
-  if ((small && W->children != NULL) || ((!small) && W->children == NULL))
+  /* Only attempt to apply small rules to smalls and visa versa */
+  if ((is_small && W->children != NULL) || ((!is_small) && W->children == NULL))
     return;
 
-  f = codelet_transform_lookup(name, n, small);
+  p = rule_lookup(ident, n, is_small);
 
-  if (f == NULL) 
-    wht_exit("%s was not registered in the transform table", name);
+  if (p == NULL) 
+    wht_exit("%s was not registered in the rule table", ident);
 
-  W->transform = f;
-  W->n_params = n;
+  W->rule = rule_data_copy(p);
 
-  for (i = 0; i < n; i++)
-    W->params[i] = params[i];
+  for (i = 0; i < MAX_RULE_PARAMS; i++)
+    W->rule->params[i] = params[i];
 
-  i_free(W->name);
-
-  W->name = strdup(name);
+  W->name = strdup(ident);
 }
 
 void
-codelet_transform_recursive(Wht *W, const char *name, int params[], size_t n, bool small)
+rule_attach_recursive(Wht *W, const char *ident, int params[], size_t n, bool is_small)
 {
   int i;
 
   if ((strcmp(W->name, "small") == 0) || (strcmp(W->name, "split") == 0))
-    codelet_transform(W, name, params, n, small);
+    rule_attach(W, ident, params, n, is_small);
 
   if (W->children == NULL)
     return;
 
   for (i = 0; i < W->children->nn; i++)
-    codelet_transform_recursive(W->children->Ws[i], name, params, n, small);
+    rule_attach_recursive(W->children->Ws[i], ident, params, n, is_small);
 }
 
 void
-codelet_transform_undo(Wht *W)
+rule_attach_undo(Wht *W)
 {
   if (W->name != NULL)
     i_free(W->name);
@@ -145,59 +213,60 @@ codelet_transform_undo(Wht *W)
   if (W->error_msg != NULL)
     i_free(W->error_msg);
 
-  W->n_params   = 0; /* XXX: Reset params */
+  rule_data_free(W->rule);
+
   W->error_msg  = NULL;
+
+  W->rule       = rule_data_init();
 
   if (W->children == NULL) {
     W->name       = strdup("small");
     W->apply      = codelet_apply_lookup(W);
-    W->transform  = null_transform;
   } else {
     W->name       = strdup("split");
     W->apply      = split_apply;
-    W->transform  = split_transform;
   }
 }
 
 void
-codelet_transform_undo_recursive(Wht *W)
+rule_attach_undo_recursive(Wht *W)
 {
   int i;
 
   if (W->error_msg != NULL) 
-    codelet_transform_undo(W);
+    rule_attach_undo(W);
 
   if (W->children == NULL)
     return;
 
   for (i = 0; i < W->children->nn; i++)
-    codelet_transform_undo_recursive(W->children->Ws[i]);
+    rule_attach_undo_recursive(W->children->Ws[i]);
 }
 
 void
-transform_from_string(Wht *W, char *transform)
+rule_apply_from_string(Wht *W, char *transform)
 {
   Wht *T;
   T = parse(transform);
 
-  char   *name;
+  char   *ident;
   int    *params;
   size_t  n;
-  bool    small;
+  bool    is_small;
 
-  name    = T->name;
-  params  = T->params;
-  n       = T->n_params;
-  small   = (bool) (T->children == NULL);
+  ident       = T->rule->ident;
+  params      = T->rule->params;
+  n           = T->rule->n;
+  is_small    = (bool) (T->children == NULL);
 
   /* Backtrack any previous errors */
-  codelet_transform_undo_recursive(W);
+  rule_attach_undo_recursive(W);
   /* Tag with transform function */
-  codelet_transform_recursive(W, name, params, n, small);
+  rule_attach_recursive(W, ident, params, n, is_small);
   /* Apply transform function */
-  W->transform(W);
+  rule_apply(W);
   /* Backtrack when error occurs */
-  codelet_transform_undo_recursive(W);
+  rule_attach_undo_recursive(W);
 
   wht_free(T);
 }

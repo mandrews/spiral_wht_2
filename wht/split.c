@@ -115,17 +115,6 @@ split_to_string(Wht *W)
   return buf;
 }
 
-void
-split_transform(Wht *W)
-{
-  size_t i, nn;
-
-  nn = W->children->nn;
-
-  for (i = 0; i < nn; i++) 
-    (W->children->Ws[i]->transform)(W->children->Ws[i]);
-}
-
 Wht *
 split_init(Wht *Ws[], size_t nn)
 {
@@ -144,7 +133,6 @@ split_init(Wht *Ws[], size_t nn)
   W            = null_init(n, "split");
   W->apply     = split_apply;
   W->free      = split_free;
-  W->transform = split_transform;
   W->to_string = split_to_string;
 
 

@@ -3,16 +3,16 @@
  *
  * \brief Mechanism for registering new codelets into the WHT Package.
  *
- * Each new transform registered should implement the \ref codelet_transform_fp
+ * Each new rule registered should implement the \ref rule_fp
  * interface.  Registration is by:
  *
  * -# Defining the external symbol outside the table
  * \code
- * extern void my_transform(Wht *W);
+ * extern void my_rule(Wht *W);
  * \endcode
  * -# Defining the entry inside the table
  * \code
- * SMALL_TRANSFORM_ENTRY("mysmall",  0, my_transform),
+ * SMALL_RULE_ENTRY("mysmall",  0, my_rule),
  * \endcode
  *
  * Using macro guards to conditionally include entries
@@ -27,79 +27,66 @@
 #include "wht.h"
 
 /**
- * \brief Structure for registering new codelet transforms with the package.
+ * \brief Registers split rule
  *
- * \param name    Identifier associated with transform
- * \param params  Number of parameters accepted by transform
- * \param call    Interface to transform codelet
+ * \param NAME  Identifier associated with rule
+ * \param N     Number of parameters associated with rule
+ * \param FUNC  Rule attachment function
  */
-typedef struct {
-  char    name[MAX_CODELET_NAME_SIZE];
-  size_t  params;
-  bool    small;
-  codelet_transform_fp call;
-} codelet_transform_entry;
+#define SPLIT_RULE_ENTRY(NAME, N, FUNC) \
+  { NAME, N, {}, false, (rule_fp) &FUNC }
 
 /**
- * \brief Registers split transform 
+ * \brief Registers small rule
  *
- * \param NAME  Identified associated with transform
- * \param N     Number of parameters
- * \param FUNC  Transform function
+ * \param NAME  Identifier associated with rule
+ * \param N     Number of parameters associated with rule
+ * \param FUNC  Rule attachment function
  */
-#define SPLIT_TRANSFORM_ENTRY(NAME, N, FUNC) \
-  { NAME, N, false, (codelet_transform_fp) &FUNC }
+#define SMALL_RULE_ENTRY(NAME, N, FUNC) \
+  { NAME, N,  {}, true, (rule_fp) &FUNC }
 
-/**
- * \brief Registers small transform 
- * \param NAME  Identified associated with transform
- * \param N     Number of parameters
- * \param FUNC  Transform function
- */
-#define SMALL_TRANSFORM_ENTRY(NAME, N, FUNC) \
-  { NAME, N,  true, (codelet_transform_fp) &FUNC }
-
-#define TRANSFORM_ENTRY_END { "", 0, true, NULL } 
-  /**< Place this at the end of the transform_registry to halt iteration */
+#define RULE_ENTRY_END { "", 0, {}, true, NULL } 
+  /**< Place this at the end of the rule_registry to halt iteration */
 
 
 /* Transform extensions to core package */
 #if ((WHT_MAX_INTERLEAVE > 0) || (WHT_VECTOR_SIZE > 0))
-extern void split_interleave_transform(Wht *W);
+extern void split_interleave_rule(Wht *W);
 #endif
 
 #if ((WHT_MAX_INTERLEAVE > 0)) 
-extern void small_interleave_transform(Wht *W);
+extern void small_interleave_rule(Wht *W);
 #endif
 
 #if ((WHT_MAX_INTERLEAVE > 0) && (WHT_VECTOR_SIZE > 0))
-extern void small_vector_transform(Wht *W);
+extern void small_vector_rule(Wht *W);
 #endif
 
 #if ((WHT_VECTOR_SIZE > 0))
-extern void small_right_vector_transform(Wht *W);
+extern void small_right_vector_rule(Wht *W);
 #endif
 
-static const codelet_transform_entry 
-codelet_transforms_registry[] = {
+static const rule_data 
+rule_registry[] = {
 
 #if ((WHT_MAX_INTERLEAVE > 0) || (WHT_VECTOR_SIZE > 0))
-  SPLIT_TRANSFORM_ENTRY("splitil", 0, split_interleave_transform),
+  SPLIT_RULE_ENTRY("splitil", 0, split_interleave_rule),
 #endif
 
 #if ((WHT_MAX_INTERLEAVE > 0)) 
-  SMALL_TRANSFORM_ENTRY("smallil", 1, small_interleave_transform),
+  SMALL_RULE_ENTRY("smallil", 1, small_interleave_rule),
 #endif
 
 #if ((WHT_MAX_INTERLEAVE > 0) && (WHT_VECTOR_SIZE > 0))
-  SMALL_TRANSFORM_ENTRY("smallv",  3, small_vector_transform),
+  SMALL_RULE_ENTRY("smallv",  3, small_vector_rule),
 #endif
 
 #if ((WHT_VECTOR_SIZE > 0))
-  SMALL_TRANSFORM_ENTRY("smallv",  1, small_right_vector_transform),
+  SMALL_RULE_ENTRY("smallv",  1, small_right_vector_rule),
 #endif
 
-  TRANSFORM_ENTRY_END /* This halts iteration on the registry */
+  RULE_ENTRY_END /* This halts iteration on the registry */
 };
 
 #endif/*REGISTRY_H*/

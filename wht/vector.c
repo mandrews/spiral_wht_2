@@ -1,7 +1,7 @@
 #include "wht.h"
 #include "codelets.h"
 
-extern void small_interleave_transform(Wht *W);
+extern void small_interleave_rule(Wht *W);
 
 bool
 rightmost_tree(Wht *W)
@@ -21,11 +21,11 @@ rightmost_tree(Wht *W)
 }
 
 void
-small_right_vector_transform(Wht *W)
+small_right_vector_rule(Wht *W)
 {
   size_t v;
 
-  v = W->params[0];
+  v = W->rule->params[0];
 
   if (v != WHT_VECTOR_SIZE)
     return error_msg_set(W, "not configured for vectors of size %d",v);
@@ -42,16 +42,16 @@ small_right_vector_transform(Wht *W)
 }
 
 void
-small_vector_transform(Wht *W)
+small_vector_rule(Wht *W)
 {
   /** 
    * \todo Check assumptions about number of parameters
    */
   size_t v, k, a;
 
-  v = W->params[0];
-  k = W->params[1];
-  a = W->params[2];
+  v = W->rule->params[0];
+  k = W->rule->params[1];
+  a = W->rule->params[2];
 
   if (v != WHT_VECTOR_SIZE)
     return error_msg_set(W, "not configured for vectors of size %d",v);
@@ -64,19 +64,19 @@ small_vector_transform(Wht *W)
    * This only occurs with vectors of size >= 4  
    */
 
-  W->params[0] = k;
-  W->params[1] = UNSET_PARAMETER;
-  W->params[2] = UNSET_PARAMETER;
-  W->n_params = 1;
+  W->rule->params[0] = k;
+  W->rule->params[1] = UNSET_PARAMETER;
+  W->rule->params[2] = UNSET_PARAMETER;
+  W->rule->n = 1;
   free(W->name);
   W->name = strdup("smallil");
 
-  small_interleave_transform(W);
+  small_interleave_rule(W);
 
-  W->params[0] = v;
-  W->params[1] = k;
-  W->params[2] = a;
-  W->n_params = 3;
+  W->rule->params[0] = v;
+  W->rule->params[1] = k;
+  W->rule->params[2] = a;
+  W->rule->n = 3;
   free(W->name);
   W->name = strdup("smallv");
 

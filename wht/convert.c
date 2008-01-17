@@ -28,35 +28,35 @@
 static void
 usage() 
 {
-  printf("Usage: wht_convert -w PLAN -t TRANSFORM [OPTIONS]\n");
+  printf("Usage: wht_convert -w PLAN -r RULE [OPTIONS]\n");
   printf("Convert PLAN from stdin or by argument.\n");
   printf("    -h            Show this help message.\n");
   printf("    -v            Show build information.\n");
   printf("    -w PLAN       Verify correctness of PLAN.\n");
-  printf("    -t TRANSFORM  Transform plan with.\n");
+  printf("    -r RULE       Apply rule RULE to PLAN.\n");
   exit(1);
 }
 
 int
 main(int argc, char **argv)
 {
-  char *plan, *func;
+  char *plan, *rule;
   size_t len;
   int c;
 
   plan  = NULL;
-  func  = NULL;
+  rule  = NULL;
   len   = 0;
 
   opterr = 0;
 
-  while ((c = getopt (argc, argv, "hvw:t:")) != -1)
+  while ((c = getopt (argc, argv, "hvw:r:")) != -1)
     switch (c) {
       case 'w':
         plan = strdup(optarg);
         break;
-      case 't':
-        func = strdup(optarg);
+      case 'r':
+        rule = strdup(optarg);
         break;
       case 'h':
         usage();
@@ -73,7 +73,7 @@ main(int argc, char **argv)
   if (plan == NULL)
     usage();
 
-  if (func == NULL)
+  if (rule == NULL)
     usage();
 
   Wht *W;
@@ -81,7 +81,7 @@ main(int argc, char **argv)
 
   W = wht_parse(plan);
 
-  transform_from_string(W, func);
+  rule_apply_from_string(W, rule);
 
   if (wht_error_msg(W) != NULL) {
     fprintf(stderr, "rejected, %s\n", wht_error_msg(W));
@@ -94,7 +94,7 @@ main(int argc, char **argv)
 
   free(buf);
   free(plan);
-  free(func);
+  free(rule);
 
   wht_free(W);
 
@@ -106,9 +106,9 @@ main(int argc, char **argv)
 \page wht_convert Convert WHT Plan
 
 \section _synopsis SYNOPSIS
-Usage: wht_convert -w PLAN -t TRANSFORM [OPTIONS]
+Usage: wht_convert -w PLAN -r RULE [OPTIONS]
 
-Apply a code transformation to a WHT PLAN.  Print the result to stdout.
+Apply a rule to a WHT PLAN.  Print the result to stdout.
 
 \section _description DESCRIPTION
 \verbatim
@@ -116,28 +116,32 @@ Convert PLAN from stdin or by argument.
     -h            Show this help message.
     -v            Show build information.
     -w PLAN       Verify correctness of PLAN.
-    -t TRANSFORM  Transform plan with.
+    -r RULE       Rule to apply.
 \endverbatim
 
 \section _examples EXAMPLES
 
-Note the syntax for split transformations must be a string in the grammar.
+Note the syntax for split rule must be a string in the grammar.
 
 \verbatim
-echo 'split[small[1],small[4]]' | wht_convert -t 'splitil[small[0]]'
+echo 'split[small[1],small[4]]' | wht_convert -r 'splitil[small[0]]'
 splitil[small[1],small[4]]
 
-echo 'split[small[1],small[4]]' | wht_convert -t 'splitil[small[0]]' | wht_convert -t 'smallil(2)[0]'
+echo 'split[small[1],small[4]]' | wht_convert -r 'splitil[small[0]]' | wht_convert -r 'smallil(2)[0]'
 splitil[smallil(2)[1],small[4]]
 \endverbatim
 
-Also the order of operations in a transformation is important.  For instance this plan cannot be interleaved by 4, since it does not have a split interleave codelet as it's parent.
+Also the order of applying rules is important.  For instance this plan 
+cannot be interleaved by 4, since it does not have a split interleave rule applied 
+to as it's parent.
 
 \verbatim
-echo 'split[small[1],small[4]]' | wht_convert -t 'smallil(2)[0]' | wht_convert -t 'splitil[small[0]]'
+echo 'split[small[1],small[4]]' | wht_convert -r 'smallil(2)[0]' | wht_convert -r 'splitil[small[0]]'
 splitil[small[1],small[4]]
 \endverbatim
 
-Much of these complications are hidden in the wht_interleave shell script, and other code transformation scripts.
+Much of these complications are hidden in the wht_interleave shell script, and other rule 
+application scripts.
+
 */
 #endif/*DOXYGEN_MAN_MODE*/

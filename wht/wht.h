@@ -21,12 +21,12 @@
  * Constants
  */
 
-#define MAX_CODELET_NAME_SIZE  (32) 
+#define MAX_RULE_IDENT_SIZE  (32) 
   /**< Maximum string size for codelet identifiers. */
 #define MAX_SPLIT_NODES        (32)
   /**< Maximum number of children for split codelets. */
 
-#define MAX_CODELET_PARAMS      (4)
+#define MAX_RULE_PARAMS      (4)
   /**< Maximum number of parameters for all codelets. */
 
 #define MAX_ATTRIBUTES          (4) 
@@ -68,6 +68,7 @@ enum attr_names { interleave_by = 0, vector_size = 1 };
 
 /* Forward declarations, so typedef'd struct can contain itself */
 typedef struct Wht Wht;
+typedef struct rule_data rule_data;
 typedef struct split_children split_children;
 
 
@@ -80,15 +81,17 @@ typedef struct split_children split_children;
  * \param U       Base stride 
  * \param x       Input vector
  */
+typedef void (*apply_fp)(Wht *W, long S, size_t U, wht_value *x);
 typedef void (*codelet_apply_fp)(Wht *W, long S, size_t U, wht_value *x);
 
+
 /**
- * \brief Interface (function pointer signature) for applying code
- * transformations to codelets 
+ * \brief Interface (function pointer signature) for attaching rules to 
+ * plan.
  *
  * \param Wht     Pointer to wht plan 
  */
-typedef void (*codelet_transform_fp)(Wht *W);
+typedef void (*rule_fp)(Wht *W);
 
 /**
  * \brief Annotated tree data structure for storing Wht plan.
@@ -100,14 +103,14 @@ struct Wht {
   int N; /**< Input signal length */
   int n; /**< N = 2^n             */
 
-  codelet_apply_fp apply;
+  apply_fp apply;
     /**< Recursive method for applying transform to input vector */
 
   void (*free)  (Wht *W);
     /**< Recursive method for freeing memory allocated by plan */ 
 
-  codelet_transform_fp transform;
-    /**< Recursive method applying code transformation to plan */
+  rule_data *rule;
+    /**< Rule attached to this node in plan */
 
   char * (*to_string) (Wht *W); 
     /**< Recursive method for translating plan into a string */ 
@@ -126,15 +129,10 @@ struct Wht {
 
   char *name; /**< Identifier for codelet, i.e. 'small' or  'split' */
 
-  int params[MAX_CODELET_PARAMS];
-    /**< Parameters for code transformation */
-
-  size_t n_params;
-
-  int attr[MAX_ATTRIBUTES]; /**< Attributes associated with WHT, set by code transformation */
+  int attr[MAX_ATTRIBUTES]; /**< Attributes associated with WHT, set by attaching rule */
 
   char *error_msg;
-    /**< Error message in case plan construction or transformation goes awry */
+    /**< Error message in case plan construction or attaching rule goes awry */
 };
 
 /**
@@ -144,6 +142,22 @@ struct split_children {
   int nn;                          /**< Number of children  */
   int ns[MAX_SPLIT_NODES];         /**< Sizes of children   */
   Wht *Ws[MAX_SPLIT_NODES];        /**< Smaller WHTs        */
+};
+
+/**
+ * \brief Structure for registering new rules with the package.
+ *
+ * \param name    Identifier associated with rule
+ * \param params  Number of parameters associated with rule
+ * \param call    Rule attachment function
+ */
+struct rule_data {
+  char    ident[MAX_RULE_IDENT_SIZE];
+  size_t  n;
+  int     params[MAX_RULE_PARAMS];
+    /**< Parameters for attaching rule */
+  bool    is_small;
+  rule_fp call;
 };
 
 /*
@@ -178,7 +192,14 @@ wht_value max_norm(const wht_value *x, const wht_value *y, size_t N);
 
 wht_value * random_vector(size_t n);
 
-void codelet_transform(Wht *W, const char *name, int params[], size_t n, bool small);
+void rule_attach(Wht *W, const char *ident, int params[], size_t n, bool is_small);
+
+rule_data * rule_data_init();
+
+void rule_apply(Wht *W);
+
+void rule_apply_from_string(Wht *W, char *rule);
+
 
 /**
  * \brief Initializes a null codelet
@@ -227,12 +248,6 @@ void small_apply(Wht *W, long S, size_t D, wht_value *x);
  */
 void split_apply(Wht *W, long S, size_t D, wht_value *x);
 
-void null_transform(Wht *W);
-
-void small_transform(Wht *W);
-
-void split_transform(Wht *W);
-
 char * null_to_string(Wht *W);
 
 char * small_to_string(Wht *W);
@@ -248,8 +263,6 @@ void split_free(Wht *W);
 void error_msg_set(Wht *W, char *format, ...);
 
 char * error_msg_get(Wht *W);
-
-void transform_from_string(Wht *W, char *transform);
 
 /**
  * \todo Move these macros to an external interface.

@@ -2,11 +2,11 @@
 #include "codelets.h"
 
 void
-small_interleave_transform(Wht *W)
+small_interleave_rule(Wht *W)
 {
   size_t k, k_max;
 
-  k = W->params[0];
+  k = W->rule->params[0];
 
   k_max = WHT_MAX_INTERLEAVE;
 
@@ -72,14 +72,12 @@ split_interleave_apply(Wht *W, long S, size_t D, wht_value *x)
 }
 
 void
-split_interleave_transform(Wht *W)
+split_interleave_rule(Wht *W)
 {
   /* Check that codelet is split */
   if (W->children == NULL)
     return error_msg_set(W, "codelet must be split to be interleaved");
 
   W->apply = split_interleave_apply;
-
-  split_transform(W);
 }
 

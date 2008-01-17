@@ -18,7 +18,7 @@ struct nodes
 
 struct params
 {
-  int    values[MAX_CODELET_PARAMS];
+  int    values[MAX_RULE_PARAMS];
   size_t size;
 };
 
@@ -138,8 +138,8 @@ parse_split(char *ident, struct nodes *nodes, struct params *params)
 
   W = split_init(nodes->values, nodes->size);
 
-  if (strcmp(ident, "split") != 0)  /* Do not apply transform to builtins */
-    codelet_transform(W, ident, params->values, params->size, false);
+  if (strcmp(ident, "split") != 0)  /* Do not attach rules to builtins */
+    rule_attach(W, ident, params->values, params->size, false);
 
   i_free(ident);
   i_free(params);
@@ -155,8 +155,8 @@ parse_small(char *ident, size_t size, struct params *params)
 
   W = small_init(size);
 
-  if (strcmp(ident, "small") != 0)  /* Do not apply transform to builtins */
-    codelet_transform(W, ident, params->values, params->size, true);
+  if (strcmp(ident, "small") != 0)  /* Do not attach rules to builtins */
+    rule_attach(W, ident, params->values, params->size, true);
 
   i_free(ident);
   i_free(params);
@@ -200,7 +200,7 @@ params_append(struct params *p, int x)
   p->values[p->size] = x;
   p->size++;
 
-  if (p->size > MAX_CODELET_PARAMS)
+  if (p->size > MAX_RULE_PARAMS)
     wht_exit("codelet parameters exheeded maximum.");
 
   return p;
