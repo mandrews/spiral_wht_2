@@ -77,6 +77,7 @@ plan_width(Wht *W)
   return mn;
 }
 
+#if 0
 unsigned int
 plan_last_size(Wht *W)
 {
@@ -122,8 +123,10 @@ plan_attrs(Wht *W, size_t attr)
 
   return d;
 }
+#endif
 
-
+#if 0
+/* Fuzzy rightmost and leftmost */
 bool
 plan_is_rightmost(Wht *W)
 {
@@ -135,10 +138,12 @@ plan_is_rightmost(Wht *W)
 
   accept = true;
 
+  /* Walk from right to left and stop when there is a leaf node */
   for (i = W->children->nn - 1; (i >= 0) && (W->children->Ws[i]->children == NULL); i--);
 
+  /* The tree is not rightmost if there is a leaf to left of this node */
   for (j = i; j >= 0; j--) 
-    if (W->children->Ws[j]->children == NULL)
+    if (W->children->Ws[j]->children == NULL) 
       return false;
     else
       accept = accept && plan_is_rightmost(W->children->Ws[j]);
@@ -167,57 +172,121 @@ plan_is_leftmost(Wht *W)
 
   return accept;
 }
+#endif
+
+bool
+plan_is_iterative(Wht *W)
+{
+  int i;
+  size_t nn;
+
+  if (W->children == NULL || W->children->nn == 0)
+    return true;
+
+  nn = W->children->nn;
+  for (i = 0; i < nn; i++)
+    if (W->children->Ws[i]->children != NULL)
+      return false;
+
+  return true;
+}
+
+bool
+plan_is_rightmost(Wht *W)
+{
+  int i;
+  size_t nn;
+
+  if (plan_is_iterative(W))
+    return true;
+
+  nn = W->children->nn;
+  for (i = 1; i < nn; i++)
+    if (W->children->Ws[i]->children != NULL)
+      return false;
+
+  return plan_is_rightmost(W->children->Ws[0]);
+}
+
+bool
+plan_is_leftmost(Wht *W)
+{
+  int i;
+  size_t nn;
+
+  if (plan_is_iterative(W))
+    return true;
+
+  nn = W->children->nn;
+  for (i = 0; i < nn - 1; i++)
+    if (W->children->Ws[i]->children != NULL)
+      return false;
+
+  return plan_is_leftmost(W->children->Ws[nn - 1]);
+}
+
 
 bool
 plan_is_balanced(Wht *W)
 {
-  size_t nn;
+  size_t nn, ns;
   int i;
   Wht *Wi;
   bool accept;
 
-  if (W->children == NULL)
+  if (plan_is_iterative(W))
     return true;
+
+  Wi = NULL;
+  nn = W->children->nn;
+  ns = 0;
+
+  for (i = 0; i < nn; i++) {
+    Wi = W->children->Ws[i];
+    if (Wi->children != NULL)
+      ns += Wi->children->nn;
+  }
+
+  if (ns / nn != nn)
+    return false;
 
   accept = true;
 
-  nn = W->children->nn;
   for (i = 0; i < nn; i++) {
     Wi = W->children->Ws[i];
-    if (Wi->children !=NULL && Wi->children->nn != nn)
-      return false;
-    else
+    if (Wi->children != NULL)
       accept = accept && plan_is_balanced(Wi);
   }
-
+  
   return accept;
 }
 
 static void
 usage() 
 {
-  printf("Usage: wht_classify -w PLAN [OPTIONS]\n\n");
-  printf("    -h        Show this help message.\n");
-  printf("    -v        Show build information.\n");
-  printf("    -w PLAN   Classify Wht PLAN.\n");
+  printf("Usage: wht_classify -w PLAN [OPTIONS]\n");
+  printf("Classify PLAN from stdin or by argument.\n");
+  printf("    -h            Show this help message.\n");
+  printf("    -v            Show build information.\n");
+  printf("    -w PLAN       Classify WHT PLAN.\n");
   exit(1);
 }
 
 int
 main(int argc, char **argv)
 {
-  char *wht_plan;
+  char *plan;
   size_t len;
   int c;
 
-  wht_plan = NULL;
+  plan = NULL;
 
   opterr = 0;
 
   while ((c = getopt (argc, argv, "hvw:")) != -1)
     switch (c) {
       case 'w':
-        wht_plan = strdup(optarg);
+        plan = strdup(optarg);
         break;
       case 'h':
         usage();
@@ -228,16 +297,15 @@ main(int argc, char **argv)
         usage();
     }
 
-  if (wht_plan == NULL)
-    getline(&wht_plan, &len, stdin);
+  if (plan == NULL)
+    getline(&plan, &len, stdin);
 
-  if (wht_plan == NULL)
+  if (plan == NULL)
     usage();
 
   Wht *W;
-  unsigned int n;
 
-  W = wht_parse(wht_plan);
+  W = wht_parse(plan);
 
   if (wht_error_msg(W) != NULL) {
     printf("rejected, %s\n", wht_error_msg(W));
@@ -245,30 +313,81 @@ main(int argc, char **argv)
     exit(1);
   }
 
-  n = plan_extent(W);
+  printf("depth:  %u\n", plan_depth(W));
+  printf("extent: %u\n", plan_extent(W));
+  printf("width:  %u\n", plan_width(W));
+#if 0
+  unsigned int n = plan_extent(W);
 
-  printf("depth:          %u\n", plan_depth(W));
-  printf("extent:         %u\n", n);
-  printf("width:          %u\n", plan_width(W));
-  printf("first:          %u\n", plan_first_size(W));
-  printf("last:           %u\n", plan_last_size(W));
   printf("interleave:     %f\n", plan_attrs(W,interleave_by) / ((n-1) * 8.0));
   printf("vectorize:      %f\n", plan_attrs(W,vector_size) / (n * 2.0));
+#endif
 
 
-  printf("shape:          ");
+  if (plan_is_balanced(W))
+    printf("shape:  balanced\n");
   if (plan_is_rightmost(W))
-    printf("right");
-  else if (plan_is_leftmost(W))
-    printf("left");
-  else if (plan_is_balanced(W))
-    printf("balanced");
-  else
-    printf("mixed");
-  printf("\n");
+    printf("shape:  right\n");
+  if (plan_is_leftmost(W))
+    printf("shape:  left\n");
+  if (plan_is_iterative(W))
+    printf("shape:  iterative\n");
 
   wht_free(W);
-  free(wht_plan);
+  free(plan);
 
   return 0;
 }
+
+#ifndef DOXYGEN_MAN_MODE
+/**
+\page wht_classify Classify WHT plans
+
+\section _synopsis SYNOPSIS
+wht_classify -w PLAN
+
+\section _description DESCRIPTION
+
+Classify a WHT plan based on a series of metrics.
+
+\verbatim
+Classify PLAN from stdin or by argument.
+    -h            Show this help message.
+    -v            Show build information.
+    -w PLAN       Classify WHT PLAN.
+\endverbatim
+
+\section _examples EXAMPLES
+
+A balanced WHT plan
+
+\verbatim
+wht_classify -w 'split[split[small[1],small[2]],split[small[1],small[4]]]'
+depth:  3
+extent: 4
+width:  2
+shape:  balanced
+\endverbatim
+
+A leftmost WHT plan
+
+\verbatim
+wht_classify -w 'split[split[small[1],small[1]],small[1]]'
+depth:  3
+extent: 3
+width:  2
+shape:  left
+\endverbatim
+
+A rightmost WHT plan
+
+\verbatim
+wht_classify -w 'split[small[1],split[small[1],small[1]]]'
+depth:  3
+extent: 3
+width:  2
+shape:  right
+\endverbatim
+
+*/
+#endif/*DOXYGEN_MAN_MODE*/

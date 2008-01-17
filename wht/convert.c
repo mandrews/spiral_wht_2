@@ -28,7 +28,8 @@
 static void
 usage() 
 {
-  printf("Usage: wht_convert -w PLAN -t TRANSFORM [OPTIONS]\n\n");
+  printf("Usage: wht_convert -w PLAN -t TRANSFORM [OPTIONS]\n");
+  printf("Convert PLAN from stdin or by argument.\n");
   printf("    -h            Show this help message.\n");
   printf("    -v            Show build information.\n");
   printf("    -w PLAN       Verify correctness of PLAN.\n");
@@ -99,3 +100,44 @@ main(int argc, char **argv)
 
   return 0;
 }
+
+#ifndef DOXYGEN_MAN_MODE
+/**
+\page wht_convert Convert WHT plans
+
+\section _synopsis SYNOPSIS
+Usage: wht_convert -w PLAN -t TRANSFORM [OPTIONS]
+
+Apply a code transformation to a WHT PLAN.  Print the result to stdout.
+
+\section _description DESCRIPTION
+\verbatim
+Convert PLAN from stdin or by argument.
+    -h            Show this help message.
+    -v            Show build information.
+    -w PLAN       Verify correctness of PLAN.
+    -t TRANSFORM  Transform plan with.
+\endverbatim
+
+\section _examples EXAMPLES
+
+Note the syntax for split transformations must be a string in the grammar.
+
+\verbatim
+echo 'split[small[1],small[4]]' | wht_convert -t 'splitil[small[0]]'
+splitil[small[1],small[4]]
+
+echo 'split[small[1],small[4]]' | wht_convert -t 'splitil[small[0]]' | wht_convert -t 'smallil(2)[0]'
+splitil[smallil(2)[1],small[4]]
+\endverbatim
+
+Also the order of operations in a transformation is important.  For instance this plan cannot be interleaved by 4, since it does not have a split interleave codelet as it's parent.
+
+\verbatim
+echo 'split[small[1],small[4]]' | wht_convert -t 'smallil(2)[0]' | wht_convert -t 'splitil[small[0]]'
+splitil[small[1],small[4]]
+\endverbatim
+
+Much of these complications are hidden in the wht_interleave shell script, and other code transformation scripts.
+*/
+#endif/*DOXYGEN_MAN_MODE*/

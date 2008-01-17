@@ -28,28 +28,29 @@
 static void
 usage() 
 {
-  printf("Usage: wht_verify -w PLAN [OPTIONS]\n\n");
-  printf("    -h        Show this help message.\n");
-  printf("    -v        Show build information.\n");
-  printf("    -w PLAN   Verify correctness of PLAN.\n");
+  printf("Usage: wht_verify -w PLAN [OPTIONS]\n");
+  printf("Verify PLAN from stdin or by argument.\n");
+  printf("    -h            Show this help message.\n");
+  printf("    -v            Show build information.\n");
+  printf("    -w PLAN       Verify correctness of PLAN.\n");
   exit(1);
 }
 
 int
 main(int argc, char **argv)
 {
-  char *wht_plan;
+  char *plan;
   size_t len;
   int c;
 
-  wht_plan = NULL;
+  plan = NULL;
 
   opterr = 0;
 
   while ((c = getopt (argc, argv, "hvw:")) != -1)
     switch (c) {
       case 'w':
-        wht_plan = strdup(optarg);
+        plan = strdup(optarg);
         break;
       case 'h':
         usage();
@@ -60,10 +61,10 @@ main(int argc, char **argv)
         usage();
     }
 
-  if (wht_plan == NULL)
-    getline(&wht_plan, &len, stdin);
+  if (plan == NULL)
+    getline(&plan, &len, stdin);
 
-  if (wht_plan == NULL)
+  if (plan == NULL)
     usage();
 
   Wht *W;
@@ -74,7 +75,7 @@ main(int argc, char **argv)
   long n,N;
   int i;
 
-  W = wht_parse(wht_plan);
+  W = wht_parse(plan);
 
   if (wht_error_msg(W) != NULL) {
     printf("rejected, %s\n", wht_error_msg(W));
@@ -101,7 +102,7 @@ main(int argc, char **argv)
   if (wht_max_norm(x,y,N) < WHT_STABILITY_THRESHOLD)
     printf("correct\n");   
   else
-    printf("accepted but incorrect\n");
+    printf("incorrect\n");
 
   wht_free(W);
   wht_free(D);
@@ -110,32 +111,51 @@ main(int argc, char **argv)
   free(y);
 
   free(buf);
-  free(wht_plan);
+  free(plan);
 
   return 0;
 }
 
-
+#ifndef DOXYGEN_MAN_MODE
 /**
-\page man_wht_verify wht_verify
- 
-\section _usage Usage
+\page wht_verify Verify WHT plans
+
+\section _synopsis SYNOPSIS
+wht_verify -w PLAN
+
+\section _description DESCRIPTION
+
+Empirically verify that a plan calculates the WHT transform by comparing 
+the result with direct computation.
+
 \verbatim
-Usage: wht_verify -w PLAN [OPTIONS]
-    -h        Show this help message.
-    -v        Show build information.
-    -w PLAN   Verify correctness of PLAN.
+Verify PLAN from stdin or by argument.
+    -h            Show this help message.
+    -v            Show build information.
+    -w PLAN       Verify correctness of PLAN.
 \endverbatim
 
-\section _examples Examples
+\section _examples EXAMPLES
 
--# Verify correctness of small vectorized codelet
-\code
-$ wht_verify -w 'smallv(2)[2]'
+Verify the correctness of a plan
+\verbatim
+wht_verify -w 'split[small[2],small[2]]'
 correct
+\endverbatim
 
-$ echo 'splitil[smallv(2,2,1)[2],smallv(2)[2]]' | wht_verify 
-correct
-\endcode
+If a verbatimlet in a plan has not been registered properly, or does not exist
+the plan is rejected
+\verbatim
+wht_verify -w 'split[small[10],small[2]]'
+rejected, not configured for unrolled verbatimlets of size 10 @ small[10]
+\endverbatim
+
+If a verbatimlet has a semantic error, i.e. it does not accurately compute the WHT
+the plan is incorrect
+\verbatim
+wht_verify -w 'split[new_small[4],small[2]]'
+incorrect
+\endverbatim
 
 */
+#endif/*DOXYGEN_MAN_MODE*/

@@ -26,7 +26,7 @@
 static void
 usage() 
 {
-  printf("Usage: whtgen -n SIZE \n\n");
+  printf("Usage: whtgen -n SIZE \n");
   printf("    -h            Show this help message.\n");
   printf("    -n SIZE       Generate codelet of size N=2^SIZE.\n");
   printf("\n");
@@ -128,12 +128,16 @@ main(int argc, char *argv[])
 whtgen -n SIZE
 
 \section _description DESCRIPTION
+\verbatim
+    -h            Show this help message.
+    -n SIZE       Generate codelet of size N=2^SIZE.
+\endverbatim
 
 Generate unrolled \f$ {\bf WHT } \f$ codelets of the form 
 \f$ ({\bf WHT}_{N} \otimes {\bf I}_{S}) \f$
 where \f$ N = 2^{SIZE} \f$. Print the result to stdout.
 
-Algorithm is to 
+Algorithm to 
 generate code is iterative, and only two temporaries are used.
  
 \code
