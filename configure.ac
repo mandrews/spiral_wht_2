@@ -259,7 +259,7 @@ AC_CONFIG_FILES([
    search/Makefile
    model/Makefile
    model/ic/Makefile
-   utils/Makefile
+   rand/Makefile
    tests/Makefile
 ])
 

@@ -7,23 +7,22 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <getopt.h>
 #include <sys/types.h>
 #include <math.h>
-
-#include "getopt.h"
 
 static void
 usage() 
 {
-  printf("Usage: wht_randtree -n SIZE [OPTIONS]\n\n");
-  printf("    -h        Show this help message.\n");
-  printf("    -v        Show build information.\n");
-  printf("    -n SIZE   Total size of random composition tree.\n");
-  printf("    -a MIN    Minimum number of factors in composition.\n");
-  printf("    -b MAX    Maximum number of factors in composition.\n");
-  printf("    -p MIN    Minimum element in composition.\n");
-  printf("    -q MAX    Maximum element in composition.\n");
-  printf("    -t TYPE   Type of WHT to generate (DEFAULT \"general\").\n");
+  printf("Usage: wht_rand -n SIZE [OPTIONS]\n");
+  printf("    -h            Show this help message.\n");
+  printf("    -v            Show build information.\n");
+  printf("    -n SIZE       Total size of random composition.\n");
+  printf("    -a MIN        Minimum number of factors in composition.\n");
+  printf("    -b MAX        Maximum number of factors in composition.\n");
+  printf("    -p MIN        Minimum element in composition.\n");
+  printf("    -q MAX        Maximum element in composition.\n");
+  printf("    -t TYPE       Type of WHT to generate (DEFAULT \"general\").\n");
   exit(1);
 }
 
@@ -39,10 +38,10 @@ main(int argc, char **argv)
 
   opterr = 0;
 
-	min_child = 1;
-	max_child = MAX_SPLIT_NODES;
-  min_leaf 	= 1;
-  max_leaf 	= WHT_MAX_UNROLL;
+  min_child = 1;
+  max_child = MAX_SPLIT_NODES;
+  min_leaf  = 1;
+  max_leaf  = WHT_MAX_UNROLL;
   wht_type  = NULL;
 
   while ((c = getopt (argc, argv, "hvn:a:b:p:q:t:")) != -1)
@@ -67,9 +66,9 @@ main(int argc, char **argv)
         break;
       case 'h':
         usage();
-			case 'v':
-				wht_info();
-				exit(0);
+      case 'v':
+        wht_info();
+        exit(0);
       default:
         usage();
     }
@@ -89,7 +88,7 @@ main(int argc, char **argv)
 
   if (wht_type != NULL && (strcmp(wht_type, "general" ) != 0) 
                        && (strcmp(wht_type, "right"   ) != 0)) {
-    printf("-t TYPE can be \"general\" or \"right\".\n");
+    printf("-t TYPE must be \"general\" or \"right\".\n");
     exit(1);
   }
 
@@ -101,7 +100,7 @@ main(int argc, char **argv)
   root = NULL;
 
   if (wht_type == NULL || (strcmp(wht_type, "general") == 0))
-	  root = compos_tree_rand(wht_size, min_child, max_child, min_leaf, max_leaf);
+    root = compos_tree_rand(wht_size, min_child, max_child, min_leaf, max_leaf);
   else if (strcmp(wht_type, "right") == 0)
     root = compos_tree_rand_right(wht_size, min_child, max_child, min_leaf, max_leaf);
 
