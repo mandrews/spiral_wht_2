@@ -118,7 +118,7 @@ main(int argc, char **argv)
 
 #ifndef DOXYGEN_MAN_MODE
 /**
-\page wht_verify Verify WHT plans
+\page wht_verify Verify WHT Plan
 
 \section _synopsis SYNOPSIS
 wht_verify -w PLAN

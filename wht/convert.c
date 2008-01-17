@@ -103,7 +103,7 @@ main(int argc, char **argv)
 
 #ifndef DOXYGEN_MAN_MODE
 /**
-\page wht_convert Convert WHT plans
+\page wht_convert Convert WHT Plan
 
 \section _synopsis SYNOPSIS
 Usage: wht_convert -w PLAN -t TRANSFORM [OPTIONS]

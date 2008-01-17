@@ -51,11 +51,11 @@ Interesting computing paradigms supported in the package are:
 
 \section _utilities Utilities
 
-- Performance Measurement 
-- Verification
+- \ref wht_measure
+- \ref wht_verify
 - Random 
-- Classification
-- Conversion
+- \ref wht_classify
+- \ref wht_convert
 
 \section _developers Developers
 There are several ways to contribute to the development of the package.

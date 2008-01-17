@@ -341,7 +341,7 @@ main(int argc, char **argv)
 
 #ifndef DOXYGEN_MAN_MODE
 /**
-\page wht_classify Classify WHT plans
+\page wht_classify Classify WHT Plan
 
 \section _synopsis SYNOPSIS
 wht_classify -w PLAN
