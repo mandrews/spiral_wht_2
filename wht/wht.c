@@ -19,7 +19,7 @@ parse(char *in)
 
   W = wht_root;
 
-  rule_apply(W);
+  rule_eval(W);
 
   yy_delete_buffer(buf);
 
@@ -82,11 +82,11 @@ i_itoa(int i)
   return buf;
 }
 
-rule_data *
-rule_data_init()
+rule *
+rule_init()
 {
   size_t i;
-  rule_data *rule;
+  rule *rule;
 
   rule = i_malloc(sizeof(*rule));
 
@@ -102,13 +102,13 @@ rule_data_init()
   return rule;
 }
 
-rule_data *
-rule_data_copy(rule_data *src)
+rule *
+rule_copy(rule *src)
 {
   int i;
-  rule_data *dst;
+  rule *dst;
 
-  dst = rule_data_init();
+  dst = rule_init();
 
   dst->n        = src->n;
   dst->is_small = src->is_small;
@@ -123,13 +123,13 @@ rule_data_copy(rule_data *src)
 }
 
 void
-rule_data_free(rule_data *rule)
+rule_free(rule *rule)
 {
   i_free(rule);
 }
 
 void
-rule_apply(Wht *W)
+rule_eval(Wht *W)
 {
   if (W->children == NULL) {
     if (W->rule->call != NULL)
@@ -146,15 +146,15 @@ rule_apply(Wht *W)
     W->rule->call(W);
 
   for (i = 0; i < nn; i++) 
-    rule_apply(W->children->Ws[i]);
+    rule_eval(W->children->Ws[i]);
 }
 
-rule_data *
+rule *
 rule_lookup(const char *ident, size_t n, bool is_small)
 {
-  rule_data *p;
+  rule *p;
 
-  p = (rule_data *) rule_registry; 
+  p = (rule *) rule_registry; 
   for (; p != NULL && (rule_fp) p->call != NULL; ++p) {
     if ((n == p->n) && 
         (is_small == p->is_small) &&
@@ -170,7 +170,7 @@ void
 rule_attach(Wht *W, const char *ident, int params[], size_t n, bool is_small)
 {
   int i;
-  rule_data *p;
+  rule *p;
 
   /* Only attempt to apply small rules to smalls and visa versa */
   if ((is_small && W->children != NULL) || ((!is_small) && W->children == NULL))
@@ -181,7 +181,7 @@ rule_attach(Wht *W, const char *ident, int params[], size_t n, bool is_small)
   if (p == NULL) 
     wht_exit("%s was not registered in the rule table", ident);
 
-  W->rule = rule_data_copy(p);
+  W->rule = rule_copy(p);
 
   for (i = 0; i < MAX_RULE_PARAMS; i++)
     W->rule->params[i] = params[i];
@@ -213,11 +213,11 @@ rule_attach_undo(Wht *W)
   if (W->error_msg != NULL)
     i_free(W->error_msg);
 
-  rule_data_free(W->rule);
+  rule_free(W->rule);
 
   W->error_msg  = NULL;
 
-  W->rule       = rule_data_init();
+  W->rule       = rule_init();
 
   if (W->children == NULL) {
     W->name       = strdup("small");
@@ -244,7 +244,7 @@ rule_attach_undo_recursive(Wht *W)
 }
 
 void
-rule_apply_from_string(Wht *W, char *transform)
+rule_eval_from_string(Wht *W, char *transform)
 {
   Wht *T;
   T = parse(transform);
@@ -264,7 +264,7 @@ rule_apply_from_string(Wht *W, char *transform)
   /* Tag with transform function */
   rule_attach_recursive(W, ident, params, n, is_small);
   /* Apply transform function */
-  rule_apply(W);
+  rule_eval(W);
   /* Backtrack when error occurs */
   rule_attach_undo_recursive(W);
 

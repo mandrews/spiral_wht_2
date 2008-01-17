@@ -92,7 +92,7 @@ null_init(size_t n, char *name)
   W->right     = 1;
   W->parent    = NULL;
   W->children  = NULL;
-  W->rule      = rule_data_init();
+  W->rule      = rule_init();
 
   for (i = 0; i < MAX_ATTRIBUTES; i++)
     W->attr[i] = UNSET_ATTRIBUTE;

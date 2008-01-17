@@ -81,7 +81,7 @@ main(int argc, char **argv)
 
   W = wht_parse(plan);
 
-  rule_apply_from_string(W, rule);
+  rule_eval_from_string(W, rule);
 
   if (wht_error_msg(W) != NULL) {
     fprintf(stderr, "rejected, %s\n", wht_error_msg(W));
@@ -116,7 +116,7 @@ Convert PLAN from stdin or by argument.
     -h            Show this help message.
     -v            Show build information.
     -w PLAN       Verify correctness of PLAN.
-    -r RULE       Rule to apply.
+    -r RULE       Rule to eval.
 \endverbatim
 
 \section _examples EXAMPLES
@@ -131,7 +131,7 @@ echo 'split[small[1],small[4]]' | wht_convert -r 'splitil[small[0]]' | wht_conve
 splitil[smallil(2)[1],small[4]]
 \endverbatim
 
-Also the order of applying rules is important.  For instance this plan 
+Also the order of evaling rules is important.  For instance this plan 
 cannot be interleaved by 4, since it does not have a split interleave rule applied 
 to as it's parent.
 

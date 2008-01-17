@@ -22,15 +22,15 @@
  */
 
 #define MAX_RULE_IDENT_SIZE  (32) 
-  /**< Maximum string size for codelet identifiers. */
+  /**< Maximum string size for rule identifiers. */
 #define MAX_SPLIT_NODES        (32)
-  /**< Maximum number of children for split codelets. */
+  /**< Maximum number of children for split nodes. */
 
 #define MAX_RULE_PARAMS      (4)
-  /**< Maximum number of parameters for all codelets. */
+  /**< Maximum number of parameters for all rules. */
 
 #define MAX_ATTRIBUTES          (4) 
-  /**< Maximum number of attributes for a WHT plan node.  */
+  /**< Maximum number of attributes for a node.  */
 
 #define UNSET_ATTRIBUTE        (-1)
 
@@ -68,7 +68,7 @@ enum attr_names { interleave_by = 0, vector_size = 1 };
 
 /* Forward declarations, so typedef'd struct can contain itself */
 typedef struct Wht Wht;
-typedef struct rule_data rule_data;
+typedef struct rule rule;
 typedef struct split_children split_children;
 
 
@@ -82,7 +82,11 @@ typedef struct split_children split_children;
  * \param x       Input vector
  */
 typedef void (*apply_fp)(Wht *W, long S, size_t U, wht_value *x);
-typedef void (*codelet_apply_fp)(Wht *W, long S, size_t U, wht_value *x);
+
+/** \todo Remove this typedef once codelet generators are update with
+ *  new nomenclature
+ */
+typedef apply_fp codelet_apply_fp;
 
 
 /**
@@ -109,7 +113,7 @@ struct Wht {
   void (*free)  (Wht *W);
     /**< Recursive method for freeing memory allocated by plan */ 
 
-  rule_data *rule;
+  struct rule *rule;
     /**< Rule attached to this node in plan */
 
   char * (*to_string) (Wht *W); 
@@ -151,7 +155,7 @@ struct split_children {
  * \param params  Number of parameters associated with rule
  * \param call    Rule attachment function
  */
-struct rule_data {
+struct rule {
   char    ident[MAX_RULE_IDENT_SIZE];
   size_t  n;
   int     params[MAX_RULE_PARAMS];
@@ -194,11 +198,11 @@ wht_value * random_vector(size_t n);
 
 void rule_attach(Wht *W, const char *ident, int params[], size_t n, bool is_small);
 
-rule_data * rule_data_init();
+rule * rule_init();
 
-void rule_apply(Wht *W);
+void rule_eval(Wht *W);
 
-void rule_apply_from_string(Wht *W, char *rule);
+void rule_eval_from_string(Wht *W, char *rule);
 
 
 /**
@@ -215,21 +219,21 @@ Wht * null_init(size_t n, char *name);
 
 
 /**
- * \brief Initializes a split codelet
+ * \brief Initializes a split node
  *
- * \param Ws      Array of children codelets
+ * \param Ws      Array of children nodes
  * \param nn      Number of children
  *
- * \return        Pointer to allocated codelet
+ * \return        Pointer to allocated node
  */
 Wht * split_init(Wht *Ws[], size_t nn);
 
 /**
- * \brief Initializes a small codelet
+ * \brief Initializes a small node
  *
- * \param n       Size of codelet
+ * \param n       Size of transform
  *
- * \return        Pointer to allocated codelet
+ * \return        Pointer to allocated node
  */
 Wht * small_init(size_t n);
 

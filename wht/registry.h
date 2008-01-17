@@ -67,7 +67,7 @@ extern void small_vector_rule(Wht *W);
 extern void small_right_vector_rule(Wht *W);
 #endif
 
-static const rule_data 
+static const rule 
 rule_registry[] = {
 
 #if ((WHT_MAX_INTERLEAVE > 0) || (WHT_VECTOR_SIZE > 0))
