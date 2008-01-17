@@ -16,22 +16,22 @@ usage()
   printf("    -h            Show this help message.\n");
   printf("    -v            Show build information.\n");
   printf("    -w PLAN       Measure the mean metric count of PLAN.\n");
-  printf("    -e EXTN       Use Measure Extension EXTN (default BUILTIN).\n");
-  printf("    -m METRIC     Measure Metric METRIC (default USEC).\n");
+  printf("    -e EXTN       Use Measure Extension EXTN (DEFAULT BUILTIN).\n");
+  printf("    -m METRIC     Measure Metric METRIC (DEFAULT USEC).\n");
   printf("    -s            Also display the standard deviation and sample size.\n");
   printf("    -c            Calibrate and subtract overhead.\n");
   printf(" Measurement Techniques (mutually exclusive):\n");
-  printf("    Average (default)\n");
-  printf("      -n SAMPLES  Accumulate average for N SAMPLES (default 1).\n");
-  printf("      -k RUN      Accumulate average in run of size K (default 1).\n");
+  printf("    Average (DEFAULT)\n");
+  printf("      -n SAMPLES  Accumulate average for N SAMPLES (DEFAULT 1).\n");
+  printf("      -k RUN      Accumulate average in run of size K (DEFAULT 1).\n");
   printf("    Timed Average\n");
   printf("      -t TIME     Accumulate average for TIME seconds.\n");
-  printf("      -k RUN      Accumulate average in run of size K (default 1).\n");
+  printf("      -k RUN      Accumulate average in run of size K (DEFAULT 1).\n");
   printf("    Z-Score\n");
   printf("      -a ALPHA    Measure sample mean with ALPHA %% confidence\n");
   printf("      -p RHO      Measure within RHO %% of sample mean\n");
-  printf("      -n SAMPLES  Initial number of N SAMPLES (default 1).\n");
-  printf("      -k RUN      Accumulate average in run of size K (default 1).\n");
+  printf("      -n SAMPLES  Initial number of N SAMPLES (DEFAULT 1).\n");
+  printf("      -k RUN      Accumulate average in run of size K (DEFAULT 1).\n");
   printf("\n");
 
   extensions = measure_extension_list();
@@ -174,22 +174,22 @@ Measure PLAN from stdin or by argument.
     -h            Show this help message.
     -v            Show build information.
     -w PLAN       Measure the mean metric count of PLAN.
-    -e EXTN       Use Measure Extension EXTN (default BUILTIN).
-    -m METRIC     Measure Metric METRIC (default USEC).
+    -e EXTN       Use Measure Extension EXTN (DEFAULT BUILTIN).
+    -m METRIC     Measure Metric METRIC (DEFAULT USEC).
     -s            Also display the standard deviation and sample size.
     -c            Calibrate and subtract overhead.
  Measurement Techniques (mutually exclusive):
-    Average (default)
-      -n SAMPLES  Accumulate average for N SAMPLES (default 1).
-      -k RUN      Accumulate average in run of size K (default 1).
+    Average (DEFAULT)
+      -n SAMPLES  Accumulate average for N SAMPLES (DEFAULT 1).
+      -k RUN      Accumulate average in run of size K (DEFAULT 1).
     Timed Average
       -t TIME     Accumulate average for TIME seconds.
-      -k RUN      Accumulate average in run of size K (default 1).
+      -k RUN      Accumulate average in run of size K (DEFAULT 1).
     Z-Score
       -a ALPHA    Measure sample mean with ALPHA % confidence
       -p RHO      Measure within RHO % of sample mean
-      -n SAMPLES  Initial number of N SAMPLES (default 1).
-      -k RUN      Accumulate average in run of size K (default 1).
+      -n SAMPLES  Initial number of N SAMPLES (DEFAULT 1).
+      -k RUN      Accumulate average in run of size K (DEFAULT 1).
 
  Available extensions: PAPI 
 

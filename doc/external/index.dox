@@ -52,8 +52,8 @@ Interesting computing paradigms supported in the package are:
 \section _utilities Utilities
 
 - \ref wht_measure
+- \ref wht_rand
 - \ref wht_verify
-- Random 
 - \ref wht_classify
 - \ref wht_convert
 

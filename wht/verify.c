@@ -143,14 +143,14 @@ wht_verify -w 'split[small[2],small[2]]'
 correct
 \endverbatim
 
-If a verbatimlet in a plan has not been registered properly, or does not exist
+If a codelet in a plan has not been registered properly, or does not exist
 the plan is rejected
 \verbatim
 wht_verify -w 'split[small[10],small[2]]'
-rejected, not configured for unrolled verbatimlets of size 10 @ small[10]
+rejected, not configured for unrolled codelets of size 10 @ small[10]
 \endverbatim
 
-If a verbatimlet has a semantic error, i.e. it does not accurately compute the WHT
+If a codelet has a semantic error, i.e. it does not accurately compute the WHT
 the plan is incorrect
 \verbatim
 wht_verify -w 'split[new_small[4],small[2]]'

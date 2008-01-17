@@ -122,7 +122,7 @@ qn_n_choose_k(ulong n, ulong k)
 /* NOTE: n = 31 and n = 38 are highest possible values that do not overflow
  * registers for 32 bit and 64 bit machines respectively 
  *
- * Could use Stirlings approximation to n! technique to empyrically dermine
+ * Could use Stirlings approximation to n! technique to empyrically determine
  * this based on the register size.
  */
 ulong
@@ -355,7 +355,9 @@ combin_to_compos(uint n, combin *cmb)
   }
 
   accum = 0;
-  for (cmb_i = cmb->begin(), cmp_i = cmp->begin(); cmb_i != cmb->end(); ++cmb_i, ++cmp_i) {
+  cmb_i = cmb->begin();
+  cmp_i = cmp->begin(); 
+  for (; cmb_i != cmb->end(); ++cmb_i, ++cmp_i) {
     *cmp_i = *cmb_i - accum;
     accum = *cmb_i;
   }
@@ -365,21 +367,31 @@ combin_to_compos(uint n, combin *cmb)
   return cmp;
 }
 
+#define elem_min(a,b) ((a < b) ? a : b)
+
 compos *
 compos_rand(uint n, uint a, uint b)
 {
   combin *cmb_a;
   compos *cmp_a;
+  uint np, ap, bp;
 
-  cmb_a = combin_rand(n-1, a-1, b-1);
+  np = n - 1;
+  ap = elem_min(np, a - 1);
+  bp = elem_min(np, b - 1);
+
+  cmb_a = combin_rand(np, ap, bp);
   cmp_a = combin_to_compos(n, cmb_a);
 
   delete cmb_a;
   return cmp_a;
 }
 
-#define elem_min(a,b) ((a < b) ? a : b)
+#undef elem_min
 
+/* \note Broken, I have an idea about shifting by dividing by minimum element,
+ * and normalizing again.
+ */
 compos_node *
 compos_tree_rand(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
 {
@@ -388,7 +400,6 @@ compos_tree_rand(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
 
   compos_node *cpn;
   compos_nodes::iterator cpn_i;
-  size_t min_fp;
   double r;
 
   cpn = new compos_node();
@@ -405,12 +416,10 @@ compos_tree_rand(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
 
   /* If n is greater than the largest element, we need to generate a
    * composition of at least 2 elements */
-  if (n >= max_n) 
-    min_fp = 2;
-  else
-    min_fp = min_f;
+  if (n >= max_n && min_f < 2) 
+    min_f = 2;
 
-  cmp = compos_rand(n, elem_min(n,min_fp), elem_min(n,max_f));
+  cmp = compos_rand(n, min_f, max_f);
 
   if (cmp->size() == 1) /* One element in composition => no children */
     return cpn;
@@ -434,7 +443,6 @@ compos_tree_rand_right(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
 
   compos_node *cpn;
   compos_nodes::iterator cpn_i;
-  size_t min_fp;
   bool rcond;
   double r;
 
@@ -452,17 +460,15 @@ compos_tree_rand_right(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
 
   /* If n is greater than the largest element, we need to generate a
    * composition of at least 2 elements */
-  if (n >= max_n) 
-    min_fp = 2;
-  else
-    min_fp = min_f;
+  if (n >= max_n && min_f < 2) 
+    min_f = 2;
 
-  /* TODO: Figure out how to get rid of non determinism */
+  /* \todo Figure out how to get rid of non determinism */
   cmp = NULL;
   do {
     if (cmp != NULL) delete cmp;
 
-    cmp = compos_rand(n, elem_min(n,min_fp), elem_min(n,max_f));
+    cmp = compos_rand(n, min_f, max_f);
 
     rcond = true;
 
@@ -495,8 +501,6 @@ compos_tree_rand_right(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
 
   return cpn;
 }
-
-#undef elem_min
 
 void
 compos_tree_free(compos_node *cpn)

@@ -11,7 +11,7 @@ function to_txt()
   html=$1
   text=$2
   cat $html | sed -e 's/<\/h.>/<hr>&/g' \
-    | html2text -style pretty | tail -n+9 | head -n-3 > $text
+    | html2text -ascii -style pretty | tail -n+9 | head -n-3 > $text
 
 }
 
