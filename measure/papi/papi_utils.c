@@ -3,7 +3,7 @@
  * Author: Michael Andrews <mjand@drexel.edu>
  *
  * This code needs the PAPI library 3.2.1 or later to be installed:
-     http://icl.cs.utk.edu/papi/
+ *   http://icl.cs.utk.edu/papi/
  */
 
 #include <stdlib.h>
@@ -20,7 +20,8 @@
   }
 
 void
-papi_setup() {
+papi_setup() 
+{
   int max;
 
   /* Check PAPI sanity */
@@ -32,7 +33,8 @@ papi_setup() {
 }
 
 void
-papi_get_events(const char *input, int **papi_events, size_t *n) {
+papi_get_events(const char *input, int **papi_events, size_t *n) 
+{
   int i, m, code;
   char *buf, *tmp, *token, *copy;
 
@@ -42,35 +44,35 @@ papi_get_events(const char *input, int **papi_events, size_t *n) {
   if (PAPI_VER_CURRENT != PAPI_library_init(PAPI_VER_CURRENT))
     papi_eprintf("PAPI_library_init error.\n");
 
-	if (input == NULL)
-		papi_eprintf("Cannot pass events as NULL.\n");
+  if (input == NULL)
+    papi_eprintf("Cannot pass events as NULL.\n");
 
-	char delims[] = ", ";
+  char delims[] = ", ";
 
-	copy  = malloc(sizeof(char) * (strlen(input) + 1));
-	token = malloc(sizeof(char) * (strlen(input) + 1));
+  copy  = malloc(sizeof(char) * (strlen(input) + 1));
+  token = malloc(sizeof(char) * (strlen(input) + 1));
 
-	strcpy(copy, input);
+  strcpy(copy, input);
 
-	/* First pass to count occurances of delimiter in input */
-	for (i = 0, tmp = copy;  ; i++, tmp = NULL) {
-		token = strtok(tmp, delims);
-		if (token == NULL) break;
-	}
+  /* First pass to count occurances of delimiter in input */
+  for (i = 0, tmp = copy;  ; i++, tmp = NULL) {
+    token = strtok(tmp, delims);
+    if (token == NULL) break;
+  }
 
-	*n = i;
+  *n = i;
 
   *papi_events = malloc(sizeof(**papi_events) * (*n));
 
-	strncpy(copy, input, strlen(input));
+  strncpy(copy, input, strlen(input));
 
-	/* Second pass initialize events from input */
-	for (i = 0, tmp = copy;  ; i++, tmp = NULL) {
-		token = strtok(tmp, delims);
-		if (token == NULL) break;
+  /* Second pass initialize events from input */
+  for (i = 0, tmp = copy;  ; i++, tmp = NULL) {
+    token = strtok(tmp, delims);
+    if (token == NULL) break;
 
-		m = strlen(prefix) + strlen(token);
-		buf = malloc((m+1) * sizeof(char));
+    m = strlen(prefix) + strlen(token);
+    buf = malloc((m+1) * sizeof(char));
     strcpy(buf, prefix);
     strcpy(buf + strlen(prefix), token);
 
@@ -82,17 +84,18 @@ papi_get_events(const char *input, int **papi_events, size_t *n) {
 
     (*papi_events)[i] = code;
 
-		free(buf);
-	}
+    free(buf);
+  }
 
-	free(copy);
-	free(token);
+  free(copy);
+  free(token);
 }
 
 void
-papi_set_events(int *papi_events, size_t n) {
+papi_set_events(int *papi_events, size_t n) 
+{
   int max;
-	long_long *papi_tmp;
+  long_long *papi_tmp;
 
   max = PAPI_num_counters();
 
@@ -109,19 +112,20 @@ papi_set_events(int *papi_events, size_t n) {
   if (PAPI_read_counters(papi_tmp, n) != PAPI_OK)
     papi_eprintf("Problem reading counters %s:%d.\n", __FILE__, __LINE__);
 
-	free(papi_tmp);
+  free(papi_tmp);
 }
 
 inline void 
-papi_reset(size_t n) {
-	long_long *papi_tmp;
+papi_reset(size_t n) 
+{
+  long_long *papi_tmp;
 
   papi_tmp = malloc(sizeof(*papi_tmp) * n);
 
   if (PAPI_read_counters(papi_tmp, n) != PAPI_OK)
     papi_eprintf("Problem reading counters %s:%d.\n", __FILE__, __LINE__);
 
-	free(papi_tmp);
+  free(papi_tmp);
 }
 
 stat_unit
