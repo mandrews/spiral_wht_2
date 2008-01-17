@@ -18,6 +18,13 @@ Milestones:
   - Integrate PAPI instruction count interpolation into IC Model
 
   - Decouple randtree from wht build constraints
+    - Rename to random
+
+  - Rename tree to plan
+
+  - Investigate internal documentation
+
+  - Fix man page generation
 
 Bugs:
 
@@ -33,8 +40,6 @@ Bugs:
   - dp should catch SIGINT and write best trees to disk
 
   - dp should check for write permssion on best tress
-
-  - all tools should accept wht plan from stdin in addition to -w
 
   - Make large note about antilexographic storing of split children
 

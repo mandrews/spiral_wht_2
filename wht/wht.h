@@ -59,8 +59,8 @@ typedef double wht_value;
 #define WHT_TYPE_STRING   ("double") 
 #endif/*WHT_DOUBLE*/
 
+/** \todo Move this to the registry */
 enum attr_names { interleave_by = 0, vector_size = 1 };
-
 
 /*
  * Data structures and interfaces (function pointer signatures)

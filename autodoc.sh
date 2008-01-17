@@ -55,7 +55,7 @@ case ${v} in
     doxygen 1> /dev/null 
   ;;
   2)
-    doxygen 
+    doxygen
   ;;
   *)
     usage;

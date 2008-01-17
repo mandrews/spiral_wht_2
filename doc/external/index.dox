@@ -1,0 +1,70 @@
+/**
+ \mainpage WHT Manual
+
+\section _overview Overview
+
+The WHT Package is meant to serve as a readable reference model for
+understanding performance on a wide variety of architectures.  At it's core the
+package
+implements a recursive factorization of the Walsh-Hadamard Transform-- a
+linear transform closely related to the Fast Fourier Transform.  
+
+The package follows the Adaptive Generate and Test paradigm of High Performance
+Computing which can be summarized as:
+- Allow the factoring of an algorithm so that it may exploit common architecture
+  features, e.g. the memory hierarchy, instruction parallelism.
+- Also, allow architecture specific optimizations which are critical for good
+  performance.
+- For a given input class of an algorithm, generate many algorithms and test to
+  see which one is optimal.
+- Since this typically introduces an exponential search space 
+  apply heuristics when possible to minimize the time searching.
+
+The package aims to be
+an ideal candidate for exploring and understanding new architectures and
+computing paradigms.
+
+Interesting computing paradigms supported in the package are:
+- SIMD 
+- openMP !
+- MPI !
+- IBM Cell !
+- NVIDIA Cuda !
+
+ ! - \b In \b Development
+
+\section _install Installation
+  See the \ref install file which is also distributed in the package.
+
+\section _quickstart Quickstart
+
+  After configuring and installing the package.  Try searching for the optimal
+  algorithm on your architecture using Dynamic Programing:
+  \code
+  INSTALL_DIR/bin/wht_dp
+  \endcode
+
+  This will store the best algorithms (or plans) in
+  \code
+  INSTALL_DIR/data/wht_best_trees.txt
+  \endcode
+
+\section _utilities Utilities
+
+- Performance Measurement 
+- Verification
+- Random 
+- Classification
+- Conversion
+
+\section _developers Developers
+There are several ways to contribute to the development of the package.
+
+- Adding a new Codelet 
+- Implementing a new Codelet Generator
+- Providing a new Performance Measurement Extension
+- Maintaining and Updating the Package
+
+\section _background Background
+
+ */

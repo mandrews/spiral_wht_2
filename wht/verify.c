@@ -17,19 +17,6 @@
  *
  */
 
-/* Verification of the WHT package
-   ===============================
-*/
-
-/* verify -w <wht-method>
-   ----------------------
-   verifies <wht-method> given as a string in wht-syntax
-   by comparing to a direct implementation.
-   The '-p <threadnum>' option allows the verification of multiple 
-   threads. The default value is the number set during installation.
-*/
-
-
 #define _GNU_SOURCE
 
 #include "wht.h"
@@ -127,3 +114,28 @@ main(int argc, char **argv)
 
   return 0;
 }
+
+
+/**
+\page man_wht_verify wht_verify
+ 
+\section _usage Usage
+\verbatim
+Usage: wht_verify -w PLAN [OPTIONS]
+    -h        Show this help message.
+    -v        Show build information.
+    -w PLAN   Verify correctness of PLAN.
+\endverbatim
+
+\section _examples Examples
+
+-# Verify correctness of small vectorized codelet
+\code
+$ wht_verify -w 'smallv(2)[2]'
+correct
+
+$ echo 'splitil[smallv(2,2,1)[2],smallv(2)[2]]' | wht_verify 
+correct
+\endcode
+
+*/

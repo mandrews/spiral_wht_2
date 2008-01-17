@@ -17,39 +17,6 @@
  *
  */
 
-/** 
- * \file whtgen/whtgen.c 
- *
- * \brief Simple generator for unrolled codelets of the form 
- * \f$ {\bf WHT}_{N} \otimes {\bf I}_{S} \f$.  
- *
- * Algorithm is to 
- * generate code is iterative, and only two temporaries are used.
- *
- * \code
- *  N1 = N/2;
- *  N2 = 1;
- *  for (i = 1; i <= N; i *= 2) {
- *    for (j = 0; j < N1; j++) {
- *      for (k = 0; k < N2; k++) {
- *        ind1 = (j * 2 * N2 + k) * s;
- *        ind2 = (j * 2 * N2 + N2 + k) * s;
- *        for (l = 0; l < s; l++) {
- *          a       = x[ind1];
- *          b       = x[ind2];  
- *          x[ind1] = a + b;
- *          x[ind2] = a - b;
- *          ind1++;
- *          ind2++;
- *        }
- *      }
- *    }
- *    N1 /= 2;
- *    N2 *= 2;
- *  }
- * \endcode
- */
-
 /** \cond */
 #include <stdio.h>
 #include <stdlib.h>
@@ -152,3 +119,127 @@ main(int argc, char *argv[])
   return 0;
 }
 /** \endcond */
+
+#ifndef DOXYGEN_MAN_MODE
+/**
+\page whtgen Generate WHT codelets
+
+\section _synopsis SYNOPSIS
+whtgen -n SIZE
+
+\section _description DESCRIPTION
+
+Generate unrolled \f$ {\bf WHT } \f$ codelets of the form 
+\f$ ({\bf WHT}_{N} \otimes {\bf I}_{S}) \f$
+where \f$ N = 2^{SIZE} \f$. Print the result to stdout.
+
+Algorithm is to 
+generate code is iterative, and only two temporaries are used.
+ 
+\code
+N1 = N/2;
+N2 = 1;
+for (i = 1; i <= N; i= 2) {
+  for (j = 0; j < N1; j++) {
+    for (k = 0; k < N2; k++) {
+      ind1 = (j 2 N2 + k) s;
+      ind2 = (j 2 N2 + N2 + k) s;
+      for (l = 0; l < s; l++) {
+        a       = x[ind1];
+        b       = x[ind2];  
+        x[ind1] = a + b;
+        x[ind2] = a - b;
+        ind1++;
+        ind2++;
+      }
+    }
+  }
+  N1 /= 2;
+  N2= 2;
+}
+\endcode
+
+\section _examples EXAMPLES
+
+Generate a codelet of size \f$ 4 = 2^2 \f$
+\code
+whtgen -n 2 
+
+#include "wht.h"
+
+void apply_small2(Wht *W, long S, long U, wht_value *x)
+{
+#if (2 <= WHT_MAX_UNROLL)
+  wht_value a, b;
+  a = x[0 * S];
+  b = x[1 * S];
+  x[0 * S] = a + b;
+  x[1 * S] = a - b;
+  a = x[2 * S];
+  b = x[3 * S];
+  x[2 * S] = a + b;
+  x[3 * S] = a - b;
+  a = x[0 * S];
+  b = x[2 * S];
+  x[0 * S] = a + b;
+  x[2 * S] = a - b;
+  a = x[1 * S];
+  b = x[3 * S];
+  x[1 * S] = a + b;
+  x[3 * S] = a - b;
+#else
+   wht_exit("runtime guards should prevent this message");
+#endif
+}
+\endcode
+*/
+#else
+/**
+\page whtgen Generate WHT codelets
+
+\section _synopsis SYNOPSIS
+whtgen -n SIZE
+
+\section _description DESCRIPTION
+
+Generate unrolled WHT codelets of the form (W_N X I_S) 
+where N = 2^SIZE. Print the result to stdout.
+\verbatim
+  -h            Show this help message.
+  -n SIZE       Generate codelet of size N=2^SIZE.
+\endverbatim
+\section _examples EXAMPLES
+
+Generate a codelet of size 4 = 2^2
+\code
+whtgen -n 2 
+
+#include "wht.h"
+
+void apply_small2(Wht *W, long S, long U, wht_value *x)
+{
+#if (2 <= WHT_MAX_UNROLL)
+  wht_value a, b;
+  a = x[0 * S];
+  b = x[1 * S];
+  x[0 * S] = a + b;
+  x[1 * S] = a - b;
+  a = x[2 * S];
+  b = x[3 * S];
+  x[2 * S] = a + b;
+  x[3 * S] = a - b;
+  a = x[0 * S];
+  b = x[2 * S];
+  x[0 * S] = a + b;
+  x[2 * S] = a - b;
+  a = x[1 * S];
+  b = x[3 * S];
+  x[1 * S] = a + b;
+  x[3 * S] = a - b;
+#else
+   wht_exit("runtime guards should prevent this message");
+#endif
+}
+\endcode
+*/
+#endif/*DOXYGEN_MAN_MODE*/

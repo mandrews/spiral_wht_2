@@ -1,79 +1,87 @@
-WHT Package Installation
-==============================================================================
-
-This package is a modified version of the Spiral WHT 1.8 package:
-
-  http://www.spiral.net/software/wht.html
-
-It is presently a prelease, and some features and data structures will change
-before the next release.
-
-On UNIX systems:
-------------------------------------------------------------------------------
-
-Unpack the archive:
-
-  tar -zxf spiral_wht-2.0.tar.gz SRC_DIR  
-
-Optionally create a build directory so that the source directory doesn't get 
-polluted with object files and temporaries:
-
-  mkdir BUILD_DIR; cd BUILD_DIR
-
-Otherwise assume that SRC_DIR and BUILD_DIR are the same.
-Next, choose from various optimizations listed by:
-
-  ../SRC_DIR/configure --help
-
-Some noteworthy options are:
-
-  Usage: ./configure [OPTION]... [VAR=VALUE]...
-
-  Optional Features:
-    --enable-double         compile with double precision floating point
-                            (default is enabled)
-    --enable-float          compile wht with single precision floating point
-                            (default is disabled)
-    --enable-max-unroll=N   maximum unrolled codelet size (default is 6)
-    --enable-interleave=K   interleave K loop iterations in codelet (default
-                            is disabled)
-    --enable-sse            enable SSE optimizations (default is disabled)
-    --enable-sse2           enable SSE2 optimizations (default is disabled)
-
-  Optional Packages:
-    --with-papi=PATH        compile with PAPI support, PATH is location of PAPI
 
 
-Once you have selected appropriate optimizations, configure with an
-installation directory:
+IINNSSTTAALLLL
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  ../SRC_DIR/configure --prefix=INSTALL_DIR [OPTIONS]
 
-Compile and install the package:
-  make
-  make install
+IInn aa UUNNIIXX eennvviirroonnmmeenntt::
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-Later on, you may want to uninstall the package:
-  make uninstall
 
-For using the programs and libraries installed by the package see the README
+  1. Unpack the archive:
+
+         tar -zxf spiral_wht-2.0.tar.gz SRC_DIR
+
+  2. Optionally, create a build directory so that the source directory doesn't
+     get polluted with object files and temporaries:
+
+         mkdir BUILD_DIR; cd BUILD_DIR
+
+     Otherwise assume that SRC_DIR and BUILD_DIR are the same.
+  3. Next, choose from various optimizations listed by:
+
+         ../SRC_DIR/configure --help
+
+     Some noteworthy options are:
+
+           Usage: ./configure [OPTION]... [VAR=VALUE]...
+
+           Optional Features:
+             --enable-double         compile with double precision floating
+       point
+                                     (default is enabled)
+             --enable-float          compile wht with single precision floating
+       point
+                                     (default is disabled)
+             --enable-max-unroll=N   maximum unrolled codelet size (default is
+       6)
+             --enable-interleave=K   interleave K loop iterations in codelet
+       (default
+                                     is disabled)
+             --enable-sse            enable SSE optimizations (default is
+       disabled)
+             --enable-sse2           enable SSE2 optimizations (default is
+       disabled)
+
+           Optional Packages:
+             --with-papi=PATH        compile with PAPI support, PATH is
+       location of PAPI
+
+  4. Once you have selected appropriate optimizations, configure with an
+     installation directory:
+
+         ../SRC_DIR/configure --prefix=INSTALL_DIR [OPTIONS]
+
+  5. Compile and install the package:
+
+         make
+         make install
+
+  6. Later on, you may want to uninstall the package:
+
+         make uninstall
+
+
+
+IInn aa WWiinnddoowwss eennvviirroonnmmeenntt::
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Presently there is no native Windows support for this package. Downloading and
+installing the Cygwin environment may work.
+
+      _h_t_t_p_:_/_/_w_w_w_._c_y_g_w_i_n_._c_o_m
+
+
+IInnssttaalllleedd ffiilleess
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+For using the programs and libraries installed by the package see the MANIFEST
 file.
 
-
-On Windows systems:
-------------------------------------------------------------------------------
-
-Download the Cygwin environment and compile as above.
-
-
-Contact information:
-------------------------------------------------------------------------------
-This package has been created in the SPIRAL project,
-  http://www.ece.cmu.edu/~spiral
-
-where adaptable software for arbitrary signal transforms is developed.
+CCoonnttaacctt IInnffoorrmmaattiioonn
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 For questions and problems, please contact
-  mjand@drexel.edu
 
+      _m_j_a_n_d_@_d_r_e_x_e_l_._e_d_u
 
