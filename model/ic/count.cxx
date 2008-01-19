@@ -9,7 +9,7 @@ small_to_key(Wht *W)
   char *buf;
   string key;
 
-  buf = W->to_string(W);
+  buf = wht_to_string(W);
   key = buf;
   free(buf);
   return key;
