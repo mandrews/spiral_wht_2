@@ -1,20 +1,5 @@
 #include "wht.h"
 
-void 
-null_free(Wht *W) 
-{
-  if (W->to_string != NULL)
-    i_free(W->to_string);
-
-  if (W->error_msg != NULL)
-    i_free(W->error_msg);
-
-  if (W->rule != NULL)
-    rule_free(W->rule);
-
-  i_free(W);
-}
-
 void
 null_apply(Wht *W, long S, size_t D, wht_value *x)
 {
@@ -30,7 +15,6 @@ null_init(size_t n, char *name)
   W            = (Wht *) i_malloc(sizeof(Wht));
   W->N         = (1 << n); 
   W->n         = n;
-  W->free      = null_free;
   W->apply     = null_apply;
   W->error_msg = NULL;
   W->left      = W->N;

@@ -64,18 +64,6 @@ split_apply(Wht *W, long S, size_t U, wht_value *x)
   }
 }
 
-void 
-split_free(Wht *W) 
-{
-  int i;
-
-  for (i = 0; i < W->children->nn; i++) 
-    W->children->Ws[i]->free(W->children->Ws[i]);
-
-  i_free(W->children);
-  null_free(W);
-}
-
 Wht *
 split_init(Wht *Ws[], size_t nn)
 {
@@ -93,7 +81,6 @@ split_init(Wht *Ws[], size_t nn)
 
   W            = null_init(n, "split");
   W->apply     = split_apply;
-  W->free      = split_free;
 
   W->children = i_malloc(sizeof(split_children));
 

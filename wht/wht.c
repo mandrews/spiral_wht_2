@@ -47,7 +47,6 @@ dump(Wht *W, FILE *fd)
   fprintf(fd, "self:         %-p\n",  &W);
   fprintf(fd, "parent:       %-p\n",   W->parent);
   fprintf(fd, "apply:        %-p\n",   W->apply);
-  fprintf(fd, "free:         %-p\n",   W->free);
   fprintf(fd, "name:         %-p\n",   W->rule->name);
   fprintf(fd, "to_string:    %-p\n",   W->to_string); 
   fprintf(fd, "error_msg:    %-s\n",   W->error_msg);
@@ -91,7 +90,7 @@ error_msg_set(Wht *W, char *format, ...)
 
   W->error_msg = i_malloc(sizeof(char) * MAX_MSG_LEN);
 
-  tmp = to_string(W);
+  tmp = node_to_string(W);
 
   va_start(ap, format); 
   vsnprintf(W->error_msg, MAX_MSG_LEN, format, ap); 
@@ -196,7 +195,7 @@ name_to_string(Wht *W)
 }
 
 char *
-to_string(Wht *W)
+node_to_string(Wht *W)
 {
   char *buf, *tmp;
   size_t nn, i, j, len;
@@ -216,7 +215,7 @@ to_string(Wht *W)
   /* Iterate over children WHTs, stored anti lexigraphically  */
   for (i = 0; i < nn; i++) {
     j    = nn - i - 1;
-    tmp  = to_string(W->children->Ws[j]);
+    tmp  = node_to_string(W->children->Ws[j]);
     len += strlen(tmp) + 2; /* , \0*/
     buf  = realloc(buf, sizeof(char) * len);
 
@@ -232,5 +231,29 @@ to_string(Wht *W)
   strncat(buf,"]",1);
 
   return buf;
+}
+
+void 
+node_free(Wht *W) 
+{
+  int i;
+
+  if (W->children != NULL) {
+    for (i = 0; i < W->children->nn; i++) 
+      node_free(W->children->Ws[i]);
+
+    i_free(W->children);
+  }
+
+  if (W->to_string != NULL)
+    i_free(W->to_string);
+
+  if (W->error_msg != NULL)
+    i_free(W->error_msg);
+
+  if (W->rule != NULL)
+    rule_free(W->rule);
+
+  i_free(W);
 }
 

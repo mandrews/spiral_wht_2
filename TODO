@@ -17,15 +17,6 @@ Milestones:
 
   - Integrate PAPI instruction count interpolation into IC Model
 
-  - Decouple randtree from wht build constraints
-    - Rename to random
-
-  - Rename tree to plan
-
-  - Investigate internal documentation
-
-  - Fix man page generation
-
 Bugs:
 
   - Some minor memory leak issues with parser.y
@@ -41,13 +32,11 @@ Bugs:
 
   - dp should check for write permssion on best tress
 
-  - Make large note about antilexographic storing of split children
-
   - unaligned vector codelets are broken for sse
 
-  - build process needs to be documented
+TODO:
 
-  - extension writing process needs to be documented
+  - Make large note about antilexographic storing of split children
 
   - parser should set wht_error when it cannot find a transform in the registry
     instead of displaying syntax error
@@ -56,4 +45,16 @@ Bugs:
 
   - create bash script for interleaving and vectorization
 
-  - move attrs into rule struct
+  - since forward declaration of enum is impossible in C++ but not in C,
+    and since registry should contain all new attributes
+    something needs to be done
+
+  - Decouple randtree from wht build constraints
+    - Rename to random
+
+  - Rename tree to plan
+
+  - Investigate internal documentation
+
+  - Fix man page generation
+

@@ -108,7 +108,6 @@ main(int argc, char **argv)
   printf("%s\n", buf);
 
   compos_tree_free(root);
-
   free(buf);
 
   return 0;

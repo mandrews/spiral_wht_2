@@ -57,7 +57,7 @@ rule_eval(Wht *W)
   if (W->to_string != NULL)
     i_free(W->to_string);
 
-  W->to_string = to_string(W);
+  W->to_string = node_to_string(W);
 
   if (W->children != NULL) {
     nn = W->children->nn;

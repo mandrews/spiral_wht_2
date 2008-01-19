@@ -546,7 +546,8 @@ compos_tree_to_string(compos_node *cpn)
 
   W = compos_tree_to_wht(cpn);
 
-  buf = strdup(W->to_string);
+  buf = node_to_string(W);
+
   wht_free(W);
 
   return buf;

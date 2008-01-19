@@ -110,9 +110,6 @@ struct Wht {
   apply_fp apply;
     /**< Recursive method for applying transform to input vector */
 
-  void (*free)  (Wht *W);
-    /**< Recursive method for freeing memory allocated by plan */ 
-
   struct rule *rule;
     /**< Rule attached to this node in plan */
 
@@ -247,21 +244,22 @@ void null_apply(Wht *W, long S, size_t D, wht_value *x);
  */
 void split_apply(Wht *W, long S, size_t D, wht_value *x);
 
-void null_free(Wht *W);
-
-void split_free(Wht *W);
-
 void error_msg_set(Wht *W, char *format, ...);
 
 char * error_msg_get(Wht *W);
 
-char * to_string(Wht *W);
+char * name_to_string(Wht *W);
+
+char * node_to_string(Wht *W);
+
+void node_free(Wht *W);
+
 
 /**
  * \todo Move these macros to an external interface.
  */
 #define wht_apply(W, x) ((W->apply)(W, 1, 0, x))
-#define wht_free(W) ((W->free)(W))
+#define wht_free(W) (node_free(W))
 #define wht_parse(s) (parse(s))
 #define wht_info() (info())
 #define wht_direct(n) (direct(n))
