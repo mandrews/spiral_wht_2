@@ -76,45 +76,6 @@ split_free(Wht *W)
   null_free(W);
 }
 
-char *
-split_to_string(Wht *W)
-{
-  const size_t bufsize = strlen(W->name) + 3; /*IDENT[ ... ]\0*/
-
-  char *buf, *tmp;
-  size_t nn, i, j, len, resize;
-
-  buf = i_malloc(sizeof(char) * bufsize);
-
-  snprintf(buf, bufsize - 2, W->name);
-  strncat(buf,"[",1);
-
-  nn = W->children->nn;
-
-  resize = bufsize;
-
-  /* Iterate over children WHTs, stored anti lexigraphically  */
-  for (i = 0; i < nn; i++) {
-    j       = nn - i - 1;
-    tmp     = W->children->Ws[j]->to_string(W->children->Ws[j]);
-    len     = strlen(tmp) + 1; /* Extra 1 is for comma */
-
-    resize += len + 1; /* Extra 1 is for '\0' */
-    buf     = realloc(buf, resize);
-
-    strncat(buf, tmp, len);
-
-    if (i < nn - 1)
-      strncat(buf, ",", 1);
-
-    i_free(tmp);
-  }
-
-  strncat(buf,"]",1);
-
-  return buf;
-}
-
 Wht *
 split_init(Wht *Ws[], size_t nn)
 {
@@ -133,8 +94,6 @@ split_init(Wht *Ws[], size_t nn)
   W            = null_init(n, "split");
   W->apply     = split_apply;
   W->free      = split_free;
-  W->to_string = split_to_string;
-
 
   W->children = i_malloc(sizeof(split_children));
 

@@ -28,12 +28,12 @@
 static void
 usage() 
 {
-  printf("Usage: wht_convert -w PLAN -r RULE [OPTIONS]\n");
-  printf("Convert PLAN from stdin or by argument.\n");
+  printf("Usage: wht_attach -w PLAN -r RULE [OPTIONS]\n");
+  printf("Attach a RULE to WHT PLAN from stdin or by argument.\n");
   printf("    -h            Show this help message.\n");
   printf("    -v            Show build information.\n");
-  printf("    -w PLAN       Verify correctness of PLAN.\n");
-  printf("    -r RULE       Apply rule RULE to PLAN.\n");
+  printf("    -w PLAN       WHT PLAN.\n");
+  printf("    -r RULE       Attach RULE to PLAN.\n");
   exit(1);
 }
 
@@ -103,20 +103,22 @@ main(int argc, char **argv)
 
 #ifndef DOXYGEN_MAN_MODE
 /**
-\page wht_convert Convert WHT Plan
+\page wht_attach Attach a Breakdown Rule to a WHT Plan
 
 \section _synopsis SYNOPSIS
-Usage: wht_convert -w PLAN -r RULE [OPTIONS]
-
-Apply a rule to a WHT PLAN.  Print the result to stdout.
+Usage: wht_attach -w PLAN -r RULE [OPTIONS]
 
 \section _description DESCRIPTION
+
+Attaches and evaluates a %rule in the context of a WHT plan.  If the rule cannot be bound to 
+a node in the plan, that node is reverted to it's previous state.
+
 \verbatim
-Convert PLAN from stdin or by argument.
+Attach a RULE to WHT PLAN from stdin or by argument.
     -h            Show this help message.
     -v            Show build information.
-    -w PLAN       Verify correctness of PLAN.
-    -r RULE       Rule to eval.
+    -w PLAN       WHT PLAN.
+    -r RULE       Attach RULE to PLAN.
 \endverbatim
 
 \section _examples EXAMPLES
@@ -124,10 +126,10 @@ Convert PLAN from stdin or by argument.
 Note the syntax for split rule must be a string in the grammar.
 
 \verbatim
-echo 'split[small[1],small[4]]' | wht_convert -r 'splitil[small[0]]'
+echo 'split[small[1],small[4]]' | wht_attach -r 'splitil[small[0]]'
 splitil[small[1],small[4]]
 
-echo 'split[small[1],small[4]]' | wht_convert -r 'splitil[small[0]]' | wht_convert -r 'smallil(2)[0]'
+echo 'split[small[1],small[4]]' | wht_attach -r 'splitil[small[0]]' | wht_attach -r 'smallil(2)[0]'
 splitil[smallil(2)[1],small[4]]
 \endverbatim
 
@@ -136,7 +138,7 @@ cannot be interleaved by 4, since it does not have a split interleave rule appli
 to as it's parent.
 
 \verbatim
-echo 'split[small[1],small[4]]' | wht_convert -r 'smallil(2)[0]' | wht_convert -r 'splitil[small[0]]'
+echo 'split[small[1],small[4]]' | wht_attach -r 'smallil(2)[0]' | wht_attach -r 'splitil[small[0]]'
 splitil[small[1],small[4]]
 \endverbatim
 

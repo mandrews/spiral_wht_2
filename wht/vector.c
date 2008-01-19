@@ -1,7 +1,6 @@
 #include "wht.h"
 #include "codelets.h"
-
-extern void small_interleave_rule(Wht *W);
+#include "registry.h"
 
 bool
 rightmost_tree(Wht *W)
@@ -68,8 +67,7 @@ small_vector_rule(Wht *W)
   W->rule->params[1] = UNSET_PARAMETER;
   W->rule->params[2] = UNSET_PARAMETER;
   W->rule->n = 1;
-  free(W->name);
-  W->name = strdup("smallil");
+  strcpy(W->rule->ident,"smallil");
 
   small_interleave_rule(W);
 
@@ -77,8 +75,7 @@ small_vector_rule(Wht *W)
   W->rule->params[1] = k;
   W->rule->params[2] = a;
   W->rule->n = 3;
-  free(W->name);
-  W->name = strdup("smallv");
+  strcpy(W->rule->ident,"smallv");
 
   W->apply = codelet_apply_lookup(W);
 

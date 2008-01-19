@@ -8,7 +8,7 @@ codelet_apply_lookup(Wht *W)
   codelet_apply_fp call;
   char *name;
 
-  name = W->to_string(W);
+  name = to_string(W);
   call = NULL; /* Did not find codelet in table */
 
   p = (codelet_apply_entry *) codelet_apply_registry; 

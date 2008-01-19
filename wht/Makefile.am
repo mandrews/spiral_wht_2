@@ -18,17 +18,17 @@ libwht_la_SOURCES = null.c direct.c small.c split.c utils.c wht.c \
 
 lib_LTLIBRARIES = libwht.la
 
-libwht_la_LIBADD  = $(top_builddir)/wht/codelets/libwht_codelets.la
+libwht_la_LIBADD	= $(top_builddir)/wht/codelets/libwht_codelets.la
 
 
 # TODO should utilize WHT_SUFFIX to disambiguate types
-bin_PROGRAMS 					= wht_verify wht_convert wht_classify
+bin_PROGRAMS					= wht_verify wht_attach wht_classify
 
 wht_verify_SOURCES		= verify.c 
 wht_verify_LDADD			= libwht.la
 
-wht_convert_SOURCES		= convert.c 
-wht_convert_LDADD			= libwht.la
+wht_attach_SOURCES		= attach.c 
+wht_attach_LDADD			= libwht.la
 
 wht_classify_SOURCES	= classify.c 
 wht_classify_LDADD		= libwht.la

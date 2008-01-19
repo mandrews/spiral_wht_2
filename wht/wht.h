@@ -98,7 +98,7 @@ typedef apply_fp codelet_apply_fp;
 typedef void (*rule_fp)(Wht *W);
 
 /**
- * \brief Annotated tree data structure for storing Wht plan.
+ * \brief Annotated tree data structure for storing WHT plan.
  *
  * \todo Wht should be in lower case to follow standard C idiom, a typedef
  * alias can be used for backwards compatability
@@ -115,9 +115,6 @@ struct Wht {
 
   struct rule *rule;
     /**< Rule attached to this node in plan */
-
-  char * (*to_string) (Wht *W); 
-    /**< Recursive method for translating plan into a string */ 
 
   Wht *parent;
     /**< Pointer to parent node */
@@ -252,12 +249,6 @@ void small_apply(Wht *W, long S, size_t D, wht_value *x);
  */
 void split_apply(Wht *W, long S, size_t D, wht_value *x);
 
-char * null_to_string(Wht *W);
-
-char * small_to_string(Wht *W);
-
-char * split_to_string(Wht *W);
-
 void null_free(Wht *W);
 
 void small_free(Wht *W);
@@ -268,12 +259,15 @@ void error_msg_set(Wht *W, char *format, ...);
 
 char * error_msg_get(Wht *W);
 
+
+char * to_string(Wht *W);
+
 /**
  * \todo Move these macros to an external interface.
  */
 #define wht_apply(W, x) ((W->apply)(W, 1, 0, x))
 #define wht_free(W) ((W->free)(W))
-#define wht_to_string(W) ((W->to_string)(W))
+#define wht_to_string(W) (to_string(W))
 #define wht_parse(s) (parse(s))
 #define wht_info() (info())
 #define wht_direct(n) (direct(n))

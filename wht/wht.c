@@ -52,7 +52,7 @@ dump(Wht *W, FILE *fd)
   fprintf(fd, "apply:        %-p\n",   W->apply);
   fprintf(fd, "free:         %-p\n",   W->free);
   fprintf(fd, "rule:         %-p\n",   W->rule);
-  fprintf(fd, "to_string:    %-p\n",   W->to_string);
+  /* fprintf(fd, "to_string:    %-p\n",   W->to_string); */
   fprintf(fd, "error_msg:    %-s\n",   W->error_msg);
   fprintf(fd, "\n");
 
@@ -181,12 +181,12 @@ rule_attach(Wht *W, const char *ident, int params[], size_t n, bool is_small)
   if (p == NULL) 
     wht_exit("%s was not registered in the rule table", ident);
 
+  rule_free(W->rule);
   W->rule = rule_copy(p);
 
   for (i = 0; i < MAX_RULE_PARAMS; i++)
     W->rule->params[i] = params[i];
 
-  W->name = strdup(ident);
 }
 
 void
@@ -207,9 +207,6 @@ rule_attach_recursive(Wht *W, const char *ident, int params[], size_t n, bool is
 void
 rule_attach_undo(Wht *W)
 {
-  if (W->name != NULL)
-    i_free(W->name);
-
   if (W->error_msg != NULL)
     i_free(W->error_msg);
 
@@ -218,12 +215,11 @@ rule_attach_undo(Wht *W)
   W->error_msg  = NULL;
 
   W->rule       = rule_init();
+  strcpy(W->rule->ident, W->name);
 
   if (W->children == NULL) {
-    W->name       = strdup("small");
     W->apply      = codelet_apply_lookup(W);
   } else {
-    W->name       = strdup("split");
     W->apply      = split_apply;
   }
 }
@@ -244,31 +240,31 @@ rule_attach_undo_recursive(Wht *W)
 }
 
 void
-rule_eval_from_string(Wht *W, char *transform)
+rule_eval_from_string(Wht *W, char *rule)
 {
-  Wht *T;
-  T = parse(transform);
+  Wht *R;
+  R = parse(rule);
 
   char   *ident;
   int    *params;
   size_t  n;
   bool    is_small;
 
-  ident       = T->rule->ident;
-  params      = T->rule->params;
-  n           = T->rule->n;
-  is_small    = (bool) (T->children == NULL);
+  ident       = R->rule->ident;
+  params      = R->rule->params;
+  n           = R->rule->n;
+  is_small    = (bool) (R->children == NULL);
 
   /* Backtrack any previous errors */
   rule_attach_undo_recursive(W);
-  /* Tag with transform function */
+  /* Attach rule to all nodes*/
   rule_attach_recursive(W, ident, params, n, is_small);
-  /* Apply transform function */
+  /* Eval rules */
   rule_eval(W);
   /* Backtrack when error occurs */
   rule_attach_undo_recursive(W);
 
-  wht_free(T);
+  wht_free(R);
 }
 
 void 
@@ -283,7 +279,7 @@ error_msg_set(Wht *W, char *format, ...)
 
   W->error_msg = i_malloc(sizeof(char) * MAX_MSG_LEN);
 
-  tmp = W->to_string(W);
+  tmp = to_string(W);
 
   va_start(ap, format); 
   vsnprintf(W->error_msg, MAX_MSG_LEN, format, ap); 
@@ -316,5 +312,109 @@ error_msg_get(Wht *W)
   }
 
   return NULL;
+}
+
+char *
+params_to_string(Wht *W)
+{
+  /**
+   * \todo Take log10 of INT_MAX determine length of integer
+   */
+  const size_t DIGIT_SIZE = 32; 
+
+  size_t bufsize, n;
+  int i;
+  char *buf;
+  char tmp[DIGIT_SIZE];
+
+  n = W->rule->n;
+
+  bufsize = DIGIT_SIZE*n + (n-1) + 1; 
+   /* n DIGITS + (n-1) COMMAS + '\0' */
+
+  buf = i_malloc(sizeof(char) * bufsize);
+
+  buf[0] = '\0';
+
+  for (i = 0; i < n; i++) {
+    snprintf(tmp, DIGIT_SIZE, "%d", W->rule->params[i]);
+    strncat(buf, tmp, strlen(tmp));
+
+    if (i != n - 1)
+      strncat(buf, ",", 1);
+  }
+
+  return buf;
+}
+
+
+char *
+node_to_string(Wht *W)
+{
+  const size_t IDENT_SIZE = strlen(W->rule->ident) + 1;
+
+  size_t bufsize;
+  char *buf;
+  char *params;
+
+  if (W->rule != NULL && W->rule->n == 0) {
+    bufsize = IDENT_SIZE; /*i.e. IDENT \0*/
+    buf = i_malloc(sizeof(char) * bufsize);
+    snprintf(buf, bufsize, "%s", W->rule->ident);
+  } else {
+    params = params_to_string(W);
+    bufsize = IDENT_SIZE + 3 + strlen(params); /*i.e. IDENT (...) \0*/
+    buf = i_malloc(sizeof(char) * bufsize);
+    snprintf(buf, bufsize, "%s(%s)", W->rule->ident, params);
+    i_free(params);
+  }
+
+  return buf;
+}
+
+char *
+to_string(Wht *W)
+{
+  char *buf, *tmp;
+  size_t nn, i, j, len, resize;
+  
+  buf = node_to_string(W);
+  len = strlen(buf) + 3; /* [ .. ] \0 */
+  buf = realloc(buf, len);
+
+  strncat(buf,"[",1);
+
+  if (W->children != NULL) {
+    nn = W->children->nn;
+
+    resize = len;
+
+    /* Iterate over children WHTs, stored anti lexigraphically  */
+    for (i = 0; i < nn; i++) {
+      j       = nn - i - 1;
+      tmp     = to_string(W->children->Ws[j]);
+      len     = strlen(tmp) + 1; /* Extra 1 is for comma */
+
+      resize += len + 1; /* Extra 1 is for '\0' */
+      buf     = realloc(buf, resize);
+
+      strncat(buf, tmp, len);
+
+      if (i < nn - 1)
+        strncat(buf, ",", 1);
+
+      i_free(tmp);
+    }
+  } else {
+    tmp = i_itoa(W->n);
+    len += strlen(tmp);
+    buf = realloc(buf, len);
+    strncat(buf, tmp, strlen(tmp));
+    i_free(tmp);
+  }
+
+  strncat(buf,"]",1);
+
+  return buf;
 }
 

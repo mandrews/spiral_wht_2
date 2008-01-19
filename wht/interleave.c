@@ -1,6 +1,24 @@
+/**
+ * \file interleave.c
+ *
+ * \brief Implementation of loop interleaving breakdown rules.
+ *
+ * Loop interleaving provides a way of computing base cases of the form:
+ *
+ * \WHT_2n_X_I_k
+ *
+ * Instead of looping over \I_k, the computations of \WHT_2n are 
+ * interleaved, i.e., computed concurrently. 
+ * This has the potential to decrease data cache misses.
+ */
 #include "wht.h"
 #include "codelets.h"
 
+/**
+ * \brief Replace small node with interleaved small node if possible.
+ *
+ * \param   W   WHT Tree
+ */
 void
 small_interleave_rule(Wht *W)
 {
@@ -15,7 +33,7 @@ small_interleave_rule(Wht *W)
     return error_msg_set(W, "codelet must be small to be interleaved");
 
   /* Check that parent codelet is split interleaved */
-  if ((W->parent == NULL) || (strcmp("splitil", W->parent->name) != 0)) 
+  if ((W->parent == NULL) || (strcmp("splitil", W->parent->rule->ident) != 0)) 
     return error_msg_set(W, "codelet must be used in conjunction with splitil");
 
   /* Check that interleave factor is supported */
@@ -71,6 +89,11 @@ split_interleave_apply(Wht *W, long S, size_t D, wht_value *x)
   }
 }
 
+/**
+ * \brief Replace split node with interleaved split node if possible.
+ *
+ * \param   W   WHT Tree
+ */
 void
 split_interleave_rule(Wht *W)
 {

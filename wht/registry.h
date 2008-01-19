@@ -6,9 +6,9 @@
  * Each new rule registered should implement the \ref rule_fp
  * interface.  Registration is by:
  *
- * -# Defining the external symbol outside the table
+ * -# Defining the symbol outside the table
  * \code
- * extern void my_rule(Wht *W);
+ * void my_rule(Wht *W);
  * \endcode
  * -# Defining the entry inside the table
  * \code
@@ -51,21 +51,14 @@
 
 
 /* Transform extensions to core package */
-#if ((WHT_MAX_INTERLEAVE > 0) || (WHT_VECTOR_SIZE > 0))
-extern void split_interleave_rule(Wht *W);
-#endif
 
-#if ((WHT_MAX_INTERLEAVE > 0)) 
-extern void small_interleave_rule(Wht *W);
-#endif
+void split_interleave_rule(Wht *W);
 
-#if ((WHT_MAX_INTERLEAVE > 0) && (WHT_VECTOR_SIZE > 0))
-extern void small_vector_rule(Wht *W);
-#endif
+void small_interleave_rule(Wht *W);
 
-#if ((WHT_VECTOR_SIZE > 0))
-extern void small_right_vector_rule(Wht *W);
-#endif
+void small_vector_rule(Wht *W);
+
+void small_right_vector_rule(Wht *W);
 
 static const rule 
 rule_registry[] = {

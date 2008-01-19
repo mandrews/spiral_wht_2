@@ -79,6 +79,7 @@ main(int argc, char **argv)
 
   if (wht_error_msg(W) != NULL) {
     printf("rejected, %s\n", wht_error_msg(W));
+    free(plan);
     wht_free(W);
     exit(1);
   }
@@ -97,7 +98,7 @@ main(int argc, char **argv)
   wht_apply(W,x);
   wht_apply(D,y);
 
-  buf = W->to_string(W);
+  buf = wht_to_string(W);
 
   if (wht_max_norm(x,y,N) < WHT_STABILITY_THRESHOLD)
     printf("correct\n");   
