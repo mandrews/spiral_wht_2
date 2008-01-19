@@ -267,7 +267,6 @@ char * to_string(Wht *W);
  */
 #define wht_apply(W, x) ((W->apply)(W, 1, 0, x))
 #define wht_free(W) ((W->free)(W))
-#define wht_to_string(W) (to_string(W))
 #define wht_parse(s) (parse(s))
 #define wht_info() (info())
 #define wht_direct(n) (direct(n))

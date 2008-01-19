@@ -3,18 +3,6 @@
 #include <sstream>
 #include <string>
 
-string 
-small_to_key(Wht *W)
-{
-  char *buf;
-  string key;
-
-  buf = wht_to_string(W);
-  key = buf;
-  free(buf);
-  return key;
-}
-
 /*
  * TODO: see if we can replace these type of signature with more c++ like:
     void alpha_n(Wht *W, counts& x)
@@ -71,7 +59,7 @@ alpha_k(Wht *W, size_t k)
   x = new counts();
 
   if (W->children == NULL) {
-    key = small_to_key(W);
+    key = string(W->to_string);
 
     if (W->n == (int) k)
       (*x)[key] = 1;

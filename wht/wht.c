@@ -128,22 +128,21 @@ rule_free(rule *rule)
 void
 rule_eval(Wht *W)
 {
-  if (W->children == NULL) {
-    if (W->rule->call != NULL)
-      return W->rule->call(W);
-    else
-      return;
-  }
-
   size_t i, nn;
-
-  nn = W->children->nn;
 
   if (W->rule->call != NULL)
     W->rule->call(W);
 
-  for (i = 0; i < nn; i++) 
-    rule_eval(W->children->Ws[i]);
+  if (W->to_string != NULL)
+    i_free(W->to_string);
+
+  W->to_string = to_string(W);
+
+  if (W->children != NULL) {
+    nn = W->children->nn;
+    for (i = 0; i < nn; i++) 
+      rule_eval(W->children->Ws[i]);
+  }
 }
 
 rule *
@@ -349,19 +348,19 @@ params_to_string(Wht *W)
 char *
 name_to_string(Wht *W)
 {
-  size_t len;
   char *buf, *tmp;
+  size_t len;
 
-  len = strlen(W->rule->name) + 1;
+  len = strlen(W->rule->name) + 1; 
   buf = i_malloc(sizeof(char) * len);
   snprintf(buf, len, "%s", W->rule->name);
 
   if (W->rule != NULL && W->rule->n > 0) {
     tmp  = params_to_string(W);
     len += strlen(tmp) + 3; /* ( .. ) \0 */
-    buf  = realloc(buf, len);
+    buf  = realloc(buf, sizeof(char) * len);
     strncat(buf,"(",1);
-    strncat(buf, tmp, strlen(tmp));
+    strncat(buf, tmp, strlen(tmp) + 1);
     strncat(buf,")",1);
 
     i_free(tmp);
@@ -370,9 +369,9 @@ name_to_string(Wht *W)
   if (W->children == NULL) {
     tmp  = i_itoa(W->n);
     len += strlen(tmp) + 3; /* ( .. ) \0 */
-    buf  = realloc(buf, len);
+    buf  = realloc(buf, sizeof(char) * len);
     strncat(buf,"[",1);
-    strncat(buf, tmp, strlen(tmp));
+    strncat(buf, tmp, strlen(tmp) + 1);
     strncat(buf,"]",1);
 
     i_free(tmp);
@@ -385,7 +384,7 @@ char *
 to_string(Wht *W)
 {
   char *buf, *tmp;
-  size_t nn, i, j, len, resize;
+  size_t nn, i, j, len;
   
   buf = name_to_string(W);
 
@@ -393,25 +392,22 @@ to_string(Wht *W)
     return buf;
 
   len = strlen(buf) + 3; /* [ .. ] \0 */
-  buf = realloc(buf, len);
+  buf = realloc(buf, sizeof(char) * len);
 
   strncat(buf,"[",1);
 
   nn = W->children->nn;
 
-  resize = len;
-
   /* Iterate over children WHTs, stored anti lexigraphically  */
   for (i = 0; i < nn; i++) {
-    j       = nn - i - 1;
-    tmp     = to_string(W->children->Ws[j]);
-    len     = strlen(tmp) + 1; /* Extra 1 is for comma */
+    j    = nn - i - 1;
+    tmp  = to_string(W->children->Ws[j]);
+    len += strlen(tmp) + 2; /* , \0*/
+    buf  = realloc(buf, sizeof(char) * len);
 
-    resize += len + 1; /* Extra 1 is for '\0' */
-    buf     = realloc(buf, resize);
+    strncat(buf, tmp, strlen(tmp) + 1);
 
-    strncat(buf, tmp, len);
-
+    /* Don't add comma for last child */
     if (i < nn - 1)
       strncat(buf, ",", 1);
 

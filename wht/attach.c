@@ -77,7 +77,6 @@ main(int argc, char **argv)
     usage();
 
   Wht *W;
-  char *buf;
 
   W = wht_parse(plan);
 
@@ -89,10 +88,8 @@ main(int argc, char **argv)
     exit(1);
   }
 
-  buf = wht_to_string(W);
-  printf("%s\n", buf);
+  printf("%s\n", W->to_string);
 
-  free(buf);
   free(plan);
   free(rule);
 

@@ -70,7 +70,6 @@ main(int argc, char **argv)
   Wht *W;
   Wht *D;
   wht_value *x, *y;
-  char *buf;
 
   long n,N;
   int i;
@@ -98,7 +97,7 @@ main(int argc, char **argv)
   wht_apply(W,x);
   wht_apply(D,y);
 
-  buf = wht_to_string(W);
+  printf("%s\n", W->to_string);
 
   if (wht_max_norm(x,y,N) < WHT_STABILITY_THRESHOLD)
     printf("correct\n");   
@@ -111,7 +110,6 @@ main(int argc, char **argv)
   free(x);
   free(y);
 
-  free(buf);
   free(plan);
 
   return 0;
