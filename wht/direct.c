@@ -12,8 +12,8 @@
 
 #include "wht.h"
 
-/*
- * TODO Investigate the stability of calculation method
+/**
+ * \todo Investigate the stability of calculation method
  */
 int 
 wht_entry(int k, long row, long col)
@@ -66,8 +66,8 @@ wht_direct(size_t n)
 {
   Wht *W;
 
-  W             = null_init(n, "direct");
-  W->apply      = apply_direct;
+  W        = node_init(n, "direct");
+  W->apply = apply_direct;
 
   return W;
 }

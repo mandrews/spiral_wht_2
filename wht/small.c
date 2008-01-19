@@ -11,7 +11,7 @@ small_init(size_t n)
 {
   Wht *W;
 
-  W            = null_init(n, "small");
+  W            = node_init(n, "small");
   W->apply     = NULL; /* Ensure that null_apply is overridden */
   W->apply     = codelet_apply_lookup(W);
 

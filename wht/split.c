@@ -79,8 +79,8 @@ split_init(Wht *Ws[], size_t nn)
     n += Ws[i]->n;
   }
 
-  W            = null_init(n, "split");
-  W->apply     = split_apply;
+  W           = node_init(n, "split");
+  W->apply    = split_apply;
 
   W->children = i_malloc(sizeof(split_children));
 

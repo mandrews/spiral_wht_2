@@ -190,9 +190,11 @@ wht_value max_norm(const wht_value *x, const wht_value *y, size_t N);
 
 wht_value * random_vector(size_t n);
 
-void rule_attach(Wht *W, const char *name, int params[], size_t n, bool is_small);
-
 rule * rule_init();
+
+void rule_free();
+
+void rule_attach(Wht *W, const char *name, int params[], size_t n, bool is_small);
 
 void rule_eval(Wht *W);
 
@@ -200,7 +202,7 @@ void rule_eval_from_string(Wht *W, char *rule);
 
 
 /**
- * \brief Initializes a null codelet
+ * \brief Initializes a node 
  *
  * \param n       Size of codelet
  * \param name    Identified associated with codelet
@@ -209,7 +211,7 @@ void rule_eval_from_string(Wht *W, char *rule);
  * Null codelets allocate memory and methods in a safe way but do transform the
  * input vector.  They are used for convience.
  */
-Wht * null_init(size_t n, char *name);
+Wht * node_init(size_t n, char *name);
 
 
 /**
@@ -244,16 +246,15 @@ void null_apply(Wht *W, long S, size_t D, wht_value *x);
  */
 void split_apply(Wht *W, long S, size_t D, wht_value *x);
 
-void error_msg_set(Wht *W, char *format, ...);
-
-char * error_msg_get(Wht *W);
-
 char * name_to_string(Wht *W);
 
 char * node_to_string(Wht *W);
 
 void node_free(Wht *W);
 
+void error_msg_set(Wht *W, char *format, ...);
+
+char * error_msg_get(Wht *W);
 
 /**
  * \todo Move these macros to an external interface.

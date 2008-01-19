@@ -2,13 +2,13 @@
 #include "wht.h"
 #include "registry.h"
 
-/*
- * NOTE: Bison does not like the 
+/**
+ * \note Bison does not like the 
  * struct { ... } nodes;  syntax
  */
 
-/* 
- * TODO: This repetition could be avoided with void * type values
+/**
+ * \todo This repetition could be avoided with void * type values
  */
 struct nodes
 {
