@@ -1,0 +1,26 @@
+/**
+\page rule_extension Adding a new Breakdown Rule to the Package
+
+There are various ways of recursively computing the \WHT
+Breakdown rules describe how to perform computation of the plan.  
+
+To add a new breakdown rule:
+-# Develop a new breakdown %rule by first implementing a function with that
+has the \ref rule_fp signature.  This function should verify that the %rule can be
+applied to the node it is attached to in the plan.  The behavior of the %rule
+can be parameterized during runtime using \ref rule::params.  
+\see small_interleave_rule
+\see split_interleave_rule
+-# Add the breakdown %rule to registry.h, by declaring the function and then
+utilizing either \ref SMALL_RULE_ENTRY or \ref SPLIT_RULE_ENTRY. 
+-# List the source code that contains the %rule function in \ref wht_Makefile_am,
+in the EXTENSION_FILES variable.  If there is any non compiled code such as a
+header, list this in the EXTENSION_DISTS variable.
+-# Compile time parameters should be controlled using the configure script \ref
+configure_ac.  This in turn, defines macros in the \ref config_h file which can be
+used to control compile time parameters.
+\see small_interleave_rule
+\see split_interleave_rule
+
+
+*/

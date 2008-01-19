@@ -56,3 +56,13 @@ Bugs:
 
   - create bash script for interleaving and vectorization
 
+
+  - separate rule from wht.c
+  - move attrs into rule struct
+  - consider the necessity of null.c
+
+  - string should be a member that should be initialized after tree is
+    constructed, different from ident
+  - lookup on string
+
+  - clean up to_string stuff, i.e. no need to rename codelet

@@ -55,14 +55,14 @@ Interesting computing paradigms supported in the package are:
 - \ref wht_rand
 - \ref wht_verify
 - \ref wht_classify
-- \ref wht_convert
+- \ref wht_attach
 
 \section _developers Developers
 There are several ways to contribute to the development of the package.
 
-- Adding a new Codelet 
-- Implementing a new Codelet Generator
-- Providing a new Performance Measurement Extension
+- \ref rule_extension
+- \ref codelet_extension
+- \ref measure_extension
 - Maintaining and Updating the Package
 
 \section _background Background

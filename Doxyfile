@@ -177,7 +177,16 @@ TAB_SIZE               = 8
 # will result in a user-defined paragraph with heading "Side Effects:". 
 # You can put \n's in the value part of an alias to insert newlines.
 
-ALIASES                = 
+ALIASES                = \
+"WHT=\f$ {\bf WHT} \f$"  \
+"WHT_2n=\f$ {\bf WHT}_{2^{n}} \f$" \
+"tensor=\f$ \otimes \f$" \
+"I_k=\f$ {\bf I}_{k}\f$" \
+"WHT_2n_X_I_k=\f$ {\bf WHT}_{2^{n}} \otimes {\bf I}_{k}\f$" \
+"WHT_N_X_I_S=\f$ {\bf WHT}_{N} \otimes {\bf I}_{S}\f$" \
+"N_2_SIZE=\f$ N = 2^{SIZE} \f$" \
+"m_4_2p2=\f$ 4 = 2^2 \f$" \
+"PAPI_URL= http://icl.cs.utk.edu/papi"
 
 # Set the OPTIMIZE_OUTPUT_FOR_C tag to YES if your project consists of C 
 # sources only. Doxygen will then generate output that is more tailored for C. 

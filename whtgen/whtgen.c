@@ -133,9 +133,10 @@ whtgen -n SIZE
     -n SIZE       Generate codelet of size N=2^SIZE.
 \endverbatim
 
-Generate unrolled \f$ {\bf WHT } \f$ codelets of the form 
-\f$ ({\bf WHT}_{N} \otimes {\bf I}_{S}) \f$
-where \f$ N = 2^{SIZE} \f$. Print the result to stdout.
+Generate unrolled \WHT  codelets of the form 
+\WHT_N_X_I_S
+where \N_2_SIZE
+Print the result to stdout.
 
 Algorithm to 
 generate code is iterative, and only two temporaries are used.
@@ -165,7 +166,7 @@ for (i = 1; i <= N; i= 2) {
 
 \section _examples EXAMPLES
 
-Generate a codelet of size \f$ 4 = 2^2 \f$
+Generate a codelet of size \m_4_2p2
 \code
 whtgen -n 2 
 

@@ -1,0 +1,21 @@
+/**
+\page measure_extension Adding a new Measure Extension to the Package
+
+Presently the package can measure the execution of a \WHT Plan using PAPI and
+the microsecond timer.  In the future, new libraries for measuring performance
+may be necessary.
+
+To add a new Measure Extension:
+-# Develop a new extension by implementing the functions with the following
+signatures: 
+  - \ref measure_extension::init
+  - \ref measure_extension::test
+  - \ref measure_extension::call
+  - \ref measure_extension::done
+-# Register this into the \ref measure_extensions table using \ref
+MEASURE_ENTRY.
+\see extensions.h
+
+\see \PAPI_URL
+
+*/
