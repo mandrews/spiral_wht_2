@@ -237,8 +237,6 @@ Wht * small_init(size_t n);
 
 void null_apply(Wht *W, long S, size_t D, wht_value *x);
 
-void small_apply(Wht *W, long S, size_t D, wht_value *x);
-
 /**
  * \brief Recursively apply transform to input vector
  *
@@ -251,14 +249,11 @@ void split_apply(Wht *W, long S, size_t D, wht_value *x);
 
 void null_free(Wht *W);
 
-void small_free(Wht *W);
-
 void split_free(Wht *W);
 
 void error_msg_set(Wht *W, char *format, ...);
 
 char * error_msg_get(Wht *W);
-
 
 char * to_string(Wht *W);
 

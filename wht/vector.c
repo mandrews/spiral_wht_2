@@ -63,11 +63,15 @@ small_vector_rule(Wht *W)
    * This only occurs with vectors of size >= 4  
    */
 
+  /** 
+   * \todo Figure out an elegant way of reusing rules
+   */
+
   W->rule->params[0] = k;
   W->rule->params[1] = UNSET_PARAMETER;
   W->rule->params[2] = UNSET_PARAMETER;
   W->rule->n = 1;
-  strcpy(W->rule->name,"smallil");
+  strcpy(W->rule->name, "smallil");
 
   small_interleave_rule(W);
 
@@ -75,7 +79,7 @@ small_vector_rule(Wht *W)
   W->rule->params[1] = k;
   W->rule->params[2] = a;
   W->rule->n = 3;
-  strcpy(W->rule->name,"smallv");
+  strcpy(W->rule->name, "smallv");
 
   W->apply = codelet_apply_lookup(W);
 
