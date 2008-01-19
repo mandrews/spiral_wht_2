@@ -8,8 +8,9 @@ codelet_apply_lookup(Wht *W)
   codelet_apply_fp call;
   char *name;
 
-  name = to_string(W);
-  call = NULL; /* Did not find codelet in table */
+  name = name_to_string(W);
+
+  call  = NULL; /* Did not find codelet in table */
 
   p = (codelet_apply_entry *) codelet_apply_registry; 
   for (; p != NULL && (codelet_apply_fp) p->call != NULL; ++p)
@@ -18,7 +19,8 @@ codelet_apply_lookup(Wht *W)
       break;
     }
 
-  free(name);
+  i_free(name);
+
   return call;
 }
 

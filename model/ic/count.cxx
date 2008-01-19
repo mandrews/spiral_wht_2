@@ -37,7 +37,7 @@ alpha_n(Wht *W)
   n  = W->n;
   nn = W->children->nn;
 
-  key.append(W->name);
+  key.append(W->rule->name);
   key.append("_alpha");
 
   (*x)[key] = 1;
@@ -125,7 +125,7 @@ beta_1(Wht *W)
   n  = W->n;
   nn = W->children->nn;
 
-  key.append(W->name);
+  key.append(W->rule->name);
   key.append("_beta_1");
 
   (*x)[key] = nn;
@@ -164,7 +164,7 @@ beta_2(Wht *W)
   n  = W->n;
   nn = W->children->nn;
 
-  key.append(W->name);
+  key.append(W->rule->name);
   key.append("_beta_2");
 
   (*x)[key] = 0;
@@ -205,7 +205,7 @@ beta_3(Wht *W)
   n  = W->n;
   nn = W->children->nn;
 
-  key.append(W->name);
+  key.append(W->rule->name);
   key.append("_beta_3");
 
   (*x)[key] = 0;

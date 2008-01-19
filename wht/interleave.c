@@ -33,7 +33,7 @@ small_interleave_rule(Wht *W)
     return error_msg_set(W, "codelet must be small to be interleaved");
 
   /* Check that parent codelet is split interleaved */
-  if ((W->parent == NULL) || (strcmp("splitil", W->parent->rule->ident) != 0)) 
+  if ((W->parent == NULL) || (strcmp("splitil", W->parent->rule->name) != 0)) 
     return error_msg_set(W, "codelet must be used in conjunction with splitil");
 
   /* Check that interleave factor is supported */

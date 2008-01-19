@@ -67,7 +67,7 @@ small_vector_rule(Wht *W)
   W->rule->params[1] = UNSET_PARAMETER;
   W->rule->params[2] = UNSET_PARAMETER;
   W->rule->n = 1;
-  strcpy(W->rule->ident,"smallil");
+  strcpy(W->rule->name,"smallil");
 
   small_interleave_rule(W);
 
@@ -75,7 +75,7 @@ small_vector_rule(Wht *W)
   W->rule->params[1] = k;
   W->rule->params[2] = a;
   W->rule->n = 3;
-  strcpy(W->rule->ident,"smallv");
+  strcpy(W->rule->name,"smallv");
 
   W->apply = codelet_apply_lookup(W);
 

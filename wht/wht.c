@@ -42,7 +42,6 @@ dump(Wht *W, FILE *fd)
 {
   int i;
 
-  fprintf(fd, "name:         %-s\n",   W->name);
   fprintf(fd, "N:            %-d\n",   W->N);
   fprintf(fd, "n:            %-d\n",   W->n);
   fprintf(fd, "left:         %-zd\n",  W->left);
@@ -83,21 +82,21 @@ i_itoa(int i)
 }
 
 rule *
-rule_init()
+rule_init(char *name)
 {
   size_t i;
   rule *rule;
 
   rule = i_malloc(sizeof(*rule));
 
-  rule->ident[0] = '\0';
-
-  rule->n = 0;
+  rule->n         = 0;
+  rule->is_small  = true;
+  rule->call      = NULL;
 
   for (i = 0; i < MAX_RULE_PARAMS; i++)
     rule->params[i] = UNSET_PARAMETER;
 
-  rule->call = NULL;
+  strncpy(rule->name, name, MAX_RULE_NAME_SIZE);
 
   return rule;
 }
@@ -108,13 +107,11 @@ rule_copy(rule *src)
   int i;
   rule *dst;
 
-  dst = rule_init();
+  dst = rule_init(src->name);
 
   dst->n        = src->n;
   dst->is_small = src->is_small;
   dst->call     = src->call;
-
-  strcpy(dst->ident, src->ident);
 
   for (i = 0; i < MAX_RULE_PARAMS; i++)
     dst->params[i] = src->params[i];
@@ -150,7 +147,7 @@ rule_eval(Wht *W)
 }
 
 rule *
-rule_lookup(const char *ident, size_t n, bool is_small)
+rule_lookup(const char *name, size_t n, bool is_small)
 {
   rule *p;
 
@@ -158,7 +155,7 @@ rule_lookup(const char *ident, size_t n, bool is_small)
   for (; p != NULL && (rule_fp) p->call != NULL; ++p) {
     if ((n == p->n) && 
         (is_small == p->is_small) &&
-        (strncmp(ident, p->ident, MAX_RULE_IDENT_SIZE) == 0)) {
+        (strncmp(name, p->name, MAX_RULE_NAME_SIZE) == 0)) {
       return p;
     }
   }
@@ -167,7 +164,7 @@ rule_lookup(const char *ident, size_t n, bool is_small)
 }
 
 void
-rule_attach(Wht *W, const char *ident, int params[], size_t n, bool is_small)
+rule_attach(Wht *W, const char *name, int params[], size_t n, bool is_small)
 {
   int i;
   rule *p;
@@ -176,32 +173,33 @@ rule_attach(Wht *W, const char *ident, int params[], size_t n, bool is_small)
   if ((is_small && W->children != NULL) || ((!is_small) && W->children == NULL))
     return;
 
-  p = rule_lookup(ident, n, is_small);
+  p = rule_lookup(name, n, is_small);
 
   if (p == NULL) 
-    wht_exit("%s was not registered in the rule table", ident);
+    wht_exit("%s was not registered in the rule table", name);
 
-  rule_free(W->rule);
+  if (W->rule != NULL)
+    rule_free(W->rule);
+
   W->rule = rule_copy(p);
 
   for (i = 0; i < MAX_RULE_PARAMS; i++)
     W->rule->params[i] = params[i];
-
 }
 
 void
-rule_attach_recursive(Wht *W, const char *ident, int params[], size_t n, bool is_small)
+rule_attach_recursive(Wht *W, const char *name, int params[], size_t n, bool is_small)
 {
   int i;
 
-  if ((strcmp(W->name, "small") == 0) || (strcmp(W->name, "split") == 0))
-    rule_attach(W, ident, params, n, is_small);
+  if ((strcmp(W->rule->name, "small") == 0) || (strcmp(W->rule->name, "split") == 0))
+    rule_attach(W, name, params, n, is_small);
 
   if (W->children == NULL)
     return;
 
   for (i = 0; i < W->children->nn; i++)
-    rule_attach_recursive(W->children->Ws[i], ident, params, n, is_small);
+    rule_attach_recursive(W->children->Ws[i], name, params, n, is_small);
 }
 
 void
@@ -210,16 +208,16 @@ rule_attach_undo(Wht *W)
   if (W->error_msg != NULL)
     i_free(W->error_msg);
 
-  rule_free(W->rule);
+  if (W->rule != NULL)
+    rule_free(W->rule);
 
   W->error_msg  = NULL;
 
-  W->rule       = rule_init();
-  strcpy(W->rule->ident, W->name);
-
   if (W->children == NULL) {
+    W->rule       = rule_init("small");
     W->apply      = codelet_apply_lookup(W);
   } else {
+    W->rule       = rule_init("split");
     W->apply      = split_apply;
   }
 }
@@ -245,12 +243,12 @@ rule_eval_from_string(Wht *W, char *rule)
   Wht *R;
   R = parse(rule);
 
-  char   *ident;
+  char   *name;
   int    *params;
   size_t  n;
   bool    is_small;
 
-  ident       = R->rule->ident;
+  name       = R->rule->name;
   params      = R->rule->params;
   n           = R->rule->n;
   is_small    = (bool) (R->children == NULL);
@@ -258,7 +256,7 @@ rule_eval_from_string(Wht *W, char *rule)
   /* Backtrack any previous errors */
   rule_attach_undo_recursive(W);
   /* Attach rule to all nodes*/
-  rule_attach_recursive(W, ident, params, n, is_small);
+  rule_attach_recursive(W, name, params, n, is_small);
   /* Eval rules */
   rule_eval(W);
   /* Backtrack when error occurs */
@@ -349,24 +347,35 @@ params_to_string(Wht *W)
 
 
 char *
-node_to_string(Wht *W)
+name_to_string(Wht *W)
 {
-  const size_t IDENT_SIZE = strlen(W->rule->ident) + 1;
+  size_t len;
+  char *buf, *tmp;
 
-  size_t bufsize;
-  char *buf;
-  char *params;
+  len = strlen(W->rule->name) + 1;
+  buf = i_malloc(sizeof(char) * len);
+  snprintf(buf, len, "%s", W->rule->name);
 
-  if (W->rule != NULL && W->rule->n == 0) {
-    bufsize = IDENT_SIZE; /*i.e. IDENT \0*/
-    buf = i_malloc(sizeof(char) * bufsize);
-    snprintf(buf, bufsize, "%s", W->rule->ident);
-  } else {
-    params = params_to_string(W);
-    bufsize = IDENT_SIZE + 3 + strlen(params); /*i.e. IDENT (...) \0*/
-    buf = i_malloc(sizeof(char) * bufsize);
-    snprintf(buf, bufsize, "%s(%s)", W->rule->ident, params);
-    i_free(params);
+  if (W->rule != NULL && W->rule->n > 0) {
+    tmp  = params_to_string(W);
+    len += strlen(tmp) + 3; /* ( .. ) \0 */
+    buf  = realloc(buf, len);
+    strncat(buf,"(",1);
+    strncat(buf, tmp, strlen(tmp));
+    strncat(buf,")",1);
+
+    i_free(tmp);
+  }
+
+  if (W->children == NULL) {
+    tmp  = i_itoa(W->n);
+    len += strlen(tmp) + 3; /* ( .. ) \0 */
+    buf  = realloc(buf, len);
+    strncat(buf,"[",1);
+    strncat(buf, tmp, strlen(tmp));
+    strncat(buf,"]",1);
+
+    i_free(tmp);
   }
 
   return buf;
@@ -378,38 +387,34 @@ to_string(Wht *W)
   char *buf, *tmp;
   size_t nn, i, j, len, resize;
   
-  buf = node_to_string(W);
+  buf = name_to_string(W);
+
+  if (W->children == NULL)
+    return buf;
+
   len = strlen(buf) + 3; /* [ .. ] \0 */
   buf = realloc(buf, len);
 
   strncat(buf,"[",1);
 
-  if (W->children != NULL) {
-    nn = W->children->nn;
+  nn = W->children->nn;
 
-    resize = len;
+  resize = len;
 
-    /* Iterate over children WHTs, stored anti lexigraphically  */
-    for (i = 0; i < nn; i++) {
-      j       = nn - i - 1;
-      tmp     = to_string(W->children->Ws[j]);
-      len     = strlen(tmp) + 1; /* Extra 1 is for comma */
+  /* Iterate over children WHTs, stored anti lexigraphically  */
+  for (i = 0; i < nn; i++) {
+    j       = nn - i - 1;
+    tmp     = to_string(W->children->Ws[j]);
+    len     = strlen(tmp) + 1; /* Extra 1 is for comma */
 
-      resize += len + 1; /* Extra 1 is for '\0' */
-      buf     = realloc(buf, resize);
+    resize += len + 1; /* Extra 1 is for '\0' */
+    buf     = realloc(buf, resize);
 
-      strncat(buf, tmp, len);
+    strncat(buf, tmp, len);
 
-      if (i < nn - 1)
-        strncat(buf, ",", 1);
+    if (i < nn - 1)
+      strncat(buf, ",", 1);
 
-      i_free(tmp);
-    }
-  } else {
-    tmp = i_itoa(W->n);
-    len += strlen(tmp);
-    buf = realloc(buf, len);
-    strncat(buf, tmp, strlen(tmp));
     i_free(tmp);
   }
 

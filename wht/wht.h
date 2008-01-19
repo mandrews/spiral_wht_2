@@ -21,22 +21,22 @@
  * Constants
  */
 
-#define MAX_RULE_IDENT_SIZE  (32) 
-  /**< Maximum string size for rule identifiers. */
-#define MAX_SPLIT_NODES        (32)
+#define MAX_RULE_NAME_SIZE      ( 32) 
+  /**< Maximum string size for rule nameifiers. */
+#define MAX_SPLIT_NODES          ( 32)
   /**< Maximum number of children for split nodes. */
 
-#define MAX_RULE_PARAMS      (4)
+#define MAX_RULE_PARAMS          (  4)
   /**< Maximum number of parameters for all rules. */
 
-#define MAX_ATTRIBUTES          (4) 
+#define MAX_ATTRIBUTES           (  4) 
   /**< Maximum number of attributes for a node.  */
 
-#define UNSET_ATTRIBUTE        (-1)
+#define UNSET_ATTRIBUTE          ( -1)
 
-#define UNSET_PARAMETER        (-1)
+#define UNSET_PARAMETER          ( -1)
 
-#define MAX_MSG_LEN           (256)
+#define MAX_MSG_LEN              (256)
 
 /**
  * \typedef wht_value
@@ -49,14 +49,14 @@
  */
 #if     WHT_FLOAT == 1
 typedef float wht_value;
-#define WHT_STABILITY_THRESHOLD   (1e-4)
-#define WHT_TYPE_STRING   ("float") 
+#define WHT_STABILITY_THRESHOLD (   1e-4)
+#define WHT_TYPE_STRING         ("float") 
 #endif/*WHT_FLOAT*/
 
 #if     WHT_DOUBLE == 1
 typedef double wht_value;
-#define WHT_STABILITY_THRESHOLD   (1e-10)
-#define WHT_TYPE_STRING   ("double") 
+#define WHT_STABILITY_THRESHOLD (   1e-10)
+#define WHT_TYPE_STRING         ("double") 
 #endif/*WHT_DOUBLE*/
 
 /** \todo Move this to the registry */
@@ -128,7 +128,7 @@ struct Wht {
   split_children * children; 
     /**< Pointer to split children, should not be allocated unless codelet is a split */
 
-  char *name; /**< Identifier for codelet, i.e. 'small' or  'split' */
+  char *to_string; 
 
   int attr[MAX_ATTRIBUTES]; /**< Attributes associated with WHT, set by attaching rule */
 
@@ -148,12 +148,12 @@ struct split_children {
 /**
  * \brief Structure for registering new rules with the package.
  *
- * \param name    Identifier associated with rule
+ * \param name   Identifier associated with rule
  * \param params  Number of parameters associated with rule
  * \param call    Rule attachment function
  */
 struct rule {
-  char    ident[MAX_RULE_IDENT_SIZE];
+  char    name[MAX_RULE_NAME_SIZE];
   size_t  n;
   int     params[MAX_RULE_PARAMS];
     /**< Parameters for attaching rule */
@@ -193,7 +193,7 @@ wht_value max_norm(const wht_value *x, const wht_value *y, size_t N);
 
 wht_value * random_vector(size_t n);
 
-void rule_attach(Wht *W, const char *ident, int params[], size_t n, bool is_small);
+void rule_attach(Wht *W, const char *name, int params[], size_t n, bool is_small);
 
 rule * rule_init();
 

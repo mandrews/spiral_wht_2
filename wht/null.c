@@ -3,8 +3,8 @@
 void 
 null_free(Wht *W) 
 {
-  if (W->name != NULL)
-    i_free(W->name);
+  if (W->to_string != NULL)
+    i_free(W->to_string);
 
   if (W->error_msg != NULL)
     i_free(W->error_msg);
@@ -30,7 +30,6 @@ null_init(size_t n, char *name)
   W            = (Wht *) i_malloc(sizeof(Wht));
   W->N         = (1 << n); 
   W->n         = n;
-  W->name      = strdup(name);
   W->free      = null_free;
   W->apply     = null_apply;
   W->error_msg = NULL;
@@ -38,8 +37,8 @@ null_init(size_t n, char *name)
   W->right     = 1;
   W->parent    = NULL;
   W->children  = NULL;
-  W->rule      = rule_init();
-  strcpy(W->rule->ident, name);
+  W->to_string = NULL;
+  W->rule      = rule_init(name);
 
   for (i = 0; i < MAX_ATTRIBUTES; i++)
     W->attr[i] = UNSET_ATTRIBUTE;
