@@ -58,6 +58,9 @@ small_vector_rule(Wht *W)
   if ((a == 1) && (! rightmost_tree(W)))
     return error_msg_set(W, "must be in rightmost tree of plan");
 
+  if (W->right == 1)
+    return error_msg_set(W, "cannot be rightmost codelet in plan");
+
   /** 
    * \todo Check and test (size * interleave_by) > vector_size.
    * This only occurs with vectors of size >= 4  

@@ -140,6 +140,7 @@ rule_attach_undo(Wht *W)
     W->rule       = rule_init("split");
     W->apply      = split_apply;
   }
+
 }
 
 void
@@ -150,11 +151,11 @@ rule_attach_undo_recursive(Wht *W)
   if (W->error_msg != NULL) 
     rule_attach_undo(W);
 
-  if (W->children == NULL)
-    return;
+  if (W->children != NULL)
+    for (i = 0; i < W->children->nn; i++)
+      rule_attach_undo_recursive(W->children->Ws[i]);
 
-  for (i = 0; i < W->children->nn; i++)
-    rule_attach_undo_recursive(W->children->Ws[i]);
+  W->to_string = node_to_string(W);
 }
 
 void
