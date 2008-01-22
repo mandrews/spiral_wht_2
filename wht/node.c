@@ -1,3 +1,8 @@
+/**
+ * \file node.c
+ *
+ * \brief Implementation of WHT node independent functions.
+ */
 #include "wht.h"
 
 void

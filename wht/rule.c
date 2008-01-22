@@ -1,3 +1,9 @@
+/**
+ * \file rule.c
+ *
+ * \brief Implementation of rule functions.
+ *
+ */
 #include "wht.h"
 #include "registry.h"
 #include "codelets.h"

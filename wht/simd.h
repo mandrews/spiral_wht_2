@@ -1,3 +1,13 @@
+/**
+ * \file simd.h
+ *
+ * \brief Single Instruction Multiple Data (SIMD) macro interface file.
+ *
+ * This file is included by simd vector codelets, and uses Intel SSE and SSE2
+ * intrinsics (x86 wrapper macros).
+ *
+ * \todo Implement Altivec interfaces.
+ */
 #ifndef SIMD_H
 #define SIMD_H
 
@@ -6,6 +16,13 @@
 
 typedef __m128d wht_vector2;
 
+/**
+ * \brief Vector of size 2 Add
+ *
+ * \param	R0		R1 + R2
+ * \param R1  	Input
+ * \param R2  	Input
+ */
 #define vadd2(R0,R1,R2) \
   R0 = _mm_add_pd(R1,R2)
 

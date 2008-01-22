@@ -1,3 +1,8 @@
+/**
+ * \file utils.c
+ *
+ * \brief Misc package utilities.
+ */
 #include "wht.h"
 
 #include <math.h>
@@ -26,43 +31,20 @@ i_free(void *p)
   free(p);
 }
 
-wht_value *
-random_vector(size_t N)
+char * 
+i_itoa(int i)
 {
-  wht_value *x;
-  int i;
+  const size_t n = sizeof(int) * 8; 
+  /** 
+   * \note n should log[10](length of maximum integer)
+   * This should work since log[2](x) > log[10](x) 
+   */
 
-  srandom((unsigned int) (getpid() * M_PI));
-  
-  x = (wht_value *) i_malloc(N * sizeof(wht_value));
-  for (i = 0; i < N; i++) 
-    x[i] = ((wht_value) (rand() + 1.0L))/RAND_MAX;
+  char *buf;
+  buf = malloc(sizeof(char) * n);
 
-  return x;
+  snprintf(buf, n, "%d", i);
+
+  return buf;
 }
-
-#define pkg_max(a,b) (a > b ? a : b)
-
-wht_value
-max_norm(const wht_value *x, const wht_value *y, size_t N)
-{
-  int i;
-  wht_value norm;
-
-  norm = WHT_STABILITY_THRESHOLD*1e-1;
-#if   WHT_FLOAT==1
-  for (i = 0; i < N; i++) 
-    norm = pkg_max(fabsf(x[i] - y[i]), norm);
-#endif/*WHT_FLOAT*/
-
-#if   WHT_DOUBLE==1
-  for (i = 0; i < N; i++) 
-    norm = pkg_max(fabs(x[i] - y[i]), norm);
-#endif/*WHT_DOUBLE*/
-
-  return norm;
-
-}
-
-#undef pkg_max
 

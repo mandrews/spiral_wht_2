@@ -180,9 +180,11 @@ TAB_SIZE               = 8
 ALIASES                = \
 "WHT=\f$ {\bf WHT} \f$"  \
 "WHT_2n=\f$ {\bf WHT}_{2^{n}} \f$" \
+"WHT_2v=\f$ {\bf WHT}_{2 v} \f$" \
 "tensor=\f$ \otimes \f$" \
 "I_k=\f$ {\bf I}_{k}\f$" \
 "WHT_2n_X_I_k=\f$ {\bf WHT}_{2^{n}} \otimes {\bf I}_{k}\f$" \
+"WHT_2n_X_I_2v=\f$ {\bf WHT}_{2^{n}} \otimes {\bf I}_{2 v}\f$" \
 "WHT_N_X_I_S=\f$ {\bf WHT}_{N} \otimes {\bf I}_{S}\f$" \
 "N_2_SIZE=\f$ N = 2^{SIZE} \f$" \
 "m_4_2p2=\f$ 4 = 2^2 \f$" \

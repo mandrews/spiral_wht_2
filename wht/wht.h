@@ -36,9 +36,11 @@
 #define MAX_ATTRIBUTES           (  4) 
   /**< Maximum number of attributes for a node  */
 
+/** \cond */
 #define UNSET_ATTRIBUTE          ( -1)
 
 #define UNSET_PARAMETER          ( -1)
+/** \endcond */
 
 #define MAX_MSG_LEN              (256)
   /**< Maximum length for error messages  */
@@ -319,20 +321,20 @@ Wht * small_init(size_t n);
  *
  * \param   W   WHT plan.
  * \param   S   Stride to apply transform at.
- * \param   D   Base stride.
+ * \param   U   Base stride.
  * \param   x   Input vector.
  */
-void null_apply(Wht *W, long S, size_t D, wht_value *x);
+void null_apply(Wht *W, long S, size_t U, wht_value *x);
 
 /**
  * \brief Recursively apply transform to the input vector.
  *
  * \param   W   WHT plan.
  * \param   S   Stride to apply transform at.
- * \param   D   Base stride.
+ * \param   U   Base stride.
  * \param   x   Input vector.
  */
-void split_apply(Wht *W, long S, size_t D, wht_value *x);
+void split_apply(Wht *W, long S, size_t U, wht_value *x);
 
 
 
@@ -358,7 +360,7 @@ void rule_free(rule *p);
 
 /**
  * \brief Attach a rule to a node in a WHT plan.  Rule remains invariant until
- * rule_eval is called at which time rule::call is evaulated with the node.
+ * \ref rule_eval is called at which time rule::call is evaulated with the node.
  *
  * \param W         Node to attach rule to
  * \param name      Name associated with rule
@@ -369,11 +371,20 @@ void rule_free(rule *p);
 void rule_attach(Wht *W, const char *name, int params[], size_t n, bool is_small);
 
 /**
- * \brief TODO
+ * \brief Evalutate rules attached to WHT plan.  If a breakdown rule is
+ * invalid, Wht::error_msg is set.
+ *
  * \param W         Root of WHT plan
  */
 void rule_eval(Wht *W);
 
+/**
+ * \brief Converts string into a rule which is then recursively attached to WHT plan.
+ * Rules are then evaulated as in \ref rule_eval.
+ *
+ * \param W         Root of WHT plan
+ * \param rule      Rule string
+ */
 void rule_eval_from_string(Wht *W, char *rule);
 
 
@@ -383,8 +394,22 @@ void rule_eval_from_string(Wht *W, char *rule);
  * Misc Functions 
  */
 
+/**
+ * \brief Sets the Wht::error_msg field on WHT node, unless a message has
+ * already been set.
+ *
+ * \param W         WHT node
+ * \param format    Format string for variable argument list, like printf
+ */
 void error_msg_set(Wht *W, char *format, ...);
 
+/**
+ * \brief Retreive the Wht::error_msg field from a WHT node.  This could be
+ * NULL, if there is no message set.
+ *
+ * \param W         WHT node
+ * \return          Error message
+ */
 char * error_msg_get(Wht *W);
 
 
@@ -396,6 +421,8 @@ char * error_msg_get(Wht *W);
 /**
  * \todo Move these macros to an external interface.
  */
+
+/** \cond */
 #define wht_apply(W, x) ((W->apply)(W, 1, 0, x))
 #define wht_free(W) (node_free(W))
 #define wht_parse(s) (parse(s))
@@ -412,6 +439,7 @@ char * error_msg_get(Wht *W);
     fprintf (stderr, "\n"); \
     exit(-1); \
   }
+/* \endcond */
 
 #endif/* WHT_H */
 

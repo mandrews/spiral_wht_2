@@ -1,7 +1,8 @@
 TODO:
 
   - External interface 
-    - Suffix for different types
+    - Suffix for different types, e.g. whtf_parse
+    - Suffix for value, e.g. whtf_value
 
   - C Version of best_trees store
     - Configure / CPUID info in header

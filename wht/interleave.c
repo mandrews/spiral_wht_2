@@ -13,11 +13,14 @@
  */
 #include "wht.h"
 #include "codelets.h"
+#include "registry.h"
+
+void split_interleave_apply(Wht *W, long S, size_t U, wht_value *x);
 
 /**
  * \brief Replace small node with interleaved small node if possible.
  *
- * \param   W   WHT Tree
+ * \param   W   WHT Plan
  */
 void
 small_interleave_rule(Wht *W)
@@ -57,8 +60,35 @@ small_interleave_rule(Wht *W)
   W->attr[interleave_by] = k;
 }
 
+/**
+ * \brief Replace split node with interleaved split node if possible.
+ *
+ * \param   W   WHT Plan
+ */
+void
+split_interleave_rule(Wht *W)
+{
+  /* Check that codelet is split */
+  if (W->children == NULL)
+    return error_msg_set(W, "codelet must be split to be interleaved");
+
+  W->apply = split_interleave_apply;
+}
+
+
+/**
+ * \brief Apply transform using interleaed codelets.
+ *
+ * Only significant difference between this implementation and \ref split_apply
+ * is step inside the innermost for loop.
+ *
+ * \param   W   WHT plan
+ * \param   S   Stride to apply transform at
+ * \param   U   Base stride
+ * \param   x   Input vector
+ */
 void 
-split_interleave_apply(Wht *W, long S, size_t D, wht_value *x)
+split_interleave_apply(Wht *W, long S, size_t U, wht_value *x)
 {
   int nn;
   long N, R, S1, Ni, i, j, k;
@@ -87,20 +117,5 @@ split_interleave_apply(Wht *W, long S, size_t D, wht_value *x)
 
     S1 *= Ni;
   }
-}
-
-/**
- * \brief Replace split node with interleaved split node if possible.
- *
- * \param   W   WHT Tree
- */
-void
-split_interleave_rule(Wht *W)
-{
-  /* Check that codelet is split */
-  if (W->children == NULL)
-    return error_msg_set(W, "codelet must be split to be interleaved");
-
-  W->apply = split_interleave_apply;
 }
 
