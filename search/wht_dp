@@ -377,7 +377,7 @@ if $0 == __FILE__ # Main Entry Point
   end
 
   unless File.exists?(opts.params[:best_plans])
-    opts.die("Could find best_plans #{opts.params[:best_plans]}")
+    File.new(opts.params[:best_plans], "w+")
   end
 
   unless File.writable?(opts.params[:best_plans])
@@ -404,8 +404,13 @@ if $0 == __FILE__ # Main Entry Point
 
   dp.best = plans
 
-  dp.run
+  begin
+    dp.run
+  rescue Interrupt
+    puts "Saving ... "
+  ensure
+    save_best_plans(best_plans, env, dp.best, info)
+  end
 
-  save_best_plans(best_plans, env, dp.best, info)
 end
 

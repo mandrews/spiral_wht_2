@@ -211,10 +211,12 @@ AC_PROG_MAKE_SET
 AC_CHECK_PROG(PERL,perl,perl)
 AC_CHECK_PROG(RUBY,ruby,ruby)
 AC_CHECK_PROG(BASH,bash,bash)
-
 AC_PROG_LIBTOOL
+
+if test "$USE_MAINTAINER_MODE" = yes; then
 AC_PROG_LEX
 AC_PROG_YACC
+fi
 
 # Checks for header files.
 AC_FUNC_ALLOCA

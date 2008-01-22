@@ -1,9 +1,9 @@
 EXTENSION_FILES = interleave.c vector.c
 EXTENSION_DISTS = simd.h
 
-EXTRA_DIST = wht.h registry.h $(EXTENSION_DISTS)
-
 BUILT_SOURCES = scanner.h scanner.c parser.h parser.c 
+
+EXTRA_DIST = wht.h registry.h $(BUILT_SOURCES) $(EXTENSION_DISTS)
 
 AM_YFLAGS = -d
 AM_LFLAGS = --header-file=scanner.h
@@ -33,8 +33,10 @@ wht_attach_LDADD			= libwht.la
 wht_classify_SOURCES	= classify.c 
 wht_classify_LDADD		= libwht.la
 
+if MAINTAINER_MODE	
 # NOTE: This is a hack to fix a problem with autoconf ylwrap script
 # See: http://lists.gnu.org/archive/html/automake/2007-11/msg00001.html
 scanner.h:
 	$(LEX) --outfile=scanner.c scanner.l
+endif # MAINTAINER_MODE
 
