@@ -8,7 +8,9 @@ function usage()
 
 path=`dirname $0`
 
-whtgen="$path/../../whtgen/whtgen"
+# NOTE: This version only uses two temporaries
+#whtgen="$path/../../whtgen/whtgen"
+whtgen="$path/../../whtgen/whtgen-simd"
 
 n=0
 while getopts "n:" i; do

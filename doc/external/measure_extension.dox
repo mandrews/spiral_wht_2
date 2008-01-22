@@ -12,8 +12,7 @@ signatures:
   - \ref measure_extension::test
   - \ref measure_extension::call
   - \ref measure_extension::done
--# Register this into the \ref measure_extensions table using \ref
-MEASURE_ENTRY.
+-# Register this into the table using \ref MEASURE_ENTRY.
 \see extensions.h
 
 \see \PAPI_URL

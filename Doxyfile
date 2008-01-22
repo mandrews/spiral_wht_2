@@ -186,7 +186,10 @@ ALIASES                = \
 "WHT_N_X_I_S=\f$ {\bf WHT}_{N} \otimes {\bf I}_{S}\f$" \
 "N_2_SIZE=\f$ N = 2^{SIZE} \f$" \
 "m_4_2p2=\f$ 4 = 2^2 \f$" \
-"PAPI_URL= http://icl.cs.utk.edu/papi"
+"PAPI_URL= http://icl.cs.utk.edu/papi" \
+"L=\f$L\f$" \
+"R=\f$R\f$" \
+"I_L_X_W_N_I_R=\f$ {\bf I}_{L} \otimes {\bf W}_{N} \otimes {\bf I}_{R} \f$" 
 
 # Set the OPTIMIZE_OUTPUT_FOR_C tag to YES if your project consists of C 
 # sources only. Doxygen will then generate output that is more tailored for C. 

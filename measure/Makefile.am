@@ -12,7 +12,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/wht
 
 noinst_LTLIBRARIES = libmeasure.la
 
-libmeasure_la_SOURCES = stat.h stat.c measure.c measure.h invnorm.c
+libmeasure_la_SOURCES = stat.h stat.c measure.c measure.h invnorm.c extensions.h
 
 libmeasure_la_LIBADD  = $(top_builddir)/wht/libwht.la $(OPT_LIBADDS)
 

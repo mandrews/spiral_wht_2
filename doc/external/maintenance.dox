@@ -1,0 +1,47 @@
+/**
+\page maintenance Maintaining and Updating the Package
+
+Maintenance of the package is not very complicated but could potentially be
+confusing to those not familiar with Gnu autotools.  The build process works as
+follows:
+
+-# \c automake takes as input in all \c Makefile.am files and outputs \c
+Makefile.in files.
+-# \c autoconf takes as input in \c configure.ac and outputs a \c configure
+script.
+-# \c The user runs the \c configure script which subsequently creates the \c
+Makefile files.
+-# The \c make program compiles, links and install the package.
+
+When any of the build files are altered, use \c autogen.sh to rebuild the build
+system.
+
+To rebuild the documentation (including this file) use \c autodoc.sh.
+
+A user can configure the package with the \c --enable-maintainer-mode flag to
+enable extra non essential targets to be built, e.g the codelet
+generators and the codelets themselves.  These commands should rebuild the
+system from scratch including the \c lex and \c yacc targets.
+
+\verbatim
+make maintainer-clean
+configure --enable-maintainer-mode ...
+make
+\endverbatim
+
+To submit code please send a patch:
+\code
+diff -Naur dist_tree my_src_tree | gzip > my_patch.txt.gz
+\endcode
+
+Test your changes by creating an archive (\c make \c dist), unpacking and
+installing from scratch.
+
+Also please use \c valgrind to make sure there are no memory management issues.
+
+\see http://www.gnu.org/software/automake
+\see http://www.gnu.org/software/autoconf
+\see http://www.gnu.org/software/bison
+\see http://valgrind.org
+
+*/

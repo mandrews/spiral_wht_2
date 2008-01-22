@@ -30,7 +30,6 @@ function highlight_extra()
   # Need to escape $ for HTML
   source-highlight -n -s ${synx} < ${name} \
     | sed -e 's/\$/\&#36;/g' \
-    | sed -re 's/\s+/ /g' \
     >> ${doxy}
   echo '</div></pre>' >> ${doxy}
   echo "\endhtmlonly" >> ${doxy}

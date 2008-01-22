@@ -26,7 +26,8 @@ struct measure_extension
  		/**< Function to initialize the extension. */
   measure_call_fp test;
  		/**< Function to perform a test run without actually 
- 		     calling \ref Wht::apply. Used for calibration. */
+ 		     calling \ref Wht::apply. Should replace \ref Wht::apply
+ 				 with \ref null_apply Used for calibration. */
   measure_call_fp call;
 		/**< Function to actually perform measurement.  Should call \ref Wht::apply. */
   measure_done_fp done;

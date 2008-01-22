@@ -33,6 +33,35 @@ Interesting computing paradigms supported in the package are:
 
  ! - \b In \b Development
 
+\section _background Background
+  This package has been created as part of the SPIRAL project:
+
+  \par
+    http://www.spiral.net
+
+  The SPIRAL project pursues the goal of automating the implementation, 
+  optimization, and platform adaptation of digital signal
+  processing (DSP) algorithms.   
+
+  The original design of this package was based on an FFT package 
+  by Sebastian Egner:
+
+  \par
+   http://avalon.ira.uka.de/home/egner
+
+  The latest version incorporates a more modular design based on the FFTW package
+  by Matteo Frigo, and Steven G. Johnson:
+
+  \par
+    http://www.fftw.org
+
+  It is possible to use native hardware performance counters using 
+  the PAPI library:
+
+  \par
+    http://icl.cs.utk.edu/papi
+
+
 \section _install Installation
   See the \ref install file which is also distributed in the package.
 
@@ -41,12 +70,13 @@ Interesting computing paradigms supported in the package are:
   After configuring and installing the package.  Try searching for the optimal
   algorithm on your architecture using Dynamic Programing:
   \code
-  INSTALL_DIR/bin/wht_dp
+  INSTALL_DIR/bin/wht_dp -m 'INSTALL_DIR/bin/wht_measure -k 10000 -n 50' -a 1 -b 6
+  INSTALL_DIR/bin/wht_dp -m 'INSTALL_DIR/bin/wht_measure -k 100 -n 50' -a 7 -b 12
   \endcode
 
-  This will store the best algorithms (or plans) in
+  This will store the best plans in:
   \code
-  INSTALL_DIR/data/wht_best_trees.txt
+  INSTALL_DIR/data/wht_best_plans.txt
   \endcode
 
 \section _utilities Utilities
@@ -63,8 +93,7 @@ There are several ways to contribute to the development of the package.
 - \ref rule_extension
 - \ref codelet_extension
 - \ref measure_extension
-- Maintaining and Updating the Package
+- \ref maintenance
 
-\section _background Background
 
  */

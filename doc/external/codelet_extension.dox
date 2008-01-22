@@ -11,7 +11,7 @@ metadata to be registered in the system.
 \see whtgen.c 
 
 To add a new codelet (assuming there is a code generator):
--# Place the code generator in \dir whtgen.  
+-# Place the code generator in the whtgen directory.
 It should take as a parameter at
 least the size of the transform, and output the generated code to \c stdout.
 Also the \c EXTERNS and \c STRUCTS metadata (below) needs to be associated with the codelet.

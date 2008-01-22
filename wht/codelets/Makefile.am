@@ -1,4 +1,4 @@
-EXTRA_DIST=make_codelets.pl
+EXTRA_DIST = register_codelets.pl make_interleave_codelets.sh make_simd_codelets.sh make_small_codelets.sh
 
 AM_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/wht
 noinst_LTLIBRARIES = libwht_codelets.la

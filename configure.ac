@@ -1,5 +1,5 @@
 #  Process this file with autoconf to produce a configure script.
-AC_INIT([spiral_wht],[2.0-pre-3],[mjand@drexel.edu])
+AC_INIT([spiral_wht],[2.0-pre-4],[mjand@drexel.edu])
 AC_CONFIG_HEADERS([config.h])
 
 AM_INIT_AUTOMAKE(1.9)
@@ -12,9 +12,9 @@ AC_CANONICAL_HOST
 # 
 #  M A I N T A I N E R   P A R A M E T E R S
 # 
-MAX_UNROLL_PKG=4
-MAX_INTERLEAVE_PKG=4
-MAX_VECTOR_PKG=2
+MAX_UNROLL_PKG=8
+MAX_INTERLEAVE_PKG=16
+MAX_VECTOR_PKG=4
 
 AC_SUBST(MAX_UNROLL_PKG)
 AC_SUBST(MAX_INTERLEAVE_PKG)
@@ -25,7 +25,7 @@ AC_SUBST(MAX_VECTOR_PKG)
 # 
 #  D E F A U L T   P A R A M E T E R S
 # 
-MAX_UNROLL=4
+MAX_UNROLL=6
 MAX_INTERLEAVE=0
 VECTOR_SIZE=0
 
@@ -249,16 +249,17 @@ AC_DEFINE_UNQUOTED(WHT_CC,"$CC",
 AC_DEFINE_UNQUOTED(WHT_CFLAGS,"$CFLAGS",
   [the compiler flags used to compile this.])
 
+# TODO puts these back when model is ready to be distributed
+# model/Makefile
+# model/ic/Makefile
 AC_CONFIG_FILES([
    Makefile
+   whtgen/Makefile
    wht/Makefile
    wht/codelets/Makefile
-   whtgen/Makefile
    measure/Makefile
    measure/papi/Makefile
    search/Makefile
-   model/Makefile
-   model/ic/Makefile
    rand/Makefile
    tests/Makefile
 ])

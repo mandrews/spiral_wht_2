@@ -97,7 +97,7 @@ main(int argc, char **argv)
   wht_apply(W,x);
   wht_apply(D,y);
 
-  printf("%s\n", W->to_string);
+  /* printf("%s\n", W->to_string); */
 
   if (wht_max_norm(x,y,N) < WHT_STABILITY_THRESHOLD)
     printf("correct\n");   
@@ -117,7 +117,7 @@ main(int argc, char **argv)
 
 #ifndef DOXYGEN_MAN_MODE
 /**
-\page wht_verify Verify WHT Plan
+\page wht_verify Verify a WHT Plan
 
 \section _synopsis SYNOPSIS
 wht_verify -w PLAN

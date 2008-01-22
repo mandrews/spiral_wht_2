@@ -40,7 +40,9 @@
  * \param NAME  Identifier associated with extension
  * \param INIT  Function to initialize the extension
  * \param TEST 	Function to perform a test run without actually 
- * 							calling \ref WHT::apply.  Used for calibration.
+ * 							calling \ref Wht::apply.  Should replace \ref Wht::apply
+ * 							with \ref null_apply
+ * 							Used for calibration.
  * \param CALL  Function to actually perform measurement
  * \param DONE  Function to cleanup the extension
  */
