@@ -4,9 +4,6 @@
 #
 # Author: Michael Andrews <mjand@drexel.edu>
 # $Id$
-#
-# TODO
-#   - Input for selecting possible transforms
 
 SCRIPT_PATH       = File.dirname(__FILE__) 
 SCRIPT_NAME       = 'wht_dp'
@@ -15,14 +12,8 @@ DEFAULT_PARAMS    = {
   :max_size       => 15,
   :max_children   => 2,
   :measure        => SCRIPT_PATH + '/wht_measure',
-  :best_trees     => SCRIPT_PATH + '/../share/wht_best_trees.txt',
-  :subspace       => nil,
-  :transforms     => nil,
+  :best_plans     => SCRIPT_PATH + '/../share/wht_best_plans.txt'
 }
-
-$LOAD_PATH << "#{SCRIPT_PATH}/../extra"
-
-require "utils"
 
 class Options
   require 'optparse'
@@ -52,21 +43,13 @@ class Options
         "Maximum number of children to allow on a split node.") { |x|
         @params[:max_children] = x }
 
-      o.on("-s", "--subspace=SPACE", String,
-        "Confine search to SPACE (presently only RIGHT supported).") { |x|
-        @params[:subspace] = x }
-
       o.on("-m", "--wht-measure=FILE", 
-        "Program to measure peformance of WHT tree.") { |x|
+        "Program to measure peformance of WHT plan.") { |x|
          @params[:measure] = x }
 
-      o.on("-t", "--transformations='A,B,C, ... '", 
-        "Apply the following code transformations to the WHT tree.") { |x|
-         @params[:transforms] = x }
-
-      o.on("-f", "--wht-best-trees=FILE", String,
-        "File to load/store the best trees found by dynamic programming.") { |x|
-         @params[:best_trees] = x }
+      o.on("-f", "--wht-best-plans=FILE", String,
+        "File to load/store the best plans found by dynamic programming.") { |x|
+         @params[:best_plans] = x }
     end
   end
 
@@ -86,6 +69,81 @@ class Options
 
 end
 
+require 'yaml'
+
+def load_runtime_env(measure)
+  cmd = "#{measure} -v"
+  env = {}
+  IO.popen(cmd) do |fd|
+    while (line = fd.gets) do
+      line.chomp!
+      case line
+        when /^max_unroll:\s*(\d+)/
+          env['max_unroll'] = $1.to_i
+        when /^max_interleave:\s*(\d+)/
+          env['max_interleave'] = $1.to_i
+        when /^vector_size:\s*(\d+)/
+          env['vector_size'] = $1.to_i
+        when /^CC:\s*(.*)$/
+          env['compiler'] = $1.to_s
+        when /^type:\s*(.*)$/
+          env['type'] = $1.to_s
+        when /^CFLAGS:\s*(.*)$/
+          env['compiler_flags'] = $1.to_s
+      end
+    end
+  end
+  env
+end
+
+def load_entry(env,info)
+  info.each do |e|
+    return e if e['env'] == env
+  end
+
+  # Add a new entry
+  entry = {
+    'env'   => env,
+    'data'  => {}
+  }
+
+  info << entry
+
+  entry
+end
+
+def load_best_plans(file, env)
+  default = [ [], YAML::Omap.new ] # i.e. empty info and plans
+
+  return default unless File.exists?(file)
+
+  info = []
+
+  File.open(file,'r') do |fd|
+    begin
+      yml  = YAML::load_stream(fd)
+      raise "Initializing #{file}" unless yml
+      info = yml.documents[0]
+    rescue => e 
+      puts e.message
+      return default
+    end
+  end
+
+  plans = load_entry(env, info)['data']
+
+  [info, plans]
+
+end
+
+def save_best_plans(file, env, plans, info)
+  load_entry(env,info)['data'] = plans
+
+  File.open(file,'w+') do |fd|
+    YAML::dump(info, fd)
+  end
+end
+
 class Search
   INF = 1.0 / 0.0
   attr_accessor :best
@@ -98,13 +156,12 @@ class Search
     @il_max         = params[:il_max]
     @vsize          = params[:vsize]
     @max_leaf       = params[:max_leaf]
-    @subspace       = params[:subspace]
     @debug          = params[:debug]
 
-    @best = {}
+    @best = YAML::Omap.new
 
     for size in 1 .. @max_size do 
-      @best[size.to_s] ||= { 'time' => INF, 'plan' => nil, 'oid' => 0}
+      @best[size] ||= { 'time' => INF, 'plan' => nil }
     end
   end
 
@@ -140,57 +197,120 @@ class Search
   def find(size)
     plans = []
 
-    operation = lambda do |zp|
+    g_cp_n(size, 1, @max_children) do |zp|
       next if zp.first == size and size > @max_leaf
-      plan = zp_to_plan(zp)
 
-      plans << plan
-      #plans << `#{SCRIPT_PATH}/../wht/wht_convert -w #{plan} -i 8 -v 2`.chomp!
-    end
+      right = right_codelets(zp.pop,size)
+      next if right.nil? or right.empty? 
 
-    case @subspace 
-      when 'right'
-        g_cp_n_right(size, 1, @max_children, @max_size) { |zp| operation.call(zp) }
-      else
-        g_cp_n(size, 1, @max_children) { |zp| operation.call(zp) }
+      lefts = []
+      zp.each_with_index do |z,i|
+        k = size_of_right_plan(zp,i+1)
+        lefts << left_codelets(z,size,k)
+      end
+
+      if lefts.empty? # Basecase
+        plans += right
+        next
+      end
+
+      lefts << right
+
+      combinations(lefts).each do |x|
+        split_codelets.each do |s|
+          plans << "#{s}[#{x.join(',')}]"
+        end
+      end
+
     end
 
     plans.each do |p|
       t  = measure(p)
-      tp = @best[size.to_s]['time']
+      tp = @best[size]['time']
       if t < tp
         puts "New Best for #{size} with T=#{t} (T'=#{tp}): #{p}"
-        @best[size.to_s]['time'] = t
-        @best[size.to_s]['plan'] = p
-        @best[size.to_s]['oid']  = size
-        @best[size.to_s]['transform']  = 'none'
+        @best[size]['time'] = t
+        @best[size]['plan'] = p
       end
     end
   end
 
   def find_best(size)
-    unless @best[size.to_s]['plan']
+    unless @best[size]['plan']
       find(size)
     end
-    @best[size.to_s]['plan']
+    @best[size]['plan']
   end
 
-  def zp_to_plan(zp)
-    s = []
-    zp.each do |z|
-      if z > @max_leaf
-        s << find_best(z)
+
+  # TODO These should be read in by a user configured file
+  def left_codelets(size, n, m)
+    return [] if size < 2
+
+    lefts = []
+    best = leftify(find_best(size))
+    lefts << best if best
+    return lefts if size > @max_leaf
+
+    lefts << "small[#{size}]"
+
+    il_max = [n, @il_max, m, size].min 
+    for k in 1 .. il_max do
+      lefts << "smallil(#{2**k})[#{size}]"
+      next unless @vsize > 0 and 2**k >= @vsize
+      lefts << "smallv(#{@vsize},#{2**k})[#{size}]"
+    end
+    lefts.uniq
+  end
+
+  def right_codelets(size,n)
+    return [find_best(size)] if n > @max_leaf
+
+    rights = [ "small[#{size}]" ]
+    if @vsize > 0 and 2**size > @vsize
+      rights << "smallv(#{@vsize})[#{size}]"
+    end
+    rights.uniq
+  end
+
+  def split_codelets
+    @il_max > 1 ? ["splitil"] : [ "split" ] 
+  end
+
+  def leftify(codelet)
+    return unless codelet
+    codelet.gsub(/smallv\((\d)\)\[(\d)\]/) { |x| "small[#{$2}]" }
+  end
+
+  def size_of_right_plan(zp,n)
+    v = 0
+    zp.reverse.each_with_index do |x,i|
+      break if n >= (zp.size - i)
+      v += x
+    end
+    v
+  end
+
+end
+
+def combinations(a)
+  return a.first if a.size == 1
+
+  h = a.shift
+  t = combinations(a)
+
+  all = []
+  t.each do |y|
+    h.each do |x|
+      if y.class == Array
+        all << [x] + y
       else
-        s << "small[#{z}]"
+        all << [x] + [y]
       end
     end
-
-    if s.size > 1
-      return "split[" + s.join(',') + "]"
-    else
-      return s.first
-    end
   end
+
+  all
 end
 
 # To generate compositions with elements >= MIN
@@ -207,37 +327,6 @@ def g_k_cb_n(n,k)
 
   loop do
     yield a
-
-    i = k - 1
-    while a[i] == (n - k + i + 1) do
-      i -= 1
-    end
-
-    return if (i < 0)
-
-    a[i] += 1
-
-    for j in i+1 .. k-1 do
-      a[j] = a[i] + j - i
-    end
-  end
-end
-
-# Generate (enumerate) all k combinations of n
-# given that the trees are rightmost
-# See above
-def rightmost(a,max)
-  b = a.dup
-  b.pop # Do not consider last element
-  c = b.select { |x| x <= max }
-  return (c.size == b.size)
-end
-
-def g_k_cb_n_right(n,k,max)
-  a = (1..k).to_a
-
-  loop do
-    yield a if rightmost(a, max)
 
     i = k - 1
     while a[i] == (n - k + i + 1) do
@@ -279,17 +368,6 @@ def g_cp_n(n, a, b)
   end
 end
 
-# Generate (enumerate) all k-way compositions of n forall k in a..b
-# given that the trees are rightmost
-def g_cp_n_right(n, a, b, m)
-  max = [n, b].min
-  a.upto(max) do |k|
-    g_k_cb_n_right(n-1,k-1,m-1) do |cb|
-      yield map_cb_to_cp(n,cb)
-    end
-  end
-end
-
 if $0 == __FILE__ # Main Entry Point
   opts = Options.new
   opts.parse(ARGV)
@@ -298,7 +376,16 @@ if $0 == __FILE__ # Main Entry Point
     opts.die("Could find measure #{opts.params[:measure]}")
   end
 
-  env = load_runtime_env
+  unless File.exists?(opts.params[:best_plans])
+    opts.die("Could find best_plans #{opts.params[:best_plans]}")
+  end
+
+  unless File.writable?(opts.params[:best_plans])
+    opts.die("Could not write to best_plans #{opts.params[:best_plans]}")
+  end
+
+
+  env = load_runtime_env(opts.params[:measure])
 
   dp = Search.new(
     { :min_size       => opts.params[:min_size],
@@ -309,18 +396,16 @@ if $0 == __FILE__ # Main Entry Point
       :vsize          => env['vector_size'],
       :debug          => opts.params[:verbose],
       :measure        => opts.params[:measure],
-      :subspace       => opts.params[:subspace],
-      :transforms     => opts.params[:transforms],
     } )
 
-  best_trees = opts.params[:best_trees] 
+  best_plans = opts.params[:best_plans] 
 
-  info, trees = load_data(best_trees, env)
+  info, plans = load_best_plans(best_plans, env)
 
-  dp.best = trees
+  dp.best = plans
 
   dp.run
 
-  save_data(best_trees, env, dp.best, info)
+  save_best_plans(best_plans, env, dp.best, info)
 end
 
