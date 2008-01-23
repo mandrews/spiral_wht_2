@@ -191,6 +191,8 @@ ALIASES                = \
 "PAPI_URL= http://icl.cs.utk.edu/papi" \
 "L=\f$L\f$" \
 "R=\f$R\f$" \
+"alpha=\f$ \alpha \f$" \
+"rho=\f$ \rho \f$" \
 "I_L_X_W_N_I_R=\f$ {\bf I}_{L} \otimes {\bf W}_{N} \otimes {\bf I}_{R} \f$" 
 
 # Set the OPTIMIZE_OUTPUT_FOR_C tag to YES if your project consists of C 

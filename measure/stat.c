@@ -1,3 +1,9 @@
+/**
+ * \file stat.c
+ *
+ * \brief Implementation of statistics data structure.
+ */
+
 #include "stat.h"
 
 #include <stdio.h>
@@ -6,41 +12,42 @@
 struct stat *
 stat_init()
 {
-  struct stat *stat;
-  stat = malloc(sizeof(*stat));
+  struct stat *s;
+  s = malloc(sizeof(*s));
 
-  stat->value    = 0.0;
-  stat->mean     = 0.0;
-  stat->stdev    = 0.0;
-  stat->sum      = 0.0;
-  stat->samples  = 0;
+  s->value    = 0.0;
+  s->mean     = 0.0;
+  s->stdev    = 0.0;
+  s->sum      = 0.0;
+  s->samples  = 0;
 
-  return stat;
+  return s;
 }
 
 void
-stat_free(struct stat *stat)
+stat_free(struct stat *s)
 {
-  free(stat);
+  free(s);
 }
 
 char * 
-stat_to_string(struct stat *stat, bool all)
+stat_to_string(struct stat *s, bool all)
 {
-  /** \todo determine this value */
+  /** \todo Replace this with call to ftoa or lgtoa */
   const size_t bufsize = 255;
   char *buf;
 
   buf = malloc(sizeof(char) * bufsize);
   if (all)
-    snprintf(buf, bufsize, "%Lg %Lg %zd", stat->mean, sqrtl(stat->stdev), stat->samples);
+    snprintf(buf, bufsize, "%Lg %Lg %zd", s->mean, sqrtl(s->stdev), s->samples);
   else
-    snprintf(buf, bufsize, "%Lg", stat->mean);
+    snprintf(buf, bufsize, "%Lg", s->mean);
 
   return buf;
 }
 
-/* Adapted from Algorithm III:
+/**
+ * Adapted from Algorithm III:
  *  http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
  * circa 2007
  *
@@ -48,44 +55,45 @@ stat_to_string(struct stat *stat, bool all)
  *  This algorithm is due to Knuth, who cites Welford."
  */
 void
-stat_update(struct stat *stat)
+stat_update(struct stat *s)
 {
   stat_unit delta;
 
-  stat->samples++;
+  s->samples++;
 
-  delta = stat->value - stat->mean;
+  delta = s->value - s->mean;
 
-  stat->mean += delta / ((stat_unit) stat->samples);
-  stat->sum  += (delta * stat->value) - (delta * stat->mean);
+  s->mean += delta / ((stat_unit) s->samples);
+  s->sum  += (delta * s->value) - (delta * s->mean);
 
-  if (stat->samples > 2) 
-    stat->stdev = stat->sum / ((stat_unit) stat->samples);
+  if (s->samples > 2) 
+    s->stdev = s->sum / ((stat_unit) s->samples);
   else 
-    stat->stdev = stat->mean;
+    s->stdev = s->mean;
 }
 
-/* Statisical significance metric adapted from:
+/**
+ * Statisical significance metric adapted from:
  *
  * The Art of Computer Performance Analysis by Raj Jain, p. 217
  * 
- * @BOOK{Jain:1991,
- *  AUTHOR = {Raj Jain},
- *  TITLE = {{The Art of Computer Performance Analysis}},
- *  PUBLISHER = {John Wiley \& Sons},
- *  YEAR = 1991
+ * \@BOOK{Jain:1991,                                      \n
+ *  AUTHOR = {Raj Jain},                                  \n
+ *  TITLE = {{The Art of Computer Performance Analysis}}, \n
+ *  PUBLISHER = {John Wiley \& Sons},                     \n
+ *  YEAR = 1991                                           \n
  * }
  */
 size_t
-stat_sig_sample(struct stat *stat, stat_unit z, stat_unit rho)
+stat_sig_sample(struct stat *s, stat_unit z, stat_unit rho)
 {
   size_t samples;
   stat_unit tmp;
 
-  tmp = stat->mean * stat->mean;
+  tmp = s->mean * s->mean;
   tmp = ceil(rho * rho * tmp);
 
-  samples = (ceil(z * z * stat->stdev) / tmp) + 1;
+  samples = (ceil(z * z * s->stdev) / tmp) + 1;
 
   return samples;
 }
