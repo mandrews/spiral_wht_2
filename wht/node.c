@@ -5,6 +5,9 @@
  */
 #include "wht.h"
 
+/**
+ * \note This symbol cannot be inlined since it needs an address to be referenced
+ */
 void
 null_apply(Wht *W, long S, size_t D, wht_value *x)
 {
@@ -64,7 +67,7 @@ char *
 params_to_string(Wht *W)
 {
   /**
-   * \todo Take log10 of INT_MAX determine length of integer
+   * \todo Use i_itoa to calculate DIGIT_SIZE
    */
   const size_t DIGIT_SIZE = 32; 
 

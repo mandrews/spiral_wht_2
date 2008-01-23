@@ -23,6 +23,8 @@ TODO:
 
   - Add PAPI instruction count interpolation to Instruction Count Model
 
+  - Integrate these lists inside Doxgen comments
+
 Bugs:
 
   - Some minor memory leak issues with parser.y
