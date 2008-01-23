@@ -1,4 +1,4 @@
-EXTENSION_FILES = interleave.c vector.c
+EXTENSION_FILES = interleave.c vector.c concurrent.c
 EXTENSION_DISTS = simd.h
 
 BUILT_SOURCES = scanner.h scanner.c parser.h parser.c 

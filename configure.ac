@@ -100,6 +100,24 @@ if test $interleave -gt $MAX_INTERLEAVE_PKG; then
 fi
 
 
+
+# 
+#  C O N C U R R E N T 
+# 
+AC_ARG_ENABLE([omp], 
+  [AS_HELP_STRING([--enable-omp],
+    [openMP optimizations (default is disabled)])],
+  [have_omp=$enableval], 
+  [have_omp=no])
+
+if test "$have_omp" = "yes"; then
+	AC_DEFINE(WHT_HAVE_OMP,1,
+    [define to enable openMP optimizations.])
+
+  CFLAGS="$CFLAGS -fopenmp"
+  LIBS="$LIBS -lgomp"
+fi
+
 # 
 #  V E C T O R I Z A T I O N
 # 
