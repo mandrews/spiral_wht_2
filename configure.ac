@@ -215,7 +215,17 @@ AC_PROG_LIBTOOL
 
 if test "$USE_MAINTAINER_MODE" = yes; then
 AC_PROG_LEX
+
+if test "$LEX" != "flex"; then
+  AC_MSG_ERROR([flex required in --enable-maintainer-mode])
+fi
+
 AC_PROG_YACC
+
+if test "$YACC" != "bison -y"; then
+  AC_MSG_ERROR([bison required in --enable-maintainer-mode])
+fi
+
 fi
 
 # Checks for header files.
