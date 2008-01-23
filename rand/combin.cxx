@@ -1,3 +1,8 @@
+/**
+ * \file combin.cxx
+ *
+ * \brief Functions related to combinatorics.
+ */
 #include <combin.h>
 
 #include <stdlib.h>
@@ -15,6 +20,9 @@ struct qn {
   ulong denom;
 };
 
+typedef map<uint, double> combin_pdf;
+
+combin::iterator combin_elem_rand(combin * c, uint n);
 
 /* From http://en.wikipedia.org/wiki/Binary_GCD_algorithm */
 ulong 
@@ -119,15 +127,16 @@ qn_n_choose_k(ulong n, ulong k)
   return qn_r;
 }
 
-/* NOTE: n = 31 and n = 38 are highest possible values that do not overflow
- * registers for 32 bit and 64 bit machines respectively 
- *
- * Could use Stirlings approximation to n! technique to empyrically determine
- * this based on the register size.
- */
 ulong
 n_choose_k(ulong n, ulong k)
 {
+/**
+ * \note n = 31 and n = 38 are highest possible values that do not overflow
+ * registers for 32 bit and 64 bit machines respectively 
+ *
+ * \todo Could use Stirlings approximation to n! technique to empyrically determine
+ * this based on the register size.
+ */
   assert(n >= k);
   struct qn qn_r;
 

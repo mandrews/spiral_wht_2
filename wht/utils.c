@@ -7,13 +7,13 @@
 
 #include <math.h>
 
-/**
- * For now this function just ensures optimal memory alignment, could be
- * extended in future.
- */
 void *
 i_malloc(size_t size) 
 {
+  /**
+   * For now this function just ensures optimal memory alignment, could be
+   * extended in future.
+   */
   void *p __attribute__ ((aligned (16)));
 
   p = malloc(size);
@@ -22,12 +22,12 @@ i_malloc(size_t size)
   return p;
 }
 
-/**
- * For now this function just calls free, could be extended in future.
- */
 void 
 i_free(void *p) 
 {
+  /**
+   * For now this function just calls free, could be extended in future.
+   */
   free(p);
 }
 

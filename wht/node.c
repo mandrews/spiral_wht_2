@@ -9,7 +9,7 @@
  * \note This symbol cannot be inlined since it needs an address to be referenced
  */
 void
-null_apply(Wht *W, long S, size_t D, wht_value *x)
+null_apply(Wht *W, long S, size_t U, wht_value *x)
 {
   /* Empty */
 }

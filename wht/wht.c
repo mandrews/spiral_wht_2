@@ -2,22 +2,24 @@
  * \file wht.c
  *
  * \brief Implementation of misc WHT plan functions.
- *
  */
 #include "wht.h"
 
 #include "scanner.h"
 
-/* This symbol points to the root of the parsed wht tree */
-extern Wht *wht_root;
+/**
+ * \var wht_root 
+ * \brief This symbol points to the root of the parsed wht tree 
+ */
+extern Wht *wht_root; 
 
 Wht *
-parse(char *in)
+parse(char *s)
 {
   Wht *W;
   YY_BUFFER_STATE buf;
 
-  buf = yy_scan_string(in);
+  buf = yy_scan_string(s);
 
   yyparse();
 

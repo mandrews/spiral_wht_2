@@ -54,6 +54,11 @@
  * \brief The fast algorithm is considered stable if the max norm 
  * differs from direct computation by less than this quantity.
  */
+/**
+ *
+ * \def WHT_TYPE_STRING
+ * \brief Data type of transform in English.
+ */
 #if     WHT_FLOAT == 1
 typedef float wht_value;
 #define WHT_STABILITY_THRESHOLD (   1e-4)

@@ -46,6 +46,9 @@ stat_to_string(struct stat *s, bool all)
   return buf;
 }
 
+void
+stat_update(struct stat *s)
+{
 /**
  * Adapted from Algorithm III:
  *  http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
@@ -54,9 +57,6 @@ stat_to_string(struct stat *s, bool all)
  *  "A numerically stable algorithm is given below. It also computes the mean.
  *  This algorithm is due to Knuth, who cites Welford."
  */
-void
-stat_update(struct stat *s)
-{
   stat_unit delta;
 
   s->samples++;
@@ -72,6 +72,9 @@ stat_update(struct stat *s)
     s->stdev = s->mean;
 }
 
+size_t
+stat_sig_sample(struct stat *s, stat_unit z, stat_unit rho)
+{
 /**
  * Statisical significance metric adapted from:
  *
@@ -84,9 +87,6 @@ stat_update(struct stat *s)
  *  YEAR = 1991                                           \n
  * }
  */
-size_t
-stat_sig_sample(struct stat *s, stat_unit z, stat_unit rho)
-{
   size_t samples;
   stat_unit tmp;
 
