@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000 Carnegie Mellon University
+ * Copyright (c) 2007 Drexel University
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ */
+
+
+/**
+ * \file verify.c
+ *
+ * \brief Interface to verify the correctness of a WHT plan.
  */
 
 #define _GNU_SOURCE

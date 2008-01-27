@@ -17,8 +17,9 @@
  *
  */
 
+
 /**
- * \file wht/split.c
+ * \file split.c
  *
  * \brief Implementation of methods for applying WHT recursive split
  */
