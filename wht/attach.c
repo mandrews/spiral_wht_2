@@ -22,7 +22,7 @@
  * \file attach.c
  * \author Michael Andrews
  *
- * \brief Interface to attach a breakdown rule to a WHT plan.
+ * \brief Interface to attach a breakdown %rule to a WHT plan.
  */
 
 #define _GNU_SOURCE

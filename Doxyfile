@@ -180,6 +180,7 @@ TAB_SIZE               = 8
 ALIASES                = \
 "WHT=\f$ {\bf WHT} \f$"  \
 "WHT_2n=\f$ {\bf WHT}_{2^{n}} \f$" \
+"WHT_2k=\f$ {\bf WHT}_{2^{k}} \f$" \
 "WHT_2v=\f$ {\bf WHT}_{2 v} \f$" \
 "tensor=\f$ \otimes \f$" \
 "I_k=\f$ {\bf I}_{k}\f$" \

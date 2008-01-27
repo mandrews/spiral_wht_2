@@ -18,22 +18,22 @@
  */
 
 
-/* Direct WHT
-   ----------
-   WHT is computed using ordinary matrix multiplication.
-   The matrix, of course, is never built.
-*/
-
-/* wht_entry(k, row, col)
-   ----------------------
-     returns the entry of the WHT(2^k) at (row, col),
-     1 <= row, col <= 2^k.
-*/
+/**
+ * \file direct.c
+ *
+ * \brief Compute the WHT using schoolbook matrix multiplication.
+ */
 
 #include "wht.h"
 
 /**
- * \todo Investigate the stability of calculation method
+ * \brief Returns the entry of a \WHT_2k matrix.
+ *
+ * \param k       Size of transform
+ * \param row     Row in transform matrix
+ * \param col     Column in transform matrix
+ * \return        Entry of matrix
+ *
  */
 int 
 wht_entry(int k, long row, long col)
@@ -59,6 +59,9 @@ wht_entry(int k, long row, long col)
   return wht_entry(k-1, row, col);
 }
 
+/**
+ * \todo Investigate the stability of calculation method
+ */
 static void 
 apply_direct(Wht *W, long S, size_t D, wht_value *x) 
 {
@@ -67,14 +70,14 @@ apply_direct(Wht *W, long S, size_t D, wht_value *x)
   wht_value *y = (wht_value *) i_malloc(N * sizeof(wht_value));
   long i, j;
 
-  /* matrix multiplication, result is in y */
+  /* Matrix multiplication, result is in y */
   for (i = 0; i < N; i++) {
     y[i] = 0;
     for (j = 0; j < N; j++)
       y[i] += wht_entry(n, i+1, j+1) * x[j*S];
   }
 
-  /* copy y to x with stride S */
+  /* Copy y to x with stride S */
   for (i = 0; i < N; i++) 
     x[i*S] = y[i];
 

@@ -1,5 +1,8 @@
-/*
- * Inverse standard normal distribution function.
+/**
+ * \file invnorm.c
+ * \author Peter J. Acklam
+ *
+ * \brief Inverse standard normal distribution function.
  *
  * This function returns an approximation of the inverse cumulative
  * standard normal distribution function.  I.e., given P, it returns
@@ -29,11 +32,6 @@
  *  A: You can use the algorithm, including any of the computer implementations
  *     listed in the section Computer implementations, for whatever purpuse you
  *     want, but please show common courtesy and give credit where credit is due.
- *
- * Modifications (Michael Andrews):
- *  - Attributed to implementation author
- *  - Renamed file and function from ltqnorm to invnorm 
- *  - Edited some of above text
  */
 
 #include <math.h>

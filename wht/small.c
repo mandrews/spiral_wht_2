@@ -22,7 +22,7 @@
  * \file small.c
  * \author Michael Andrews
  *
- * \brief Small unrolled codelet rule.
+ * \brief Small unrolled codelet %rule.
  *
  */
 

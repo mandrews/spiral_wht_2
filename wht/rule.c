@@ -22,7 +22,7 @@
  * \file rule.c
  * \author Michael Andrews
  *
- * \brief Implementation of rule functions.
+ * \brief Implementation of %rule functions.
  *
  */
 
