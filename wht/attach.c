@@ -115,7 +115,7 @@ Usage: wht_attach -w PLAN -r RULE [OPTIONS]
 
 \section _description DESCRIPTION
 
-Attaches and evaluates a %rule in the context of a WHT plan.  If the rule cannot be bound to 
+Attaches and evaluates a %rule in the context of a WHT plan.  If the %rule cannot be bound to 
 a node in the plan, that node is reverted to it's previous state.
 
 \verbatim
@@ -128,7 +128,7 @@ Attach a RULE to WHT PLAN from stdin or by argument.
 
 \section _examples EXAMPLES
 
-Note the syntax for split rule must be a string in the grammar.
+Note the syntax for split %rule must be a string in the grammar.
 
 \verbatim
 echo 'split[small[1],small[4]]' | wht_attach -r 'splitil[small[0]]'
@@ -139,7 +139,7 @@ splitil[smallil(2)[1],small[4]]
 \endverbatim
 
 Also the order of evaling rules is important.  For instance this plan 
-cannot be interleaved by 4, since it does not have a split interleave rule applied 
+cannot be interleaved by 4, since it does not have a split interleave %rule applied 
 to as it's parent.
 
 \verbatim
@@ -147,7 +147,7 @@ echo 'split[small[1],small[4]]' | wht_attach -r 'smallil(2)[0]' | wht_attach -r 
 splitil[small[1],small[4]]
 \endverbatim
 
-Much of these complications are hidden in the wht_interleave shell script, and other rule 
+Much of these complications are hidden in the wht_interleave shell script, and other %rule 
 application scripts.
 
 */

@@ -4,7 +4,7 @@
 There are various ways of recursively computing the \WHT
 Breakdown rules describe how to perform computation of the plan.  
 
-To add a new breakdown rule:
+To add a new breakdown %rule:
 -# Develop a new breakdown %rule by first implementing a function with that
 has the \ref rule_fp signature.  This function should verify that the %rule can be
 applied to the node it is attached to in the plan.  The behavior of the %rule
