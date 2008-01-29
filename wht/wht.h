@@ -81,7 +81,7 @@
  */
 #if     WHT_FLOAT == 1
 typedef float wht_value;
-#define WHT_STABILITY_THRESHOLD (   1e-4)
+#define WHT_STABILITY_THRESHOLD (   1e-2)
 #define WHT_TYPE_STRING         ("float") 
 #endif/*WHT_FLOAT*/
 
@@ -96,7 +96,11 @@ typedef double wht_value;
  *
  * \todo Figure out howto allow attributes to be set outside this header. 
  */
-enum attr_names { interleave_by = 0, vector_size = 1 };
+enum attr_names { 
+  interleave_by = 0, 
+  vector_size   = 1, 
+  omp_chunk     = 2
+};
 
 
 

@@ -74,6 +74,10 @@ def power_of_2(x)
   return (x == (1 << (Math.log(x) / Math.log(2))))
 end
 
+def log2(x)
+  return (Math.log(x) / Math.log(2)).ceil
+end
+
 def split(*a)
   "split[" + a.join(',') + "]"
 end
@@ -115,25 +119,26 @@ if $0 == __FILE__ # Main Entry Point
   end
 
   v = env['vector_size']
+  p = log2(v) + 1
 
   if v > 0
     puts "\nVectorization Tests (1)"
     puts
 
-    for size in v .. n do
+    for size in p .. n do
       expect_correct(smallv(size,v))
     end
 
-    for size in v .. n do
+    for size in p .. n do
       expect_reject(split(smallv(size,v)*2))
     end
 
-    for size in v .. n do
-      expect_correct(split(split(small(1)*4),smallv(size,v)))
+    for size in p .. n do
+      expect_correct(split(small(1)*4,smallv(size,v)))
     end
 
-    for size in v .. n do
-      expect_reject(split(split(small(1)*3),smallv(size,v),small(1)))
+    for size in p .. n do
+      expect_reject(split(small(1)*3,smallv(size,v),small(1)))
     end
   end 
 
@@ -177,17 +182,17 @@ if $0 == __FILE__ # Main Entry Point
     puts
 
     # Vary interleave factor fix size
-    for size in v .. n do
+    for size in p .. n do
       expect_correct(splitil(smallv(1,v,v,1)*4,smallv(size,v)))
       expect_correct(splitil(smallv(1,v,v,0)*4,smallv(size,v)))
     end
 
-    for size in v .. n do
+    for size in p .. n do
       expect_correct(splitil(smallv(1,v,v,1), splitil(smallv(1,v,v,1),smallv(size,v))))
       expect_correct(splitil(smallv(1,v,v,0), splitil(smallv(1,v,v,0),smallv(size,v))))
     end
 
-    for size in v .. n do
+    for size in p .. n do
       # Reject aligned vectors here
       expect_reject(splitil(
         splitil(smallv(1,v,v,1), small(n)),
@@ -195,12 +200,12 @@ if $0 == __FILE__ # Main Entry Point
 
       # Accept general vectors here
       expect_correct(splitil(
-        splitil(smallv(1,v,v,0), small(n)),
+        splitil(smallv(1,v,v,0), small(p)),
         splitil(smallv(1,v,v,0), smallv(n,v))))
     end
 
     # Reject when interleaved codelets do not have splitil parent
-    for size in v .. n do
+    for size in p .. n do
       expect_reject(split(smallv(1,v,v,0)*4,smallv(size,v)))
       expect_reject(split(smallv(1,v,v,1)*4,smallv(size,v)))
     end
@@ -212,7 +217,7 @@ if $0 == __FILE__ # Main Entry Point
       expect_reject(smallv(n,v,x,1))
     end
 
-    for size in v .. n do
+    for size in p .. n do
       expect_correct(splitil(smallv(size,v,k,0),smallv(n,v)))
     end
 

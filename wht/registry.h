@@ -91,7 +91,7 @@ rule_registry[] = {
 #endif
 
 #if ((WHT_HAVE_OMP))
-  SPLIT_RULE_ENTRY("splitp",  0, split_concurrent_rule),
+  SPLIT_RULE_ENTRY("splitp",  1, split_concurrent_rule),
 #endif
 
 #if ((WHT_MAX_INTERLEAVE > 0)) 

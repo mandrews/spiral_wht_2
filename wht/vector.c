@@ -89,6 +89,10 @@ small_right_vector_rule(Wht *W)
   if (! (rightmost_tree(W) && (W->right == 1)))
     return error_msg_set(W, "must be rightmost codelet in plan");
 
+  /**  The node must be have at least size 2v */
+  if (2*v > W->N)
+    return error_msg_set(W, "size of codelet must be at least 2v = %d", 2*v);
+
   W->apply = codelet_apply_lookup(W);
 
   if (W->apply == NULL) 

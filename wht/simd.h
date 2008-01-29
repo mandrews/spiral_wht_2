@@ -96,22 +96,22 @@ typedef __m128 wht_vector4;
 #define vload4u(R0,A0,A1,A2,A3) \
   { \
     wht_vector4 R1; \
-    R0 = _mm_load_ss(&A2); \
+    R0 = _mm_load_ss(&A1); \
     R1 = _mm_load_ss(&A3); \
     R0 = _mm_loadh_pi(R0, (__m64 const *) &A0); \
-    R1 = _mm_loadh_pi(R1, (__m64 const *) &A1); \
-    vshuf4(R0,R1,R0,3,1,2,0); \
+    R1 = _mm_loadh_pi(R1, (__m64 const *) &A2); \
+    vshuf4(R0,R0,R1,0,2,0,2); \
   };
 
 #define vstore4u(R0,A0,A1,A2,A3) \
   { \
-    _mm_store_ss(&A3,R0); \
-    vshuf4(R0,R0,R0,2,3,1,0); \
-    _mm_store_ss(&A2,R0); \
-    vshuf4(R0,R0,R0,1,2,3,0); \
-    _mm_store_ss(&A1,R0); \
-    vshuf4(R0,R0,R0,0,1,2,3); \
     _mm_store_ss(&A0,R0); \
+    vshuf4(R0,R0,R0,0,3,2,1); \
+    _mm_store_ss(&A1,R0); \
+    vshuf4(R0,R0,R0,0,3,2,1); \
+    _mm_store_ss(&A2,R0); \
+    vshuf4(R0,R0,R0,0,3,2,1); \
+    _mm_store_ss(&A3,R0); \
   };
 
 
