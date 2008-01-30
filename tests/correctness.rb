@@ -70,12 +70,12 @@ def expect_error(plan)
   end
 end
 
-def power_of_2(x)
-  return (x == (1 << (Math.log(x) / Math.log(2))))
-end
-
 def log2(x)
   return (Math.log(x) / Math.log(2)).ceil
+end
+
+def power_of_2(x)
+  return x == (1 << log2(x))
 end
 
 def split(*a)
@@ -119,7 +119,7 @@ if $0 == __FILE__ # Main Entry Point
   end
 
   v = env['vector_size']
-  p = log2(v) + 1
+  p = log2(v) + 1 # Min size for vectorization by v
 
   if v > 0
     puts "\nVectorization Tests (1)"
@@ -177,6 +177,8 @@ if $0 == __FILE__ # Main Entry Point
     end
   end 
 
+  r = log2(k) # Min size for max interleave
+
   if v > 0 and k > 0
     puts "\nVectorization Tests (2)"
     puts
@@ -218,7 +220,7 @@ if $0 == __FILE__ # Main Entry Point
     end
 
     for size in p .. n do
-      expect_correct(splitil(smallv(size,v,k,0),smallv(n,v)))
+      expect_correct(splitil(smallv(size,v,k,0),smallv(r,v)))
     end
 
   end

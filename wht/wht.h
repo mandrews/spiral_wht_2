@@ -87,7 +87,7 @@ typedef float wht_value;
 
 #if     WHT_DOUBLE == 1
 typedef double wht_value;
-#define WHT_STABILITY_THRESHOLD (   1e-10)
+#define WHT_STABILITY_THRESHOLD (    1e-9)
 #define WHT_TYPE_STRING         ("double") 
 #endif/*WHT_DOUBLE*/
 
