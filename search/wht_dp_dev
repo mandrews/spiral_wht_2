@@ -24,6 +24,8 @@ $LOAD_PATH << "#{SCRIPT_PATH}/../extra"
 
 require "utils"
 
+INF = 1.0 / 0.0
+
 class Options
   require 'optparse'
   attr_reader :params
@@ -87,7 +89,6 @@ class Options
 end
 
 class Search
-  INF = 1.0 / 0.0
   attr_accessor :best
   attr_accessor :debug
   def initialize(params)
@@ -333,6 +334,7 @@ if $0 == __FILE__ # Main Entry Point
   rescue Interrupt
     puts "Saving ... "
   ensure
+    dp.best.delete_if { |k,v| v["time"] == INF }
     save_data(best_plans, env, dp.best, info)
   end
 

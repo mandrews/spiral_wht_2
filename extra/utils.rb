@@ -81,10 +81,11 @@ def load_data(file, env)
 end
 
 def save_data(file, env, plans, info)
-  load_entry(env,info)['data'] = plans.sort { |a,b| a[0].to_i <=> b[0].to_i }
+  plans.sort { |a,b| a[0].to_i <=> b[0].to_i }
+  load_entry(env,info)['data'] = plans
 
   File.open(file,'w+') do |fd|
-    fd.puts(JSON.pretty_unparse(info))
+    fd.puts(JSON.pretty_generate(info))
   end
 end
 
