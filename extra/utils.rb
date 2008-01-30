@@ -5,14 +5,14 @@
 # Author: Michael Andrews <mjand@drexel.edu>
 # $Id$
 
-require 'json/ext'
+require 'json'
 
-SCRIPT_PATH     = File.dirname(__FILE__) 
-MEASURE_PATH    = "#{SCRIPT_PATH}/../measure"
-RANDTREE_PATH   = "#{SCRIPT_PATH}/../utils"
-CONVERT_PATH    = "#{SCRIPT_PATH}/../wht"
-CLASSIFY_PATH   = "#{SCRIPT_PATH}/../wht"
-IC_PATH         = "#{SCRIPT_PATH}/../model/ic"
+UTILS_PATH      = File.dirname(__FILE__) 
+MEASURE_PATH    = "#{UTILS_PATH}/../measure"
+RANDTREE_PATH   = "#{UTILS_PATH}/../utils"
+CONVERT_PATH    = "#{UTILS_PATH}/../wht"
+CLASSIFY_PATH   = "#{UTILS_PATH}/../wht"
+IC_PATH         = "#{UTILS_PATH}/../model/ic"
 
 def load_runtime_env
   cmd = "#{MEASURE_PATH}/wht_measure -v"
@@ -81,10 +81,10 @@ def load_data(file, env)
 end
 
 def save_data(file, env, plans, info)
-  load_entry(env,info)['data'] = plans
+  load_entry(env,info)['data'] = plans.sort { |a,b| a[0].to_i <=> b[0].to_i }
 
   File.open(file,'w+') do |fd|
-    fd.puts(JSON.pretty_generate(info))
+    fd.puts(JSON.pretty_unparse(info))
   end
 end
 
