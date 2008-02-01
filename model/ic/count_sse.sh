@@ -53,10 +53,9 @@ if [ ! -e $tmp ]; then
 
   for ((n=1;n<=unroll;n+=1)); do
     for ((k=2;k<=ifactor;k*=2)); do
-      # TODO fix the v2
-      x=`objdump -d ${path}/../../wht/codelets/s_${n}_il_${k}_v${vsize}.o  | grep -E ${ops} | wc -l`
+      x=`objdump -d ${path}/../../wht/codelets/s_${n}_il_${k}_v_${vsize}.o  | grep -E ${ops} | wc -l`
       echo "smallv($vsize,$k,0)[$n] : $x" >> ${tmp}
-      x=`objdump -d ${path}/../../wht/codelets/s_${n}_il_${k}_v${vsize}_a.o  | grep -E ${ops} | wc -l`
+      x=`objdump -d ${path}/../../wht/codelets/s_${n}_il_${k}_v_${vsize}_a.o  | grep -E ${ops} | wc -l`
       echo "smallv($vsize,$k,1)[$n] : $x" >> ${tmp}
       x=`objdump -d ${path}/../../wht/codelets/s_${n}_il_${k}.o  | grep -E ${ops} | wc -l`
       echo "smallil($k)[$n] : $x" >> ${tmp}

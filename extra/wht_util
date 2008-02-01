@@ -5,6 +5,8 @@
 #
 # Author: Michael Andrews <mjand@drexel.edu>
 
+$LOAD_PATH << File.dirname(__FILE__) 
+
 require 'utils'
 
 def generate(plans, o)

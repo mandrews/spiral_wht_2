@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+$LOAD_PATH << File.dirname(__FILE__) 
+
 require 'utils'
 
 def search(a,b,n,k,kp,file,root,rules)
@@ -8,7 +10,7 @@ def search(a,b,n,k,kp,file,root,rules)
   else
     r = "-r '#{rules.join(':')}'"
   end
-  cmd = "./wht_dp -k #{kp} -a #{a} -b #{b} #{r} -f '#{root}/#{file}' -m '#{MEASURE_PATH}/wht_measure -k #{k} -n #{n} -a 0.5 -p 0.1 -e PAPI -m TOT_CYC' -v"
+  cmd = "./wht_dp -k #{kp} -a #{a} -b #{b} #{r} -f '#{root}/#{file}' -m '#{BIN_PATH}/wht_measure -k #{k} -n #{n} -a 0.5 -p 0.1 -e PAPI -m TOT_CYC' -v"
   puts cmd
   IO.popen(cmd) do |fd|
     while (line = fd.gets)

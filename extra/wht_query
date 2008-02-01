@@ -7,6 +7,8 @@
 # TODO matlab or CSV style 
 # TODO add delete and where clause
 
+$LOAD_PATH << File.dirname(__FILE__) 
+
 require 'utils'
 
 ENUM = {

@@ -8,18 +8,12 @@
 require 'json'
 
 UTILS_PATH      = File.dirname(__FILE__) 
-#MEASURE_PATH    = "#{UTILS_PATH}/../bin"
-MEASURE_PATH    = "../measure"
-#RANDTREE_PATH   = "#{UTILS_PATH}/../bin"
-RANDTREE_PATH   = "../rand"
-CLASSIFY_PATH   = "../wht"
-ATTACH_PATH     = "../wht"
-COUNT_SSE_PATH  = "../model/ic"
+BIN_PATH        = "#{UTILS_PATH}/../bin"
 
 INF = 1.0 / 0
 
 def load_runtime_env
-  cmd = "#{MEASURE_PATH}/wht_measure -v"
+  cmd = "#{BIN_PATH}/wht_measure -v"
   env = {}
   IO.popen(cmd) do |fd|
     while (line = fd.gets) do
@@ -72,7 +66,7 @@ def time(&blk)
 end
 
 def wht_measure(plan, *args)
-  cmd = "#{MEASURE_PATH}/wht_measure -s -w '#{plan}' #{args}"
+  cmd = "#{BIN_PATH}/wht_measure -s -w '#{plan}' #{args}"
   puts "Executing #{cmd}" if @debug
   t = 0
   IO.popen(cmd) do |fd|
@@ -93,7 +87,7 @@ def wht_measure(plan, *args)
 end
 
 def wht_classify(plan, *args)
-  cmd = "#{CLASSIFY_PATH}/wht_classify -w '#{plan}' #{args}"
+  cmd = "#{BIN_PATH}/wht_classify -w '#{plan}' #{args}"
   puts "Executing #{cmd}" if @debug
   t = 0
   IO.popen(cmd) do |fd|
@@ -118,9 +112,9 @@ def wht_attach(plan, rules)
   dup = rules.dup
 
   r0  = dup.shift
-  cmd = "#{ATTACH_PATH}/wht_attach -w '#{plan}' -r '#{r0}' "
+  cmd = "#{BIN_PATH}/wht_attach -w '#{plan}' -r '#{r0}' "
   dup.each do |ri|
-    cmd += "| #{ATTACH_PATH}/wht_attach -r '#{ri}' "
+    cmd += "| #{BIN_PATH}/wht_attach -r '#{ri}' "
   end
 
   puts "Executing #{cmd}" if @debug
@@ -138,13 +132,13 @@ def wht_attach(plan, rules)
 end
 
 def wht_rand(size,a,b,p,q,*args)
-  `#{RANDTREE_PATH}/wht_rand -n #{size} -a #{a} -b #{b} -p #{p} -q #{q} #{args}`.chomp
+  `#{BIN_PATH}/wht_rand -n #{size} -a #{a} -b #{b} -p #{p} -q #{q} #{args}`.chomp
 end
 
 def count_sse_sh(plan)
   h = {}
   ['shuffle', 'unpack', 'scalar_add', 'vector_add', 'scalar_mov', 'vector_mov'].each do |mode|
-    cmd = "bash #{COUNT_SSE_PATH}/count_sse.sh '#{plan}' #{mode}"
+    cmd = "bash #{BIN_PATH}/count_sse.sh '#{plan}' #{mode}"
     puts "Executing #{cmd}"  if @debug
     t = 0
     IO.popen(cmd) do |fd|

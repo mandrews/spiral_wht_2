@@ -280,8 +280,6 @@ AC_DEFINE_UNQUOTED(WHT_CFLAGS,"$CFLAGS",
   [the compiler flags used to compile this.])
 
 # TODO puts these back when model is ready to be distributed
-# model/Makefile
-# model/ic/Makefile
 AC_CONFIG_FILES([
    Makefile
    whtgen/Makefile
@@ -292,6 +290,8 @@ AC_CONFIG_FILES([
    search/Makefile
    rand/Makefile
    tests/Makefile
+   model/Makefile
+   model/ic/Makefile
 ])
 
 AC_OUTPUT
