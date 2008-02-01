@@ -61,10 +61,10 @@ main(int argc, char **argv)
   while ((c = getopt (argc, argv, "hvw:r:")) != -1)
     switch (c) {
       case 'w':
-        plan = strdup(optarg);
+        plan = optarg;
         break;
       case 'r':
-        rule = strdup(optarg);
+        rule = optarg;
         break;
       case 'h':
         usage();
@@ -81,9 +81,6 @@ main(int argc, char **argv)
   if (plan == NULL)
     usage();
 
-  if (rule == NULL)
-    usage();
-
   Wht *W;
 
   W = wht_parse(plan);
@@ -97,9 +94,6 @@ main(int argc, char **argv)
   }
 
   printf("%s\n", W->to_string);
-
-  free(plan);
-  free(rule);
 
   wht_free(W);
 

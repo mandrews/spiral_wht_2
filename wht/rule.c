@@ -189,6 +189,9 @@ rule_attach_undo_recursive(Wht *W)
 void
 rule_eval_from_string(Wht *W, char *rule)
 {
+  if (rule == NULL)
+    return;
+
   Wht *R;
   R = parse(rule);
 
@@ -197,7 +200,7 @@ rule_eval_from_string(Wht *W, char *rule)
   size_t  n;
   bool    is_small;
 
-  name       = R->rule->name;
+  name        = R->rule->name;
   params      = R->rule->params;
   n           = R->rule->n;
   is_small    = (bool) (R->children == NULL);

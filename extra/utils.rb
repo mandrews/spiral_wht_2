@@ -8,11 +8,10 @@
 require 'json'
 
 UTILS_PATH      = File.dirname(__FILE__) 
-MEASURE_PATH    = "#{UTILS_PATH}/../measure"
-RANDTREE_PATH   = "#{UTILS_PATH}/../utils"
-CONVERT_PATH    = "#{UTILS_PATH}/../wht"
-CLASSIFY_PATH   = "#{UTILS_PATH}/../wht"
-IC_PATH         = "#{UTILS_PATH}/../model/ic"
+MEASURE_PATH    = "#{UTILS_PATH}/../bin"
+RANDTREE_PATH   = "#{UTILS_PATH}/../bin"
+CLASSIFY_PATH   = "#{UTILS_PATH}/../bin"
+ATTACH_PATH     = "#{UTILS_PATH}/../bin"
 
 def load_runtime_env
   cmd = "#{MEASURE_PATH}/wht_measure -v"
@@ -142,3 +141,26 @@ def count_sse_exec(plan)
   return h
 end
 
+def attach(plan, rules)
+  return plan if rules.empty?
+  dup = rules.dup
+
+  r0  = dup.shift
+  cmd = "#{ATTACH_PATH}/wht_attach -w '#{plan}' -r '#{r0}' "
+  dup.each do |ri|
+    cmd += "| #{ATTACH_PATH}/wht_attach -r '#{ri}' "
+  end
+
+  puts "Executing #{cmd}" if @debug
+  t = 0
+  IO.popen(cmd) do |fd|
+    t = fd.gets
+  end
+
+  unless t 
+    puts("Could not read: #{cmd}") if @debug
+    return plan
+  else
+    return t.chomp
+  end
+end

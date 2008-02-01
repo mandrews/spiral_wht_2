@@ -5,8 +5,6 @@
 # Author: Michael Andrews <mjand@drexel.edu>
 # $Id$
 #
-# TODO
-#   - Input for selecting possible transforms
 
 SCRIPT_PATH       = File.dirname(__FILE__) 
 SCRIPT_NAME       = 'wht_dp'
@@ -17,7 +15,7 @@ DEFAULT_PARAMS    = {
   :measure        => SCRIPT_PATH + '/wht_measure',
   :best_plans     => SCRIPT_PATH + '/../share/wht_best_plans.txt',
   :subspace       => nil,
-  :transforms     => nil,
+  :rules          => [],
 }
 
 $LOAD_PATH << "#{SCRIPT_PATH}/../extra"
@@ -62,9 +60,9 @@ class Options
         "Program to measure peformance of WHT plan.") { |x|
          @params[:measure] = x }
 
-      o.on("-t", "--transformations='A,B,C, ... '", 
-        "Apply the following code transformations to the WHT plan.") { |x|
-         @params[:transforms] = x }
+      o.on("-r", "--rules='A,B,C, ... '", String,
+        "Apply the following rules to the WHT plan.") { |x|
+         @params[:rules] = x.split(/:/) }
 
       o.on("-f", "--wht-best-plans=FILE", String,
         "File to load/store the best plans found by dynamic programming.") { |x|
@@ -100,6 +98,7 @@ class Search
     @vsize          = params[:vsize]
     @max_leaf       = params[:max_leaf]
     @subspace       = params[:subspace]
+    @rules          = params[:rules]
     @debug          = params[:debug]
 
     @best = {}
@@ -131,12 +130,13 @@ class Search
       t = fd.gets
     end
 
-    unless t 
+    if t.nil? or t.to_f.zero?
       puts("Could not read: #{cmd}") if @debug
       return INF
-    else
-      t.to_f
+    else 
+      return t.to_f
     end
+
   end
 
   def find(size)
@@ -146,7 +146,7 @@ class Search
       next if zp.first == size and size > @max_leaf
       plan = zp_to_plan(zp)
 
-      plans << plan
+      plans << attach(plan, @rules)
     end
 
     case @subspace 
@@ -161,10 +161,10 @@ class Search
       tp = @best[size.to_s]['time']
       if t < tp
         puts "New Best for #{size} with T=#{t} (T'=#{tp}): #{p}"
-        @best[size.to_s]['time'] = t
-        @best[size.to_s]['plan'] = p
-        @best[size.to_s]['oid']  = size
-        @best[size.to_s]['transform']  = 'none'
+        @best[size.to_s]['time']    = t
+        @best[size.to_s]['plan']    = p
+        @best[size.to_s]['oid']     = size
+        @best[size.to_s]['rules']   = @rules.join(':')
       end
     end
   end
@@ -307,7 +307,6 @@ if $0 == __FILE__ # Main Entry Point
     opts.die("Could not write to best_plans #{opts.params[:best_plans]}")
   end
 
-
   env = load_runtime_env
 
   dp = Search.new(
@@ -320,7 +319,7 @@ if $0 == __FILE__ # Main Entry Point
       :debug          => opts.params[:verbose],
       :measure        => opts.params[:measure],
       :subspace       => opts.params[:subspace],
-      :transforms     => opts.params[:transforms],
+      :rules          => opts.params[:rules],
     } )
 
   best_plans = opts.params[:best_plans] 
