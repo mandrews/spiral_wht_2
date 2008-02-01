@@ -25,6 +25,10 @@ TODO:
 
   - Integrate these lists inside Doxgen comments
 
+  - Count SSE should disassemble libwht.a not individual codelets
+
+  - Flag to reset count SSE /tmp cache
+
 Bugs:
 
   - Some minor memory leak issues with parser.y

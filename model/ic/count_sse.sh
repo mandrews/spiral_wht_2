@@ -38,7 +38,7 @@ case ${mode} in
     ;;
 esac;
 
-tmp="/tmp/wht-${mode}"
+tmp="${path}/../share/wht-${mode}"
 
 if [ ! -e $tmp ]; then
   for ((n=1;n<=unroll;n+=1)); do
