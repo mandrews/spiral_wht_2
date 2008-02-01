@@ -1,0 +1,339 @@
+#!/usr/bin/env ruby
+
+# wht_dp
+#
+# Author: Michael Andrews <mjand@drexel.edu>
+# $Id$
+#
+
+SCRIPT_PATH       = File.dirname(__FILE__) 
+SCRIPT_NAME       = 'wht_dp'
+DEFAULT_PARAMS    = {
+  :min_size       => 1,
+  :max_size       => 15,
+  :max_children   => 2,
+  :measure        => SCRIPT_PATH + '/wht_measure',
+  :best_plans     => SCRIPT_PATH + '/../share/wht_best_plans.txt',
+  :subspace       => nil,
+  :rules          => [],
+}
+
+require "utils"
+
+class Options
+  require 'optparse'
+  attr_reader :params
+  def initialize
+    @params  = DEFAULT_PARAMS
+    @options = OptionParser.new do |o|
+      o.banner = "Usage: #{SCRIPT_NAME} [OPTIONS]"
+      o.separator ""
+      o.on("-h", "--help", 
+        "Show this help message.") { 
+        die }
+
+      o.on("-v", "--verbose", 
+        "Show non-essential information.") {
+        @params[:verbose] = true }
+
+      o.on("-a", "--min-size=SIZE", Integer,
+        "Start the search at size 2^SIZE.") { |x|
+        @params[:min_size] = x }
+
+      o.on("-b", "--max-size=SIZE", Integer,
+        "Stop the search at size 2^SIZE.") { |x|
+        @params[:max_size] = x }
+
+      o.on("-k", "--max-children=CHILDREN", Integer,
+        "Maximum number of children to allow on a split node.") { |x|
+        @params[:max_children] = x }
+
+      o.on("-s", "--subspace=SPACE", String,
+        "Confine search to SPACE (presently only RIGHT supported).") { |x|
+        @params[:subspace] = x }
+
+      o.on("-m", "--wht-measure=FILE", 
+        "Program to measure peformance of WHT plan.") { |x|
+         @params[:measure] = x }
+
+      o.on("-r", "--rules='A,B,C, ... '", String,
+        "Apply the following rules to the WHT plan.") { |x|
+         @params[:rules] = x.split(/:/) }
+
+      o.on("-f", "--wht-best-plans=FILE", String,
+        "File to load/store the best plans found by dynamic programming.") { |x|
+         @params[:best_plans] = x }
+    end
+  end
+
+  def die(msg = nil)
+    puts @options.to_s 
+    puts "\n#{msg}" unless msg.nil?
+    exit
+  end
+
+  def parse(args)
+    begin
+      @options.parse!(args)
+    rescue => e
+      die(e.message)
+    end
+  end
+
+end
+
+class Search
+  attr_accessor :best
+  attr_accessor :debug
+  def initialize(params)
+    @min_size       = params[:min_size]
+    @max_size       = params[:max_size]
+    @max_children   = params[:max_children]
+    @measure        = params[:measure]
+    @il_max         = params[:il_max]
+    @vsize          = params[:vsize]
+    @max_leaf       = params[:max_leaf]
+    @subspace       = params[:subspace]
+    @rules          = params[:rules]
+    @debug          = params[:debug]
+
+    @best = Array.new(@max_size)
+
+    for size in 1 .. @max_size do 
+      @best[size] ||= { 'time' => INF, 'plan' => nil, 'id' => size}
+    end
+  end
+
+  def best=(map)
+    map.each_index do |i|
+      @best[i] = map[i]
+    end
+  end
+
+  def run
+    for size in @min_size .. @max_size do 
+      puts "size #{size}" if @debug
+      find(size)
+    end
+
+  end
+
+  def measure(plan)
+    cmd = "#{@measure} -w '#{plan}'"
+    puts "Executing #{cmd}" if @debug
+    t = 0
+    IO.popen(cmd) do |fd|
+      t = fd.gets
+    end
+
+    if t.nil? or t.to_f.zero?
+      puts("Could not read: #{cmd}") if @debug
+      return INF
+    else 
+      return t.to_f
+    end
+
+  end
+
+  def find(size)
+    plans = []
+
+    operation = lambda do |zp|
+      next if zp.first == size and size > @max_leaf
+      plan = zp_to_plan(zp)
+
+      plans << wht_attach(plan, @rules)
+    end
+
+    case @subspace 
+      when 'right'
+        g_cp_n_right(size, 1, @max_children, @max_size) { |zp| operation.call(zp) }
+      else
+        g_cp_n(size, 1, @max_children) { |zp| operation.call(zp) }
+    end
+
+    plans.each do |p|
+      t  = measure(p)
+      tp = @best[size]['time']
+      if t < tp
+        puts "New Best for #{size} with T=#{t} (T'=#{tp}): #{p}"
+        @best[size]['time']    = t
+        @best[size]['plan']    = p
+        @best[size]['id']      = size
+        @best[size]['rules']   = @rules.join(':')
+      end
+    end
+  end
+
+  def find_best(size)
+    unless @best[size]['plan']
+      find(size)
+    end
+    @best[size]['plan']
+  end
+
+  def zp_to_plan(zp)
+    s = []
+    zp.each do |z|
+      if z > @max_leaf
+        s << find_best(z)
+      else
+        s << "small[#{z}]"
+      end
+    end
+
+    if s.size > 1
+      return "split[" + s.join(',') + "]"
+    else
+      return s.first
+    end
+  end
+end
+
+# To generate compositions with elements >= MIN
+#   1) verify that MIN | n i.e n % min == 0
+#   2) set m = n / MIN, and generate compositions
+#   3) multiply each m_i by MIN
+#
+# Similarly for elements <= MAX
+
+# Generate (enumerate) all k combinations of n
+# See http://home.att.net/~srschmitt/script_combinations.html
+def g_k_cb_n(n,k)
+  a = (1..k).to_a
+
+  loop do
+    yield a
+
+    i = k - 1
+    while a[i] == (n - k + i + 1) do
+      i -= 1
+    end
+
+    return if (i < 0)
+
+    a[i] += 1
+
+    for j in i+1 .. k-1 do
+      a[j] = a[i] + j - i
+    end
+  end
+end
+
+# Generate (enumerate) all k combinations of n
+# given that the plans are rightmost
+# See above
+def rightmost(a,max)
+  b = a.dup
+  b.pop # Do not consider last element
+  c = b.select { |x| x <= max }
+  return (c.size == b.size)
+end
+
+def g_k_cb_n_right(n,k,max)
+  a = (1..k).to_a
+
+  loop do
+    yield a if rightmost(a, max)
+
+    i = k - 1
+    while a[i] == (n - k + i + 1) do
+      i -= 1
+    end
+
+    return if (i < 0)
+
+    a[i] += 1
+
+    for j in i+1 .. k-1 do
+      a[j] = a[i] + j - i
+    end
+  end
+end
+
+# Map a combination to a composition
+# Idea from Dr. Johnson
+# see http://en.wikipedia.org/wiki/Combinadic
+def map_cb_to_cp(n, cb)
+  m, i = 0, 0
+  cp = Array.new(cb.size)
+  cb.each do |x|
+    cp[i] = x - m
+    m = x
+    i += 1
+  end
+  cp[i] = n - m
+  cp
+end
+
+# Generate (enumerate) all k-way compositions of n forall k in a..b
+def g_cp_n(n, a, b)
+  max = [n, b].min
+  a.upto(max) do |k|
+    g_k_cb_n(n-1,k-1) do |cb|
+      yield map_cb_to_cp(n,cb)
+    end
+  end
+end
+
+# Generate (enumerate) all k-way compositions of n forall k in a..b
+# given that the plans are rightmost
+def g_cp_n_right(n, a, b, m)
+  max = [n, b].min
+  a.upto(max) do |k|
+    g_k_cb_n_right(n-1,k-1,m-1) do |cb|
+      yield map_cb_to_cp(n,cb)
+    end
+  end
+end
+
+if $0 == __FILE__ # Main Entry Point
+  opts = Options.new
+  opts.parse(ARGV)
+
+  unless File.exists?(opts.params[:measure].split.first)
+    opts.die("Could find measure #{opts.params[:measure]}")
+  end
+
+  unless File.exists?(opts.params[:best_plans])
+    File.new(opts.params[:best_plans], "w+")
+  end
+
+  unless File.writable?(opts.params[:best_plans])
+    opts.die("Could not write to best_plans #{opts.params[:best_plans]}")
+  end
+
+  env = load_runtime_env
+
+  dp = Search.new(
+    { :min_size       => opts.params[:min_size],
+      :max_size       => opts.params[:max_size],
+      :max_children   => opts.params[:max_children],
+      :max_leaf       => env['max_unroll'],
+      :il_max         => env['max_interleave'],
+      :vsize          => env['vector_size'],
+      :debug          => opts.params[:verbose],
+      :measure        => opts.params[:measure],
+      :subspace       => opts.params[:subspace],
+      :rules          => opts.params[:rules],
+    } )
+
+  file  = opts.params[:best_plans] 
+
+  plans = load_data(file, [])
+  plans.unshift({}) # Add a 0 element (makes indexing easier)
+
+  dp.best = plans
+
+  begin
+    dp.run
+  rescue Interrupt
+    puts "Saving ... "
+  ensure
+    dp.best.shift # Remove 0 element
+    dp.best.delete_if { |v| not v.nil? and v["time"] == INF }
+    save_data(file, dp.best)
+  end
+
+end
+

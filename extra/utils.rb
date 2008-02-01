@@ -8,10 +8,15 @@
 require 'json'
 
 UTILS_PATH      = File.dirname(__FILE__) 
-MEASURE_PATH    = "#{UTILS_PATH}/../bin"
-RANDTREE_PATH   = "#{UTILS_PATH}/../bin"
-CLASSIFY_PATH   = "#{UTILS_PATH}/../bin"
-ATTACH_PATH     = "#{UTILS_PATH}/../bin"
+#MEASURE_PATH    = "#{UTILS_PATH}/../bin"
+MEASURE_PATH    = "../measure"
+#RANDTREE_PATH   = "#{UTILS_PATH}/../bin"
+RANDTREE_PATH   = "../rand"
+CLASSIFY_PATH   = "../wht"
+ATTACH_PATH     = "../wht"
+COUNT_SSE_PATH  = "../model/ic"
+
+INF = 1.0 / 0
 
 def load_runtime_env
   cmd = "#{MEASURE_PATH}/wht_measure -v"
@@ -38,23 +43,9 @@ def load_runtime_env
   env
 end
 
-def load_entry(env,info)
-  info.each do |e|
-    return e if e['env'] == env
-  end
+def load_data(file, default)
+  return default unless File.exists?(file)
 
-  # Add a new entry
-  entry = {
-    'env'   => env,
-    'data'  => {}
-  }
-
-  info << entry
-
-  entry
-end
-
-def load_json(file, default)
   File.open(file,'r') do |fd|
     begin
       json  = JSON.load(fd)
@@ -67,44 +58,41 @@ def load_json(file, default)
   end
 end
 
-def load_data(file, env)
-  default = [[],{}]
-
-  return default unless File.exists?(file)
-
-  info = load_json(file, [])
-
-  plans = load_entry(env, info)['data']
-
-  [info, plans]
-end
-
-def save_data(file, env, plans, info)
-  plans.sort { |a,b| a[0].to_i <=> b[0].to_i }
-  load_entry(env,info)['data'] = plans
-
+def save_data(file, data)
   File.open(file,'w+') do |fd|
-    fd.puts(JSON.pretty_generate(info))
+    fd.puts(JSON.pretty_generate(data))
   end
 end
 
-def measure(plan, *args)
-  cmd = "#{MEASURE_PATH}/wht_measure -w '#{plan}' #{args}"
+def time(&blk)
+  t0 = Time.now
+  yield
+  t1 = Time.now
+  puts t1 - t0
+end
+
+def wht_measure(plan, *args)
+  cmd = "#{MEASURE_PATH}/wht_measure -s -w '#{plan}' #{args}"
   puts "Executing #{cmd}" if @debug
   t = 0
   IO.popen(cmd) do |fd|
     t = fd.gets
   end
 
-  unless t 
+  if t.nil?
     puts("Could not read: #{cmd}") if @debug
     return INF
-  else
-    t.to_f
   end
+
+  a = t.split(/\s+/)
+  return [ 
+    a[0].to_f,
+    a[1].to_f,
+    a[2].to_i
+  ]
 end
 
-def classify_exec(plan, *args)
+def wht_classify(plan, *args)
   cmd = "#{CLASSIFY_PATH}/wht_classify -w '#{plan}' #{args}"
   puts "Executing #{cmd}" if @debug
   t = 0
@@ -125,23 +113,7 @@ def classify_exec(plan, *args)
   return h
 end
 
-
-def count_sse_exec(plan)
-  h = {}
-  ['shuffle', 'unpack', 'scalar_add', 'vector_add', 'scalar_mov', 'vector_mov'].each do |mode|
-    cmd = "bash #{IC_PATH}/count_sse.sh '#{plan}' #{mode}"
-    puts "Executing #{cmd}"  if @debug
-    t = 0
-    IO.popen(cmd) do |fd|
-      t = fd.readlines
-    end
-
-    h[mode] = t.first.to_i
-  end
-  return h
-end
-
-def attach(plan, rules)
+def wht_attach(plan, rules)
   return plan if rules.empty?
   dup = rules.dup
 
@@ -164,3 +136,23 @@ def attach(plan, rules)
     return t.chomp
   end
 end
+
+def wht_rand(size,a,b,p,q,*args)
+  `#{RANDTREE_PATH}/wht_rand -n #{size} -a #{a} -b #{b} -p #{p} -q #{q} #{args}`.chomp
+end
+
+def count_sse_sh(plan)
+  h = {}
+  ['shuffle', 'unpack', 'scalar_add', 'vector_add', 'scalar_mov', 'vector_mov'].each do |mode|
+    cmd = "bash #{COUNT_SSE_PATH}/count_sse.sh '#{plan}' #{mode}"
+    puts "Executing #{cmd}"  if @debug
+    t = 0
+    IO.popen(cmd) do |fd|
+      t = fd.readlines
+    end
+
+    h[mode] = t.first.to_i
+  end
+  return h
+end
+

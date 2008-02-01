@@ -1,0 +1,104 @@
+#!/usr/bin/env ruby
+
+#
+# wht_util
+#
+# Author: Michael Andrews <mjand@drexel.edu>
+
+require 'utils'
+
+def generate(plans, o)
+  n,a,b,p,q,r = o['size'],o['min_f'],o['max_f'],o['min_e'],o['max_e'],o['right']
+
+  for i in 0 .. o["samples"]
+    plan = wht_rand(n,a,b,p,q)
+    plans << { 'id' => i, 'plan' => plan }
+    print '.'
+    $stdout.flush
+  end
+  puts "\n"
+end
+
+def measure(plans, o)
+  plans.each do |node|
+
+    plan = node["plan"]
+
+    o['metrics'].each do |metric, params|
+      next if o['no_update'] and node.has_key?("#{metric}_mean")
+
+      value = wht_measure(plan, params)
+      node["#{metric}_mean"]    = value[0]
+      node["#{metric}_stdev"]   = value[1]
+      node["#{metric}_samples"] = value[2]
+
+      print '.'
+      $stdout.flush
+    end
+  end
+  puts "\n"
+end
+
+def attach(plans, o)
+  o['rules'].each do |file, rules|
+    new_plans = []
+    plans.each do |node|
+      new_node = node.dup
+      new_node['plan'] = wht_attach(node['plan'], rules)
+      new_plans << new_node
+    end
+
+    save_data(file, new_plans)
+  end
+end
+
+def classify(plans, o)
+  plans.each do |node|
+    info = wht_classify(node['plan'])
+    node.merge!(info)
+  end
+end
+
+def count_sse(plans, o)
+  plans.each do |node|
+    info = count_sse_sh(node['plan'])
+    node.merge!(info)
+  end
+end
+
+MODES = ['generate', 'measure', 'attach', 'classify', 'count_sse' ]
+
+def die
+  puts "wht_util: SPEC FILE MODE"
+  exit 1
+end
+
+if $0 == __FILE__
+  die if ARGV.size < 3
+
+  spec = load_data(ARGV[0],{})
+
+  file = ARGV[1]
+  mode = ARGV[2]
+
+  data = nil
+
+  time {
+    time {
+      puts "loading ..."
+      data = load_data(file,[])
+    }
+
+    time {
+      puts mode
+      eval("#{mode}(data, spec['#{mode}'])")
+    }
+
+    time {
+      puts "saving ..."
+      save_data(file, data)
+    }
+    puts "total"
+  }
+end
+

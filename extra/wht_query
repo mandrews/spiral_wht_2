@@ -1,0 +1,67 @@
+#!/usr/bin/env ruby
+
+# wht_query
+#
+# Author: Michael Andrews <mjand@drexel.edu>
+
+# TODO matlab or CSV style 
+# TODO add delete and where clause
+
+require 'utils'
+
+ENUM = {
+  'right'     => 1,
+  'left'      => 2,
+  'balanced'  => 3,
+  'mixed'     => 4
+}
+
+
+def select(plans, selects)
+  # Place header
+  hostname = `hostname`
+  puts "% HOSTNAME #{hostname}"
+  puts "% SELECT : " + selects.join(', ')
+
+  out = {}
+
+  plans.each do |node|
+    id = node['id'].to_i
+    row = Array.new(selects.size)
+
+    node.each do |key,value|
+      i = selects.index(key)
+      next if i.nil?
+
+      unless ENUM[value].nil?
+        row[i] = enum[value]
+      else
+        row[i] = value
+      end
+    end
+
+    out[id] = row
+
+  end
+
+  out.sort.each do |id, value|
+    puts value.join(' ') unless value.empty?
+  end
+end
+
+def die
+  puts "wht_query: FILE SELECT"
+  exit 1
+end
+
+if __FILE__ == $0
+  die if ARGV.size < 2
+
+  file      = ARGV[0]
+  selects   = (ARGV[1] || "").split(/\s*,\s*/)
+
+  data = load_data(file, [])
+
+  select(data, selects)
+
+end
