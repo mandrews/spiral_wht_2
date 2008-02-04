@@ -16,6 +16,7 @@ dist-hook:
 	rm $(top_distdir)/whtgen/whtgen
 
 install-exec-local:
+	mkdir -p $(prefix)/share
 	mkdir -p $(top_srcdir)/model/share
 	mkdir -p $(prefix)/extra
 	$(BASH) $(top_srcdir)/model/ic/count_sse.sh 'small[1]' shuffle
