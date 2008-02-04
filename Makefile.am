@@ -31,4 +31,5 @@ install-exec-local:
 	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_search $(prefix)/extra
 	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_update $(prefix)/extra
 	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_util $(prefix)/extra
+	$(top_srcdir)/install-sh $(top_srcdir)/extra/utils.rb $(prefix)/extra
 	rm -rf $(top_srcdir)/model/share
