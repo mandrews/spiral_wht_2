@@ -8,9 +8,9 @@ function usage()
 
 path=`dirname $0`
 
-vsize=2
-unroll=8
-ifactor=16
+vsize=`${path}/wht_predict -v | grep vector_size: | cut -d ' ' -f 2`
+unroll=`${path}/wht_predict -v | grep max_unroll: | cut -d ' ' -f 2`
+ifactor=`${path}/wht_predict -v | grep max_interleave: | cut -d ' ' -f 2`
 plan=$1
 mode=$2
 
@@ -22,23 +22,23 @@ case ${mode} in
     ops='unpcklpd|unpckhpd';
     ;;
   'scalar_add')
-    ops='addsd|subsd';
+    ops='addsd|subsd|addss|subss';
     ;;
   'vector_add')
-    ops='addpd|subpd';
+    ops='addpd|subpd|addps|subps';
     ;;
   'scalar_mov')
-    ops='movsd|movlpd|movhpd';
+    ops='movsd|movlpd|movhpd|movhps|movlpd|movss';
     ;;
   'vector_mov')
-    ops='movpd|movapd';
+    ops='movpd|movapd|movps|movaps';
     ;;
   *)
     usage;
     ;;
 esac;
 
-tmp="${path}/../share/wht-${mode}"
+tmp="${path}/../share/${mode}"
 
 if [ ! -e $tmp ]; then
   for ((n=1;n<=unroll;n+=1)); do
@@ -46,7 +46,7 @@ if [ ! -e $tmp ]; then
     echo "small[$n] : $x" >> ${tmp}
   done
 
-  for ((n=vsize;n<=unroll;n+=1)); do
+  for ((n=1;n<=unroll;n+=1)); do
     x=`objdump -d ${path}/../../wht/codelets/s_${n}_v_${vsize}_a.o  | grep -E ${ops} | wc -l`
     echo "smallv($vsize)[$n] : $x" >> ${tmp}
   done
