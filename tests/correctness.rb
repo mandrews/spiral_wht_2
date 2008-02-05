@@ -177,7 +177,7 @@ if $0 == __FILE__ # Main Entry Point
     end
   end 
 
-  r = log2(k) # Min size for max interleave
+  r = [ log2(k), log2(2*v) ].max # Min size for max interleave
 
   if v > 0 and k > 0
     puts "\nVectorization Tests (2)"

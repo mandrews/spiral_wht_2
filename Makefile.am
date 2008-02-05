@@ -2,7 +2,7 @@ OPTIONS_AUTOMAKE=gnu
 
 data_DATA =
 
-EXTRA_DIST = doc/html autogen.sh autodoc.sh extra
+EXTRA_DIST = doc autogen.sh autodoc.sh extra
 
 # TODO add model when ready to be dist
 SUBDIRS = whtgen wht measure search rand model tests

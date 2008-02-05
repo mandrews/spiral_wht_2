@@ -27,7 +27,7 @@ TODO:
 
   - Count SSE should disassemble libwht.a not individual codelets
 
-  - Flag to reset count SSE /tmp cache
+  - Flag to reset count SSE cache
 
 Bugs:
 
@@ -38,6 +38,7 @@ Bugs:
     instead of displaying syntax error
 
   - Plans of the form split[split[ ... ] ] need to be rejected by grammar
+    - NO, this just corresponds to a blocking factorization
 
 	- Does not install html manual to share ($htmldir)
 
