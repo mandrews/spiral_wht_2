@@ -2,17 +2,30 @@
 
 function usage() 
 {
-  echo "count_see wht_plan [shuffle | unpack | scalar_add | vector_add | scalar_mov | vector_mov]"
+  echo "count_see -w wht_plan [shuffle | unpack | scalar_add | vector_add | scalar_mov | vector_mov]"
   exit 1
 }
 
 path=`dirname $0`
-
 vsize=`${path}/wht_predict -v | grep vector_size: | cut -d ' ' -f 2`
 unroll=`${path}/wht_predict -v | grep max_unroll: | cut -d ' ' -f 2`
 ifactor=`${path}/wht_predict -v | grep max_interleave: | cut -d ' ' -f 2`
-plan=$1
-mode=$2
+
+plan='';
+
+while getopts "w:" i; do
+  case "$i" in
+    "w") plan=$OPTARG;
+    ;;
+  esac
+done
+
+if [ "$plan" == "" ] ; then
+  read plan
+  mode=$1
+else
+  mode=$3
+fi
 
 case ${mode} in
   'shuffle')
@@ -38,6 +51,7 @@ case ${mode} in
     ;;
 esac;
 
+mkdir -p "${path}/../share"
 tmp="${path}/../share/${mode}"
 
 if [ ! -e $tmp ]; then
