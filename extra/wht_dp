@@ -16,7 +16,7 @@ DEFAULT_PARAMS    = {
   :measure        => SCRIPT_PATH + '/wht_measure',
   :best_plans     => SCRIPT_PATH + '/../share/wht_best_plans.txt',
   :subspace       => nil,
-  :rules          => [],
+  :rules          => nil,
 }
 
 $LOAD_PATH << File.dirname(__FILE__) 
@@ -59,15 +59,15 @@ class Options
         "Confine search to SPACE (presently only RIGHT supported).") { |x|
         @params[:subspace] = x }
 
-      o.on("-m", "--wht-measure=FILE", 
+      o.on("-m", "--measure=FILE", 
         "Program to measure peformance of WHT plan.") { |x|
          @params[:measure] = x }
 
-      o.on("-r", "--rules='A,B,C, ... '", String,
-        "Apply the following rules to the WHT plan.") { |x|
-         @params[:rules] = x.split(/:/) }
+      o.on("-r", "--rule=SCRIPT", String,
+        "Search using a rule script.") { |x|
+         @params[:rules] = x }
 
-      o.on("-f", "--wht-best-plans=FILE", String,
+      o.on("-f", "--best-plans=FILE", String,
         "File to load/store the best plans found by dynamic programming.") { |x|
          @params[:best_plans] = x }
     end
@@ -141,21 +141,37 @@ class Search
 
   end
 
+  def apply(plan)
+    cmd = "#{@rules} -w '#{plan}'"
+    puts "Executing #{cmd}" if @debug
+
+    out = nil
+    IO.popen(cmd) do |fd|
+      out = fd.gets
+    end
+
+    if out.nil? 
+      puts("Could not read: #{cmd}") if @debug
+      return nil
+    else 
+      return out.chomp
+    end
+  end
+
   def measure(plan)
     cmd = "#{@measure} -w '#{plan}'"
     puts "Executing #{cmd}" if @debug
-    t = 0
+    out = 0
     IO.popen(cmd) do |fd|
-      t = fd.gets
+      out = fd.gets
     end
 
-    if t.nil? or t.to_f.zero?
+    if out.nil? or out.to_f.zero?
       puts("Could not read: #{cmd}") if @debug
       return INF
     else 
-      return t.to_f
+      return out.to_f
     end
-
   end
 
   def find(size)
@@ -164,8 +180,11 @@ class Search
     g_cp_n(size, 1, @max_children) do |zp|
       next if zp.first == size and size > @max_leaf
       plans += zp_to_plans(zp)
+    end
 
-      #plans << wht_attach(plan, @rules)
+    unless @rules.nil?
+      extras = plans.map { |plan| apply(plan) }
+      plans += extras
     end
 
     plans.each do |p|
