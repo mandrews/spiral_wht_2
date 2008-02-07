@@ -12,8 +12,8 @@ BIN_PATH        = "#{UTILS_PATH}/../bin"
 
 INF = 1.0 / 0
 
-def load_runtime_env
-  cmd = "#{BIN_PATH}/wht_measure -v"
+def load_runtime_env(measure)
+  cmd = "#{measure} -v"
   env = {}
   IO.popen(cmd) do |fd|
     while (line = fd.gets) do

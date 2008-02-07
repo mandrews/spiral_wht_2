@@ -12,6 +12,7 @@ DEFAULT_PARAMS    = {
   :min_size       => 1,
   :max_size       => 15,
   :max_children   => 2,
+  :memory         => 4,
   :measure        => SCRIPT_PATH + '/wht_measure',
   :best_plans     => SCRIPT_PATH + '/../share/wht_best_plans.txt',
   :subspace       => nil,
@@ -85,7 +86,6 @@ class Options
 end
 
 class Search
-  attr_accessor :best
   attr_accessor :debug
   def initialize(params)
     @min_size       = params[:min_size]
@@ -97,19 +97,42 @@ class Search
     @max_leaf       = params[:max_leaf]
     @subspace       = params[:subspace]
     @rules          = params[:rules]
+    @memory         = params[:memory]
     @debug          = params[:debug]
 
     @best = Array.new(@max_size)
 
     for size in 1 .. @max_size do 
-      @best[size] ||= { 'time' => INF, 'plan' => nil, 'id' => size}
+      @best[size] ||= [ { 'time' => INF, 'plan' => nil, 'id' => size} ]
+    end
+
+  end
+
+  def best=(best)
+    # Add a 0 element (makes indexing easier)
+    best.unshift({'id' => 0, 'time' => INF, 'plan' => nil}) 
+
+    best.each_index do |i|
+      @best[i] = [ best[i] ]
     end
   end
 
-  def best=(map)
-    map.each_index do |i|
-      @best[i] = map[i]
+  def best
+    tmp = []
+    @best.each_index do |i|
+      t = INF
+      @best[i].each do |x|
+        next if x['time'] == INF or x['plan'].nil?
+
+        tp = x['time']
+        if tp < t
+          t = tp
+          tmp[i] = x
+        end
+      end
     end
+    tmp.shift # Remove 0 element
+    return tmp
   end
 
   def run
@@ -140,55 +163,67 @@ class Search
   def find(size)
     plans = []
 
-    operation = lambda do |zp|
+    g_cp_n(size, 1, @max_children) do |zp|
       next if zp.first == size and size > @max_leaf
-      plan = zp_to_plan(zp)
+      plans += zp_to_plans(zp)
 
-      plans << wht_attach(plan, @rules)
-    end
-
-    case @subspace 
-      when 'right'
-        g_cp_n_right(size, 1, @max_children, @max_size) { |zp| operation.call(zp) }
-      else
-        g_cp_n(size, 1, @max_children) { |zp| operation.call(zp) }
+      #plans << wht_attach(plan, @rules)
     end
 
     plans.each do |p|
-      t  = measure(p)
-      tp = @best[size]['time']
-      if t < tp
-        puts "New Best for #{size} with T=#{t} (T'=#{tp}): #{p}"
-        @best[size]['time']    = t
-        @best[size]['plan']    = p
-        @best[size]['id']      = size
-        @best[size]['rules']   = @rules.join(':')
+      t = measure(p)
+
+      @best[size].each do |x| 
+        tp = x['time']
+        if t < tp 
+
+          if @best[size].size > @memory
+            @best[size].delete(x) # Remove old best
+          end
+
+          puts "New Best for #{size} with T=#{t} (T'=#{tp}): #{p}"
+          @best[size] << { 'id' => size, 'time' => t, 'plan' => p }
+          break
+        end
       end
     end
   end
 
   def find_best(size)
-    unless @best[size]['plan']
-      find(size)
+    find(size) if @best[size].empty?
+
+    plans = []
+
+    @best[size].each do |x|
+      next if x['time'] == INF
+      next if x['plan'].nil?
+      plans << x['plan']
     end
-    @best[size]['plan']
+
+    return plans
   end
 
-  def zp_to_plan(zp)
-    s = []
+  def zp_to_plans(zp)
+    tmp = []
     zp.each do |z|
       if z > @max_leaf
-        s << find_best(z)
+        tmp << find_best(z) 
       else
-        s << "small[#{z}]"
+        tmp << ["small[#{z}]"]
       end
     end
 
-    if s.size > 1
-      return "split[" + s.join(',') + "]"
-    else
-      return s.first
+    plans = []
+    combinations(tmp).each do |s|
+      s = s.to_a
+      if s.size > 1
+        plans << "split[" + s.join(',') + "]"
+      else
+        plans << s.first
+      end
     end
+
+    return plans
   end
 end
 
@@ -232,27 +267,6 @@ def rightmost(a,max)
   return (c.size == b.size)
 end
 
-def g_k_cb_n_right(n,k,max)
-  a = (1..k).to_a
-
-  loop do
-    yield a if rightmost(a, max)
-
-    i = k - 1
-    while a[i] == (n - k + i + 1) do
-      i -= 1
-    end
-
-    return if (i < 0)
-
-    a[i] += 1
-
-    for j in i+1 .. k-1 do
-      a[j] = a[i] + j - i
-    end
-  end
-end
-
 # Map a combination to a composition
 # Idea from Dr. Johnson
 # see http://en.wikipedia.org/wiki/Combinadic
@@ -278,15 +292,24 @@ def g_cp_n(n, a, b)
   end
 end
 
-# Generate (enumerate) all k-way compositions of n forall k in a..b
-# given that the plans are rightmost
-def g_cp_n_right(n, a, b, m)
-  max = [n, b].min
-  a.upto(max) do |k|
-    g_k_cb_n_right(n-1,k-1,m-1) do |cb|
-      yield map_cb_to_cp(n,cb)
+def combinations(a)
+  return a.first if a.size == 1
+
+  h = a.shift
+  t = combinations(a)
+
+  all = []
+  t.each do |y|
+    h.each do |x|
+      if y.class == Array
+        all << [x] + y
+      else
+        all << [x] + [y]
+      end
     end
   end
+
+  all
 end
 
 if $0 == __FILE__ # Main Entry Point
@@ -305,7 +328,7 @@ if $0 == __FILE__ # Main Entry Point
     opts.die("Could not write to best_plans #{opts.params[:best_plans]}")
   end
 
-  env = load_runtime_env
+  env = load_runtime_env(opts.params[:measure].split.first)
 
   dp = Search.new(
     { :min_size       => opts.params[:min_size],
@@ -316,25 +339,28 @@ if $0 == __FILE__ # Main Entry Point
       :vsize          => env['vector_size'],
       :debug          => opts.params[:verbose],
       :measure        => opts.params[:measure],
+      :memory         => opts.params[:memory],
       :subspace       => opts.params[:subspace],
       :rules          => opts.params[:rules],
     } )
 
   file  = opts.params[:best_plans] 
+  plans = []
 
-  plans = load_data(file, [])
-  plans.unshift({}) # Add a 0 element (makes indexing easier)
+  File.open(file,'r') do |fd|
+    plans = load_data(fd) 
+  end
 
-  dp.best = plans
+  dp.best = plans || []
 
   begin
     dp.run
   rescue Interrupt
     puts "Saving ... "
   ensure
-    dp.best.shift # Remove 0 element
-    dp.best.delete_if { |v| not v.nil? and v["time"] == INF }
-    save_data(file, dp.best)
+    File.open(file,'w+') do |fd|
+      save_data(fd, dp.best)
+    end
   end
 
 end
