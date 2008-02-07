@@ -12,7 +12,7 @@ DEFAULT_PARAMS    = {
   :min_size       => 1,
   :max_size       => 15,
   :max_children   => 2,
-  :memory         => 4,
+  :max_cache      => 2,
   :measure        => SCRIPT_PATH + '/wht_measure',
   :best_plans     => SCRIPT_PATH + '/../share/wht_best_plans.txt',
   :subspace       => nil,
@@ -50,6 +50,10 @@ class Options
       o.on("-k", "--max-children=CHILDREN", Integer,
         "Maximum number of children to allow on a split node.") { |x|
         @params[:max_children] = x }
+
+      o.on("-x", "--max-cache=SIZE", Integer,
+        "Maximum number of sub problems to store.") { |x|
+        @params[:max_cache] = x }
 
       o.on("-s", "--subspace=SPACE", String,
         "Confine search to SPACE (presently only RIGHT supported).") { |x|
@@ -97,7 +101,7 @@ class Search
     @max_leaf       = params[:max_leaf]
     @subspace       = params[:subspace]
     @rules          = params[:rules]
-    @memory         = params[:memory]
+    @max_cache         = params[:max_cache]
     @debug          = params[:debug]
 
     @best = Array.new(@max_size)
@@ -110,29 +114,23 @@ class Search
 
   def best=(best)
     # Add a 0 element (makes indexing easier)
-    best.unshift({'id' => 0, 'time' => INF, 'plan' => nil}) 
+    best.unshift([{'id' => 0, 'time' => INF, 'plan' => nil}]) 
 
     best.each_index do |i|
-      @best[i] = [ best[i] ]
+      @best[i] = best[i] 
     end
   end
 
   def best
-    tmp = []
-    @best.each_index do |i|
-      t = INF
-      @best[i].each do |x|
-        next if x['time'] == INF or x['plan'].nil?
+    @best.shift # Remove 0 element
 
-        tp = x['time']
-        if tp < t
-          t = tp
-          tmp[i] = x
-        end
-      end
+    @best.each do |y|
+      y.delete_if { |x| x.nil? }
+      y.delete_if { |x| x['time'] == INF } 
+      y.delete_if { |x| x['plan'].nil? } 
     end
-    tmp.shift # Remove 0 element
-    return tmp
+
+    return @best
   end
 
   def run
@@ -177,7 +175,7 @@ class Search
         tp = x['time']
         if t < tp 
 
-          if @best[size].size > @memory
+          if @best[size].size > @max_cache
             @best[size].delete(x) # Remove old best
           end
 
@@ -335,11 +333,9 @@ if $0 == __FILE__ # Main Entry Point
       :max_size       => opts.params[:max_size],
       :max_children   => opts.params[:max_children],
       :max_leaf       => env['max_unroll'],
-      :il_max         => env['max_interleave'],
-      :vsize          => env['vector_size'],
+      :max_cache      => opts.params[:max_cache],
       :debug          => opts.params[:verbose],
       :measure        => opts.params[:measure],
-      :memory         => opts.params[:memory],
       :subspace       => opts.params[:subspace],
       :rules          => opts.params[:rules],
     } )
