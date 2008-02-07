@@ -197,13 +197,13 @@ if $0 == __FILE__ # Main Entry Point
     for size in p .. n do
       # Reject aligned vectors here
       expect_reject(splitil(
-        splitil(smallv(1,v,v,1), small(n)),
-        splitil(smallv(1,v,v,1), smallv(n,v))))
+        splitil(smallv(1,v,v,1), small(p)),
+        splitil(smallv(1,v,v,1), smallv(size,v))))
 
       # Accept general vectors here
       expect_correct(splitil(
         splitil(smallv(1,v,v,0), small(p)),
-        splitil(smallv(1,v,v,0), smallv(n,v))))
+        splitil(smallv(1,v,v,0), smallv(size,v))))
     end
 
     # Reject when interleaved codelets do not have splitil parent
