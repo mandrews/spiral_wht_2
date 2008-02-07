@@ -37,32 +37,25 @@ def load_runtime_env
   env
 end
 
-def load_data(file, default)
-  return default unless File.exists?(file)
-
-  File.open(file,'r') do |fd|
-    begin
-      json  = JSON.load(fd)
-      raise "Initializing #{file}" unless json
-      return json
-    rescue => e 
-      puts e.message
-      return default
-    end
+def load_data(fd)
+  begin
+    json  = JSON.load(fd)
+    raise "Initializing #{file}" unless json
+    return json
+  rescue => e 
+    puts e.message
   end
 end
 
-def save_data(file, data)
-  File.open(file,'w+') do |fd|
-    fd.puts(JSON.pretty_generate(data))
-  end
+def save_data(fd, data)
+  fd.puts(JSON.pretty_generate(data))
 end
 
 def time(&blk)
   t0 = Time.now
   yield
   t1 = Time.now
-  puts t1 - t0
+  $stderr.puts t1 - t0
 end
 
 def wht_measure(plan, *args)
@@ -129,10 +122,6 @@ def wht_attach(plan, rules)
   else
     return t.chomp
   end
-end
-
-def wht_rand(size,a,b,p,q,*args)
-  `#{BIN_PATH}/wht_rand -n #{size} -a #{a} -b #{b} -p #{p} -q #{q} #{args}`.chomp
 end
 
 def count_sse_sh(plan)

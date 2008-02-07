@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+function usage() 
+{
+  echo "Usage: wht_interleave -w WHT_PLAN -k INTERLEAVE"
+  exit 1
+}
+
+path=`dirname $0`
+
+plan=''
+
+k=2
+
+while getopts "k:w:h" i; do
+  case "$i" in
+    "w") plan=$OPTARG;
+    ;;
+    "k") k=$OPTARG;
+    ;;
+    "h")
+      usage;
+    ;;
+    *)
+      usage;
+  esac
+done
+
+if [ "$plan" == "" ] ; then
+  read plan
+fi
+
+attach="${path}/../bin/wht_attach"
+
+tmp=`${attach} -w ${plan} -r splitil[small[0]]`
+
+for ((i=k;i>=2;i/=2)); do
+  arg="smallil($i)[0]"
+  tmp=`${attach} -w ${tmp} -r $arg`
+done
+
+echo ${tmp}

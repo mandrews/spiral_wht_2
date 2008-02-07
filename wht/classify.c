@@ -332,14 +332,16 @@ main(int argc, char **argv)
 #endif
 
 
-  if (plan_is_balanced(W))
-    printf("shape:  balanced\n");
-  if (plan_is_rightmost(W))
-    printf("shape:  right\n");
-  if (plan_is_leftmost(W))
-    printf("shape:  left\n");
   if (plan_is_iterative(W))
     printf("shape:  iterative\n");
+  else if (plan_is_balanced(W))
+    printf("shape:  balanced\n");
+  else if (plan_is_rightmost(W))
+    printf("shape:  right\n");
+  else if (plan_is_leftmost(W))
+    printf("shape:  left\n");
+  else
+    printf("shape:  mixed\n");
 
   wht_free(W);
   free(plan);

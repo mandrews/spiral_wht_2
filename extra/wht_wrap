@@ -1,0 +1,62 @@
+#!/usr/bin/env ruby
+
+#
+# wht_wrap
+#
+# Author: Michael Andrews <mjand@drexel.edu>
+
+$LOAD_PATH << File.dirname(__FILE__) 
+
+require 'utils'
+
+def exec(plans, cmd, fields, delim = nil)
+  plans.each do |node|
+    plan = node['plan']
+
+    t = nil
+    IO.popen(cmd,'w+') do |fd|
+      fd.puts plan
+      t = fd.gets
+    end
+
+    if t.nil?
+      $stderr.puts("Could not read: #{cmd}")
+      next
+    end
+
+    t.chomp!
+
+    a = t.split(/\s+/)
+    a.delete_if { |x| x.empty? }
+
+    if a.length != fields.length
+      $stderr.puts("Field delim mismatch: #{cmd}") 
+      next
+    end
+
+
+    a.each_index { |i| node[fields[i]] = a[i] }
+  end
+end
+
+def die
+  $stderr.puts "wht_wrap: CMD FIELDS"
+  $stderr.flush
+  exit 1
+end
+
+if $0 == __FILE__
+  begin
+    data = load_data($stdin) || []
+
+    die if ARGV.size < 2
+
+    cmd     = ARGV[0]
+    fields  = ARGV[1].split(/\s*,\s*/)
+
+    exec(data, cmd, fields)
+  ensure
+    save_data($stdout, data)
+  end
+end
+

@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+function usage() 
+{
+  echo "Usage: wht_vectorize -w WHT_PLAN -k INTERLEAVE -v VECTOR_SIZE"
+  exit 1
+}
+
+path=`dirname $0`
+
+plan=''
+
+k=2
+v=2
+
+while getopts "k:w:v:h" i; do
+  case "$i" in
+    "w") plan=$OPTARG;
+    ;;
+    "k") k=$OPTARG;
+    ;;
+    "v") v=$OPTARG;
+    ;;
+    "h")
+      usage;
+    ;;
+    *)
+      usage;
+    ;;
+  esac
+done
+
+if [ "$plan" == "" ] ; then
+  read plan
+fi
+
+attach="${path}/../bin/wht_attach"
+
+plan=`${attach} -w ${plan} -r splitil[small[0]]`
+
+args="smallv($v)[0]"
+plan=`${attach} -w ${plan} -r $args`
+
+for ((i=k;i>=2;i/=2)); do
+  args="smallv($v,$i,1)[0]"
+  plan=`${attach} -w ${plan} -r $args`
+done
+
+for ((i=k;i>=2;i/=2)); do
+  args="smallv($v,$i,0)[0]"
+  plan=`${attach} -w ${plan} -r $args`
+done
+
+echo ${plan}

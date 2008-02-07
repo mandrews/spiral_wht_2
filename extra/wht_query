@@ -62,8 +62,9 @@ if __FILE__ == $0
   file      = ARGV[0]
   selects   = (ARGV[1] || "").split(/\s*,\s*/)
 
-  data = load_data(file, [])
-
-  select(data, selects)
+  File.open(file) do |fd|
+    data = load_data(fd) 
+    select(data, selects)
+  end
 
 end

@@ -53,6 +53,7 @@ split_concurrent_rule(Wht *W)
 void 
 split_concurrent_apply(Wht *W, long S, size_t U, wht_value *x)
 {
+#ifdef WHT_HAVE_OMP
   int nn;
   long N, R, S1, Ni, i, j, k;
   Wht *Wi;
@@ -86,6 +87,9 @@ split_concurrent_apply(Wht *W, long S, size_t U, wht_value *x)
       S1 *= Ni;
     }
   }
+#else
+  wht_exit("initialization guards should prevent this message");
+#endif
 }
 
 #if 0

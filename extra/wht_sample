@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+
+#
+# wht_util
+#
+# Author: Michael Andrews <mjand@drexel.edu>
+
+$LOAD_PATH << File.dirname(__FILE__) 
+
+require 'utils'
+
+def generate(plans, samples, cmd)
+  for i in 0 .. samples
+    plan = `#{cmd}`.chomp
+    plans << { 'id' => i, 'plan' => plan }
+    $stderr.print '.'
+    $stderr.flush
+  end
+  $stderr.puts "\n"
+end
+
+def die
+  puts "wht_sample: SAMPLES ARGS"
+  exit 1
+end
+
+if $0 == __FILE__
+  die if ARGV.size < 2
+
+  samples = ARGV[0].to_i
+  cmd     = ARGV[1]
+
+  time {
+    data = []
+
+    generate(data, samples, cmd)
+
+    save_data($stdout, data)
+    $stderr.puts "total"
+  }
+end
+

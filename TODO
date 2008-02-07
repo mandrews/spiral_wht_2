@@ -44,3 +44,5 @@ Bugs:
 
   - Does not conditionally check headers xmmintrin.h, emmintrin.h
 
+  - icc 10 papi.h sys/types.h caddr_t
+
