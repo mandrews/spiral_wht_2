@@ -15,7 +15,8 @@ DEFAULT_PARAMS    = {
   :max_cache      => 2,
   :measure        => SCRIPT_PATH + '/wht_measure',
   :best_plans     => SCRIPT_PATH + '/../share/wht_best_plans.txt',
-  :subspace       => nil,
+  :pedantic       => false,
+  :verbose        => false,
   :rules          => nil,
 }
 
@@ -55,10 +56,6 @@ class Options
         "Maximum number of sub problems to store.") { |x|
         @params[:max_cache] = x }
 
-      o.on("-s", "--subspace=SPACE", String,
-        "Confine search to SPACE (presently only RIGHT supported).") { |x|
-        @params[:subspace] = x }
-
       o.on("-m", "--measure=FILE", 
         "Program to measure peformance of WHT plan.") { |x|
          @params[:measure] = x }
@@ -66,6 +63,10 @@ class Options
       o.on("-r", "--rule=SCRIPT", String,
         "Search using a rule script.") { |x|
          @params[:rules] = x }
+
+      o.on("-p", "--pedantic", 
+        "Search over both builtins and rules.") { |x|
+         @params[:pedantic] = true }
 
       o.on("-f", "--best-plans=FILE", String,
         "File to load/store the best plans found by dynamic programming.") { |x|
@@ -99,10 +100,10 @@ class Search
     @il_max         = params[:il_max]
     @vsize          = params[:vsize]
     @max_leaf       = params[:max_leaf]
-    @subspace       = params[:subspace]
     @rules          = params[:rules]
-    @max_cache         = params[:max_cache]
+    @max_cache      = params[:max_cache]
     @debug          = params[:debug]
+    @pedantic       = params[:pedantic]
 
     @best = Array.new(@max_size)
 
@@ -183,8 +184,13 @@ class Search
     end
 
     unless @rules.nil?
-      extras = plans.map { |plan| apply(plan) }
-      plans += extras
+      new_plans = plans.map { |plan| apply(plan) }
+
+      if @pedantic 
+        plans += new_plans
+      else
+        plans = new_plans
+      end
     end
 
     plans.each do |p|
@@ -351,12 +357,12 @@ if $0 == __FILE__ # Main Entry Point
     { :min_size       => opts.params[:min_size],
       :max_size       => opts.params[:max_size],
       :max_children   => opts.params[:max_children],
-      :max_leaf       => env['max_unroll'],
       :max_cache      => opts.params[:max_cache],
       :debug          => opts.params[:verbose],
+      :pedantic       => opts.params[:pedantic],
       :measure        => opts.params[:measure],
-      :subspace       => opts.params[:subspace],
       :rules          => opts.params[:rules],
+      :max_leaf       => env['max_unroll'],
     } )
 
   file  = opts.params[:best_plans] 
