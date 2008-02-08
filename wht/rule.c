@@ -133,6 +133,12 @@ rule_attach(Wht *W, const char *name, int params[], size_t n, bool is_small)
 
   for (i = 0; i < MAX_RULE_PARAMS; i++)
     W->rule->params[i] = params[i];
+
+  /* Reset the error message that may have been caused by a builtin */
+  if (W->error_msg != NULL)
+    i_free(W->error_msg);
+
+  W->error_msg = NULL;
 }
 
 void

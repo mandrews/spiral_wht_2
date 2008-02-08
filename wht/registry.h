@@ -83,6 +83,8 @@ void small_vector_rule(Wht *W);
 
 void small_right_vector_rule(Wht *W);
 
+void small_external_rule(Wht *W);
+
 static const rule 
 rule_registry[] = {
 
@@ -104,6 +106,10 @@ rule_registry[] = {
 
 #if ((WHT_VECTOR_SIZE > 0))
   SMALL_RULE_ENTRY("smallv",  1, small_right_vector_rule),
+#endif
+
+#ifdef HAVE_SPIRAL
+  SMALL_RULE_ENTRY("spiral",  0, small_external_rule),
 #endif
 
   RULE_ENTRY_END /* This halts iteration on the registry */

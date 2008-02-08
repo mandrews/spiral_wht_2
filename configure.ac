@@ -186,6 +186,47 @@ AC_DEFINE_UNQUOTED(WHT_MAX_INTERLEAVE,$interleave,
   [interleave K loop iterations in codelet])
 
 
+#
+#  S P I R A L   C O D E L E T S 
+#
+AC_ARG_WITH([spiral], 
+  [AS_HELP_STRING([--with-spiral=PATH],
+    [compile with SPIRAL unrolled codelets, PATH is location SPIRAL codelets])], 
+  [spiral_path=$withval], 
+  [spiral_path="no"])
+
+AM_CONDITIONAL(HAVE_SPIRAL, test "$spiral_path" != "no")
+
+if test "$spiral_path" != "no"; then
+  AC_DEFINE(HAVE_SPIRAL, [], [compile with SPIRAL codelets] )
+
+  if test ! -e "$spiral_path"; then
+    AC_MSG_ERROR([--spiral-path does not exist])
+  fi
+
+  case "$spiral_path" in
+  /*) abs=1;;
+  *) abs=0;;
+  esac
+
+  if test $abs = 0; then
+    AC_MSG_ERROR([--spiral-path needs to be absolute])
+  fi
+fi
+
+SPIRAL_PATH=$spiral_path
+
+AC_ARG_ENABLE([spiral_unroll], 
+  [AS_HELP_STRING([--enable-spiral-unroll=N],
+    [maximum SPIRAL unrolled codelet size (default is 6)])],
+  [spiral_unroll=$enableval], 
+  [spiral_unroll=$MAX_UNROLL])
+
+SPIRAL_UNROLL=$spiral_unroll
+
+AC_SUBST(SPIRAL_PATH)
+AC_SUBST(SPIRAL_UNROLL)
+
 
 # Checks for library functions.
 AC_FUNC_MALLOC

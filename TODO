@@ -44,5 +44,9 @@ Bugs:
 
   - Does not conditionally check headers xmmintrin.h, emmintrin.h
 
-  - icc 10 papi.h sys/types.h caddr_t
+  - icc 10 papi.h fails with header sys/types.h caddr_t
+
+  - should store extension info in a modular fashion
+
+  - should not compile uncessary targets in .codelets (waste of time)
 

@@ -65,7 +65,25 @@ if ($codelet eq "") {
 
 # Convert SPIRAL function to WHT function
 open(FD, $codelet) or die "Could not open $codelet to read.";
-print "#include \"wht.h\"";
+
+$call = "$call\_$size";
+
+print <<TEXT
+/*
+EXTERNS: {
+  extern apply_fp $call;
+}
+
+STRUCTS: {
+#ifdef HAVE_SPIRAL
+  CODELET_APPLY_ENTRY("spiral[$size]", $call),
+#endif
+}
+*/
+#include "wht.h"
+
+TEXT
+;
 
 while ($line = <FD>) {
   next if $line =~ /^#include/; # Skip SPIRAL includes
@@ -74,10 +92,10 @@ while ($line = <FD>) {
     $size = $1;
   }
 
-  $line =~ s/void WHT_(\d+).*/void $call\_$size($interface) {/;
-  $line =~ s/(double)|(float)/wht_value/;
-  $line =~ s/X/x/;
-  $line =~ s/Y/x/;
+  $line =~ s/void WHT_(\d+).*/void $call($interface) {/;
+  $line =~ s/(double)|(float)/wht_value/g;
+  $line =~ s/X\[/x\[/g;
+  $line =~ s/Y\[/x\[/g;
 
   print $line;
 }
