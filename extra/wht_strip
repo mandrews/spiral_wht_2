@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+
+#
+# wht_wrap
+#
+# Author: Michael Andrews <mjand@drexel.edu>
+
+$LOAD_PATH << File.dirname(__FILE__) 
+
+require 'utils'
+
+def strip(plans)
+  new_plans = []
+  plans.each do |cache|
+    cache.sort! { |x,y| x['time'] <=> y['time'] }
+    new_plans << cache.first
+  end
+  return new_plans
+end
+
+def die
+  $stderr.puts "wht_strip:"
+  $stderr.flush
+  exit 1
+end
+
+if $0 == __FILE__
+  begin
+    data = load_data($stdin) || []
+    data = strip(data)
+  ensure
+    save_data($stdout, data)
+  end
+end
+
