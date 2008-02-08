@@ -1,7 +1,10 @@
 /**
 \mainpage WHT Manual
 
-\attention This package and manual are still in development.
+\attention This package and manual are still in development.  A prerelease can
+be downloaded from:
+  \par
+  http://www.cs.drexel.edu/~ma53/src/spiral_wht-2.0-pre-4.tar.gz
 
 \section _overview Overview
 
