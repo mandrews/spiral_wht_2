@@ -18,6 +18,7 @@ DEFAULT_PARAMS    = {
   :pedantic       => false,
   :verbose        => false,
   :rules          => nil,
+  :log            => "/dev/null",
 }
 
 $LOAD_PATH << File.dirname(__FILE__) 
@@ -71,6 +72,10 @@ class Options
       o.on("-f", "--best-plans=FILE", String,
         "File to load/store the best plans found by dynamic programming.") { |x|
          @params[:best_plans] = x }
+
+      o.on("-d", "--log=FILE", String,
+        "File to log to.") { |x|
+         @params[:log] = x }
     end
   end
 
@@ -105,12 +110,24 @@ class Search
     @debug          = params[:debug]
     @pedantic       = params[:pedantic]
 
+    @log  = File.open(params[:log],'a')
+
     @best = Array.new(@max_size)
 
     for size in 1 .. @max_size do 
       @best[size] ||= [ { 'time' => INF, 'plan' => nil, 'id' => size} ]
     end
 
+  end
+
+  def log(msg)
+    puts msg 
+    @log.puts msg
+  end
+
+  def debug(msg)
+    puts msg if @debug
+    @log.puts msg
   end
 
   def best=(best)
@@ -135,16 +152,18 @@ class Search
   end
 
   def run
+    t0 = Time.now
     for size in @min_size .. @max_size do 
-      puts "size #{size}" if @debug
+      debug("size #{size}")
       find(size)
     end
-
+    t1 = Time.now
+    log("Total: #{t1 - t0}") 
   end
 
   def apply(plan)
     cmd = "#{@rules} -w '#{plan}'"
-    puts "Executing #{cmd}" if @debug
+    debug("Executing #{cmd}")
 
     out = nil
     IO.popen(cmd) do |fd|
@@ -152,7 +171,7 @@ class Search
     end
 
     if out.nil? 
-      puts("Could not read: #{cmd}") if @debug
+      log("Could not read: #{cmd}") 
       return nil
     else 
       return out.chomp
@@ -161,14 +180,15 @@ class Search
 
   def measure(plan)
     cmd = "#{@measure} -w '#{plan}'"
-    puts "Executing #{cmd}" if @debug
+    debug("Executing #{cmd}")
+
     out = 0
     IO.popen(cmd) do |fd|
       out = fd.gets
     end
 
     if out.nil? or out.to_f.zero?
-      puts("Could not read: #{cmd}") if @debug
+      debug("Could not read: #{cmd}") 
       return INF
     else 
       return out.to_f
@@ -204,7 +224,7 @@ class Search
             @best[size].delete(x) # Remove old best
           end
 
-          puts "New Best for #{size} with T=#{t} (T'=#{tp}): #{p}"
+          log "New Best for #{size} with T=#{t} (T'=#{tp}): #{p}"
           @best[size] << { 'id' => size, 'time' => t, 'plan' => p }
           break
         end
@@ -362,6 +382,7 @@ if $0 == __FILE__ # Main Entry Point
       :pedantic       => opts.params[:pedantic],
       :measure        => opts.params[:measure],
       :rules          => opts.params[:rules],
+      :log            => opts.params[:log],
       :max_leaf       => env['max_unroll'],
     } )
 
@@ -377,7 +398,7 @@ if $0 == __FILE__ # Main Entry Point
   begin
     dp.run
   rescue Interrupt
-    puts "Saving ... "
+    log("Saving ... ")
   ensure
     File.open(file,'w+') do |fd|
       save_data(fd, dp.best)
