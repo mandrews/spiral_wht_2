@@ -9,8 +9,9 @@ $LOAD_PATH << File.dirname(__FILE__)
 
 require 'utils'
 
-def exec(plans, cmd, fields, delim = nil)
+def exec(plans, cmd, fields, sizes = nil)
   plans.each do |node|
+    next if not sizes.nil? and not sizes.include?(node['id'].to_i)
     plan = node['plan']
 
     t = nil
@@ -34,7 +35,6 @@ def exec(plans, cmd, fields, delim = nil)
       next
     end
 
-
     a.each_index { |i| node[fields[i]] = a[i] }
   end
 end
@@ -53,8 +53,9 @@ if $0 == __FILE__
 
     cmd     = ARGV[0]
     fields  = ARGV[1].split(/\s*,\s*/)
+    sizes   = ARGV[2] ? eval(ARGV[2]) : nil
 
-    exec(data, cmd, fields)
+    exec(data, cmd, fields, sizes)
   ensure
     save_data($stdout, data)
   end

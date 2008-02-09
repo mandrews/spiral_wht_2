@@ -32,6 +32,7 @@ install-exec-local:
 	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_update $(prefix)/extra
 	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_wrap $(prefix)/extra
 	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_sample $(prefix)/extra
+	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_strip $(prefix)/extra
 	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_interleave $(prefix)/extra
 	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_vectorize $(prefix)/extra
 	$(top_srcdir)/install-sh $(top_srcdir)/extra/utils.rb $(prefix)/extra

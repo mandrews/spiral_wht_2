@@ -220,7 +220,7 @@ class Search
         tp = x['time']
         if t < tp 
 
-          if @best[size].size > @max_cache
+          if @best[size].size >= @max_cache
             @best[size].delete(x) # Remove old best
           end
 
@@ -237,10 +237,13 @@ class Search
 
     plans = []
 
+    @best[size].sort! { |x,y| x['time'] <=> y['time'] }
+
     @best[size].each do |x|
       next if x['time'] == INF
       next if x['plan'].nil?
       plans << x['plan']
+      break if plans.size >= @max_cache
     end
 
     return plans
@@ -398,7 +401,7 @@ if $0 == __FILE__ # Main Entry Point
   begin
     dp.run
   rescue Interrupt
-    log("Saving ... ")
+    puts "Saving ... "
   ensure
     File.open(file,'w+') do |fd|
       save_data(fd, dp.best)
