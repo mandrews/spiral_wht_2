@@ -36,6 +36,8 @@ def exec(plans, cmd, fields, sizes = nil)
     end
 
     a.each_index { |i| node[fields[i]] = a[i] }
+    $stderr.print '.'
+    $stderr.flush
   end
 end
 

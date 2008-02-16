@@ -25,7 +25,7 @@ def select(plans, selects)
   puts "% HOSTNAME #{hostname}"
   puts "% SELECT : " + selects.join(', ')
 
-  out = {}
+  out = []
 
   plans.each do |node|
     id = node['id'].to_i
@@ -42,11 +42,11 @@ def select(plans, selects)
       end
     end
 
-    out[id] = row
+    out <<  row
 
   end
 
-  out.sort.each do |id, value|
+  out.each do |value|
     puts value.join(' ') unless value.empty?
   end
 end
