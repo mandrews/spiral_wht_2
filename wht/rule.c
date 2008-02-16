@@ -142,18 +142,22 @@ rule_attach(Wht *W, const char *name, int params[], size_t n, bool is_small)
 }
 
 void
-rule_attach_recursive(Wht *W, const char *name, int params[], size_t n, bool is_small)
+rule_attach_recursive(Wht *W, const char *name, int params[], size_t n, bool is_small, double p)
 {
   int i;
+  double r;
+
+  r = ((double) random())/RAND_MAX;
 
   if ((strcmp(W->rule->name, "small") == 0) || (strcmp(W->rule->name, "split") == 0))
-    rule_attach(W, name, params, n, is_small);
+    if (r <= p)
+      rule_attach(W, name, params, n, is_small);
 
   if (W->children == NULL)
     return;
 
   for (i = 0; i < W->children->nn; i++)
-    rule_attach_recursive(W->children->Ws[i], name, params, n, is_small);
+    rule_attach_recursive(W->children->Ws[i], name, params, n, is_small, p);
 }
 
 void
@@ -193,7 +197,7 @@ rule_attach_undo_recursive(Wht *W)
 }
 
 void
-rule_eval_from_string(Wht *W, char *rule)
+rule_eval_from_string(Wht *W, char *rule, double p)
 {
   if (rule == NULL)
     return;
@@ -211,10 +215,12 @@ rule_eval_from_string(Wht *W, char *rule)
   n           = R->rule->n;
   is_small    = (bool) (R->children == NULL);
 
+  srandom((unsigned int) (getpid() * M_PI));
+
   /* Backtrack any previous errors */
   rule_attach_undo_recursive(W);
   /* Attach rule to all nodes*/
-  rule_attach_recursive(W, name, params, n, is_small);
+  rule_attach_recursive(W, name, params, n, is_small, p);
   /* Eval rules */
   rule_eval(W);
   /* Backtrack when error occurs */

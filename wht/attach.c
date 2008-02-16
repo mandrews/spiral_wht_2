@@ -49,22 +49,27 @@ int
 main(int argc, char **argv)
 {
   char *plan, *rule;
+  double p;
   size_t len;
   int c;
 
   plan  = NULL;
   rule  = NULL;
+  p     = 1.0;
   len   = 0;
 
   opterr = 0;
 
-  while ((c = getopt (argc, argv, "hvw:r:")) != -1)
+  while ((c = getopt (argc, argv, "hvw:r:p:")) != -1)
     switch (c) {
       case 'w':
         plan = optarg;
         break;
       case 'r':
         rule = optarg;
+        break;
+      case 'p':
+        p = atof(optarg);
         break;
       case 'h':
         usage();
@@ -85,7 +90,7 @@ main(int argc, char **argv)
 
   W = wht_parse(plan);
 
-  rule_eval_from_string(W, rule);
+  rule_eval_from_string(W, rule, p);
 
   if (wht_error_msg(W) != NULL) {
     fprintf(stderr, "rejected, %s\n", wht_error_msg(W));

@@ -414,7 +414,7 @@ void rule_eval(Wht *W);
  * \param W         Root of WHT plan
  * \param rule      Rule string
  */
-void rule_eval_from_string(Wht *W, char *rule);
+void rule_eval_from_string(Wht *W, char *rule, double p);
 
 
 
