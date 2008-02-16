@@ -18,6 +18,8 @@ DEFAULT_PARAMS    = {
   :pedantic       => false,
   :verbose        => false,
   :rules          => nil,
+  :smalls         => [],
+  :splits         => [],
   :log            => "/dev/null",
 }
 
@@ -65,6 +67,14 @@ class Options
         "Search using a rule script.") { |x|
          @params[:rules] = x }
 
+      o.on("--splits=S1;S2;...;SN", String,
+        "Search using split rules.") { |x|
+         @params[:splits] = x.split(/\s*;\s*/) }
+
+      o.on("--smalls=S1;S2;...;SN", String,
+        "Search using small rules.") { |x|
+         @params[:smalls] = x.split(/\s*;\s*/) }
+
       o.on("-p", "--pedantic", 
         "Search over both builtins and rules.") { |x|
          @params[:pedantic] = true }
@@ -107,8 +117,15 @@ class Search
     @max_leaf       = params[:max_leaf]
     @rules          = params[:rules]
     @max_cache      = params[:max_cache]
+    @splits         = params[:splits]
+    @smalls         = params[:smalls]
     @debug          = params[:debug]
     @pedantic       = params[:pedantic]
+
+    if not @rules.nil? and (not @smalls.empty? or not @splits.empty?)
+      puts "Cannot use WHT tree rule and codelet rules"
+      exit
+    end
 
     @log  = File.open(params[:log],'a')
 
@@ -213,7 +230,7 @@ class Search
       end
     end
 
-    plans.each do |p|
+    plans.uniq.each do |p|
       t = measure(p)
 
       @best[size].each do |x| 
@@ -255,7 +272,11 @@ class Search
       if z > @max_leaf
         tmp << find_best(z) 
       else
-        tmp << ["small[#{z}]"]
+        s = ["small[#{z}]"]
+        @smalls.each do |id|
+          s << "#{id}[#{z}]"
+        end
+        tmp << s
       end
     end
 
@@ -264,6 +285,9 @@ class Search
       s = s.to_a
       if s.size > 1
         plans << "split[" + s.join(',') + "]"
+        @splits.each do |id|
+          plans << "#{id}[" + s.join(',') + "]"
+        end
       else
         plans << s.first
       end
@@ -385,6 +409,8 @@ if $0 == __FILE__ # Main Entry Point
       :pedantic       => opts.params[:pedantic],
       :measure        => opts.params[:measure],
       :rules          => opts.params[:rules],
+      :splits         => opts.params[:splits],
+      :smalls         => opts.params[:smalls],
       :log            => opts.params[:log],
       :max_leaf       => env['max_unroll'],
     } )
