@@ -195,6 +195,24 @@ class Search
     end
   end
 
+  def vet(plan)
+    cmd = "#{SCRIPT_PATH}/../bin/wht_attach -w '#{plan}'"
+    debug("Executing #{cmd}")
+
+    out = nil
+    IO.popen(cmd) do |fd|
+      out = fd.gets
+    end
+
+    if out.nil? 
+      log("Could not read: #{cmd}") 
+      return nil
+    else 
+      return out.chomp
+    end
+  end
+
+
   def measure(plan)
     cmd = "#{@measure} -w '#{plan}'"
     debug("Executing #{cmd}")
@@ -229,6 +247,9 @@ class Search
         plans = new_plans
       end
     end
+
+    plans.map! { |x| vet(x) }
+    plans.reject! { |x| x.nil? }
 
     plans.uniq.each do |p|
       t = measure(p)
@@ -296,13 +317,6 @@ class Search
     return plans
   end
 end
-
-# To generate compositions with elements >= MIN
-#   1) verify that MIN | n i.e n % min == 0
-#   2) set m = n / MIN, and generate compositions
-#   3) multiply each m_i by MIN
-#
-# Similarly for elements <= MAX
 
 # Generate (enumerate) all k combinations of n
 # See http://home.att.net/~srschmitt/script_combinations.html

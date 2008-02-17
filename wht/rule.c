@@ -200,7 +200,7 @@ void
 rule_eval_from_string(Wht *W, char *rule, double p)
 {
   if (rule == NULL)
-    return;
+    return rule_attach_undo_recursive(W);
 
   Wht *R;
   R = parse(rule);
