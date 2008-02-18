@@ -118,6 +118,22 @@ if test "$have_omp" = "yes"; then
   LIBS="$LIBS -lgomp"
 fi
 
+
+# 
+#  D D L
+# 
+AC_ARG_ENABLE([ddl], 
+  [AS_HELP_STRING([--enable-ddl],
+    [DDL optimizations (default is disabled)])],
+  [have_ddl=$enableval], 
+  [have_ddl=no])
+
+if test "$have_ddl" = "yes"; then
+	AC_DEFINE(WHT_WITH_DDL,1,
+    [define to enable DDL optimizations.])
+fi
+
+
 # 
 #  V E C T O R I Z A T I O N
 # 

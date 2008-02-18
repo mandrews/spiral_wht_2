@@ -71,3 +71,12 @@ i_itoa(int i)
   return buf;
 }
 
+/*
+ * From: http://graphics.stanford.edu/~seander/bithacks.html#DetermineIfPowerOf2
+ */
+inline
+bool
+i_power_of_2(int v)
+{
+  return (!(v & (v - 1)) && v);
+}

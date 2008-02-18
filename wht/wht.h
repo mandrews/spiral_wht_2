@@ -165,7 +165,7 @@ struct Wht {
   size_t right;
     /**< \R in \I_L_X_W_N_I_R */
 
-  split_children * children; 
+  split_children *children; 
     /**< Pointer to child nodes, should not be allocated unless node is a split node */
 
   char *to_string; 
@@ -230,7 +230,7 @@ void i_free(void *p);
  */
 char * i_itoa(int i);
 
-
+bool i_power_of_2(int v);
 
 
 /*
