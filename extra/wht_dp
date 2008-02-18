@@ -8,11 +8,19 @@
 
 SCRIPT_PATH       = File.dirname(__FILE__) 
 SCRIPT_NAME       = 'wht_dp'
+
+$LOAD_PATH << File.dirname(__FILE__) 
+
+require "utils"
+
 DEFAULT_PARAMS    = {
   :min_size       => 1,
   :max_size       => 15,
   :max_children   => 2,
   :max_cache      => 2,
+  :max_depth      => INF,
+  :max_extent     => INF,
+  :shapes         => ['right', 'left', 'iterative', 'balanced', 'mixed'],
   :measure        => SCRIPT_PATH + '/wht_measure',
   :best_plans     => SCRIPT_PATH + '/../share/wht_best_plans.txt',
   :pedantic       => false,
@@ -22,10 +30,6 @@ DEFAULT_PARAMS    = {
   :splits         => [],
   :log            => "/dev/null",
 }
-
-$LOAD_PATH << File.dirname(__FILE__) 
-
-require "utils"
 
 class Options
   require 'optparse'
@@ -54,6 +58,18 @@ class Options
       o.on("-k", "--max-children=CHILDREN", Integer,
         "Maximum number of children to allow on a split node.") { |x|
         @params[:max_children] = x }
+
+      o.on("--max-depth=DEPTH", Integer,
+        "Maximum depth of WHT trees.") { |x|
+        @params[:max_depth] = x }
+
+      o.on("--max-extent=DEPTH", Integer,
+        "Maximum extent of WHT trees.") { |x|
+        @params[:max_extent] = x }
+
+      o.on("--shapes=S1,S2,..,SN", Array,
+        "Possible shapes of WHT trees.") { |x|
+        @params[:shapes] = x }
 
       o.on("-x", "--max-cache=SIZE", Integer,
         "Maximum number of sub problems to store.") { |x|
@@ -102,7 +118,6 @@ class Options
       die(e.message)
     end
   end
-
 end
 
 class Search
@@ -111,12 +126,15 @@ class Search
     @min_size       = params[:min_size]
     @max_size       = params[:max_size]
     @max_children   = params[:max_children]
+    @max_cache      = params[:max_cache]
+    @max_depth      = params[:max_depth]
+    @max_extent     = params[:max_extent]
+    @shapes         = params[:shapes]
     @measure        = params[:measure]
     @il_max         = params[:il_max]
     @vsize          = params[:vsize]
     @max_leaf       = params[:max_leaf]
     @rules          = params[:rules]
-    @max_cache      = params[:max_cache]
     @splits         = params[:splits]
     @smalls         = params[:smalls]
     @debug          = params[:debug]
@@ -195,6 +213,45 @@ class Search
     end
   end
 
+  def classify(plan)
+    cmd = "#{SCRIPT_PATH}/../bin/wht_classify -w '#{plan}'"
+    debug("Executing #{cmd}")
+
+    out = nil
+    IO.popen(cmd) do |fd|
+      while (out = fd.gets)
+
+      end
+    end
+
+    if out.nil? 
+      log("Could not read: #{cmd}") 
+      return nil
+    else 
+      return out.chomp
+    end
+  end
+
+  def classify(plan)
+    cmd = "#{SCRIPT_PATH}/../bin/wht_classify -w '#{plan}'"
+    debug("Executing #{cmd}")
+
+    out = 0
+    IO.popen(cmd) do |fd|
+      out = fd.readlines
+    end
+  
+    h = {}
+    out.each do |line|
+      k,v = line.split(/\s*:\s*/)
+      h[k] = v.chomp
+    end
+  
+    log("Could not read: #{cmd}") if h.empty?  
+  
+    return h
+  end
+
   def vet(plan)
     cmd = "#{SCRIPT_PATH}/../bin/wht_attach -w '#{plan}'"
     debug("Executing #{cmd}")
@@ -211,7 +268,6 @@ class Search
       return out.chomp
     end
   end
-
 
   def measure(plan)
     cmd = "#{@measure} -w '#{plan}'"
@@ -248,8 +304,19 @@ class Search
       end
     end
 
+    log("Space size for #{size}: #{plans.size}")
+
     plans.map! { |x| vet(x) }
-    plans.reject! { |x| x.nil? }
+    plans.uniq!
+
+    plans.reject! do |p|
+      attrs = classify(p)
+      attrs['depth'].to_i > @max_depth or
+        (attrs['extent'].to_i > @max_extent) or
+        (not @shapes.include?(attrs['shape']))
+    end
+
+    log("Subspace size for #{size}: #{plans.size}")
 
     plans.uniq.each do |p|
       t = measure(p)
@@ -419,6 +486,9 @@ if $0 == __FILE__ # Main Entry Point
       :max_size       => opts.params[:max_size],
       :max_children   => opts.params[:max_children],
       :max_cache      => opts.params[:max_cache],
+      :max_depth      => opts.params[:max_depth],
+      :max_extent     => opts.params[:max_extent],
+      :shapes         => opts.params[:shapes],
       :debug          => opts.params[:verbose],
       :pedantic       => opts.params[:pedantic],
       :measure        => opts.params[:measure],
