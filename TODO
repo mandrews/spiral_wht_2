@@ -13,8 +13,6 @@ TODO:
 
   - More Perl test targets
 
-  - Shell scripts for interleaving and vectorization (wrap wht_attach)
-
   - Doxygen man page generation
 
   - Utilize Doxygen \internal flag
@@ -29,6 +27,10 @@ TODO:
 
   - Flag to reset count SSE cache
 
+  - Allow PAPI native events
+
+  - Investigate accuracy / precision of time.h:clock_getres CLOCK_PROCESS_CPUTIME_ID
+
 Bugs:
 
   - Some minor memory leak issues with parser.y
@@ -37,8 +39,7 @@ Bugs:
   - File parser.y should set wht_error when it cannot find a transform in the registry
     instead of displaying syntax error
 
-  - Plans of the form split[split[ ... ] ] need to be rejected by grammar
-    - NO, this just corresponds to a blocking factorization
+  - Plans of the form split[split[ ... ] ] should be rejected by grammar
 
 	- Does not install html manual to share ($htmldir)
 
