@@ -441,7 +441,18 @@ void error_msg_set(Wht *W, char *format, ...);
  */
 char * error_msg_get(Wht *W);
 
+unsigned int plan_extent(Wht *W);
+unsigned int plan_depth(Wht *W);
+unsigned int plan_min_width(Wht *W);
+unsigned int plan_max_width(Wht *W);
+unsigned int plan_min_size(Wht *W);
+unsigned int plan_max_size(Wht *W);
 
+/** \todo Replace these with plan_shape, and shape enum */
+bool plan_is_iterative(Wht *W);
+bool plan_is_rightmost(Wht *W);
+bool plan_is_leftmost(Wht *W);
+bool plan_is_balanced(Wht *W);
 
 /*
  * External Macro Interfaces

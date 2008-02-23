@@ -13,7 +13,7 @@ AM_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/wht/codelets
 
 SUBDIRS = codelets 
 
-libwht_la_SOURCES = node.c direct.c small.c split.c utils.c wht.c rule.c \
+libwht_la_SOURCES = node.c direct.c small.c split.c utils.c wht.c rule.c features.c \
 										scanner.l parser.y $(EXTENSION_FILES)
 
 lib_LTLIBRARIES = libwht.la

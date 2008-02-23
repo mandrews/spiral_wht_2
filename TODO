@@ -30,6 +30,12 @@ TODO:
 
   - Investigate accuracy / precision of time.h:clock_getres CLOCK_PROCESS_CPUTIME_ID
 
+	- Make nomenclature uniform, e.g.
+		wht_attach -> wht_rule
+		plan -> tree
+		factors, degree, width -> ?
+		leaf, size, node -> size
+
 Bugs:
 
   - Some minor memory leak issues with parser.y
