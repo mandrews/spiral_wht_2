@@ -50,7 +50,9 @@ usage()
   printf("    -p MIN_E      Minimum element in composition.\n");
   printf("    -q MAX_E      Maximum element in composition.\n");
   printf("    -u UNSTRICT   Generate WHT trees that cannot be executed in current configuration.\n");
+#if 0
   printf("    -t TYPE       Type of WHT to generate (DEFAULT \"general\").\n");
+#endif
   exit(1);
 }
 
@@ -179,12 +181,11 @@ determine if the algorithm should be recursively applied.
     -h            Show this help message.
     -v            Show build information.
     -n SIZE       Total size of random composition.
-    -a MIN        Minimum number of factors in composition.
-    -b MAX        Maximum number of factors in composition.
-    -p MIN        Minimum element in composition.
-    -q MAX        Maximum element in composition.
+    -a MIN_F      Minimum number of factors in composition.
+    -b MAX_F      Maximum number of factors in composition.
+    -p MIN_E      Minimum element in composition.
+    -q MAX_E      Maximum element in composition.
     -u UNSTRICT   Generate WHT trees that cannot be executed in current configuration.
-    -t TYPE       Type of WHT to generate (DEFAULT "general").
 \endverbatim
 
 \section _examples EXAMPLES

@@ -33,6 +33,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#define min(a,b) ((a < b) ? (a) : (b))
 #define max(a,b) ((a > b) ? (a) : (b))
 
 unsigned int
@@ -68,7 +69,7 @@ plan_depth(Wht *W)
 }
 
 unsigned int
-plan_width(Wht *W)
+plan_min_width(Wht *W)
 {
   int i;
   unsigned int nn, mn;
@@ -80,43 +81,66 @@ plan_width(Wht *W)
   mn = nn;
 
   for (i = 0; i < nn; i++) 
-    mn = max(mn, plan_width(W->children->Ws[i]));
+    mn = min(mn, plan_min_width(W->children->Ws[i]));
+
+  return mn;
+}
+
+unsigned int
+plan_max_width(Wht *W)
+{
+  int i;
+  unsigned int nn, mn;
+
+  if (W->children == NULL)
+    return 1;
+
+  nn = W->children->nn;
+  mn = nn;
+
+  for (i = 0; i < nn; i++) 
+    mn = max(mn, plan_max_width(W->children->Ws[i]));
+
+  return mn;
+}
+
+unsigned int
+plan_min_size(Wht *W)
+{
+  int i;
+  unsigned int nn, mn;
+
+  if (W->children == NULL)
+    return W->n;
+
+  nn = W->children->nn;
+  mn = W->n;
+
+  for (i = 0; i < nn; i++) 
+    mn = min(mn, plan_min_size(W->children->Ws[i]));
+
+  return mn;
+}
+
+unsigned int
+plan_max_size(Wht *W)
+{
+  int i;
+  unsigned int nn, mn;
+
+  if (W->children == NULL)
+    return W->n;
+
+  nn = W->children->nn;
+  mn = 0;
+
+  for (i = 0; i < nn; i++) 
+    mn = max(mn, plan_max_size(W->children->Ws[i]));
 
   return mn;
 }
 
 #if 0
-unsigned int
-plan_last_size(Wht *W)
-{
-  Wht *Wi;
-  unsigned int rs;
-
-  Wi = W;
-  while (Wi->children != NULL) {
-    Wi = Wi->children->Ws[0];
-  }
-
-  rs = Wi->n;
-
-  return rs;
-}
-
-unsigned int
-plan_first_size(Wht *W)
-{
-  size_t nn;
-  unsigned int fs;
-
-  if (W->children == NULL) 
-    return W->n;
-
-  nn = W->children->nn;
-  fs = W->children->Ws[nn - 1]->n;
-
-  return fs;
-}
-
 int
 plan_attrs(Wht *W, size_t attr)
 {
@@ -269,6 +293,9 @@ plan_is_balanced(Wht *W)
   return accept;
 }
 
+#undef min
+#undef max
+
 static void
 usage() 
 {
@@ -321,9 +348,12 @@ main(int argc, char **argv)
     exit(1);
   }
 
-  printf("depth:  %u\n", plan_depth(W));
-  printf("extent: %u\n", plan_extent(W));
-  printf("width:  %u\n", plan_width(W));
+  printf("depth:        %u\n", plan_depth(W));
+  printf("extent:       %u\n", plan_extent(W));
+  printf("min_width:    %u\n", plan_min_width(W));
+  printf("max_width:    %u\n", plan_max_width(W));
+  printf("min_size:     %u\n", plan_min_size(W));
+  printf("max_size:     %u\n", plan_max_size(W));
 #if 0
   unsigned int n = plan_extent(W);
 
@@ -333,15 +363,15 @@ main(int argc, char **argv)
 
 
   if (plan_is_iterative(W))
-    printf("shape:  iterative\n");
+    printf("shape:        iterative\n");
   else if (plan_is_balanced(W))
-    printf("shape:  balanced\n");
+    printf("shape:        balanced\n");
   else if (plan_is_rightmost(W))
-    printf("shape:  right\n");
+    printf("shape:        right\n");
   else if (plan_is_leftmost(W))
-    printf("shape:  left\n");
+    printf("shape:        left\n");
   else
-    printf("shape:  mixed\n");
+    printf("shape:        mixed\n");
 
   wht_free(W);
   free(plan);
@@ -373,30 +403,39 @@ A balanced WHT plan
 
 \verbatim
 wht_classify -w 'split[split[small[1],small[2]],split[small[1],small[4]]]'
-depth:  3
-extent: 4
-width:  2
-shape:  balanced
+depth:        3
+extent:       4
+min_width:    1
+max_width:    2
+min_size:     1
+max_size:     4
+shape:        balanced
 \endverbatim
 
 A leftmost WHT plan
 
 \verbatim
 wht_classify -w 'split[split[small[1],small[1]],small[1]]'
-depth:  3
-extent: 3
-width:  2
-shape:  left
+depth:        3
+extent:       3
+min_width:    1
+max_width:    2
+min_size:     1
+max_size:     1
+shape:        left
 \endverbatim
 
 A rightmost WHT plan
 
 \verbatim
 wht_classify -w 'split[small[1],split[small[1],small[1]]]'
-depth:  3
-extent: 3
-width:  2
-shape:  right
+depth:        3
+extent:       3
+min_width:    1
+max_width:    2
+min_size:     1
+max_size:     1
+shape:        right
 \endverbatim
 
 */

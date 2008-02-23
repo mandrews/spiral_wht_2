@@ -12,6 +12,7 @@ TODO:
   - Retooled version of Genetic Algorithm Search
 
   - More Perl test targets
+    - Use wht_rand in conjunction with wht_classify
 
   - Doxygen man page generation
 
