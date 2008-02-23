@@ -103,6 +103,8 @@ split_init(Wht *Ws[], size_t nn)
     left  /= Ws[i]->N;
   }
 
+  W->to_string = node_to_string(W);
+
   return W;
 }
 

@@ -37,12 +37,14 @@ small_init(size_t n)
   W            = node_init(n, "small");
   W->apply     = NULL; /* Ensure that null_apply is overridden */
   W->apply     = codelet_apply_lookup(W);
+  W->to_string = node_to_string(W);
 
   if (n > WHT_MAX_UNROLL)
     error_msg_set(W, "not configured for unrolled codelets of size %zd", n);
 
   if (W->apply == NULL)
     error_msg_set(W, "could not find codelet");
+
 
   return W;  
 }

@@ -17,8 +17,6 @@ TODO:
 
   - Utilize Doxygen \internal flag
 
-  - Flag to allow wht_rand to construct trees outside compile time parameters
-
   - Add PAPI instruction count interpolation to Instruction Count Model
 
   - Integrate these lists inside Doxgen comments

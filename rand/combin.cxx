@@ -399,18 +399,30 @@ combin_to_compos(uint n, combin *cmb)
 
 #define elem_min(a,b) ((a < b) ? a : b)
 
+/*
+ * Generate a random composition by first generating a random composition of
+ * lesser degree.  If there is a minimum element in the composition, generate a
+ * random composition shifted by p (e.g. in n/p) and map back to n.
+ */
 compos *
-compos_rand(uint n, uint a, uint b)
+compos_rand(uint n, uint a, uint b, uint p = 1)
 {
   combin *cmb_a;
   compos *cmp_a;
+  combin::iterator cmb_i;
   uint np, ap, bp;
 
-  np = n - 1;
+  np = (n / p) - 1;  /* Shift into n/p */
+
   ap = elem_min(np, a - 1);
   bp = elem_min(np, b - 1);
 
   cmb_a = combin_rand(np, ap, bp);
+
+  /* Map back to n */
+  for (cmb_i = cmb_a->begin(); cmb_i != cmb_a->end(); ++cmb_i)
+    *cmb_i *= p;
+
   cmp_a = combin_to_compos(n, cmb_a);
 
   delete cmb_a;
@@ -419,9 +431,6 @@ compos_rand(uint n, uint a, uint b)
 
 #undef elem_min
 
-/* \note Broken, I have an idea about shifting by dividing by minimum element,
- * and normalizing again.
- */
 compos_node *
 compos_tree_rand(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
 {
@@ -449,10 +458,12 @@ compos_tree_rand(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
   if (n >= max_n && min_f < 2) 
     min_f = 2;
 
-  cmp = compos_rand(n, min_f, max_f);
+  cmp = compos_rand(n, min_f, max_f, min_n);
 
-  if (cmp->size() == 1) /* One element in composition => no children */
+  if (cmp->size() == 1) { /* One element in composition => no children */
+    delete cmp;
     return cpn;
+  }
 
   cpn->children->resize(cmp->size());
 
@@ -464,6 +475,7 @@ compos_tree_rand(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
   return cpn;
 }
 
+#if 0
 compos_node *
 compos_tree_rand_right(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
 {
@@ -531,6 +543,7 @@ compos_tree_rand_right(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
 
   return cpn;
 }
+#endif
 
 void
 compos_tree_free(compos_node *cpn)

@@ -30,6 +30,7 @@ extern "C" {
 
 #include "combin.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -44,10 +45,11 @@ usage()
   printf("    -h            Show this help message.\n");
   printf("    -v            Show build information.\n");
   printf("    -n SIZE       Total size of random composition.\n");
-  printf("    -a MIN        Minimum number of factors in composition.\n");
-  printf("    -b MAX        Maximum number of factors in composition.\n");
-  printf("    -p MIN        Minimum element in composition.\n");
-  printf("    -q MAX        Maximum element in composition.\n");
+  printf("    -a MIN_F      Minimum number of factors in composition.\n");
+  printf("    -b MAX_F      Maximum number of factors in composition.\n");
+  printf("    -p MIN_E      Minimum element in composition.\n");
+  printf("    -q MAX_E      Maximum element in composition.\n");
+  printf("    -u UNSTRICT   Generate WHT trees that cannot be executed in current configuration.\n");
   printf("    -t TYPE       Type of WHT to generate (DEFAULT \"general\").\n");
   exit(1);
 }
@@ -57,6 +59,7 @@ main(int argc, char **argv)
 {
   size_t wht_size, min_child, max_child, min_leaf, max_leaf;
   char *wht_type;
+  bool strict;
 
   int c;
 
@@ -69,8 +72,9 @@ main(int argc, char **argv)
   min_leaf  = 1;
   max_leaf  = WHT_MAX_UNROLL;
   wht_type  = NULL;
+  strict    = true;
 
-  while ((c = getopt (argc, argv, "hvn:a:b:p:q:t:")) != -1)
+  while ((c = getopt (argc, argv, "hvn:a:b:p:q:t:u")) != -1)
     switch (c) {
       case 'n':
         wht_size = atoi(optarg);
@@ -90,6 +94,9 @@ main(int argc, char **argv)
       case 't':
         wht_type = optarg;
         break;
+      case 'u':
+        strict = false;
+        break;
       case 'h':
         usage();
       case 'v':
@@ -103,12 +110,17 @@ main(int argc, char **argv)
     usage();
 
   if (min_leaf < 1) {
-    printf("-a MIN_NODE too small.\n");
+    printf("-a MIN_E too small.\n");
     exit(1);
   }
 
-  if (max_leaf > WHT_MAX_UNROLL) {
-    printf("-b MAX_NODE cannot be larger than %d.\n", WHT_MAX_UNROLL);
+  if ((min_leaf > WHT_MAX_UNROLL) && strict) {
+    printf("-a MIN_E cannot be larger than %d.\n", WHT_MAX_UNROLL);
+    exit(1);
+  }
+
+  if ((max_leaf > WHT_MAX_UNROLL) && strict) {
+    printf("-b MAX_E cannot be larger than %d.\n", WHT_MAX_UNROLL);
     exit(1);
   }
 
@@ -119,22 +131,27 @@ main(int argc, char **argv)
   }
 
   compos_node *root;
-  char *buf;
+  Wht *W;
 
   srandom((unsigned int) (getpid() * M_PI));
 
   root = NULL;
 
+  root = compos_tree_rand(wht_size, min_child, max_child, min_leaf, max_leaf);
+#if 0
   if (wht_type == NULL || (strcmp(wht_type, "general") == 0))
     root = compos_tree_rand(wht_size, min_child, max_child, min_leaf, max_leaf);
   else if (strcmp(wht_type, "right") == 0)
     root = compos_tree_rand_right(wht_size, min_child, max_child, min_leaf, max_leaf);
+#endif
 
-  buf = compos_tree_to_string(root);
-  printf("%s\n", buf);
+
+  W = compos_tree_to_wht(root);
+  assert(W->n == ((long) wht_size));
+  printf("%s\n", W->to_string);
 
   compos_tree_free(root);
-  free(buf);
+  wht_free(W);
 
   return 0;
 }
@@ -166,16 +183,36 @@ determine if the algorithm should be recursively applied.
     -b MAX        Maximum number of factors in composition.
     -p MIN        Minimum element in composition.
     -q MAX        Maximum element in composition.
+    -u UNSTRICT   Generate WHT trees that cannot be executed in current configuration.
     -t TYPE       Type of WHT to generate (DEFAULT "general").
 \endverbatim
 
 \section _examples EXAMPLES
 
-Generate a randome WHT plan of size 8 with a width of 2 (e.g a random binary tree of size 8).
+Generate a random WHT plan of size 8 with a width of 2 (e.g a random binary tree of size 8).
 \verbatim
 wht_rand -n 8 -b 2
 split[small[2],split[small[3],split[small[1],split[small[1],small[1]]]]]
 \endverbatim
+
+Generate a random WHT plan of size 17 with nodes of at least size 2 and at most size 4.
+\verbatim
+wht_rand -p 2 -q 4 -n 17
+split[small[2],small[2],small[2],small[2],split[split[small[2],small[2]],split[small[2],small[3]]]]
+\endverbatim
+
+Generate a random WHT plan of size 25 with nodes of at least size 10.
+\verbatim
+wht_rand -p 10 -n 25 
+-a MIN_E cannot be larger than 8.
+\endverbatim
+
+Since the package has not been configured for this large of a codelet, use the UNSTRICT flag.
+\verbatim
+wht_rand -p 10 -n 25 -u
+split[small[10],small[15]]
+\endverbatim
+
 
 */
 #endif/*DOXYGEN_MAN_MODE*/
