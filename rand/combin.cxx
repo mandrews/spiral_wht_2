@@ -405,14 +405,17 @@ combin_to_compos(uint n, combin *cmb)
  * random composition shifted by p (e.g. in n/p) and map back to n.
  */
 compos *
-compos_rand(uint n, uint a, uint b, uint p = 1)
+compos_rand(uint n, uint a, uint b, uint p, uint q)
 {
   combin *cmb_a;
   compos *cmp_a;
   combin::iterator cmb_i;
   uint np, ap, bp;
 
-  np = (n / p) - 1;  /* Shift into n/p */
+  /* Shift to n/p, determine p to fit other constraints */
+  do {
+    np = (n/p) - 1;
+  } while ((np == 0) && n >= q && --p);
 
   ap = elem_min(np, a - 1);
   bp = elem_min(np, b - 1);
@@ -458,7 +461,7 @@ compos_tree_rand(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
   if (n >= max_n && min_f < 2) 
     min_f = 2;
 
-  cmp = compos_rand(n, min_f, max_f, min_n);
+  cmp = compos_rand(n, min_f, max_f, min_n, max_n);
 
   if (cmp->size() == 1) { /* One element in composition => no children */
     delete cmp;
