@@ -30,6 +30,7 @@
 
 extern double invnorm(double p);
 
+#if 1
 #include <sys/types.h>
 #include <sys/resource.h>
 
@@ -43,6 +44,60 @@ cputime()
 
   return ((double) rus.ru_utime.tv_sec) * 1e6 + ((double) rus.ru_utime.tv_usec);
 }
+#endif
+
+#if 0
+#include <time.h>
+
+inline
+double
+cputime()
+{
+  struct timespec tp;
+
+  clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &tp);
+
+  return ((double) tp.tv_sec * 1e9) + ((double) tp.tv_nsec);
+}
+#endif
+
+#if 0
+#ifdef WHT_HAVE_OMP
+#include <omp.h>
+#endif/*WHT_HAVE_OMP*/
+
+inline
+double
+cputime()
+{
+  return omp_get_wtime();
+}
+
+#endif
+
+#if 0
+typedef union
+{ 
+  unsigned long long int64;
+  struct {
+    unsigned int lo, hi;
+  } int32;
+} tsc_counter;
+
+#define RDTSC(cpu_c)                   \
+  __asm__ __volatile__ ("rdtsc" :      \
+  "=a" ((cpu_c).int32.lo),             \
+  "=d" ((cpu_c).int32.hi))
+
+inline
+double
+cputime()
+{
+  tsc_counter t0;
+  RDTSC(t0);
+  return ((double) t0.int64);
+}
+#endif
 
 void builtin_init(char *metric) { /* Empty, only metric is usec */ }
 void builtin_done() { /* Empty */ }
