@@ -30,52 +30,53 @@
 
 extern double invnorm(double p);
 
+/** \todo Use configuration macros to prevent certain builtin metrics from
+ *        being compiled 
+ */
 #if 1
 #include <sys/types.h>
 #include <sys/resource.h>
 
-inline
 double
-cputime()
+usec()
 {
   struct rusage rus;
 
   getrusage(RUSAGE_SELF, &rus);
 
-  return ((double) rus.ru_utime.tv_sec) * 1e6 + ((double) rus.ru_utime.tv_usec);
+  return ((double) rus.ru_utime.tv_sec) * 1e6 + 
+         ((double) rus.ru_utime.tv_usec);
 }
 #endif
 
-#if 0
+#if 1
 #include <time.h>
 
-inline
 double
-cputime()
+nsec()
 {
   struct timespec tp;
 
   clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &tp);
 
-  return ((double) tp.tv_sec * 1e9) + ((double) tp.tv_nsec);
+  return ((double) tp.tv_sec * 1e9) + 
+         ((double) tp.tv_nsec);
 }
 #endif
 
-#if 0
-#ifdef WHT_HAVE_OMP
-#include <omp.h>
-#endif/*WHT_HAVE_OMP*/
-
-inline
-double
-cputime()
-{
-  return omp_get_wtime();
-}
-
-#endif
-
-#if 0
+#if 1
+/**
+ * \see 
+ * @INPROCEEDINGS{Chellappa:08,
+ *  AUTHOR = {Srinivas Chellappa and Franz Franchetti and Markus P{\"u}schel},
+ *  TITLE = {How To Write Fast Numerical Code: A Small Introduction},
+ *  BOOKTITLE = {Summer School on Generative and Transformational Techniques in
+ *               Software Engineering},
+ *  PUBLISHER = {Springer},
+ *  SERIES = {Lecture Notes in Computer Science},
+ *  YEAR = {2008}
+ * }
+ */
 typedef union
 { 
   unsigned long long int64;
@@ -89,9 +90,8 @@ typedef union
   "=a" ((cpu_c).int32.lo),             \
   "=d" ((cpu_c).int32.hi))
 
-inline
 double
-cputime()
+cycles()
 {
   tsc_counter t0;
   RDTSC(t0);
@@ -99,36 +99,72 @@ cputime()
 }
 #endif
 
-void builtin_init(char *metric) { /* Empty, only metric is usec */ }
+void builtin_init() { /* Empty */ }
 void builtin_done() { /* Empty */ }
 
-stat_unit
-builtin_test(Wht *W, wht_value *x, char *metric)
+measure_call_fp
+builtin_prep(char *metric) 
+{ 
+  if (strcasecmp(metric, "usec")    == 0)
+    return &usec;
+  if (strcasecmp(metric, "nsec")    == 0)
+    return &nsec;
+  if (strcasecmp(metric, "cycles")  == 0)
+    return &cycles;
+
+  return NULL;
+}
+
+char **
+builtin_list()
 {
-  /* Microsecond metric */
-  double t0, t1;
+  const size_t N = 4;
+
+  char **list;
+
+  list = malloc(sizeof(*list) * N);
+
+  list[0] = strdup("usec");
+  list[1] = strdup("nsec");
+  list[2] = strdup("cycles");
+  list[3] = NULL;
+
+  return list;
+}
+
+inline
+stat_unit
+test_helper(Wht *W, wht_value *x, measure_call_fp call)
+{
+  volatile double t0, t1;
   codelet_apply_fp apply;
 
   apply = W->apply;
   W->apply = null_apply;
+ 
+  call(); /* Warm up */
+  call(); /* Warm up */
 
-  t0 = cputime();
+  t0 = call();
   wht_apply(W,x);
-  t1 = cputime();
+  t1 = call();
 
   W->apply = apply;
   return t1 - t0;
 }
 
+inline
 stat_unit
-builtin_call(Wht *W, wht_value *x, char *metric)
+call_helper(Wht *W, wht_value *x, measure_call_fp call)
 {
-  /* Microsecond metric */
-  double t0, t1;
+  volatile double t0, t1;
 
-  t0 = cputime();
+  call(); /* Warm up */
+  call(); /* Warm up */
+
+  t0 = call();
   wht_apply(W,x);
-  t1 = cputime();
+  t1 = call();
 
   return t1 - t0;
 }
@@ -137,55 +173,89 @@ struct measure_extension builtin  =
 { 
   "BUILTIN", 
   (measure_init_fp)  &builtin_init,
-  (measure_call_fp)  &builtin_test,
-  (measure_call_fp)  &builtin_call,
+  (measure_list_fp)  &builtin_list,
+  (measure_prep_fp)  &builtin_prep,
   (measure_done_fp)  &builtin_done
 };
 
+bool
+measure_list_include(char *metric, measure_list_fp get_list)
+{
+  char **list, **p;
+  bool found;
+
+  found = false;
+
+  list = get_list();
+
+  for (p = list; *p != NULL; p++) {
+    if (strcasecmp(*p, metric) == 0) {
+      found = true;
+      break;
+    }
+  }
+
+  for (p = list; *p != NULL; p++) 
+    free(*p);
+
+  free(list);
+
+  return found;
+}
+
+void
+measure_list_print(FILE *fd, measure_list_fp get_list)
+{
+  char **list, **p;
+
+
+  list = get_list();
+
+  for (p = list; *p != NULL; p++) {
+    fprintf(fd, "%s\n", *p);
+    free(*p);
+  }
+
+  free(list);
+}
+
+
 struct measure_extension *
-measure_extension_find(char *name)
+measure_extension_find(char *metric)
 {
   struct measure_extension *p;
 
-  if (name == NULL) 
+  if (measure_list_include(metric, &builtin_list))
     return &builtin;
 
   for (p = (struct measure_extension *) measure_extensions; p->name != NULL; p++) 
-    if (strncmp(name, p->name, strlen(p->name)) == 0) 
+    if (measure_list_include(metric, p->list))
       return p;
-  
+
   return NULL;
 }
 
-char *
-measure_extension_list()
+void
+measure_extension_print(FILE *fd)
 {
   struct measure_extension *p;
-  size_t n;
-  char *buf;
 
-  n = 0;
-  for (p = (struct measure_extension *) measure_extensions; p->name != NULL; p++)
-    n += strlen(p->name) + 1; /* 1 for the extra space */
+  fprintf(fd,"%s\n--------\n", "BUILTIN");
+  measure_list_print(fd, &builtin_list);
+  fprintf(fd,"\n");
 
-  buf = malloc(sizeof(char) * n + 1); /* 1 for the \0 */
-
-  strcpy(buf,"");
-
-  for (p = (struct measure_extension *) measure_extensions; p->name != NULL; p++) {
-    strcat(buf, p->name);
-    strcat(buf, " ");
+  for (p = (struct measure_extension *) measure_extensions; p->name != NULL; p++)  {
+    fprintf(fd,"%s\n--------\n", p->name);
+    measure_list_print(fd, p->list);
+    fprintf(fd,"\n");
   }
-
-  return buf;
 }
 
 inline
 void
-measure_helper(Wht *W, char *metric, struct stat *stat, bool calib, size_t run,
-  struct measure_extension *extension)
+measure_helper(Wht *W, struct stat *stat, bool calib, size_t run, measure_call_fp call)
 {
-  stat_unit value, overhead;
+  volatile stat_unit value, overhead;
   wht_value *x;
   int i;
 
@@ -193,41 +263,44 @@ measure_helper(Wht *W, char *metric, struct stat *stat, bool calib, size_t run,
 
   value = 0.0;
   for (i = 0; i <= run; i++)
-    value += extension->call(W,x,metric);
+    value += call_helper(W, x, call);
 
   overhead = 0.0;
   if (calib)
     for (i = 0; i <= run; i++)
-      overhead += extension->test(W,x,metric);
+      overhead += test_helper(W, x, call);
 
   stat->value = (value - overhead) / (run*1.0);
-
   stat_update(stat);
-
   stat->samples += run;
 
   free(x);
 }
 
 struct stat *
-measure(Wht *W, char *name, char *metric, bool calib, size_t run,
+measure(Wht *W, char *metric, bool calib, size_t run,
   size_t samples)
 {
-  struct measure_extension *extension;
   struct stat *stat;
   size_t i;
+  measure_call_fp call;
+  struct measure_extension *extension;
+
+  extension = measure_extension_find(metric);
+
+  if (extension == NULL) {
+    fprintf(stderr, "No extension registered for %s\n", metric);
+    return NULL;
+  }
 
   stat = stat_init();
 
-  extension = measure_extension_find(name);
+  extension->init();
 
-  if (extension == NULL) 
-    wht_exit("No extension registered for %s\n", metric);
-
-  extension->init(metric);
+  call = extension->prep(metric);
 
   for (i = 0; i < samples; i++)
-    measure_helper(W, metric, stat, calib, run, extension);
+    measure_helper(W, stat, calib, run, call);
 
   extension->done();
 
@@ -235,30 +308,35 @@ measure(Wht *W, char *name, char *metric, bool calib, size_t run,
 }
 
 struct stat *
-measure_with_z_test(Wht *W, char *name, char *metric, bool calib, size_t run,
+measure_with_z_test(Wht *W, char *metric, bool calib, size_t run,
   size_t initial, double alpha, double rho)
 {
-  struct measure_extension *extension;
   struct stat *stat;
   size_t i;
   double z;
+  measure_call_fp call;
+  struct measure_extension *extension;
+
+  extension = measure_extension_find(metric);
+
+  if (extension == NULL) {
+    fprintf(stderr, "No extension registered for %s\n", metric);
+    return NULL;
+  }
 
   stat = stat_init();
 
-  extension = measure_extension_find(name);
+  extension->init();
 
-  if (extension == NULL) 
-    wht_exit("No extension registered for %s\n", metric);
+  call = extension->prep(metric);
 
   z = invnorm(alpha);
 
-  extension->init(metric);
-
   for (i = 0; i < initial; i++)
-    measure_helper(W, metric, stat, calib, run, extension);
+    measure_helper(W, stat, calib, run, call);
 
   while (stat_sig_sample(stat, z, rho) > stat->samples) 
-    measure_helper(W, metric, stat, calib, run, extension);
+    measure_helper(W, stat, calib, run, call);
 
   extension->done();
 
@@ -266,28 +344,33 @@ measure_with_z_test(Wht *W, char *name, char *metric, bool calib, size_t run,
 }
 
 struct stat * 
-measure_until(Wht *W, char *name, char *metric, bool calib, size_t run,
+measure_until(Wht *W, char *metric, bool calib, size_t run,
   double tn)
 {
-  struct measure_extension *extension;
   struct stat *stat;
   double t0, tk;
+  measure_call_fp call;
+  struct measure_extension *extension;
+
+  extension = measure_extension_find(metric);
+
+  if (extension == NULL) {
+    fprintf(stderr, "No extension registered for %s\n", metric);
+    return NULL;
+  }
 
   stat = stat_init();
 
-  extension = measure_extension_find(name);
+  extension->init();
 
-  if (extension == NULL) 
-    wht_exit("No extension registered for %s\n", metric);
-
-  extension->init(metric);
+  call = extension->prep(metric);
 
   t0 = 0.0;
   tk = 0.0;
   while (tk < tn) {
-    t0 = cputime();
-    measure_helper(W, metric, stat, calib, run, extension);
-    tk += cputime() - t0;
+    t0 = usec();
+    measure_helper(W, stat, calib, run, call);
+    tk += usec() - t0;
   }
 
   extension->done();

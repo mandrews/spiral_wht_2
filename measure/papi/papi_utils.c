@@ -28,6 +28,11 @@
  *   http://icl.cs.utk.edu/papi/
  */
 
+
+/** \todo Implement PAPI_DEBUG flag to encapsulate PAPI functions that break
+ *        valgrind.
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -42,7 +47,7 @@
   }
 
 void
-papi_setup() 
+papi_init() 
 {
   int max;
 
@@ -55,69 +60,14 @@ papi_setup()
 }
 
 void
-papi_get_events(const char *input, int **papi_events, size_t *n) 
+papi_set_events(char *metric)
 {
-  int i, m, code;
-  char *buf, *tmp, *token, *copy;
+  const size_t n = 1;
 
-  char prefix[] = "PAPI_";
-
-  /* Check PAPI sanity */
-  if (PAPI_VER_CURRENT != PAPI_library_init(PAPI_VER_CURRENT))
-    papi_eprintf("PAPI_library_init error.\n");
-
-  if (input == NULL)
-    papi_eprintf("Cannot pass events as NULL.\n");
-
-  char delims[] = ", ";
-
-  copy  = malloc(sizeof(char) * (strlen(input) + 1));
-  token = malloc(sizeof(char) * (strlen(input) + 1));
-
-  strcpy(copy, input);
-
-  /* First pass to count occurances of delimiter in input */
-  for (i = 0, tmp = copy;  ; i++, tmp = NULL) {
-    token = strtok(tmp, delims);
-    if (token == NULL) break;
-  }
-
-  *n = i;
-
-  *papi_events = malloc(sizeof(**papi_events) * (*n));
-
-  strncpy(copy, input, strlen(input));
-
-  /* Second pass initialize events from input */
-  for (i = 0, tmp = copy;  ; i++, tmp = NULL) {
-    token = strtok(tmp, delims);
-    if (token == NULL) break;
-
-    m = strlen(prefix) + strlen(token);
-    buf = malloc((m+1) * sizeof(char));
-    strcpy(buf, prefix);
-    strcpy(buf + strlen(prefix), token);
-
-    if (PAPI_event_name_to_code(buf, &code) != PAPI_OK)
-      papi_eprintf("Unknown PAPI event %s.\n", buf);
-
-    if (code == 0)
-      papi_eprintf("Unknown PAPI event %s.\n", buf);
-
-    (*papi_events)[i] = code;
-
-    free(buf);
-  }
-
-  free(copy);
-  free(token);
-}
-
-void
-papi_set_events(int *papi_events, size_t n) 
-{
   int max;
   long_long *papi_tmp;
+  int papi_events[1];
+  int code;
 
   max = PAPI_num_counters();
 
@@ -129,6 +79,15 @@ papi_set_events(int *papi_events, size_t n)
   PAPI_reset(max);
 
   PAPI_stop_counters(papi_tmp, n);
+
+  if (PAPI_event_name_to_code(metric, &code) != PAPI_OK)
+    papi_eprintf("Unknown PAPI event %s.\n", metric);
+
+  if (code == 0)
+    papi_eprintf("Unknown PAPI event %s.\n", metric);
+
+  papi_events[0] = code;
+
   PAPI_start_counters(papi_events, n);
 
   if (PAPI_read_counters(papi_tmp, n) != PAPI_OK)
@@ -137,7 +96,8 @@ papi_set_events(int *papi_events, size_t n)
   free(papi_tmp);
 }
 
-inline void 
+inline 
+void 
 papi_reset(size_t n) 
 {
   long_long *papi_tmp;
@@ -150,43 +110,8 @@ papi_reset(size_t n)
   free(papi_tmp);
 }
 
-stat_unit
-papi_test(Wht *W, wht_value *x, char *metric)
-{
-  long_long tmp[1];
-  codelet_apply_fp apply;
-
-  apply = W->apply;
-  W->apply = null_apply;
-
-  /* Read and reset the counters.
-   * The commented out conditional affects the reading of the performance
-   * counters, but might be good for debugging.
-   * NOTE: PAPI_accum_counters does not work properly.
-   * */ 
-#if 0
-    if (PAPI_read_counters(tmp, 1) != PAPI_OK)
-      papi_eprintf("Problem reading counters %s:%d.\n", __FILE__, __LINE__);
-#else
-    PAPI_read_counters(tmp, 1);
-#endif
-
-  wht_apply(W,x);
-
-  /* Read and reset the counters.
-   * This conditional should NOT effect the reading of the performance
-   * counters.
-   * */
-  if (PAPI_read_counters(tmp, 1) != PAPI_OK)
-    papi_eprintf("Problem reading counters %s:%d.\n", __FILE__, __LINE__);
-
-  W->apply = apply;
-
-  return (stat_unit) tmp[0];
-}
-
-stat_unit
-papi_call(Wht *W, wht_value *x, char *metric)
+double
+papi_generic_call()
 {
   long_long tmp[1];
 
@@ -201,29 +126,56 @@ papi_call(Wht *W, wht_value *x, char *metric)
 #else
     PAPI_read_counters(tmp, 1);
 #endif
-    wht_apply(W,x);
-  /* Read and reset the counters.
-   * This conditional should NOT effect the reading of the performance
-   * counters.
-   * */
-  if (PAPI_read_counters(tmp, 1) != PAPI_OK)
-    papi_eprintf("Problem reading counters %s:%d.\n", __FILE__, __LINE__);
-
-  return (stat_unit) tmp[0];
+    return ((double) tmp[0]);
 }
 
 
-void 
-papi_init(char *metric)
+measure_call_fp
+papi_prep(char *metric)
 {
-  int *papi_events;
-  size_t papi_event_total;
+  papi_set_events(metric);
+  papi_reset(1);
+  return &papi_generic_call;
+}
 
-  papi_setup();
+/** \todo Add PAPI native event sets */
+char **
+papi_list()
+{
+  int i, j;
+  size_t n;
+  char **list;
+  PAPI_event_info_t info;
 
-  /* This allocates papi_events */
-  papi_get_events(metric, &papi_events, &papi_event_total);
-  papi_set_events(papi_events, 1);
+  papi_init();
+
+  i = PAPI_PRESET_MASK;
+  n = 0;
+  do {
+    if (PAPI_get_event_info(i, &info) == PAPI_OK) 
+      n++;
+  } while (PAPI_enum_event(&i, PAPI_PRESET_ENUM_AVAIL) == PAPI_OK);
+
+  list = malloc(sizeof(*list) * (n+1));
+
+  i = PAPI_PRESET_MASK;
+  j = 0;
+  do {
+    if (PAPI_get_event_info(i, &info) == PAPI_OK) {
+#if 0
+      /* How to get the description of an event in PAPI */
+      len = strlen(info.symbol) + strlen(info.long_descr) + 6; /* X -- Y\n\0 */
+      list[j] = malloc(sizeof(char) * len);
+      snprintf(list[j], len, "%s -- %s", info.symbol, info.long_descr);
+#endif
+      list[j] = strdup(info.symbol);
+      j++;
+    }
+  } while (PAPI_enum_event(&i, PAPI_PRESET_ENUM_AVAIL) == PAPI_OK);
+
+  list[j] = NULL;
+
+  return list;
 }
 
 void 

@@ -60,18 +60,13 @@
  *
  * \param NAME  Identifier associated with extension
  * \param INIT  Function to initialize the extension
- * \param TEST 	Function to perform a test run without actually 
- * 							calling \ref Wht::apply.  Should replace \ref Wht::apply
- * 							with \ref null_apply
- * 							Used for calibration.
- * \param CALL  Function to actually perform measurement
  * \param DONE  Function to cleanup the extension
  */
-#define MEASURE_ENTRY(NAME, INIT, TEST, CALL, DONE) \
+#define MEASURE_ENTRY(NAME, INIT, LIST, PREP, DONE) \
   { NAME, \
 		(measure_init_fp) &INIT, \
-    (measure_call_fp) &TEST, \
-    (measure_call_fp) &CALL, \
+		(measure_list_fp) &LIST, \
+		(measure_prep_fp) &PREP, \
     (measure_done_fp) &DONE }
 
 #define MEASURE_EXTENSIONS_END { NULL, NULL, NULL, NULL } 
@@ -84,7 +79,7 @@
 static const struct measure_extension
 measure_extensions[] = {
 #ifdef HAVE_PAPI
-	MEASURE_ENTRY("PAPI", papi_init, papi_test, papi_call, papi_done),
+	MEASURE_ENTRY("PAPI", papi_init, papi_list, papi_prep, papi_done),
 #endif
   MEASURE_EXTENSIONS_END
 };

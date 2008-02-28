@@ -31,7 +31,7 @@
 #include "papi.h"
 
 #include "wht.h"
-#include "stat.h"
+#include "measure.h"
 
 #ifndef PAPI_UTILS_DEBUG
 #define PAPI_UTILS_DEBUG 0
@@ -41,7 +41,9 @@ void papi_init();
 
 void papi_done();
 
-stat_unit papi_call(Wht *W, wht_value *x, char *metric);
-stat_unit papi_test(Wht *W, wht_value *x, char *metric);
+double papi_call();
+char **papi_list();
+
+measure_call_fp papi_prep(char *metric);
 
 #endif /*PAPI_UTILS_H*/

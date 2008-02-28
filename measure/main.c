@@ -36,15 +36,13 @@
 static void
 usage() 
 {
-  char *extensions;
-
   printf("Usage: wht_measure -w PLAN [OPTIONS]\n");
   printf("Measure PLAN from stdin or by argument.\n");
   printf("    -h            Show this help message.\n");
   printf("    -v            Show build information.\n");
+  printf("    -l            List available metrics .\n");
   printf("    -w PLAN       Measure the mean metric count of PLAN.\n");
-  printf("    -e EXTN       Use Measure Extension EXTN (DEFAULT BUILTIN).\n");
-  printf("    -m METRIC     Measure Metric METRIC (DEFAULT USEC).\n");
+  printf("    -m METRIC     Measure metric METRIC (DEFAULT usec).\n");
   printf("    -s            Also display the standard deviation and sample size.\n");
   printf("    -c            Calibrate and subtract overhead.\n");
   printf(" Measurement Techniques (mutually exclusive):\n");
@@ -61,29 +59,19 @@ usage()
   printf("      -k RUN      Accumulate average in run of size K (DEFAULT 1).\n");
   printf("\n");
 
-  extensions = measure_extension_list();
-
-  printf(" Available extensions: %s\n", extensions);
-#ifdef  HAVE_PAPI
-  printf("\n For a list of available PAPI metrics see PAPI_INSTALL_DIR/bin/papi_avail.\n");
-#endif/*HAVE_PAPI*/
-
-  free(extensions);
-
   exit(EXIT_FAILURE);
 }
 
 int 
 main(int argc, char **argv)
 {
-  char *plan, *extn, *metric;
+  char *plan, *metric;
   int c, n, k;
   double a, p, t;
   bool all, calib;
   size_t len;
 
   plan = NULL;
-  extn = NULL;
   metric = NULL;
   all = false;
   calib = false;
@@ -93,16 +81,13 @@ main(int argc, char **argv)
   n = 1;
   k = 1;
 
-  while ((c = getopt (argc, argv, "hvw:e:sa:p:m:t:n:k:c")) != -1)
+  while ((c = getopt (argc, argv, "hvlw:sa:p:m:t:n:k:c")) != -1)
     switch (c) {
       case 'w':
         plan = strdup(optarg);
         break;
-      case 'e':
-        extn = optarg;
-        break;
       case 'm':
-        metric = optarg;
+        metric = strdup(optarg);
         break;
       case 's':
         all = true;
@@ -131,6 +116,9 @@ main(int argc, char **argv)
       case 'v':
         wht_info();
         exit(1);
+      case 'l':
+        measure_extension_print(stderr);
+        exit(1);
       case 'h':
         usage();
       default:
@@ -142,6 +130,9 @@ main(int argc, char **argv)
 
   if (plan == NULL)
     usage();
+
+  if (metric == NULL)
+    metric = strdup("usec");
 
   if ((a != INFINITY && p == INFINITY) || (a == INFINITY && p != INFINITY)) {
     printf("must choose both alpha and rho\n\n");
@@ -166,20 +157,22 @@ main(int argc, char **argv)
   }
 
   if (a != INFINITY && p != INFINITY)
-    s = measure_with_z_test(W, extn, metric, calib, k, n, a, p);
+    s = measure_with_z_test(W, metric, calib, k, n, a, p);
   else if (t != INFINITY)
-    s = measure_until(W, extn, metric, calib, k, t);
+    s = measure_until(W, metric, calib, k, t);
   else
-    s = measure(W, extn, metric, calib, k, n);
+    s = measure(W, metric, calib, k, n);
 
-  buf = stat_to_string(s, all);
-
-  printf("%s\n", buf);
+  if (s != NULL) {
+    buf = stat_to_string(s, all);
+    printf("%s\n", buf);
+    stat_free(s);
+    free(buf);
+  }
 
   wht_free(W);
-  stat_free(s);
-  free(buf);
   free(plan);
+  free(metric);
 
   return 0;
 }
@@ -244,7 +237,7 @@ wht_measure -w 'split[small[4],small[4],small[4]]' -k 20 -n 40 -c
 374.335
 \endverbatim
 
-The Z-Score Test allows the number of samples to vary and guarentees an accurate result that will be within RHO of the true mean with ALPHA% confidence.  This allows the user to decrease the number of required samples and still achieve statistica significance.
+The Z-Score Test allows the number of samples to vary and guarentees an accurate result that will be within RHO of the true mean with ALPHA% confidence.  This allows the user to decrease the number of required samples and still achieve statistical significance.
 
 \verbatim
 wht_measure -w 'split[small[4],small[4],small[4]]' -k 20 -n 10 -c -a 0.5 -p 1 
