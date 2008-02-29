@@ -5,7 +5,7 @@
 
 echo "Rebuilding autotools build system:"
 autoheader
-aclocal
+aclocal -I ./m4
 libtoolize --force
 autoconf
 automake -Wall --add-missing

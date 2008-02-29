@@ -28,8 +28,6 @@ TODO:
 
   - Allow PAPI native events
 
-  - Investigate accuracy / precision of time.h:clock_getres CLOCK_PROCESS_CPUTIME_ID
-
 	- Make nomenclature uniform, e.g.
 		wht_attach -> wht_rule
 		plan -> tree

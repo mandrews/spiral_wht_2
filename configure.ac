@@ -102,8 +102,9 @@ fi
 
 
 # 
-#  C O N C U R R E N T 
-# 
+#  O P E N   M P 
+#
+
 AC_ARG_ENABLE([omp], 
   [AS_HELP_STRING([--enable-omp],
     [openMP optimizations (default is disabled)])],
@@ -114,8 +115,15 @@ if test "$have_omp" = "yes"; then
 	AC_DEFINE(WHT_HAVE_OMP,1,
     [define to enable openMP optimizations.])
 
-  CFLAGS="$CFLAGS -fopenmp"
-  LIBS="$LIBS -lgomp"
+  case "${ax_cv_c_compiler_vendor}" in
+    gnu)
+      CC="$CC -fopenmp"
+      LIBS="$LIBS -lgomp"
+      ;;
+    intel)
+      CC="$CC -openmp"
+      ;;
+  esac
 fi
 
 
