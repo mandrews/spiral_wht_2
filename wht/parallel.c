@@ -20,7 +20,7 @@
 
 /**
  * \file parallel.c
- * \author Michael Andrews
+ * \author Kang Chen
  *
  * \brief Concurrent breakdown rules implementations.
  *
@@ -42,7 +42,7 @@ split_parallel_rule(Wht *W)
   if (W->children == NULL)
     return error_msg_set(W, "codelet must be split to be parallelized");
 
-  if (W->children != 2)
+  if (W->children->nn != 2)
     return error_msg_set(W, "codelet must be a binary split to be parallelized");
 
   W->attr[omp_chunk] = (1 << W->rule->params[0]);
