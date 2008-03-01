@@ -54,3 +54,5 @@ Bugs:
 
   - should not compile uncessary targets in .codelets (waste of time)
 
+  - Fix SIMD WHT_FLOAT checks in generated code, should be #ifdef
+

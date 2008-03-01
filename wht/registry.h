@@ -75,7 +75,7 @@
 
 void split_interleave_rule(Wht *W);
 
-void split_concurrent_rule(Wht *W);
+void split_parallel_rule(Wht *W);
 
 void split_ddl_rule(Wht *W);
 
@@ -95,7 +95,7 @@ rule_registry[] = {
 #endif
 
 #if ((WHT_HAVE_OMP))
-  SPLIT_RULE_ENTRY("splitp",  1, split_concurrent_rule),
+  SPLIT_RULE_ENTRY("splitp",  1, split_parallel_rule),
 #endif
 
 #ifdef WHT_WITH_DDL

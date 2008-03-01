@@ -8,7 +8,9 @@
 #include "wht.h"
 
 /* Tim Chagnon */
-void m_bit_permute(long b, long M, long N, wht_value *x) {
+void 
+m_bit_permute(long b, long M, long N, wht_value *x) 
+{
   long NPB, PB, PBOFF, pb, NB, ib, jb, k, l, lstart, u, v;
   long ibN, jbN, kN;
   wht_value tmp;

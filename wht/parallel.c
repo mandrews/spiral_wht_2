@@ -19,7 +19,7 @@
 
 
 /**
- * \file concurrent.c
+ * \file parallel.c
  * \author Michael Andrews
  *
  * \brief Concurrent breakdown rules implementations.
@@ -32,75 +32,27 @@
 #include <omp.h>
 #endif/*WHT_HAVE_OMP*/
 
-#define OMP_CHUNK   (256)
-
-void split_concurrent_apply(Wht *W, long S, size_t U, wht_value *x);
+void split_parallel_apply(Wht *W, long S, size_t U, wht_value *x);
 
 void
-split_concurrent_rule(Wht *W)
+split_parallel_rule(Wht *W)
 {
   size_t b;
 
   if (W->children == NULL)
-    return error_msg_set(W, "codelet must be split to be interleaved");
+    return error_msg_set(W, "codelet must be split to be parallelized");
 
-  b = (1 << W->rule->params[0]);
+  if (W->children != 2)
+    return error_msg_set(W, "codelet must be a binary split to be parallelized");
 
-  W->attr[omp_chunk] = b;
-  W->apply = split_concurrent_apply;
+  W->attr[omp_chunk] = (1 << W->rule->params[0]);
+  W->apply = split_parallel_apply;
 }
 
 void 
-split_concurrent_apply(Wht *W, long S, size_t U, wht_value *x)
+split_parallel_apply(Wht *W, long S, size_t U, wht_value *x) 
 {
 #ifdef WHT_HAVE_OMP
-  int nn;
-  long N, R, S1, Ni, i, j, k;
-  Wht *Wi;
-  int b;
-  
-  b = W->attr[omp_chunk];
-
-  nn = W->children->nn;
-
-  N  = W->N;
-  R  = N;
-  S1 = 1;
-
-  /* Iterate over children WHTs, stored anti lexigraphically  */
-  #pragma omp parallel for ordered schedule(guided, b) \
-    shared(i,Ni,Wi,R,S1) private(j,k) 
-  for (i = 0; i < nn; i++) {
-    #pragma omp ordered
-    {
-      Ni = W->children->ns[i];
-      Wi = W->children->Ws[i];
-      R /= Ni;
-    }
-
-    for (j = 0; j < R; j++) 
-      for (k = 0; k < S1; k++) 
-        (Wi->apply)(Wi, S1*S, S, x+k*S+j*Ni*S1*S);
-
-    #pragma omp ordered 
-    {
-      S1 *= Ni;
-    }
-  }
-#else
-  wht_exit("initialization guards should prevent this message");
-#endif
-}
-
-#if 0
-
-/* Kang's scheduled code from previous version of package.  Early testing seems
- * to indicate that that openMP scheduling does a better job.
- */
-
-void 
-split_kang_apply(Wht *W, long S, size_t U, wht_value *x) 
-{
   long block, chunk;
   long N, R, S1, Ni, j;
   wht_value *xpt;
@@ -184,5 +136,9 @@ split_kang_apply(Wht *W, long S, size_t U, wht_value *x)
       }
     } /*end of parallel region*/
   }
-}
+#else
+  wht_exit("initialization guards should prevent this message");
 #endif
+}
+
+/** \todo import splitddl_p */

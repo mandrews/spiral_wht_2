@@ -25,6 +25,8 @@
  * \brief Metric measurement utilities.
  */
 
+#include <unistd.h>
+
 #include "measure.h"
 #include "extensions.h"
 
@@ -49,9 +51,16 @@ usec()
 }
 #endif
 
-#if 1
+#ifdef _POSIX_TIMERS 
+#ifdef _POSIX_CPUTIME
+#ifndef __INTEL_COMPILER
+#define HAVE_NSEC
+#endif/*__INTEL_COMPILER*/
+#endif/*_POSIX_CPUTIME*/
+#endif/*_POSIX_TIMERS*/
 #include <time.h>
 
+#ifdef HAVE_NSEC
 double
 nsec()
 {
@@ -62,7 +71,7 @@ nsec()
   return ((double) tp.tv_sec * 1e9) + 
          ((double) tp.tv_nsec);
 }
-#endif
+#endif/*HAVE_NSEC*/
 
 #if 1
 /**
@@ -107,8 +116,10 @@ builtin_prep(char *metric)
 { 
   if (strcasecmp(metric, "usec")    == 0)
     return &usec;
+#ifdef HAVE_NSEC
   if (strcasecmp(metric, "nsec")    == 0)
     return &nsec;
+#endif/*HAVE_NSEC*/
   if (strcasecmp(metric, "cycles")  == 0)
     return &cycles;
 
@@ -120,14 +131,18 @@ builtin_list()
 {
   const size_t N = 4;
 
-  char **list;
+  char **list, **p;
 
   list = malloc(sizeof(*list) * N);
 
-  list[0] = strdup("usec");
-  list[1] = strdup("nsec");
-  list[2] = strdup("cycles");
-  list[3] = NULL;
+  p = list;
+
+  *p = strdup("usec"); p++;
+#ifdef HAVE_NSEC
+  *p = strdup("nsec"); p++;
+#endif/*HAVE_NSEC*/
+  *p = strdup("cycles"); p++;
+  *p = NULL; p++;
 
   return list;
 }

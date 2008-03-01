@@ -65,6 +65,11 @@
 #define MAX_MSG_LEN              (256)
   /**< Maximum length for error messages  */
 
+/* For some reason Intel does not define this */
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327
+#endif/*M_PI*/
+
 /**
  * \typedef wht_value
  * \brief The data type of input vectors applied by the transform.
@@ -79,13 +84,13 @@
  * \def WHT_TYPE_STRING
  * \brief Data type of transform in English.
  */
-#if     WHT_FLOAT == 1
+#ifdef WHT_FLOAT
 typedef float wht_value;
 #define WHT_STABILITY_THRESHOLD (   1e-2)
 #define WHT_TYPE_STRING         ("float") 
 #endif/*WHT_FLOAT*/
 
-#if     WHT_DOUBLE == 1
+#ifdef WHT_DOUBLE
 typedef double wht_value;
 #define WHT_STABILITY_THRESHOLD (    1e-9)
 #define WHT_TYPE_STRING         ("double") 

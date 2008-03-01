@@ -58,8 +58,11 @@ small_interleave_rule(Wht *W)
     return error_msg_set(W, "codelet must be small to be interleaved");
 
   /* Check that parent codelet is split interleaved */
+#if 0
+  /* an attribute like, provides_interleaving within root node should work */
   if ((W->parent == NULL) || (strcmp("splitil", W->parent->rule->name) != 0)) 
     return error_msg_set(W, "codelet must be used in conjunction with splitil");
+#endif
 
   /* Check that interleave factor is supported */
   if (k > k_max) 

@@ -8,6 +8,7 @@ AC_DISABLE_SHARED
 AM_DISABLE_SHARED
 
 AC_CANONICAL_HOST
+AX_COMPILER_VENDOR
 
 # 
 #  M A I N T A I N E R   P A R A M E T E R S
@@ -32,6 +33,16 @@ VECTOR_SIZE=0
 if test "$CFLAGS" = ""; then
   CFLAGS="-O2"
 fi
+
+# 
+#  D E F A U L T   C O M P I L E R   F L A G S
+# 
+
+case "${ax_cv_c_compiler_vendor}" in
+  intel)
+    CFLAGS="$CFLAGS -no-gcc"
+    ;;
+esac
 
 # 
 #  T R A N S F O R M   T Y P E
@@ -61,7 +72,6 @@ if test "$ok" = "yes"; then
 	fi
 	AC_DEFINE(WHT_FLOAT,1,
     [define to compile with single precision floating point])
-	AC_DEFINE(WHT_DOUBLE,0)
   WHT_PRECISION=f
   WHT_SUFFIX=f
 fi
@@ -104,7 +114,6 @@ fi
 # 
 #  O P E N   M P 
 #
-
 AC_ARG_ENABLE([omp], 
   [AS_HELP_STRING([--enable-omp],
     [openMP optimizations (default is disabled)])],
@@ -115,13 +124,15 @@ if test "$have_omp" = "yes"; then
 	AC_DEFINE(WHT_HAVE_OMP,1,
     [define to enable openMP optimizations.])
 
+  echo "$ax_cv_c_compiler_vendor"
   case "${ax_cv_c_compiler_vendor}" in
     gnu)
-      CC="$CC -fopenmp"
+      CFLAGS="$CFLAGS -fopenmp"
       LIBS="$LIBS -lgomp"
       ;;
     intel)
-      CC="$CC -openmp"
+      CFLAGS="$CFLAGS -openmp"
+      LIBS="$LIBS -liomp5 -lpthread"
       ;;
   esac
 fi
@@ -160,7 +171,11 @@ if test "$have_sse" = "yes"; then
 		AC_MSG_ERROR([--enable-sse can only be used in conjunction with --enable-float])
 	fi
 
-  CFLAGS="$CFLAGS -msse"
+  case "${ax_cv_c_compiler_vendor}" in
+    gnu)
+      CFLAGS="$CFLAGS -msse"
+    ;;
+  esac
 
   VECTOR_SIZE=4
 
@@ -190,7 +205,11 @@ if test "$have_sse2" = "yes"; then
 		AC_MSG_ERROR([--enable-sse2 can only be used in conjunction with --enable-double])
 	fi
 
-  CFLAGS="$CFLAGS -msse2"
+  case "${ax_cv_c_compiler_vendor}" in
+    gnu)
+      CFLAGS="$CFLAGS -msse2"
+    ;;
+  esac
 
   VECTOR_SIZE=2
 
