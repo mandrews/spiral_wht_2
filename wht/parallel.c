@@ -27,6 +27,7 @@
  */
 
 #include "wht.h"
+#include "registry.h"
 
 #ifdef WHT_HAVE_OMP
 #include <omp.h>
@@ -45,7 +46,6 @@ split_parallel_rule(Wht *W)
   if (W->children->nn != 2)
     return error_msg_set(W, "codelet must be a binary split to be parallelized");
 
-  W->attr[omp_chunk] = (1 << W->rule->params[0]);
   W->apply = split_parallel_apply;
 }
 

@@ -3,10 +3,11 @@
 #include <sstream>
 #include <string>
 
-/*
- * TODO: see if we can replace these type of signature with more c++ like:
-    void alpha_n(Wht *W, counts& x)
-*/
+/**
+ * \todo replace this type of signature with a more idiomatic c++ signature,
+ * e.g.
+ *   void alpha_n(Wht *W, counts& x)
+ */
 counts *
 alpha_n(Wht *W)
 {
@@ -79,10 +80,8 @@ alpha_k(Wht *W, size_t k)
     t = alpha_k(Wi,k);
 
     int il = 1;
-#if 1
-    if (Wi->attr[interleave_by] != UNSET_PARAMETER)
-      il = Wi->attr[interleave_by];
-#endif
+    if (Wi->attr[INTERLEAVE_BY] != UNSET_PARAMETER)
+      il = Wi->attr[INTERLEAVE_BY];
 
     for (j = t->begin(); j != t->end(); j++) 
       (*x)[j->first] += (((1 << (n - ni)) * j->second) / il);
@@ -275,7 +274,7 @@ counts::load(FILE *fd)
 
   buf = (char *) malloc(sizeof(char) * max);
 
-  /* TODO: replace with STL string::getline */
+  /** \todo replace with STL string::getline */
   while (getline(&buf, &max, fd) > 0) {
     line = string(buf);
     line = line.substr(0, line.find("\n")); /* Chomp! */

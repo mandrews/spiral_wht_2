@@ -71,6 +71,20 @@
   /**< Place this at the end of the rule_registry to halt iteration */
 
 
+
+/** 
+ * \brief Possible attributes associated with a node after a rule has been applied
+ */
+enum attribute_names
+{ 
+  INTERLEAVE_BY = 0,
+	INTERLEAVING
+  VECTOR_SIZE, 
+	BLOCK_SIZE,
+};
+
+
+
 /* Transform extensions to core package */
 
 void split_interleave_rule(Wht *W);
@@ -95,7 +109,7 @@ rule_registry[] = {
 #endif
 
 #if ((WHT_HAVE_OMP))
-  SPLIT_RULE_ENTRY("splitp",  1, split_parallel_rule),
+  SPLIT_RULE_ENTRY("splitp",  0, split_parallel_rule),
 #endif
 
 #ifdef WHT_WITH_DDL

@@ -53,7 +53,7 @@
 #define MAX_RULE_PARAMS          (  4)
   /**< Maximum number of parameters for all rules */
 
-#define MAX_ATTRIBUTES           (  4) 
+#define MAX_ATTRIBUTES           (  8) 
   /**< Maximum number of attributes for a node  */
 
 /** \cond */
@@ -95,17 +95,6 @@ typedef double wht_value;
 #define WHT_STABILITY_THRESHOLD (    1e-9)
 #define WHT_TYPE_STRING         ("double") 
 #endif/*WHT_DOUBLE*/
-
-/** 
- * \brief Possible attributes associated with a node after a rule has been applied 
- *
- * \todo Figure out howto allow attributes to be set outside this header. 
- */
-enum attr_names { 
-  interleave_by = 0, 
-  vector_size   = 1, 
-  omp_chunk     = 2
-};
 
 
 
@@ -178,6 +167,10 @@ struct Wht {
 
   int attr[MAX_ATTRIBUTES]; 
     /**< Attributes associated with WHT, set by attaching rule */
+
+  bool provides[MAX_ATTRIBUTES]; 
+
+  bool requires[MAX_ATTRIBUTES]; 
 
   char *error_msg;
     /**< Error message in case plan construction or attaching rule goes awry */

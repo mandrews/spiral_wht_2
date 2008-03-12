@@ -6,12 +6,13 @@
 
 
 #include "wht.h"
+#include "registry.h"
 
 /* Tim Chagnon */
 void 
 m_bit_permute(long b, long M, long N, wht_value *x) 
 {
-  long NPB, PB, PBOFF, pb, NB, ib, jb, k, l, lstart, u, v;
+  long NPB, PB, pb, NB, ib, jb, k, l, u, v;
   long ibN, jbN, kN;
   wht_value tmp;
 
@@ -107,7 +108,7 @@ split_ddl_apply(Wht *W, long S, size_t D, wht_value *x)
   N  = W->N;
 
   // blocksize
-  b = W->rule->params[0];
+  b = W->attr[BLOCK_SIZE];
 
   // Children are stored in Right-to-Left order
   N1 = W->children->ns[1];
@@ -148,7 +149,7 @@ split_ddl_apply(Wht *W, long S, size_t D, wht_value *x)
 void
 split_ddl_rule(Wht *W)
 {
-  long b, bp, i;
+  long b;
 
   /* Check that codelet is split */
   if (W->children == NULL)
@@ -169,6 +170,8 @@ split_ddl_rule(Wht *W)
   if (b > W->children->ns[1])
     return error_msg_set(W, "block size must be less than left child size %d", 
       W->children->ns[1]);
+
+  W->attr[BLOCK_SIZE] = b;
 
   W->apply = split_ddl_apply;
 }

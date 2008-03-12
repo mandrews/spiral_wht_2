@@ -3,6 +3,7 @@
 
 extern "C" {
 #include "wht.h"
+#include "registry.h"
 }
 
 #include <map>

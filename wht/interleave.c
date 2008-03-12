@@ -58,11 +58,8 @@ small_interleave_rule(Wht *W)
     return error_msg_set(W, "codelet must be small to be interleaved");
 
   /* Check that parent codelet is split interleaved */
-#if 0
-  /* an attribute like, provides_interleaving within root node should work */
-  if ((W->parent == NULL) || (strcmp("splitil", W->parent->rule->name) != 0)) 
+  if ((W->parent == NULL) || (! W->parent->provides[INTERLEAVING]))
     return error_msg_set(W, "codelet must be used in conjunction with splitil");
-#endif
 
   /* Check that interleave factor is supported */
   if (k > k_max) 
@@ -82,7 +79,9 @@ small_interleave_rule(Wht *W)
   if (W->apply == NULL) 
     return error_msg_set(W, "could not find codelet");
 
-  W->attr[interleave_by] = k;
+  W->requires[INTERLEAVING] = true;
+
+  W->attr[INTERLEAVE_BY] = k;
 }
 
 /**
@@ -96,6 +95,8 @@ split_interleave_rule(Wht *W)
   /* Check that codelet is split */
   if (W->children == NULL)
     return error_msg_set(W, "codelet must be split to be interleaved");
+
+  W->provides[INTERLEAVING] = true;
 
   W->apply = split_interleave_apply;
 }
@@ -131,8 +132,8 @@ split_interleave_apply(Wht *W, long S, size_t U, wht_value *x)
     Ni = W->children->ns[i];
     R /= Ni;
 
-    if (Wi->attr[interleave_by] != UNSET_ATTRIBUTE)
-      nk = Wi->attr[interleave_by];
+    if (Wi->attr[INTERLEAVE_BY] != UNSET_ATTRIBUTE)
+      nk = Wi->attr[INTERLEAVE_BY];
     else
       nk = 1;
 

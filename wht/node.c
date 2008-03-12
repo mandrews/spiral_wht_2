@@ -58,6 +58,11 @@ node_init(size_t n, char *name)
   for (i = 0; i < MAX_ATTRIBUTES; i++)
     W->attr[i] = UNSET_ATTRIBUTE;
 
+  for (i = 0; i < MAX_ATTRIBUTES; i++) {
+    W->provides[i] = false;
+    W->requires[i] = false;
+  }
+
   return W;  
 }
 

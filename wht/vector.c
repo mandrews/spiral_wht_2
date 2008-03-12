@@ -98,7 +98,7 @@ small_right_vector_rule(Wht *W)
   if (W->apply == NULL) 
     return error_msg_set(W, "could not find codelet");
 
-  W->attr[vector_size] = v;
+  W->attr[VECTOR_SIZE] = v;
 }
 
 /**
@@ -156,10 +156,10 @@ small_vector_rule(Wht *W)
   if (W->apply == NULL) 
     return error_msg_set(W, "could not find codelet");
 
-  W->attr[vector_size] = v;
+  W->attr[VECTOR_SIZE] = v;
 
   /** 
-   * \todo Check and test (size * interleave_by) > vector_size.
+   * \todo Check and test (size * interleave_by) > VECTOR_SIZE.
    * This only occurs with vectors of size >= 4  
    */
 
