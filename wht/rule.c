@@ -123,8 +123,11 @@ rule_attach(Wht *W, const char *name, int params[], size_t n, bool is_small)
 
   p = rule_lookup(name, n, is_small);
 
-  if (p == NULL) 
-    wht_exit("%s was not registered in the rule table", name);
+  if (p == NULL) {
+    asprintf(&W->error_msg,
+      "rule %s not registered in rule table @ %s", name, W->to_string);
+    return;
+  }
 
   if (W->rule != NULL)
     rule_free(W->rule);
