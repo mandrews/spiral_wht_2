@@ -3,6 +3,7 @@
 # TODO 
 #   - set parameters via enviroment 
 #   - collect helper functions into a single non test file
+#   - check for OMP_NUM_THREADS, if not set then set to 2
 
 use strict;
 
@@ -90,18 +91,18 @@ my $j;
 
 for ($i = 1; $i <= $n; $i++) {
   expect_correct  _splitp(_small(1), _small($i));
+
   expect_correct  _splitp(
-    _split(_small(1), _small($i)),
+    _split(_small(1), _small(1)),
     _split(_small(1), _small($i)));
-  expect_correct  _splitp(_small($i), _small(1));
+
+  expect_correct  _splitp(
+    _splitp(_small(1), _small(1)),
+    _splitp(_small(1), _small($i)));
 }
 
 for ($i = 1; $i <= $n; $i++) {
   expect_reject   _splitp(_small(1), _small(1), _small($i));
-}
-
-for ($i=1; $i <= $n;$i++) {
-  expect_correct _splitp(_small(1), _splitp(_small(1), _small($i)));
 }
 
 my $K = log2($k); # Minimum codelet size to perform interleaving up to $k
@@ -113,10 +114,16 @@ for ($i = 2; $i <= $k; $i *= 2) {
 for ($i = 1; $i <= $n; $i++) {
   for ($j = 4; $j < $b; $j*=2) {
     expect_correct _splitpddl($j, _small(1), _small($i));
+
     expect_correct _splitpddl($j, _small($i), _small(1));
+
     expect_correct _splitpddl($j, 
-      _split(_small($i), _small(1)),  
-      _split(_small($i), _small(1)) );
+      _split(_small(1), _small(1)),  
+      _split(_small(1), _small($i)) );
+
+    expect_correct _splitpddl($j, 
+      _splitp(_small(1), _small(1)),  
+      _splitp(_small(1), _small($i)) );
   }
 }
 
