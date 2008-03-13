@@ -36,7 +36,7 @@
 void split_parallel_apply(Wht *W, long S, size_t U, wht_value *x);
 void split_ddl_parallel_apply(Wht *W, long S, size_t U, wht_value *x);
 
-#define IL_ON
+#define IL_ON 
 
 void
 split_parallel_rule(Wht *W)
@@ -161,7 +161,7 @@ split_parallel_apply(Wht *W, long S, size_t U, wht_value *x)
 		Wi = W->children->Ws[1];
 		if (Wi->attr[INTERLEAVE_BY] == UNSET_ATTRIBUTE) {
       for (j = 0, xpt = x; j < Ni; ++ j, xpt += S)
-				(Wi->apply)(Wi, S, S, xpt);
+				(Wi->apply)(Wi, block, S, xpt);
     } else {
       long temp;
       nIL = Wi->attr[INTERLEAVE_BY];

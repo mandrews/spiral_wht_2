@@ -1,6 +1,5 @@
 #!/usr/bin/env perl -w
 
-
 # TODO 
 #   - set parameters via enviroment 
 #   - collect helper functions into a single non test file
@@ -99,11 +98,11 @@ for ($i = 1; $i <= $n; $i++) {
   expect_reject   _splitp(_small(1), _small(1), _small($i));
 }
 
-#for ($i=1; $i<=$n;$i++) {
-#  expect_correct _splitp(_small(1), _splitp(_small(1), _small($i)));
-#}
+for ($i=1; $i <= $n;$i++) {
+  expect_correct _splitp(_small(1), _splitp(_small(1), _small($i)));
+}
 
-my $K = log2($k);
+my $K = log2($k); # Minimum codelet size to perform interleaving up to $k
 
 for ($i = 2; $i <= $k; $i *= 2) {
   expect_correct  _splitp(_smallil($i,1),_small($K));
