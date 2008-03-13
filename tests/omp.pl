@@ -83,6 +83,8 @@ $opt{'k'} or usage;
 my $n = int($opt{'n'});
 my $k = int($opt{'k'});
 
+my $b = 256;
+
 my $i;
 my $j;
 
@@ -109,13 +111,20 @@ for ($i = 2; $i <= $k; $i *= 2) {
 }
 
 for ($i = 1; $i <= $n; $i++) {
-  for ($j = 1; $j < $i; $j*=2) {
+  for ($j = 4; $j < $b; $j*=2) {
     expect_correct _splitpddl($j, _small(1), _small($i));
     expect_correct _splitpddl($j, _small($i), _small(1));
     expect_correct _splitpddl($j, 
       _split(_small($i), _small(1)),  
       _split(_small($i), _small(1)) );
-    expect_reject  _splitpddl($j, _small($i), _small(1), _small(1));
   }
 }
+
+expect_reject  _splitpddl(0, _small(1), _small(1));
+expect_reject  _splitpddl(1, _small(1), _small(1));
+expect_reject  _splitpddl(2, _small(1), _small(1));
+expect_reject  _splitpddl(3, _small(1), _small(1));
+expect_reject  _splitpddl(5, _small(1), _small(1));
+
+expect_reject  _splitpddl(4, _small(1), _small(1), _small(1));
 
