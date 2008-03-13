@@ -87,12 +87,16 @@ AC_ARG_ENABLE([max_unroll],
   [max_unroll=$enableval], 
   [max_unroll=$MAX_UNROLL])
 
-if test $max_unroll -gt $MAX_UNROLL_PKG; then
+MAX_UNROLL=$max_unroll
+
+if test $MAX_UNROLL -gt $MAX_UNROLL_PKG; then
   AC_MSG_ERROR([--enable-max-unroll larger than package was built for])
 fi
 
-AC_DEFINE_UNQUOTED(WHT_MAX_UNROLL,$max_unroll,
+AC_DEFINE_UNQUOTED(WHT_MAX_UNROLL,$MAX_UNROLL,
   [maximum unrolled codelet size])
+
+AC_SUBST(MAX_UNROLL)
 
 
 
@@ -109,6 +113,8 @@ if test $interleave -gt $MAX_INTERLEAVE_PKG; then
   AC_MSG_ERROR([--enable-interleave larger than package was built for])
 fi
 
+MAX_INTERLEAVE=$interleave
+
 
 
 # 
@@ -124,7 +130,6 @@ if test "$have_omp" = "yes"; then
 	AC_DEFINE(WHT_HAVE_OMP,1,
     [define to enable openMP optimizations.])
 
-  echo "$ax_cv_c_compiler_vendor"
   case "${ax_cv_c_compiler_vendor}" in
     gnu)
       CFLAGS="$CFLAGS -fopenmp"
@@ -183,8 +188,8 @@ if test "$have_sse" = "yes"; then
     AC_MSG_ERROR([--enable-sse vectors are larger than package was built for])
   fi
 
-  if test $interleave -eq 0; then
-    interleave=$VECTOR_SIZE;
+  if test $MAX_INTERLEAVE -eq 0; then
+    MAX_INTERLEAVE=$VECTOR_SIZE;
   fi
 
 fi
@@ -217,16 +222,20 @@ if test "$have_sse2" = "yes"; then
     AC_MSG_ERROR([--enable-sse2 vectors are larger than package was built for])
   fi
 
-  if test $interleave -eq 0; then
-    interleave=$VECTOR_SIZE;
+  if test $MAX_INTERLEAVE -eq 0; then
+    MAX_INTERLEAVE=$VECTOR_SIZE;
   fi
 
 fi
 
 AC_DEFINE_UNQUOTED(WHT_VECTOR_SIZE,$VECTOR_SIZE, [Size of vector to use.])
 
-AC_DEFINE_UNQUOTED(WHT_MAX_INTERLEAVE,$interleave,
+AC_DEFINE_UNQUOTED(WHT_MAX_INTERLEAVE,$MAX_INTERLEAVE,
   [interleave K loop iterations in codelet])
+
+AC_SUBST(MAX_INTERLEAVE)
+
+
 
 
 #

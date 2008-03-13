@@ -96,7 +96,7 @@ m_bit_permute(long b, long M, long N, wht_value *x)
  *
  *  A blocking form is required for better cache performance.
  *
-*/
+ */
 void 
 split_ddl_apply(Wht *W, long S, size_t D, wht_value *x)
 {

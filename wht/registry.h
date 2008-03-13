@@ -78,7 +78,7 @@
 enum attribute_names
 { 
   INTERLEAVE_BY = 0,
-	INTERLEAVING
+	INTERLEAVING,
   VECTOR_SIZE, 
 	BLOCK_SIZE,
 };
@@ -90,6 +90,8 @@ enum attribute_names
 void split_interleave_rule(Wht *W);
 
 void split_parallel_rule(Wht *W);
+
+void split_ddl_parallel_rule(Wht *W);
 
 void split_ddl_rule(Wht *W);
 
@@ -110,6 +112,10 @@ rule_registry[] = {
 
 #if ((WHT_HAVE_OMP))
   SPLIT_RULE_ENTRY("splitp",  0, split_parallel_rule),
+#endif
+
+#if ((WHT_HAVE_OMP))
+  SPLIT_RULE_ENTRY("splitddlp",  1, split_ddl_parallel_rule),
 #endif
 
 #ifdef WHT_WITH_DDL
