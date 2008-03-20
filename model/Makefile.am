@@ -1,2 +1,2 @@
-SUBDIRS=ic
+SUBDIRS=ic cm
 

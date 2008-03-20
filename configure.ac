@@ -372,7 +372,6 @@ AC_DEFINE_UNQUOTED(WHT_CC,"$CC",
 AC_DEFINE_UNQUOTED(WHT_CFLAGS,"$CFLAGS",
   [the compiler flags used to compile this.])
 
-# TODO puts these back when model is ready to be distributed
 AC_CONFIG_FILES([
    Makefile
    whtgen/Makefile
@@ -385,6 +384,7 @@ AC_CONFIG_FILES([
    tests/Makefile
    model/Makefile
    model/ic/Makefile
+   model/cm/Makefile
 ])
 
 AC_OUTPUT
