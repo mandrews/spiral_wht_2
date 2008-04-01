@@ -287,6 +287,18 @@ AC_CHECK_FUNCS([memset strdup])
 AC_SEARCH_LIBS([sqrtl],[m],[], AC_MSG_ERROR([required sqrtl symbol not found]))
 AC_SEARCH_LIBS([ceil],[m],[], AC_MSG_ERROR([required ceil symbol not found]))
 
+# Internal measurement routines
+AC_CHECK_FUNCS([clock_gettime], 
+  AC_DEFINE(HAVE_NSEC, [], [Compile with nsec]), [])
+
+AC_CHECK_FUNCS([getrusage], 
+  AC_DEFINE(HAVE_USEC, [], [Compile with usec]), [])
+
+AC_COMPILE_IFELSE(
+  [AC_LANG_PROGRAM([[unsigned int lo, hi;]],
+    [[__asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));]])],
+  [AC_DEFINE(HAVE_RDTSC, [], [Compile with rdtsc instruction])], [])
+
 
 # 
 #  P A P I    M E A S U R E

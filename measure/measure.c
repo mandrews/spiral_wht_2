@@ -32,10 +32,7 @@
 
 extern double invnorm(double p);
 
-/** \todo Use configuration macros to prevent certain builtin metrics from
- *        being compiled 
- */
-#if 1
+#ifdef HAVE_USEC
 #include <sys/types.h>
 #include <sys/resource.h>
 
@@ -51,16 +48,8 @@ usec()
 }
 #endif
 
-#ifdef _POSIX_TIMERS 
-#ifdef _POSIX_CPUTIME
-#ifndef __INTEL_COMPILER
-#define HAVE_NSEC
-#endif/*__INTEL_COMPILER*/
-#endif/*_POSIX_CPUTIME*/
-#endif/*_POSIX_TIMERS*/
-#include <time.h>
-
 #ifdef HAVE_NSEC
+#include <time.h>
 double
 nsec()
 {
@@ -73,7 +62,7 @@ nsec()
 }
 #endif/*HAVE_NSEC*/
 
-#if 1
+#ifdef HAVE_RDTSC
 /**
  * \see 
  * @INPROCEEDINGS{Chellappa:08,
@@ -100,7 +89,7 @@ typedef union
   "=d" ((cpu_c).int32.hi))
 
 double
-cycles()
+rdtsc()
 {
   tsc_counter t0;
   RDTSC(t0);
@@ -114,14 +103,21 @@ void builtin_done() { /* Empty */ }
 measure_call_fp
 builtin_prep(char *metric) 
 { 
+
+#ifdef HAVE_USEC
   if (strcasecmp(metric, "usec")    == 0)
     return &usec;
+#endif/*HAVE_USEC*/
+
 #ifdef HAVE_NSEC
   if (strcasecmp(metric, "nsec")    == 0)
     return &nsec;
 #endif/*HAVE_NSEC*/
-  if (strcasecmp(metric, "cycles")  == 0)
-    return &cycles;
+
+#ifdef HAVE_RDTSC
+  if (strcasecmp(metric, "rdtsc")  == 0)
+    return &rdtsc;
+#endif/*HAVE_RDTSC*/
 
   return NULL;
 }
@@ -137,11 +133,18 @@ builtin_list()
 
   p = list;
 
+#ifdef HAVE_USEC
   *p = strdup("usec"); p++;
+#endif/*HAVE_USEC*/
+
 #ifdef HAVE_NSEC
   *p = strdup("nsec"); p++;
 #endif/*HAVE_NSEC*/
-  *p = strdup("cycles"); p++;
+
+#ifdef HAVE_RDTSC
+  *p = strdup("rdtsc"); p++;
+#endif/*HAVE_RDTSC*/
+
   *p = NULL; p++;
 
   return list;
