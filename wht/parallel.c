@@ -24,6 +24,8 @@
  *
  * \brief Concurrent breakdown rules implementations.
  *
+ * \todo  Improve readability of openMP code, possibly simplify.
+ * \todo  Improve openMP documentation.
  */
 
 #include "wht.h"

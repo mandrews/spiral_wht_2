@@ -133,10 +133,15 @@
   ./autogen.sh
   \endcode
 
-  To rebuild the documentation including this (README file) type:
+  To rebuild the documentation, including this \ref readme file, type:
   \code
   ./autodoc.sh
   \endcode
+
+  All non code internal documentation, including this \ref readme file, should go in
+  doc/internal.  All non code external documentation, for instance \ref
+  measure_extension "instructions to add a new measurement extension", should
+  go in doc/external.
 
   Various developer related features are enabled by configuring with 
   the maintainer mode flag:

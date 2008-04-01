@@ -31,7 +31,7 @@ computing paradigms.
 
 Interesting computing paradigms supported in the package are:
 - SIMD 
-- openMP !
+- openMP 
 - MPI !
 - IBM Cell !
 - NVIDIA Cuda !
@@ -100,5 +100,7 @@ There are several ways to contribute to the development of the package.
 - \ref measure_extension
 - \ref maintenance
 
+\section _readme For more information
+  See the \ref readme file which is also distributed in the package.
 
  */
