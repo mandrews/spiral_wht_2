@@ -330,8 +330,6 @@ p_transpose_stride(wht_value *xx, int n, int n1, long S, int pll, int B)
   } /*end of omp pragma*/
 }
 
-
-
 void 
 split_parallel_apply(Wht *W, long S, size_t U, wht_value *x)
 {

@@ -147,6 +147,8 @@ builtin_list()
   return list;
 }
 
+/** \todo Make sure these omp barriers are keeping time correctly */
+
 inline
 stat_unit
 test_helper(Wht *W, wht_value *x, measure_call_fp call)
@@ -160,9 +162,18 @@ test_helper(Wht *W, wht_value *x, measure_call_fp call)
   call(); /* Warm up */
   call(); /* Warm up */
 
-  t0 = call();
+  #pragma omp single
+  {
+    t0 = call();
+  }
+
   wht_apply(W,x);
-  t1 = call();
+  #pragma omp barrier
+
+  #pragma omp single
+  {
+    t1 = call();
+  }
 
   W->apply = apply;
   return t1 - t0;
@@ -177,9 +188,18 @@ call_helper(Wht *W, wht_value *x, measure_call_fp call)
   call(); /* Warm up */
   call(); /* Warm up */
 
-  t0 = call();
+  #pragma omp single
+  {
+    t0 = call();
+  }
+
   wht_apply(W,x);
-  t1 = call();
+  #pragma omp barrier
+
+  #pragma omp single
+  {
+    t1 = call();
+  }
 
   return t1 - t0;
 }
