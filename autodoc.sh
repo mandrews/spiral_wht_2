@@ -38,6 +38,18 @@ function highlight_extra()
 
 path=`dirname $0`
 
+tmp=`which source-highlight`
+if [ $? != 0 ]; then
+  echo 'Please install GNU source-highlight'
+  exit
+fi
+
+tmp=`which doxygen`
+if [ $? != 0 ]; then
+  echo 'Please install doxygen'
+  exit
+fi
+
 v=0
 while getopts "v:" i; do
   case "$i" in
