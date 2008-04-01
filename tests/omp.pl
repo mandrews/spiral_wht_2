@@ -1,137 +1,75 @@
 #!/usr/bin/env perl -w
 
-# TODO 
-#   - set parameters via enviroment 
-#   - collect helper functions into a single non test file
-#   - check for OMP_NUM_THREADS, if not set then set to 2
+use Helpers;
 
-use strict;
-
-use File::Basename qw/ basename dirname /;
-use POSIX qw/ceil floor/;
-use Getopt::Std;
-
-use vars qw/ %opt /;
-
-our $path     = dirname($0);
-our $verify   = "$path/../wht/wht_verify";
-
-sub usage {
-  print "omp.pl -n SIZE -k INTERLEAVE_BY\n";
-  exit 1;
-}
-
-sub _split {
-  return "split[" . join(',',@_) . "]";
-}
-
-sub _small {
-  my $n = shift @_;
-  return "small[$n]";
-}
-
-sub expect_correct {
-  my $plan = shift @_;
-  my $out  = `$verify -w '$plan'`;
-
-  if ($out =~ /^correct/) {
-    print "PASS[A] $plan\n";
-  } else {
-    print "FAIL[R] $plan\n";
-    print "!!!\n";
-    exit 1;
-  }
-}
-
-sub expect_reject {
-  my $plan = shift @_;
-  my $out  = `$verify -w '$plan'`;
-
-  if ($out =~ /^reject/) {
-    print "PASS[R] $plan\n";
-  } else {
-    print "FAIL[A] $plan\n";
-    print "!!!\n";
-    exit 1;
-  }
-}
-
-sub log2 {
-  my $n = shift;
-  return ceil(log($n)/log(2));
-}
-
-sub _splitp {
+sub splitp {
   return "splitp[" . join(',',@_) . "]";
 }
 
-sub _splitpddl {
+sub splitpddl {
   my $b = shift;
   return "splitddlp($b)[" . join(',',@_) . "]";
 }
 
-sub _smallil {
+sub smallil {
   my $k = shift @_;
   my $n = shift @_;
   return "smallil($k)[$n]";
 }
 
+$ENV{'OMP_NUM_THREADS'} ||= 2; # Set number of openMP threads if not set
 
-getopts('n:k:', \%opt ) or usage;
-$opt{'n'} or usage;
-$opt{'k'} or usage;
-
-my $n = int($opt{'n'});
-my $k = int($opt{'k'});
-
+my $n = int($ENV{'MAX_UNROLL'});
+my $k = int($ENV{'MAX_INTERLEAVE'});
 my $b = 256;
 
-my $i;
-my $j;
+printf "\nopenMP Tests (%d threads)\n\n", $ENV{'OMP_NUM_THREADS'};
 
-for ($i = 1; $i <= $n; $i++) {
-  expect_correct  _splitp(_small(1), _small($i));
+for (my $i = 1; $i <= $n; $i++) {
+  expect_correct  splitp(smalld(1), smalld($i));
 
-  expect_correct  _splitp(
-    _split(_small(1), _small(1)),
-    _split(_small(1), _small($i)));
+  expect_correct  splitp(
+    splitd(smalld(1), smalld(1)),
+    splitd(smalld(1), smalld($i)));
 
-  expect_correct  _splitp(
-    _splitp(_small(1), _small(1)),
-    _splitp(_small(1), _small($i)));
+  expect_correct  splitp(
+    splitp(smalld(1), smalld(1)),
+    splitp(smalld(1), smalld($i)));
 }
 
-for ($i = 1; $i <= $n; $i++) {
-  expect_reject   _splitp(_small(1), _small(1), _small($i));
+for (my $i = 1; $i <= $n; $i++) {
+  expect_reject   splitp(smalld(1), smalld(1), smalld($i));
 }
 
-my $K = log2($k); # Minimum codelet size to perform interleaving up to $k
+for (my $i = 1; $i <= $n; $i++) {
+  for (my $j = 4; $j < $b; $j*=2) {
+    expect_correct splitpddl($j, smalld(1), smalld($i));
 
-for ($i = 2; $i <= $k; $i *= 2) {
-  expect_correct  _splitp(_smallil($i,1),_small($K));
-}
+    expect_correct splitpddl($j, smalld($i), smalld(1));
 
-for ($i = 1; $i <= $n; $i++) {
-  for ($j = 4; $j < $b; $j*=2) {
-    expect_correct _splitpddl($j, _small(1), _small($i));
+    expect_correct splitpddl($j, 
+      splitd(smalld(1), smalld(1)),  
+      splitd(smalld(1), smalld($i)) );
 
-    expect_correct _splitpddl($j, _small($i), _small(1));
-
-    expect_correct _splitpddl($j, 
-      _split(_small(1), _small(1)),  
-      _split(_small(1), _small($i)) );
-
-    expect_correct _splitpddl($j, 
-      _splitp(_small(1), _small(1)),  
-      _splitp(_small(1), _small($i)) );
+    expect_correct splitpddl($j, 
+      splitp(smalld(1), smalld(1)),  
+      splitp(smalld(1), smalld($i)) );
   }
 }
 
-expect_reject  _splitpddl(0, _small(1), _small(1));
-expect_reject  _splitpddl(1, _small(1), _small(1));
-expect_reject  _splitpddl(2, _small(1), _small(1));
-expect_reject  _splitpddl(3, _small(1), _small(1));
-expect_reject  _splitpddl(5, _small(1), _small(1));
+expect_reject  splitpddl(0, smalld(1), smalld(1));
+expect_reject  splitpddl(1, smalld(1), smalld(1));
+expect_reject  splitpddl(2, smalld(1), smalld(1));
+expect_reject  splitpddl(3, smalld(1), smalld(1));
+expect_reject  splitpddl(5, smalld(1), smalld(1));
 
-expect_reject  _splitpddl(4, _small(1), _small(1), _small(1));
+expect_reject  splitpddl(4, smalld(1), smalld(1), smalld(1));
+
+if ($k > 2) {
+  my $K = log2($k); # Minimum codelet size to perform interleaving up to $k
+
+  for (my $i = 2; $i <= $k; $i *= 2) {
+    expect_correct  splitp(smallil($i,1),smalld($K));
+  }
+}
 

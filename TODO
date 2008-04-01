@@ -34,6 +34,9 @@ TODO:
 		factors, degree, width -> ?
 		leaf, size, node -> size
 
+  - Document ICC patch for papi 3.5.0
+    - icc 10 papi.h fails with header sys/types.h caddr_t
+
 Bugs:
 
   - Some minor memory leak issues with parser.y
@@ -44,8 +47,6 @@ Bugs:
 	- Does not install html manual to share ($htmldir)
 
   - Does not conditionally check headers xmmintrin.h, emmintrin.h
-
-  - icc 10 papi.h fails with header sys/types.h caddr_t
 
   - should not compile uncessary targets in .codelets (waste of time)
 

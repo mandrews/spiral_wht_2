@@ -47,19 +47,6 @@ esac
 # 
 #  T R A N S F O R M   T Y P E
 # 
-AC_ARG_ENABLE([double], 
-  [AS_HELP_STRING([--enable-double],
-    [compile with double precision floating point (default is enabled) ])], 
-  [ok=$enableval], 
-  [ok=yes])
-
-if test "$ok" = "yes"; then
-	AC_DEFINE(WHT_DOUBLE,1,
-    [define to compile with double precision floating point])
-  WHT_PRECISION=
-  WHT_SUFFIX=
-fi
-
 AC_ARG_ENABLE([float], 
   [AS_HELP_STRING([--enable-float],
    [compile wht with single precision floating point (default is disabled)])], 
@@ -67,13 +54,15 @@ AC_ARG_ENABLE([float],
   [ok=no])
 
 if test "$ok" = "yes"; then
-	if test "$WHT_PRECISION" != ""; then
-		AC_MSG_ERROR([--enable-float conflict])
-	fi
 	AC_DEFINE(WHT_FLOAT,1,
     [define to compile with single precision floating point])
   WHT_PRECISION=f
   WHT_SUFFIX=f
+else
+	AC_DEFINE(WHT_DOUBLE,1,
+    [define to compile with double precision floating point])
+  WHT_PRECISION=
+  WHT_SUFFIX=
 fi
 
 
@@ -141,6 +130,8 @@ if test "$have_omp" = "yes"; then
       ;;
   esac
 fi
+
+AM_CONDITIONAL(HAVE_OMP, test "$have_omp" != "no")
 
 
 # 
@@ -230,10 +221,20 @@ fi
 
 AC_DEFINE_UNQUOTED(WHT_VECTOR_SIZE,$VECTOR_SIZE, [Size of vector to use.])
 
+AC_SUBST(VECTOR_SIZE)
+
+AM_CONDITIONAL(HAVE_VECTOR, test "$VECTOR_SIZE" != 0)
+
+# Need to export interleaving related variables here
+# since they are intertwined with vector size
+
 AC_DEFINE_UNQUOTED(WHT_MAX_INTERLEAVE,$MAX_INTERLEAVE,
   [interleave K loop iterations in codelet])
 
 AC_SUBST(MAX_INTERLEAVE)
+
+AM_CONDITIONAL(HAVE_INTERLEAVE, test "$MAX_INTERLEAVE" != 0)
+
 
 
 
