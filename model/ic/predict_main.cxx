@@ -54,14 +54,14 @@ main(int argc, char **argv)
 
   if (count_file != NULL) {
     fd = fopen(count_file, "r");
-    x.load(fd);
+    x.load_counts(fd);
     fclose(fd);
   } else {
-    x.load(stdin);
+    x.load_counts(stdin);
   }
 
   fd = fopen(coeff_file, "r");
-  y.load(fd);
+  y.load_counts(fd);
   fclose(fd);
 
   x *= y;

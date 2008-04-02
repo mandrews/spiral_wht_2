@@ -183,7 +183,7 @@ end
 class AddOp < BinaryOp
   def to_s
     if vsize < 2 
-      "#{result} = #{left} + #{right};\n"
+      "add(#{result},#{left},#{right});\n"
     else
       "vadd#{vsize}(#{result},#{left},#{right});\n"
     end
@@ -193,7 +193,7 @@ end
 class SubOp < BinaryOp
   def to_s
     if vsize < 2 
-      "#{result} = #{left} - #{right};\n"
+      "sub(#{result},#{left},#{right});\n"
     else
       "vsub#{vsize}(#{result},#{left},#{right});\n"
     end
@@ -281,7 +281,7 @@ end
 class LoadOp < MemoryOp
   def to_s
     if vsize < 2 
-      sprintf "%s = %s[%s];\n", into, from, stride
+      sprintf "load(%s,%s[%s]);\n", into, from, stride
     else
       sprintf "vload%d(%s,%s[%s]);\n", vsize, into, from, stride
     end
@@ -291,7 +291,7 @@ end
 class StoreOp < MemoryOp
   def to_s
     if vsize < 2 
-      sprintf "%s[%s] = %s;\n", from, stride, into
+      sprintf "store(%s,%s[%s]);\n", into, from, stride 
     else
       sprintf "vstore%d(%s,%s[%s]);\n", vsize, into, from, stride
     end
@@ -367,7 +367,7 @@ class Generator
 
 /*
 EXTERNS: {
-  extern codelet_apply_fp #{@name};
+  extern apply_fp #{@name};
 }
 
 STRUCTS: {

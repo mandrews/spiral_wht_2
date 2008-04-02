@@ -157,7 +157,7 @@ stat_unit
 test_helper(Wht *W, wht_value *x, measure_call_fp call)
 {
   volatile double t0, t1;
-  codelet_apply_fp apply;
+  apply_fp apply;
 
   apply = W->apply;
   W->apply = null_apply;

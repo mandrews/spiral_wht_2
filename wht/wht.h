@@ -120,11 +120,6 @@ typedef struct split_children split_children;
  */
 typedef void (*apply_fp)(Wht *W, long S, size_t U, wht_value *x);
 
-/** \todo Remove this typedef once codelet generators are update with
- *  new nomenclature.
- */
-typedef apply_fp codelet_apply_fp;
-
 
 /**
  * \brief Interface (function pointer signature) for attaching rules to 
@@ -478,6 +473,31 @@ bool plan_is_balanced(Wht *W);
     exit(-1); \
   }
 /* \endcond */
+
+#define add(R0,R1,R2) \
+  R0 = R1 + R2;
+
+#define sub(R0,R1,R2) \
+  R0 = R1 - R2;
+
+#ifndef TRACE
+#define load(R0,M0) \
+  R0 = M0;
+#else
+#define load(R0,M0) \
+  R0 = M0; \
+	fprintf(stderr, "L%p ", &M0);
+#endif/*TRACE*/
+
+#ifndef TRACE
+#define store(R0,M0) \
+  M0 = R0;
+#else
+#define store(R0,M0) \
+  M0 = R0; \
+	fprintf(stderr, "S%p ", &M0);
+#endif/*TRACE*/
+
 
 #endif/* WHT_H */
 

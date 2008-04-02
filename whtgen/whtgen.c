@@ -69,7 +69,7 @@ main(int argc, char *argv[])
   /* Meta Data */
   printf("/*\n");
   printf("EXTERNS: {\n");
-  printf("extern codelet_apply_fp apply_small%d;\n", n);
+  printf("extern apply_fp apply_small%d;\n", n);
   printf("}\n");
   printf("STRUCTS: {\n");
   printf("#if (%d <= WHT_MAX_UNROLL)\n", n);
@@ -248,3 +248,4 @@ void apply_small2(Wht *W, long S, long U, wht_value *x)
 \endcode
 */
 #endif/*DOXYGEN_MAN_MODE*/
+

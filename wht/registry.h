@@ -80,7 +80,7 @@ enum attribute_names
   INTERLEAVE_BY = 0,
 	INTERLEAVING,
   VECTOR_SIZE, 
-	BLOCK_SIZE,
+	BLOCK_SIZE
 };
 
 

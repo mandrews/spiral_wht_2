@@ -266,7 +266,7 @@ operator<<(ostream& o, counts &x)
 }
 
 void
-counts::load(FILE *fd)
+counts::load_counts(FILE *fd)
 {
   char *buf;
   size_t max = 256;
@@ -300,7 +300,7 @@ counts::load_basis(FILE *fd)
 {
   counts_iter i;
 
-  load(fd);
+  load_counts(fd);
 
   for (i = this->begin(); i != this->end(); i++)
     i->second = 0.0;

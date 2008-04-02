@@ -45,21 +45,43 @@ typedef __m128d wht_vector2;
  * \param R2  	Input
  */
 #define vadd2(R0,R1,R2) \
-  R0 = _mm_add_pd(R1,R2)
+  R0 = _mm_add_pd(R1,R2);
 
 #define vsub2(R0,R1,R2) \
-  R0 = _mm_sub_pd(R1,R2)
+  R0 = _mm_sub_pd(R1,R2);
 
-#define vload2(R0,M0) \
-  R0 = _mm_load_pd(&M0)
+#define __vload2(R0,M0) \
+  R0 = _mm_load_pd(&M0);
 
-#define vstore2(R0,M0) \
-  _mm_store_pd(&M0,R0)
+
+
+#ifndef TRACE
+#define vload2(R0,M0) __vload2(R0,M0); 
+#else
+#define vload2(R0,M0) __vload2(R0,M0); \
+	fprintf(stderr, "L%p ", &M0); 
+#endif/*TRACE*/
+
+
+
+#define __vstore2(R0,M0) \
+  _mm_store_pd(&M0,R0);
+
+#ifndef TRACE
+#define vstore2(R0,M0) __vstore2(R0,M0); 
+#else
+#define vstore2(R0,M0) __vstore2(R0,M0); \
+	fprintf(stderr, "S%p ", &M0); 
+#endif/*TRACE*/
+
+
 
 #define vshuf2(R0,R1,R2,A,B) \
-  R0 = _mm_shuffle_pd(R1, R2, _MM_SHUFFLE2(A,B))
+  R0 = _mm_shuffle_pd(R1, R2, _MM_SHUFFLE2(A,B));
 
-#define vload2u(R0,A0,A1) \
+
+
+#define __vload2u(R0,A0,A1) \
   { \
     wht_vector2 TZ; \
     R0 = _mm_load_sd(&A0); \
@@ -67,9 +89,27 @@ typedef __m128d wht_vector2;
     R0 = _mm_unpacklo_pd(R0,TZ); \
   };
 
-#define vstore2u(R0,A0,A1) \
+#ifndef TRACE
+#define vload2u(R0,A0,A1) __vload2u(R0,A0,A1); 
+#else
+#define vload2u(R0,A0,A1) __vload2u(R0,A0,A1); \
+	fprintf(stderr, "L%p ", &A0); \
+	fprintf(stderr, "L%p ", &A1);
+#endif/*TRACE*/
+
+
+
+#define __vstore2u(R0,A0,A1) \
   _mm_storeh_pd(&A1,R0); \
   _mm_storel_pd(&A0,R0); 
+
+#ifndef TRACE
+#define vstore2u(R0,A0,A1) __vstore2u(R0,A0,A1); 
+#else
+#define vstore2u(R0,A0,A1) __vstore2u(R0,A0,A1); \
+	fprintf(stderr, "S%p ", &A1); \
+	fprintf(stderr, "S%p ", &A0);
+#endif/*TRACE*/
 
 #endif/*WHT_DOUBLE*/
 
@@ -79,21 +119,43 @@ typedef __m128d wht_vector2;
 typedef __m128 wht_vector4;
 
 #define vadd4(R0,R1,R2) \
-  R0 = _mm_add_ps(R1,R2)
+  R0 = _mm_add_ps(R1,R2);
 
 #define vsub4(R0,R1,R2) \
-  R0 = _mm_sub_ps(R1,R2)
+  R0 = _mm_sub_ps(R1,R2);
 
-#define vload4(R0,M0) \
-  R0 = _mm_load_ps(&M0)
 
-#define vstore4(R0,M0) \
-  _mm_store_ps(&M0,R0)
+
+#define __vload4(R0,M0) \
+  R0 = _mm_load_ps(&M0);
+
+#ifndef TRACE
+#define vload4(R0,M0) __vload4(R0,M0);
+#else
+#define vload4(R0,M0) __vload4(R0,M0); \
+  fprintf(stderr, "L%p ", &M0);
+#endif/*TRACE*/
+
+
+
+#define __vstore4(R0,M0) \
+  _mm_store_ps(&M0,R0);
+
+#ifndef TRACE
+#define vstore4(R0,M0) __vstore4(R0,M0);
+#else
+#define vstore4(R0,M0) __vstore4(R0,M0); \
+  fprintf(stderr, "S%p ", &M0);
+#endif/*TRACE*/
+
+
 
 #define vshuf4(R0,R1,R2,A,B,C,D) \
-  R0 = _mm_shuffle_ps(R1, R2, _MM_SHUFFLE(A,B,C,D))
+  R0 = _mm_shuffle_ps(R1, R2, _MM_SHUFFLE(A,B,C,D));
 
-#define vload4u(R0,A0,A1,A2,A3) \
+
+
+#define __vload4u(R0,A0,A1,A2,A3) \
   { \
     wht_vector4 R1; \
     R0 = _mm_load_ss(&A1); \
@@ -103,7 +165,20 @@ typedef __m128 wht_vector4;
     vshuf4(R0,R0,R1,0,2,0,2); \
   };
 
-#define vstore4u(R0,A0,A1,A2,A3) \
+#ifndef TRACE
+#define vload4u(R0,A0,A1,A2,A3) __vload4u(R0,A0,A1,A2,A3);
+#else
+#define vload4u(R0,A0,A1,A2,A3) __vload4u(R0,A0,A1,A2,A3); \
+  fprintf(stderr, "L%p ", &A1); \
+  fprintf(stderr, "L%p ", &A3); \
+  fprintf(stderr, "L%p ", &A0); \
+  fprintf(stderr, "L%p ", &A2);
+#endif/*TRACE*/
+
+
+
+
+#define __vstore4u(R0,A0,A1,A2,A3) \
   { \
     _mm_store_ss(&A0,R0); \
     vshuf4(R0,R0,R0,0,3,2,1); \
@@ -113,6 +188,17 @@ typedef __m128 wht_vector4;
     vshuf4(R0,R0,R0,0,3,2,1); \
     _mm_store_ss(&A3,R0); \
   };
+
+#ifndef TRACE
+#define vstore4u(R0,A0,A1,A2,A3) __vstore4u(R0,A0,A1,A2,A3);
+#else
+#define vstore4u(R0,A0,A1,A2,A3) __vstore4u(R0,A0,A1,A2,A3); \
+  fprintf(stderr, "S%p ", &A0); \
+  fprintf(stderr, "S%p ", &A1); \
+  fprintf(stderr, "S%p ", &A2); \
+  fprintf(stderr, "S%p ", &A3);
+#endif/*TRACE*/
+
 
 
 #endif/*WHT_FLOAT*/

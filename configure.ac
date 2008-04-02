@@ -13,8 +13,11 @@ AX_COMPILER_VENDOR
 # 
 #  M A I N T A I N E R   P A R A M E T E R S
 # 
-MAX_UNROLL_PKG=8
-MAX_INTERLEAVE_PKG=16
+#MAX_UNROLL_PKG=8
+#MAX_INTERLEAVE_PKG=16
+#MAX_VECTOR_PKG=4
+MAX_UNROLL_PKG=6
+MAX_INTERLEAVE_PKG=4
 MAX_VECTOR_PKG=4
 
 AC_SUBST(MAX_UNROLL_PKG)
@@ -323,6 +326,23 @@ if test "$papi_path" != "no"; then
 
   LIBS="$LIBS -lpapi"
 fi
+
+
+#
+# M E M O R Y   T R A C E
+#
+AC_ARG_ENABLE([trace], 
+  [AS_HELP_STRING([--enable-trace],
+   [compile wht with single precision floating point (default is disabled)])], 
+  [ok=$enableval], 
+  [ok=no])
+
+if test "$ok" = "yes"; then
+	AC_DEFINE(TRACE,1,
+    [define to compile with a memory trace to stderr])
+fi
+
+
 
 #  Checks for programs.
 AC_PROG_CC

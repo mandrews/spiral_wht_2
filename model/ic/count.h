@@ -25,7 +25,7 @@ class counts : public map<string, double>
 
   friend ostream& operator<<(ostream& o, counts &x);
 
-  void load(FILE *fd);
+  void load_counts(FILE *fd);
   void load_basis(FILE *fd);
 
   size_t max;
