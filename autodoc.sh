@@ -16,7 +16,6 @@ function to_txt()
 }
 
 # Syntax highlight languages that are unsupported by Doxygen
-# TODO option to control removal of space
 function highlight_extra()
 {
   html=$1
@@ -38,7 +37,7 @@ function highlight_extra()
 
 path=`dirname $0`
 
-# Require packages for Doxygen magic
+# Required packages for Doxygen magic
 pkgs="source-highlight doxygen latex gs"
 for p in $pkgs; do
   tmp=`which $p`

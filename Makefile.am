@@ -4,7 +4,6 @@ data_DATA =
 
 EXTRA_DIST = doc autogen.sh autodoc.sh extra
 
-# TODO add model when ready to be dist
 SUBDIRS = whtgen wht measure search rand model tests
 
 # Remove dependancy information
