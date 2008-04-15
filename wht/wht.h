@@ -486,7 +486,7 @@ bool plan_is_balanced(Wht *W);
 #else
 #define load(R0,M0) \
   R0 = M0; \
-	fprintf(stderr, "L%p ", &M0);
+	fprintf(stderr, "0 %p\n", &M0);
 #endif/*TRACE*/
 
 #ifndef TRACE
@@ -495,7 +495,7 @@ bool plan_is_balanced(Wht *W);
 #else
 #define store(R0,M0) \
   M0 = R0; \
-	fprintf(stderr, "S%p ", &M0);
+	fprintf(stderr, "1 %p\n", &M0);
 #endif/*TRACE*/
 
 

@@ -59,7 +59,7 @@ typedef __m128d wht_vector2;
 #define vload2(R0,M0) __vload2(R0,M0); 
 #else
 #define vload2(R0,M0) __vload2(R0,M0); \
-	fprintf(stderr, "L%p ", &M0); 
+	fprintf(stderr, "0 %p\n", &M0); 
 #endif/*TRACE*/
 
 
@@ -71,7 +71,7 @@ typedef __m128d wht_vector2;
 #define vstore2(R0,M0) __vstore2(R0,M0); 
 #else
 #define vstore2(R0,M0) __vstore2(R0,M0); \
-	fprintf(stderr, "S%p ", &M0); 
+	fprintf(stderr, "1 %p\n", &M0); 
 #endif/*TRACE*/
 
 
@@ -93,8 +93,8 @@ typedef __m128d wht_vector2;
 #define vload2u(R0,A0,A1) __vload2u(R0,A0,A1); 
 #else
 #define vload2u(R0,A0,A1) __vload2u(R0,A0,A1); \
-	fprintf(stderr, "L%p ", &A0); \
-	fprintf(stderr, "L%p ", &A1);
+	fprintf(stderr, "0 %p\n", &A0); \
+	fprintf(stderr, "0 %p\n", &A1);
 #endif/*TRACE*/
 
 
@@ -107,8 +107,8 @@ typedef __m128d wht_vector2;
 #define vstore2u(R0,A0,A1) __vstore2u(R0,A0,A1); 
 #else
 #define vstore2u(R0,A0,A1) __vstore2u(R0,A0,A1); \
-	fprintf(stderr, "S%p ", &A1); \
-	fprintf(stderr, "S%p ", &A0);
+	fprintf(stderr, "1 %p\n", &A1); \
+	fprintf(stderr, "1 %p\n", &A0);
 #endif/*TRACE*/
 
 #endif/*WHT_DOUBLE*/
@@ -133,7 +133,7 @@ typedef __m128 wht_vector4;
 #define vload4(R0,M0) __vload4(R0,M0);
 #else
 #define vload4(R0,M0) __vload4(R0,M0); \
-  fprintf(stderr, "L%p ", &M0);
+  fprintf(stderr, "0 %p\n", &M0);
 #endif/*TRACE*/
 
 
@@ -145,7 +145,7 @@ typedef __m128 wht_vector4;
 #define vstore4(R0,M0) __vstore4(R0,M0);
 #else
 #define vstore4(R0,M0) __vstore4(R0,M0); \
-  fprintf(stderr, "S%p ", &M0);
+  fprintf(stderr, "1 %p\n", &M0);
 #endif/*TRACE*/
 
 
@@ -169,10 +169,10 @@ typedef __m128 wht_vector4;
 #define vload4u(R0,A0,A1,A2,A3) __vload4u(R0,A0,A1,A2,A3);
 #else
 #define vload4u(R0,A0,A1,A2,A3) __vload4u(R0,A0,A1,A2,A3); \
-  fprintf(stderr, "L%p ", &A1); \
-  fprintf(stderr, "L%p ", &A3); \
-  fprintf(stderr, "L%p ", &A0); \
-  fprintf(stderr, "L%p ", &A2);
+  fprintf(stderr, "0 %p\n", &A1); \
+  fprintf(stderr, "0 %p\n", &A3); \
+  fprintf(stderr, "0 %p\n", &A0); \
+  fprintf(stderr, "0 %p\n", &A2);
 #endif/*TRACE*/
 
 
@@ -193,10 +193,10 @@ typedef __m128 wht_vector4;
 #define vstore4u(R0,A0,A1,A2,A3) __vstore4u(R0,A0,A1,A2,A3);
 #else
 #define vstore4u(R0,A0,A1,A2,A3) __vstore4u(R0,A0,A1,A2,A3); \
-  fprintf(stderr, "S%p ", &A0); \
-  fprintf(stderr, "S%p ", &A1); \
-  fprintf(stderr, "S%p ", &A2); \
-  fprintf(stderr, "S%p ", &A3);
+  fprintf(stderr, "1 %p\n", &A0); \
+  fprintf(stderr, "1 %p\n", &A1); \
+  fprintf(stderr, "1 %p\n", &A2); \
+  fprintf(stderr, "1 %p\n", &A3);
 #endif/*TRACE*/
 
 

@@ -1,0 +1,185 @@
+#!/usr/bin/env ruby
+#
+# http://www.computing.surrey.ac.uk/personal/st/R.Peel/cs250/din-format.html
+#
+
+def assert
+  raise "Assertion failed !" unless yield 
+end
+
+DEFAULT_PARAMS = {
+  :assoc  => 1,
+  :line   => 1,
+  :size   => 1,
+  :bytes  => 8,
+  :base   => nil,
+  :mode   => 't',
+}
+
+MODES = %w[ t m a mw mr ]
+
+# TODO use aliases like total, accesses, etc ..
+
+class Options
+  require 'optparse'
+  attr_reader :params
+  def initialize
+    @params  = DEFAULT_PARAMS
+    @options = OptionParser.new do |o|
+      o.banner = "Usage: peso [OPTIONS]"
+      o.separator ""
+      o.on("-h", "--help", 
+        "Show this help message.") { 
+        die }
+
+      o.on("-a", "--assoc=INTEGER", Integer,
+        "Cache set associativity in words (default #{DEFAULT_PARAMS[:assoc]}.") { |x|
+        @params[:assoc] = x }
+
+      o.on("-l", "--line=INTEGER", Integer,
+        "Cache line size in words (default #{DEFAULT_PARAMS[:line]}.") { |x|
+        @params[:line] = x }
+
+      o.on("-s", "--size=INTEGER", Integer,
+        "Cache size in words (default #{DEFAULT_PARAMS[:size]}.") { |x|
+        @params[:size] = x }
+
+      o.on("-b", "--bytes=INTEGER", Integer,
+        "Bytes per word (default #{DEFAULT_PARAMS[:bytes]}.") { |x|
+        @params[:bytes] = x }
+
+      o.on("-x", "--base=HEX", String,
+        "Base address in hex (default is first address in trace).") { |x|
+        @params[:base] = Integer(x) }
+
+      o.on("-r", "--report=MODE", MODES, {}, "Possible report modes:", MODES.join(', ')) { |x|
+        @params[:mode] = x }
+    end
+  end
+
+  def die(msg = nil)
+    puts @options.to_s 
+    puts "\n#{msg}" unless msg.nil?
+    exit
+  end
+
+  def parse(args)
+    begin
+      @options.parse!(args)
+    rescue => e
+      die(e.message)
+    end
+  end
+end
+
+
+
+class CacheSim
+
+  attr_reader :accesses
+
+  def initialize(params)
+    @assoc = params[:assoc]
+    @line  = params[:line]
+    @size  = params[:size]
+
+    @cache = {}
+
+    @misses   = []
+    @accesses = 0
+
+    for i in 0 .. @size
+      @cache[i] = []
+    end
+
+    @misses[0] = 0
+    @misses[1] = 0
+
+  end
+
+  def update_lru(block, elem)
+
+    assert { @cache[block].size <= @assoc }
+
+    if @cache[block].size >= @assoc
+      @cache[block].pop
+    end
+
+    @cache[block].push(elem)
+
+    assert { @cache[block].size <= @assoc }
+  end
+
+  def cache(block, elem)
+    update_lru(block,elem)
+
+    base = elem - (elem % @line)
+
+    for x in 0 .. @line
+      b = (base + x) % @size
+      e = elem + x
+      update_lru(b, e)
+    end
+
+  end
+
+  def access(elem, rw)
+    block = elem % @size
+
+    unless @cache[block].include?(elem)
+      @misses[rw] += 1
+      cache(block, elem)
+    end
+
+    @accesses += 1
+  end
+
+  def read_misses
+    @misses[0]
+  end
+
+  def write_misses
+    @misses[1]
+  end
+
+end
+
+def addr_to_elem(addr, base, bytes)
+  (addr % base) / bytes
+end
+
+if $0 == __FILE__ # Main Entry Point
+  opts = Options.new
+  opts.parse(ARGV)
+
+  base    = opts.params[:base]
+  bytes   = opts.params[:bytes]
+  mode    = opts.params[:mode]
+
+  sim = CacheSim.new(
+    { :assoc => opts.params[:assoc],
+      :line  => opts.params[:line],
+      :size  => opts.params[:size] })
+
+  while line = STDIN.gets do 
+    rw, addr = line.chomp.split(/ /)
+    rw, addr = Integer(rw), Integer(addr)
+    base = addr if base.nil?
+    elem = addr_to_elem(addr, base, bytes)
+    sim.access(elem, rw)
+  end
+
+  case mode
+    when 't'
+      puts "#{sim.accesses} #{sim.read_misses} #{sim.write_misses}"
+    when 'a'
+      puts "#{sim.accesses}"
+    when 'm'
+      puts "#{sim.read_misses + sim.write_misses}"
+    when 'mr'
+      puts "#{sim.read_misses}"
+    when 'mw'
+      puts "#{sim.write_misses}"
+   end
+      
+end
