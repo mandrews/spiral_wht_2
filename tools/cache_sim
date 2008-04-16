@@ -33,19 +33,19 @@ class Options
         die }
 
       o.on("-a", "--assoc=INTEGER", Integer,
-        "Cache set associativity in words (default #{DEFAULT_PARAMS[:assoc]}.") { |x|
+        "Cache set associativity in words (default #{DEFAULT_PARAMS[:assoc]}).") { |x|
         @params[:assoc] = x }
 
       o.on("-l", "--line=INTEGER", Integer,
-        "Cache line size in words (default #{DEFAULT_PARAMS[:line]}.") { |x|
+        "Cache line size in words (default #{DEFAULT_PARAMS[:line]}).") { |x|
         @params[:line] = x }
 
       o.on("-s", "--size=INTEGER", Integer,
-        "Cache size in words (default #{DEFAULT_PARAMS[:size]}.") { |x|
+        "Cache size in words (default #{DEFAULT_PARAMS[:size]}).") { |x|
         @params[:size] = x }
 
       o.on("-b", "--bytes=INTEGER", Integer,
-        "Bytes per word (default #{DEFAULT_PARAMS[:bytes]}.") { |x|
+        "Bytes per word (default #{DEFAULT_PARAMS[:bytes]}).") { |x|
         @params[:bytes] = x }
 
       o.on("-x", "--base=HEX", String,
