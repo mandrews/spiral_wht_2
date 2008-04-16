@@ -13,7 +13,9 @@ usage()
   printf("    -h            Show this help message.\n");
   printf("    -v            Show build information.\n");
   printf("    -w PLAN       Verify correctness of PLAN.\n");
-  printf("    -c CAPACITY   Capacity of cache in bytes.\n");
+  printf("    -c CAPACITY   Capacity of cache (in bytes).\n");
+  printf("    -b BLOCK      Size of cache block (in bytes).\n");
+  printf("    -a ASSOC      Set associativity of cache.\n");
   exit(1);
 }
 
@@ -21,22 +23,35 @@ int
 main(int argc, char **argv)
 {
   char *plan;
+  long C, b, a;
+  bool overhead;
   size_t len;
   int c;
-  long C;
 
   plan = NULL;
   C = -1;
+  b = 1;
+  a = 1;
+  overhead = false;
 
   opterr = 0;
 
-  while ((c = getopt (argc, argv, "hvw:c:")) != -1)
+  while ((c = getopt (argc, argv, "hvw:c:b:a:o")) != -1)
     switch (c) {
       case 'w':
         plan = strdup(optarg);
         break;
       case 'c':
         C = atoi(optarg);
+        break;
+      case 'b':
+        b = atoi(optarg);
+        break;
+      case 'a':
+        a = atoi(optarg);
+        break;
+      case 'o':
+        overhead = true;
         break;
       case 'h':
         usage();
@@ -50,6 +65,16 @@ main(int argc, char **argv)
   if (C < 0)
     usage();
 
+  if (! i_power_of_2(b)) {
+    printf("Option -b BLOCK needs to be a power of 2\n");
+    exit(1);
+  }
+
+  if (! i_power_of_2(a)) {
+    printf("Option -a ASSOC needs to be a power of 2\n");
+    exit(1);
+  }
+
   if (plan == NULL)
     getline(&plan, &len, stdin);
 
@@ -58,7 +83,12 @@ main(int argc, char **argv)
 
 
   Wht *W;
-  long cm;
+  long cm, ov;
+
+  C /= sizeof(wht_value);
+  b /= sizeof(wht_value);
+  // C /= a;
+  // a = (long) ceil(log(a) / log(2));
 
   W = wht_parse(plan);
 
@@ -69,9 +99,14 @@ main(int argc, char **argv)
     exit(1);
   }
 
-  cm = cm_count(W, 1, C);
-
-  printf("%ld\n", cm);
+  ov = (W->N / b)*(a-1);
+  cm = cm_count(W, 1, C, b, a);
+  
+  if (overhead)
+    /* Prefetch factor */
+    printf("%ld\n", (long) (ceil((cm-ov)/(4.0 - 1))));
+  else
+    printf("%ld\n", cm);
 
   wht_free(W);
 
