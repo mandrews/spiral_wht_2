@@ -469,11 +469,16 @@ end
 def check_opts(opts)
   die(" -n SIZE required") unless opts.params[:size]
 
-  k = opts.params[:interleave_by] * (2**opts.params[:size]) 
+  n = 2**opts.params[:size]
+  k = opts.params[:interleave_by] 
   v = opts.params[:vector_size]
 
-  unless k > v
+  unless n*k > v
     die("SIZE x INTERLEAVED_BY must be greater than VECTOR_SIZE")
+  end
+
+  if k != 1 and k < v
+    die("INTERLEAVED_BY must be greater than or equal to VECTOR_SIZE")
   end
 
 end
