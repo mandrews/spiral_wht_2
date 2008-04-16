@@ -131,16 +131,17 @@ class Search
     @max_extent     = params[:max_extent]
     @shapes         = params[:shapes]
     @measure        = params[:measure]
-    @il_max         = params[:il_max]
-    @vsize          = params[:vsize]
     @max_leaf       = params[:max_leaf]
     @rules          = params[:rules]
-    @splits         = params[:splits]
-    @smalls         = params[:smalls]
+    @splits         = params[:splits] + [ "split" ]
+    @smalls         = params[:smalls] + [ "small" ]
     @debug          = params[:debug]
     @pedantic       = params[:pedantic]
 
-    if not @rules.nil? and (not @smalls.empty? or not @splits.empty?)
+    @splits.uniq!
+    @smalls.uniq!
+
+    if not @rules.nil? and ((@smalls.length > 1) or (@splits.length > 1))
       puts "Cannot use WHT tree rule and codelet rules"
       exit
     end
@@ -358,9 +359,9 @@ class Search
     tmp = []
     zp.each do |z|
       if z > @max_leaf
-        tmp << find_best(z) 
+        tmp << find_best(z)  
       else
-        s = ["small[#{z}]"]
+        s = []
         @smalls.each do |id|
           s << "#{id}[#{z}]"
         end
@@ -372,7 +373,6 @@ class Search
     combinations(tmp).each do |s|
       s = s.to_a
       if s.size > 1
-        plans << "split[" + s.join(',') + "]"
         @splits.each do |id|
           plans << "#{id}[" + s.join(',') + "]"
         end
@@ -383,6 +383,7 @@ class Search
 
     return plans
   end
+
 end
 
 # Generate (enumerate) all k combinations of n
