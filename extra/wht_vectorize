@@ -2,7 +2,7 @@
 
 function usage() 
 {
-  echo "Usage: wht_vectorize -w WHT_PLAN -k INTERLEAVE -v VECTOR_SIZE"
+  echo "Usage: wht_vectorize -w WHT_PLAN -k INTERLEAVE -v VECTOR_SIZE [-c]"
   exit 1
 }
 
@@ -10,16 +10,19 @@ path=`dirname $0`
 
 plan=''
 
-k=2
-v=2
+v=2 # Vector size
+k=2 # Interleave parameter
+c=0 # Compose with smaller functions ?
 
-while getopts "k:w:v:h" i; do
+while getopts "k:w:v:ch" i; do
   case "$i" in
     "w") plan=$OPTARG;
     ;;
     "k") k=$OPTARG;
     ;;
     "v") v=$OPTARG;
+    ;;
+    "c") c=1
     ;;
     "h")
       usage;
@@ -30,7 +33,7 @@ while getopts "k:w:v:h" i; do
   esac
 done
 
-if [ "$plan" == "" ] ; then
+if [ "$plan" == "" ]; then
   read plan
 fi
 
@@ -41,14 +44,21 @@ plan=`${attach} -w ${plan} -r splitil[small[0]]`
 args="smallv($v)[0]"
 plan=`${attach} -w ${plan} -r $args`
 
-for ((i=k;i>=2;i/=2)); do
-  args="smallv($v,$i,1)[0]"
-  plan=`${attach} -w ${plan} -r $args`
-done
+if [ $c = 1 ]; then
+  for ((i=k;i>=2;i/=2)); do
+    args="smallv($v,$i,1)[0]"
+    plan=`${attach} -w ${plan} -r $args`
+  done
 
-for ((i=k;i>=2;i/=2)); do
-  args="smallv($v,$i,0)[0]"
+  for ((i=k;i>=2;i/=2)); do
+    args="smallv($v,$i,0)[0]"
+    plan=`${attach} -w ${plan} -r $args`
+  done
+else
+  args="smallv($v,$k,1)[0]"
   plan=`${attach} -w ${plan} -r $args`
-done
+  args="smallv($v,$k,0)[0]"
+  plan=`${attach} -w ${plan} -r $args`
+fi
 
 echo ${plan}

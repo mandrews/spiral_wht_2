@@ -2,7 +2,7 @@
 
 function usage() 
 {
-  echo "Usage: wht_interleave -w WHT_PLAN -k INTERLEAVE"
+  echo "Usage: wht_interleave -w WHT_PLAN -k INTERLEAVE [-c]"
   exit 1
 }
 
@@ -10,13 +10,16 @@ path=`dirname $0`
 
 plan=''
 
-k=2
+k=2 # Interleave parameter
+c=0 # Compose with smaller functions ?
 
-while getopts "k:w:h" i; do
+while getopts "k:w:ch" i; do
   case "$i" in
     "w") plan=$OPTARG;
     ;;
     "k") k=$OPTARG;
+    ;;
+    "c") c=1
     ;;
     "h")
       usage;
@@ -34,9 +37,14 @@ attach="${path}/../bin/wht_attach"
 
 tmp=`${attach} -w ${plan} -r splitil[small[0]]`
 
-for ((i=k;i>=2;i/=2)); do
-  arg="smallil($i)[0]"
+if [ $c = 1 ]; then
+  for ((i=k;i>=2;i/=2)); do
+    arg="smallil($i)[0]"
+    tmp=`${attach} -w ${tmp} -r $arg`
+  done
+else
+  arg="smallil($k)[0]"
   tmp=`${attach} -w ${tmp} -r $arg`
-done
+fi
 
 echo ${tmp}
