@@ -29,6 +29,7 @@ DEFAULT_PARAMS    = {
   :smalls         => [],
   :splits         => [],
   :log            => "/dev/null",
+  :worst          => false,
 }
 
 class Options
@@ -102,6 +103,10 @@ class Options
       o.on("-d", "--log=FILE", String,
         "File to log to.") { |x|
          @params[:log] = x }
+
+      o.on("-w", "--worst", 
+        "Search for the worst trees instead of the best.") { 
+         @params[:worst] = true  }
     end
   end
 
@@ -137,6 +142,7 @@ class Search
     @smalls         = params[:smalls] + [ "small" ]
     @debug          = params[:debug]
     @pedantic       = params[:pedantic]
+    @worst          = params[:worst]
 
     @splits.uniq!
     @smalls.uniq!
@@ -150,8 +156,16 @@ class Search
 
     @best = Array.new(@max_size)
 
+    if @worst
+      @search_relation = lambda { |x,y| x > y }
+      @search_initial  = -INF
+    else
+      @search_relation = lambda { |x,y| x < y }
+      @search_initial  = INF
+    end
+
     for size in 1 .. @max_size do 
-      @best[size] ||= [ { 'time' => INF, 'plan' => nil, 'id' => size} ]
+      @best[size] ||= [ { 'time' => @search_initial, 'plan' => nil, 'id' => size} ]
     end
 
   end
@@ -168,7 +182,7 @@ class Search
 
   def best=(best)
     # Add a 0 element (makes indexing easier)
-    best.unshift([{'id' => 0, 'time' => INF, 'plan' => nil}]) 
+    best.unshift([{'id' => 0, 'time' => @search_initial, 'plan' => nil}]) 
 
     best.each_index do |i|
       @best[i] = best[i] 
@@ -180,7 +194,7 @@ class Search
 
     @best.each do |y|
       y.delete_if { |x| x.nil? }
-      y.delete_if { |x| x['time'] == INF } 
+      y.delete_if { |x| x['time'] == @search_initial } 
       y.delete_if { |x| x['plan'].nil? } 
     end
 
@@ -281,7 +295,7 @@ class Search
 
     if out.nil? or out.to_f.zero?
       debug("Could not read: #{cmd}") 
-      return INF
+      return @search_initial
     else 
       return out.to_f
     end
@@ -324,7 +338,7 @@ class Search
 
       @best[size].each do |x| 
         tp = x['time']
-        if t < tp 
+        if @search_relation.call(t,tp)
 
           if @best[size].size >= @max_cache
             @best[size].delete(x) # Remove old best
@@ -346,7 +360,7 @@ class Search
     @best[size].sort! { |x,y| x['time'] <=> y['time'] }
 
     @best[size].each do |x|
-      next if x['time'] == INF
+      next if x['time'] == @search_initial
       next if x['plan'].nil?
       plans << x['plan']
       break if plans.size >= @max_cache
@@ -482,23 +496,11 @@ if $0 == __FILE__ # Main Entry Point
 
   env = load_runtime_env(opts.params[:measure].split.first)
 
-  dp = Search.new(
-    { :min_size       => opts.params[:min_size],
-      :max_size       => opts.params[:max_size],
-      :max_children   => opts.params[:max_children],
-      :max_cache      => opts.params[:max_cache],
-      :max_depth      => opts.params[:max_depth],
-      :max_extent     => opts.params[:max_extent],
-      :shapes         => opts.params[:shapes],
-      :debug          => opts.params[:verbose],
-      :pedantic       => opts.params[:pedantic],
-      :measure        => opts.params[:measure],
-      :rules          => opts.params[:rules],
-      :splits         => opts.params[:splits],
-      :smalls         => opts.params[:smalls],
-      :log            => opts.params[:log],
-      :max_leaf       => env['max_unroll'],
-    } )
+  o = opts.params.dup
+
+  o[:max_leaf] = env['max_unroll']
+
+  dp = Search.new(o)
 
   file  = opts.params[:best_plans] 
   plans = []
