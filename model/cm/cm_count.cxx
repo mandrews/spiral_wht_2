@@ -88,7 +88,6 @@ main(int argc, char **argv)
   C /= sizeof(wht_value);
   b /= sizeof(wht_value);
   // C /= a;
-  // a = (long) ceil(log(a) / log(2));
 
   W = wht_parse(plan);
 
@@ -103,8 +102,7 @@ main(int argc, char **argv)
   cm = cm_count(W, 1, C, b, a);
   
   if (overhead)
-    /* Prefetch factor */
-    printf("%ld\n", (long) (ceil((cm-ov)/(4.0 - 1))));
+    printf("%ld\n", cm-ov);
   else
     printf("%ld\n", cm);
 
