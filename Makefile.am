@@ -18,12 +18,18 @@ install-exec-local:
 	mkdir -p $(prefix)/share
 	mkdir -p $(top_srcdir)/model/share
 	mkdir -p $(prefix)/extra
-	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' shuffle
-	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' unpack
-	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' scalar_add
-	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' vector_add
-	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' scalar_mov
-	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' vector_mov
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'unpckhpd'
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'unpcklpd'
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i '[addsd|subsd]'
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i '[addpd|subpd]'
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'movsd'
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'movsd' -m
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'movapd'
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'movapd' -m
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'movhpd'
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'movhpd' -m
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'movlpd'
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'movlpd' -m
 	$(top_srcdir)/install-sh $(top_srcdir)/model/share/* $(datadir)
 	$(top_srcdir)/install-sh $(top_srcdir)/model/ic/count_sse.sh $(bindir)
 	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_dp $(prefix)/extra

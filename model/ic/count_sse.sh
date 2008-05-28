@@ -26,6 +26,10 @@ while getopts "w:i:m" i; do
   esac
 done
 
+if [ "$ins" == "" ]; then
+  usage
+fi
+
 if [ "$wht" == "" ] ; then
   read wht
 fi
