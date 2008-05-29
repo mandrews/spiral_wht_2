@@ -286,6 +286,32 @@ plan_is_balanced(Wht *W)
   return accept;
 }
 
+
+/**
+ * \todo Move the rightmost_tree code from vector.c to feature.c
+ */
+bool rightmost_tree(Wht *W);
+
+unsigned int
+plan_left_size(Wht *W)
+{
+  int i;
+  unsigned int left;
+
+  if (W->children == NULL) {
+    if (! rightmost_tree(W) && W->right != 1)
+      return W->n;
+    else
+      return 0;
+  }
+
+  left = 0;
+  for (i = 0; i < W->children->nn; i++)
+    left += plan_left_size(W->children->Ws[i]);
+
+  return left;
+}
+
 #undef min
 #undef max
 

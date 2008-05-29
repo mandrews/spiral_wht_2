@@ -440,6 +440,7 @@ unsigned int plan_min_width(Wht *W);
 unsigned int plan_max_width(Wht *W);
 unsigned int plan_min_size(Wht *W);
 unsigned int plan_max_size(Wht *W);
+unsigned int plan_left_size(Wht *W);
 
 /** \todo Replace these with plan_shape, and shape enum */
 bool plan_is_iterative(Wht *W);

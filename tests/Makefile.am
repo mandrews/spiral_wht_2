@@ -5,7 +5,7 @@ TESTS_ENVIRONMENT = BUILDDIR=$(top_builddir) \
 	VECTOR_SIZE=$(VECTOR_SIZE) \
 	$(PERL) 
 
-TESTS = default.pl 
+TESTS = default.pl classify.pl
 
 if HAVE_INTERLEAVE
 TESTS += interleave.pl

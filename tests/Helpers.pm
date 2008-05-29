@@ -3,16 +3,17 @@ package Helpers;
 require(Exporter);
 
 our @ISA = qw(Exporter);
-our @EXPORT = qw/splitd smalld expect_correct expect_reject log2/;
-our @EXPORT_OK = qw/verify path/;
+our @EXPORT = qw/ splitd smalld expect_correct expect_reject expect_classify log2 /;
+our @EXPORT_OK = qw/path verify classify /;
 
 use strict;
 
 use File::Basename qw/ basename dirname /;
 use POSIX qw/ceil floor/;
 
-our $path     = dirname($0);
-our $verify   = "$path/../wht/wht_verify";
+our $path       = dirname($0);
+our $verify     = "$path/../wht/wht_verify";
+our $classify   = "$path/../wht/wht_classify";
 
 sub splitd {
   return "split[" . join(',',@_) . "]";
@@ -52,6 +53,27 @@ sub expect_reject {
 sub log2 {
   my $n = shift;
   return ceil(log($n)/log(2));
+}
+
+sub expect_classify {
+  my $plan = shift @_;
+  my $attr = shift @_;
+  my $valu = shift @_;
+  my $out  = `$classify -w '$plan'`;
+
+  if ($out =~ /$attr:\s*(.*)/) {
+    if ($1 == $valu) {
+      print "PASS[A] $plan\n";
+    } else {
+      print "FAIL[R] $plan\n";
+      print "!!!\n";
+      exit 1;
+    }
+  } else {
+    print "FAIL[E] NO '$attr' IN '$classify'\n";
+    print "!!!\n";
+    exit 1;
+  }
 }
 
 1;

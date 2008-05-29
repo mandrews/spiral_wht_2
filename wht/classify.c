@@ -91,6 +91,7 @@ main(int argc, char **argv)
   printf("max_width:    %u\n", plan_max_width(W));
   printf("min_size:     %u\n", plan_min_size(W));
   printf("max_size:     %u\n", plan_max_size(W));
+  printf("left_size:    %u\n", plan_left_size(W));
 #if 0
   unsigned int n = plan_extent(W);
 
