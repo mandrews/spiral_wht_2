@@ -41,7 +41,10 @@ attach="${path}/../bin/wht_attach"
 
 plan=`${attach} -w ${plan} -r splitil[small[0]]`
 
-args="smallv($v)[0]"
+args="smallv($v,1)[0]"
+plan=`${attach} -w ${plan} -r $args`
+
+args="smallv($v,0)[0]"
 plan=`${attach} -w ${plan} -r $args`
 
 if [ $c = 1 ]; then

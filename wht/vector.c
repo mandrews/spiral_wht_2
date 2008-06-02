@@ -77,17 +77,25 @@ rightmost_tree(Wht *W)
 void
 small_right_vector_rule(Wht *W)
 {
-  size_t v;
+  size_t v, a;
 
   v = W->rule->params[0];
+  a = W->rule->params[1];
 
   /**  The package must be configured for vectors of size v */
   if (v != WHT_VECTOR_SIZE)
     return error_msg_set(W, "not configured for vectors of size %d",v);
 
+  /**  
+   * If thie node loads aligned memory (e.g. at unit stride) the node must
+   * be in a rightmost plan
+   */
+  if ((a == 1) && ! rightmost_tree(W))
+    return error_msg_set(W, "must be in rightmost tree of plan");
+
   /**  The node must be the rightmost node in the plan */
-  if (! (rightmost_tree(W) && (W->right == 1)))
-    return error_msg_set(W, "must be rightmost codelet in plan");
+  if (W->right != 1)
+      return error_msg_set(W, "must be rightmost codelet in plan");
 
   /**  The node must be have at least size 2v */
   if (2*v > W->N)

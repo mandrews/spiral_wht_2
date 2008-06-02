@@ -504,8 +504,10 @@ if $0 == __FILE__
     mode, vp = :general_vectorize, 1
   elsif v > 1 and k > 1 
     mode, vp = :topmost_vectorize, 1
-  elsif v > 1
+  elsif v > 1 and a
     mode, np = :right_vectorize, (2**m) / v
+  elsif v > 1 and not a
+    mode, np = :left_vectorize, (2**m) / v
   elsif k > 1
     mode = :interleave
   end
@@ -530,10 +532,17 @@ if $0 == __FILE__
       g.align_base 
     when :right_vectorize
       g.name  = "apply_small#{m}_v#{v}_a"
-      g.ident = "smallv(#{v})[#{m}]"
+      g.ident = "smallv(#{v},1)[#{m}]"
       g.type  = "wht_vector#{v}"
       g.vectorize(v)
       g.align_stride
+    when :left_vectorize
+      g.name  = "apply_small#{m}_v#{v}"
+      g.ident = "smallv(#{v},0)[#{m}]"
+      g.type  = "wht_vector#{v}"
+      g.interleave(v)
+      g.group(v,true)
+      g.vectorize(v)
     when :interleave
       g.name  = "apply_small#{m}_il#{k}"
       g.ident = "smallil(#{k})[#{m}]"

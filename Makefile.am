@@ -20,8 +20,10 @@ install-exec-local:
 	mkdir -p $(prefix)/extra
 	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'unpckhpd'
 	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'unpcklpd'
-	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i '[addsd|subsd]'
-	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i '[addpd|subpd]'
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'addsd|subsd'
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'addsd|subsd' -m
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'addpd|subpd'
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'addpd|subpd' -m
 	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'movsd'
 	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'movsd' -m
 	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'movapd'

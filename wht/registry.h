@@ -131,7 +131,7 @@ rule_registry[] = {
 #endif
 
 #if ((WHT_VECTOR_SIZE > 0))
-  SMALL_RULE_ENTRY("smallv",  1, small_right_vector_rule),
+  SMALL_RULE_ENTRY("smallv",  2, small_right_vector_rule),
 #endif
 
 #ifdef HAVE_SPIRAL

@@ -457,7 +457,7 @@ bool plan_is_balanced(Wht *W);
  */
 
 /** \cond */
-#define wht_apply(W, x) ((W->apply)(W, 1, 0, x))
+#define wht_apply(W, x) ((W->apply)(W, 1, 1, x))
 #define wht_free(W) (node_free(W))
 #define wht_parse(s) (parse(s))
 #define wht_info() (info())
