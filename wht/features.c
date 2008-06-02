@@ -293,13 +293,13 @@ plan_is_balanced(Wht *W)
 bool rightmost_tree(Wht *W);
 
 unsigned int
-plan_left_size(Wht *W)
+plan_left_tree(Wht *W)
 {
   int i;
   unsigned int left;
 
   if (W->children == NULL) {
-    if (! rightmost_tree(W) && W->right != 1)
+    if (! rightmost_tree(W))
       return W->n;
     else
       return 0;
@@ -307,10 +307,20 @@ plan_left_size(Wht *W)
 
   left = 0;
   for (i = 0; i < W->children->nn; i++)
-    left += plan_left_size(W->children->Ws[i]);
+    left += plan_left_tree(W->children->Ws[i]);
 
   return left;
 }
+
+unsigned int
+plan_right_node(Wht *W)
+{
+  if (W->children == NULL) 
+    return W->n;
+  else
+   return plan_right_node(W->children->Ws[0]);
+}
+
 
 #undef min
 #undef max

@@ -57,22 +57,25 @@ sub log2 {
 
 sub expect_classify {
   my $plan = shift @_;
-  my $attr = shift @_;
-  my $valu = shift @_;
+  my $hash = shift @_;
   my $out  = `$classify -w '$plan'`;
 
-  if ($out =~ /$attr:\s*(.*)/) {
-    if ($1 == $valu) {
-      print "PASS[A] $plan\n";
+  for my $k ( keys %$hash ) {
+    if ($out =~ /$k\s*:\s*(.*)/) {
+      my $v = $1;
+
+      if ($hash->{$k} == $v) {
+        print "PASS[A] $plan\n";
+      } else {
+        print "FAIL[R] $plan\n";
+        print "!!!\n";
+        exit 1;
+      }
     } else {
-      print "FAIL[R] $plan\n";
+      print "FAIL[E] NO '$k' IN '$classify'\n";
       print "!!!\n";
       exit 1;
     }
-  } else {
-    print "FAIL[E] NO '$attr' IN '$classify'\n";
-    print "!!!\n";
-    exit 1;
   }
 }
 
