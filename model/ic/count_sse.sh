@@ -54,7 +54,10 @@ if [ ! -e $tmp ]; then
   for ((n=1;n<=unroll;n+=1)); do
     f="${path}/../../wht/codelets/s_${n}_v_${vsize}_a.o"
     x=`objdump -d ${f} | grep -E ${ins} | grep -E ${cmd} "\(|\)" | wc -l`
-    echo "smallv($vsize)[$n] : $x" >> ${tmp}
+    echo "smallv($vsize,1)[$n] : $x" >> ${tmp}
+    f="${path}/../../wht/codelets/s_${n}_v_${vsize}.o"
+    x=`objdump -d ${f} | grep -E ${ins} | grep -E ${cmd} "\(|\)" | wc -l`
+    echo "smallv($vsize,0)[$n] : $x" >> ${tmp}
   done
 
   for ((n=1;n<=unroll;n+=1)); do
