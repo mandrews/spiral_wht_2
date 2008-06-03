@@ -32,6 +32,19 @@ install-exec-local:
 	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'movhpd' -m
 	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'movlpd'
 	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'movlpd' -m
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'addss|subss'
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'addss|subss' -m
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'addps|subps'
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'addps|subps' -m
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'movss'
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'movss' -m
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'movaps'
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'movaps' -m
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'movhps'
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'movhps' -m
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'movlps'
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'movlps' -m
+	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'shufps'
 	$(top_srcdir)/install-sh $(top_srcdir)/model/share/* $(datadir)
 	$(top_srcdir)/install-sh $(top_srcdir)/model/ic/count_sse.sh $(bindir)
 	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_dp $(prefix)/extra
