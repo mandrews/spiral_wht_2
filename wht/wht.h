@@ -29,6 +29,8 @@
 
 #include "config.h"
 
+#define _GNU_SOURCE /* Use GNU extensions to std libraries */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -410,6 +412,12 @@ void rule_eval(Wht *W);
 void rule_eval_from_string(Wht *W, char *rule, double p);
 
 
+/**
+ * \brief Remove all rules attached to WHT plan.  
+ *
+ * \param W         Root of WHT plan
+ */
+void rule_strip(Wht *W);
 
 
 /*

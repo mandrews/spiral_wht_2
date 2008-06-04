@@ -232,3 +232,26 @@ rule_eval_from_string(Wht *W, char *rule, double p)
   wht_free(R);
 }
 
+void
+rule_strip_recursive(Wht *W)
+{
+  int i;
+
+  if (W->error_msg != NULL) 
+    free(W->error_msg);
+
+  rule_attach_undo(W);
+
+  if (W->children != NULL)
+    for (i = 0; i < W->children->nn; i++)
+      rule_strip_recursive(W->children->Ws[i]);
+
+  W->to_string = node_to_string(W);
+}
+
+void
+rule_strip(Wht *W)
+{
+  rule_strip_recursive(W);
+}
+

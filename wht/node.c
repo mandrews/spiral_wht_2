@@ -125,6 +125,7 @@ params_to_string(Wht *W)
 }
 
 
+/** \todo Fix memory leak @ name_to_string:151 */
 char *
 name_to_string(Wht *W)
 {
@@ -160,6 +161,7 @@ name_to_string(Wht *W)
   return buf;
 }
 
+/** \todo Fix memory leak @ node_to_string:186 */
 char *
 node_to_string(Wht *W)
 {

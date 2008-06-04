@@ -42,6 +42,7 @@ usage()
   printf("    -v            Show build information.\n");
   printf("    -w PLAN       WHT PLAN.\n");
   printf("    -r RULE       Attach RULE to PLAN.\n");
+  printf("    -s            Strip all rules from PLAN.\n");
   exit(1);
 }
 
@@ -49,6 +50,7 @@ int
 main(int argc, char **argv)
 {
   char *plan, *rule;
+  bool strip;
   double p;
   size_t len;
   int c;
@@ -57,10 +59,11 @@ main(int argc, char **argv)
   rule  = NULL;
   p     = 1.0;
   len   = 0;
+  strip = false;
 
   opterr = 0;
 
-  while ((c = getopt (argc, argv, "hvw:r:p:")) != -1)
+  while ((c = getopt (argc, argv, "hvw:r:p:s")) != -1)
     switch (c) {
       case 'w':
         plan = optarg;
@@ -70,6 +73,9 @@ main(int argc, char **argv)
         break;
       case 'p':
         p = atof(optarg);
+        break;
+      case 's':
+        strip = true;
         break;
       case 'h':
         usage();
@@ -90,7 +96,10 @@ main(int argc, char **argv)
 
   W = wht_parse(plan);
 
-  rule_eval_from_string(W, rule, p);
+  if (! strip)
+    rule_eval_from_string(W, rule, p);
+  else
+    rule_strip(W);
 
   if (wht_error_msg(W) != NULL) {
     fprintf(stderr, "rejected, %s\n", wht_error_msg(W));
