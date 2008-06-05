@@ -232,25 +232,6 @@ class Search
     cmd = "#{SCRIPT_PATH}/../bin/wht_classify -w '#{plan}'"
     debug("Executing #{cmd}")
 
-    out = nil
-    IO.popen(cmd) do |fd|
-      while (out = fd.gets)
-
-      end
-    end
-
-    if out.nil? 
-      log("Could not read: #{cmd}") 
-      return nil
-    else 
-      return out.chomp
-    end
-  end
-
-  def classify(plan)
-    cmd = "#{SCRIPT_PATH}/../bin/wht_classify -w '#{plan}'"
-    debug("Executing #{cmd}")
-
     out = 0
     IO.popen(cmd) do |fd|
       out = fd.readlines
