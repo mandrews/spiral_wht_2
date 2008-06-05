@@ -28,11 +28,11 @@ for (my $i = $p; $i <= $n; $i++) {
   expect_correct    smallv($v,0,$i);
   expect_reject     splitd(smallv($v,1,$i), smallv($v,1,$i));
   expect_reject     splitd(smallv($v,0,$i), smallv($v,0,$i));
-  expect_correct    splitd(smalld($p), smallv($v,1,$i));
-  expect_correct    splitd(smalld($p), smallv($v,0,$i));
-  expect_reject     splitd(smalld($p), smallv($v,1,$i), smalld(1));
-  expect_reject     splitd(smalld($p), smallv($v,0,$i), smalld(1));
-  expect_correct    splitd(splitil(smalld($p),smallv($v,0,$i)), smallv($v,1,$p))
+  expect_correct    splitd(smalld(1), smallv($v,1,$i));
+  expect_correct    splitd(smalld(1), smallv($v,0,$i));
+  expect_reject     splitd(smalld(1), smallv($v,1,$i), smalld(1));
+  expect_reject     splitd(smalld(1), smallv($v,0,$i), smalld(1));
+  expect_correct    splitd(splitil(smalld(1),smallv($v,0,$i)), smallv($v,1,$p))
 }
 
 # Vary interleave factor fix size
