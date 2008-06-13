@@ -29,8 +29,6 @@
 
 #include "config.h"
 
-#define _GNU_SOURCE /* Use GNU extensions to std libraries */
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
