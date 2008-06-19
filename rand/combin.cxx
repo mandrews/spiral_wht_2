@@ -45,6 +45,10 @@ typedef map<uint, double> combin_pdf;
 
 combin::iterator combin_elem_rand(combin * c, uint n);
 
+/* Forward Declarations */
+void compos_tree_base(compos_node *r, uint min, uint max);
+
+
 /* From http://en.wikipedia.org/wiki/Binary_GCD_algorithm */
 ulong 
 gcd(ulong u, ulong v)
@@ -164,10 +168,10 @@ n_choose_k(ulong n, ulong k)
   qn_r = qn_n_choose_k(n,k);
 
   /* Normalization by GCD should cause denominator to be 1 */
-  assert (qn_r.denom == 1);
+  assert(qn_r.denom == 1);
 
   /* A negative numerator implies overflow */
-  assert (qn_r.numer >  0);
+  assert(qn_r.numer >  0);
 
   return qn_r.numer;
 }
@@ -405,26 +409,18 @@ combin_to_compos(uint n, combin *cmb)
  * random composition shifted by p (e.g. in n/p) and map back to n.
  */
 compos *
-compos_rand(uint n, uint a, uint b, uint p, uint q)
+compos_rand(uint n, uint a, uint b)
 {
   combin *cmb_a;
   compos *cmp_a;
-  combin::iterator cmb_i;
   uint np, ap, bp;
 
-  /* Shift to n/p, determine p to fit other constraints */
-  do {
-    np = (n/p) - 1;
-  } while ((np == 0) && n >= q && --p);
+  np = n - 1;
 
   ap = elem_min(np, a - 1);
   bp = elem_min(np, b - 1);
 
   cmb_a = combin_rand(np, ap, bp);
-
-  /* Map back to n */
-  for (cmb_i = cmb_a->begin(); cmb_i != cmb_a->end(); ++cmb_i)
-    *cmb_i *= p;
 
   cmp_a = combin_to_compos(n, cmb_a);
 
@@ -435,7 +431,7 @@ compos_rand(uint n, uint a, uint b, uint p, uint q)
 #undef elem_min
 
 compos_node *
-compos_tree_rand(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
+compos_tree_rand(uint n, uint min_f, uint max_f, uint max_n)
 {
   compos *cmp;
   compos::iterator cmp_i;
@@ -448,9 +444,6 @@ compos_tree_rand(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
   cpn->value = n;
   cpn->children = new compos_nodes();
 
-  if (n <= min_n)
-    return cpn;
-
   r = ((double) random() / (double) RAND_MAX);
 
   if (n <= max_n && (r >= 0.5))
@@ -461,7 +454,7 @@ compos_tree_rand(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
   if (n >= max_n && min_f < 2) 
     min_f = 2;
 
-  cmp = compos_rand(n, min_f, max_f, min_n, max_n);
+  cmp = compos_rand(n, min_f, max_f);
 
   if (cmp->size() == 1) { /* One element in composition => no children */
     delete cmp;
@@ -471,7 +464,7 @@ compos_tree_rand(uint n, uint min_f, uint max_f, uint min_n, uint max_n)
   cpn->children->resize(cmp->size());
 
   for (cmp_i = cmp->begin(), cpn_i = cpn->children->begin(); cmp_i != cmp->end(); ++cmp_i, ++cpn_i) 
-    *cpn_i = compos_tree_rand(*cmp_i, min_f, max_f, min_n, max_n);
+    *cpn_i = compos_tree_rand(*cmp_i, min_f, max_f, max_n);
 
   delete cmp;
 
@@ -573,28 +566,294 @@ compos_tree_to_wht(compos_node *cpn)
   Wht *Ws[MAX_SPLIT_NODES];
   cpns = cpn->children;
 
-  if (cpns->empty()) {
+  if (cpns->empty()) 
     return small_init(cpn->value);
-  } else {
-    /* NOTE: Antilexigraphic ordering, i.e. WHT nodes are stored right to left */
-    for (cpns_i = cpns->rbegin(), i = 0; cpns_i != cpns->rend(); ++cpns_i, i++)
-      Ws[i] = compos_tree_to_wht(*cpns_i);
 
-    return split_init(Ws, cpns->size());
+  /* NOTE: Antilexigraphic ordering, i.e. WHT nodes are stored right to left */
+  for (cpns_i = cpns->rbegin(), i = 0; cpns_i != cpns->rend(); ++cpns_i, i++)
+    Ws[i] = compos_tree_to_wht(*cpns_i);
+
+  return split_init(Ws, cpns->size());
+}
+
+compos_node *
+wht_to_compos_tree(Wht *W)
+{
+  int i, nn;
+  compos_node *cpn;
+  Wht *Wi;
+
+  cpn = new compos_node();
+  cpn->children = new compos_nodes();
+
+  if (W->children == NULL) {
+    cpn->value = W->n;
+    return cpn;
+  }
+
+  nn = W->children->nn;
+
+  /* NOTE: Antilexigraphic ordering, i.e. WHT nodes are stored right to left */
+  for (i = 0; i < nn; i++) {
+    Wi = W->children->Ws[i];
+    cpn->children->push_front(wht_to_compos_tree(Wi));
+  }
+
+  return cpn;
+}
+
+void
+compos_tree_print(compos_node *root)
+{
+  Wht *W;
+
+  W = compos_tree_to_wht(root);
+  fprintf(stderr, "%s\n", W->to_string);
+  wht_free(W);
+}
+
+
+void
+compos_tree_rotate(compos_node *r, uint min, uint max)
+{
+  compos_nodes *rs, *xs, *ys, *ws, *zs;
+  compos_node *x, *y, *w, *z;
+
+  if (min < 2)
+    return;
+
+  rs = r->children;
+
+  if (rs->size() < 2) 
+    return;
+
+  assert(rs->size() > 0);
+  x = rs->back(); rs->pop_back();
+
+  xs = x->children;
+
+  /* X must be a leaf node */
+  if (! xs->empty() ) {
+    rs->push_back(x);
+
+    compos_tree_traverse(r, compos_tree_rotate, min, max);
+    
+    return;
+  }
+
+  if ( xs->empty() && x->value >= min) {
+    rs->push_back(x);
+    return;
+  }
+
+  assert(rs->size() > 0);
+  y = rs->back(); rs->pop_back();
+
+  ys = y->children;
+
+  if (ys->empty()) { /* Base case */
+
+    rs->push_back(y);
+    rs->push_back(x);
+    compos_tree_base(r, min, max);
+    
+    // compos_tree_traverse(r, compos_tree_rotate, min, max);
+
+    return;
+  }
+
+  assert(ys->size() > 0);
+  w = ys->back(); ys->pop_back();
+  assert(ys->size() > 0);
+  z = ys->back(); ys->pop_back();
+
+  ws = w->children;
+  zs = z->children;
+
+  if (ys->empty()) {
+    compos_tree_free(y);
+  } else {
+    compos_tree_fix(y, min, max);
+    rs->push_back(y);
+  }
+
+  if ( ( zs->empty() &&  ws->empty()) ) {
+
+    rs->push_back(z);
+    rs->push_back(w);
+    rs->push_back(x);
+
+    compos_tree_base(r, min, max);
+
+    // compos_tree_traverse(r, compos_tree_rotate, min, max);
+
+    return;
+  } else
+  if ( (!zs->empty() &&  ws->empty()) ) {
+
+    rs->push_back(z);
+    rs->push_back(w);
+    rs->push_back(x);
+
+    compos_tree_base(r, min, max);
+
+    // compos_tree_traverse(r, compos_tree_rotate, min, max);
+
+    return;
+
+  } else 
+  if ( (zs->empty() &&  !ws->empty()) ) {
+
+    rs->push_back(w); 
+    rs->push_back(z);
+    rs->push_back(x);
+
+    compos_tree_base(r, min, max);
+
+    // compos_tree_traverse(r, compos_tree_rotate, min, max);
+
+    return;
+
+  } else 
+  if ( (!zs->empty() && !ws->empty()) ) {
+
+    rs->push_front(x); 
+    ys->push_back(z);
+    ys->push_back(w);
+
+    // compos_tree_traverse(r, compos_tree_rotate, min, max);
+
+    return;
+
+  } else {
+    assert(false);
   }
 }
 
-char* 
-compos_tree_to_string(compos_node *cpn)
+void 
+compos_tree_base(compos_node *r, uint min, uint max)
 {
-  Wht *W;
-  char *buf;
+  compos_nodes *rs, *xs, *ys;
+  compos_node *x, *y;
+  uint xv, yv, zv;
 
-  W = compos_tree_to_wht(cpn);
+  rs = r->children;
 
-  buf = node_to_string(W);
+  if (rs->size() < 2) 
+    return;
 
-  wht_free(W);
+  assert(rs->size() > 0);
+  x = rs->back(); rs->pop_back();
 
-  return buf;
+  xs = x->children;
+
+  /* X must be a leaf node */
+  if (! xs->empty()) {
+    rs->push_back(x);
+    return;
+  }
+
+  assert(rs->size() > 0);
+  y = rs->back(); rs->pop_back();
+
+  ys = y->children;
+
+  /* Y must be a leaf node */
+  if (! ys->empty()) { 
+    rs->push_back(y);
+    rs->push_back(x);
+    return;
+  }
+
+  xv = x->value;
+  yv = y->value;
+  zv = xv + yv;
+
+  if ( (xv >=  min) && (zv  <  max) ||
+       (xv >=  min) && (zv  >= max) ) { /* NoOp   */
+    rs->push_back(y);
+    rs->push_back(x);
+    return;
+
+  } else
+  if ( (xv  <  min) && (yv >= min) ) { /* Swap   */
+    rs->push_back(x);
+    rs->push_back(y);
+
+    return;
+
+  } else
+  if ( (xv  <  min) && (zv  <  max) ) { /* Merge  */
+    x->value += yv;
+
+    rs->push_back(x);
+
+    compos_tree_free(y);
+
+    compos_tree_base(r, min, max);
+    compos_tree_fix(r, min, max);
+
+    return;
+
+  } else {
+    assert(false);
+  }
+
 }
+
+void 
+compos_tree_fix(compos_node *r, uint min, uint max)
+{
+  compos_node *x;
+  compos_nodes *rs, *xs;
+  compos_nodes::reverse_iterator i;
+
+  rs = r->children;
+
+  if (rs->empty()) 
+    return;
+
+  if (rs->size() > 1)
+    return;
+
+  x = rs->back(); rs->pop_back();
+
+  xs = x->children;
+
+  if (xs->empty()) {
+    r->value = x->value;
+  } else {
+    for (i = xs->rbegin(); i != xs->rend(); ++i)
+      rs->push_back(*i);
+  }
+
+  compos_tree_free(x);
+
+}
+
+void
+compos_tree_traverse(compos_node *r, compos_tree_op_fp f, uint min, uint max)
+{
+  compos_nodes *rs;
+  compos_nodes::reverse_iterator i;
+
+  rs = r->children;
+
+  if (rs->empty()) 
+    return;
+
+  /** 
+   * \todo There is a problem with *i reference an element that (f) could
+   * possibly delete from the list.
+   */
+  for (i = rs->rbegin(); i != rs->rend(); ++i) {
+    (f)(*i, min, max);
+
+    compos_tree_traverse(*i, f, min, max);
+
+    /* Apply f to root if right most structure has been collapsed */
+    if (rs->back()->children->empty()) 
+      (f)(r, min, max);
+  }
+}
+

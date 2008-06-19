@@ -139,14 +139,7 @@ main(int argc, char **argv)
 
   root = NULL;
 
-  root = compos_tree_rand(wht_size, min_child, max_child, min_leaf, max_leaf);
-#if 0
-  if (wht_type == NULL || (strcmp(wht_type, "general") == 0))
-    root = compos_tree_rand(wht_size, min_child, max_child, min_leaf, max_leaf);
-  else if (strcmp(wht_type, "right") == 0)
-    root = compos_tree_rand_right(wht_size, min_child, max_child, min_leaf, max_leaf);
-#endif
-
+  root = compos_tree_rand(wht_size, min_child, max_child, max_leaf);
 
   W = compos_tree_to_wht(root);
   assert(W->n == ((long) wht_size));

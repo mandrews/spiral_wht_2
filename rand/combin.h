@@ -84,6 +84,8 @@ typedef struct compos_node compos_node;
 
 typedef list<struct compos_node *> compos_nodes;
 
+typedef void (*compos_tree_op_fp)(compos_node *r, uint min, uint max);
+
 /**
  * \brief A composition tree node.  
  *
@@ -176,13 +178,10 @@ combin * combin_enum_next();
  * \param n     Total size
  * \param a     Minimum number of elements
  * \param b     Maximum number of elements
- * \param min   Minimum element
  * \param max   Maximum element
  * \return      Composition tree
- *
- * \bug Minimum element parameter is not working
  */
-compos_node * compos_tree_rand(uint n, uint a, uint b, uint min, uint max);
+compos_node * compos_tree_rand(uint n, uint a, uint b, uint max);
 
 /**
  * \brief Generate a random rightmost composition tree of size n.
@@ -201,9 +200,6 @@ compos_node * compos_tree_rand_right(uint n, uint a, uint b, uint min, uint max)
 
 void compos_tree_free(compos_node *node);
 
-char* 
-compos_tree_to_string(compos_node *cpn);
-
 /**
  * \brief Convert a composition tree into a WHT plan.
  *
@@ -215,5 +211,13 @@ compos_tree_to_string(compos_node *cpn);
  */
 Wht *
 compos_tree_to_wht(compos_node *cpn);
+
+compos_node *
+wht_to_compos_tree(Wht *W);
+
+void compos_tree_rotate(compos_node *r, uint min, uint max);
+void compos_tree_fix(compos_node *r, uint min, uint max);
+
+void compos_tree_traverse(compos_node *r, compos_tree_op_fp f, uint min, uint max);
 
 #endif/*COMBIN_H*/
