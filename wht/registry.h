@@ -93,7 +93,11 @@ void split_parallel_rule(Wht *W);
 
 void split_ddl_parallel_rule(Wht *W);
 
+void split_vector_ddl_rule(Wht *W);
+
 void split_ddl_rule(Wht *W);
+
+
 
 void small_interleave_rule(Wht *W);
 
@@ -101,41 +105,51 @@ void small_vector_rule(Wht *W);
 
 void small_right_vector_rule(Wht *W);
 
+void small_vector_ddl_rule(Wht *W);
+
 void small_external_rule(Wht *W);
 
 static const rule 
 rule_registry[] = {
 
 #if ((WHT_MAX_INTERLEAVE > 0) || (WHT_VECTOR_SIZE > 0))
-  SPLIT_RULE_ENTRY("splitil", 0, split_interleave_rule),
+  SPLIT_RULE_ENTRY("splitil",     0, split_interleave_rule),
 #endif
 
 #if ((WHT_HAVE_OMP))
-  SPLIT_RULE_ENTRY("splitp",  0, split_parallel_rule),
+  SPLIT_RULE_ENTRY("splitp",      0, split_parallel_rule),
 #endif
 
 #if ((WHT_HAVE_OMP))
-  SPLIT_RULE_ENTRY("splitddlp",  1, split_ddl_parallel_rule),
-#endif
-
-#ifdef WHT_WITH_DDL
-  SPLIT_RULE_ENTRY("splitddl", 1, split_ddl_rule),
-#endif
-
-#if ((WHT_MAX_INTERLEAVE > 0)) 
-  SMALL_RULE_ENTRY("smallil", 1, small_interleave_rule),
-#endif
-
-#if ((WHT_MAX_INTERLEAVE > 0) && (WHT_VECTOR_SIZE > 0))
-  SMALL_RULE_ENTRY("smallv",  3, small_vector_rule),
+  SPLIT_RULE_ENTRY("splitddlp",   1, split_ddl_parallel_rule),
 #endif
 
 #if ((WHT_VECTOR_SIZE > 0))
-  SMALL_RULE_ENTRY("smallv",  2, small_right_vector_rule),
+  SPLIT_RULE_ENTRY("splitvd",    1, split_vector_ddl_rule),
+#endif
+
+#ifdef WHT_WITH_DDL
+  SPLIT_RULE_ENTRY("splitddl",    1, split_ddl_rule),
+#endif
+
+#if ((WHT_MAX_INTERLEAVE > 0)) 
+  SMALL_RULE_ENTRY("smallil",     1, small_interleave_rule),
+#endif
+
+#if ((WHT_MAX_INTERLEAVE > 0) && (WHT_VECTOR_SIZE > 0))
+  SMALL_RULE_ENTRY("smallv",      3, small_vector_rule),
+#endif
+
+#if ((WHT_VECTOR_SIZE > 0))
+  SMALL_RULE_ENTRY("smallv",      2, small_right_vector_rule),
+#endif
+
+#if ((WHT_VECTOR_SIZE > 0))
+  SMALL_RULE_ENTRY("smallvd",     1, small_vector_ddl_rule),
 #endif
 
 #ifdef HAVE_SPIRAL
-  SMALL_RULE_ENTRY("spiral",  0, small_external_rule),
+  SMALL_RULE_ENTRY("spiral",      0, small_external_rule),
 #endif
 
   RULE_ENTRY_END /* This halts iteration on the registry */
