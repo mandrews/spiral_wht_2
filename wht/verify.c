@@ -105,6 +105,7 @@ main(int argc, char **argv)
   wht_apply(D,y);
 
   /* printf("%s\n", W->to_string); */
+  /* printf("%g\n", wht_max_norm(x,y,N)); */
 
   if (wht_max_norm(x,y,N) < WHT_STABILITY_THRESHOLD)
     printf("correct\n");   

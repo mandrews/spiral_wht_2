@@ -49,19 +49,19 @@ for (my $i = $p; $i <= $n; $i++) {
   expect_reject     splitv($v, smallv($v,$q), smalld($i), smalld($i));
 
   expect_correct    splitv($v, smallv($v,$q), smallv($v,$v,1,$i));
-  expect_correct    splitv($v, smalld($q), smallv($v,$v,1,$i));
+  expect_reject     splitv($v, smalld($q), smallv($v,$v,1,$i));
   expect_reject     splitv($v, smallv($v,$q), smalld($i));
 
-  expect_correct    splitv($v, smalld($q), 
+  expect_reject     splitv($v, smalld($q), 
     splitd(smallv($v,$v,1,$p), smallv($v,$v,1,$i)));
 
   expect_reject    splitv($v, smalld($q), 
     splitd(smalld($p), smalld($i)));
 
-  expect_correct    splitv($v, smalld($q), 
+  expect_correct    splitv($v, smallv($v,$q), 
     splitd(smallv($v,$v,1,$p), smallv($v,$v,1,$p), smallv($v,$v,1,$i)));
 
-  expect_reject    splitv($v, smalld($q), 
+  expect_reject    splitv($v, smallv($v,$q), 
     splitv($v,smallv($v,$v,1,$p), smallv($v,$v,1,$i)));
 }
 

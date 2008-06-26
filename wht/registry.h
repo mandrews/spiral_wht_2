@@ -81,6 +81,7 @@ enum attribute_names
 	INTERLEAVING,
   VECTOR_SIZE, 
   VECTOR_STRIDE, 
+  VECTOR_S_STRIDE, /* Stride N / v^2 */
 	BLOCK_SIZE
 };
 
