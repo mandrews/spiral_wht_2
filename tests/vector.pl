@@ -3,6 +3,11 @@
 use Helpers;
 use List::Util qw/max/;
 
+sub splitv {
+  my $v = shift @_;
+  return "splitv($v)[" . join(',',@_) . "]";
+}
+
 sub splitil {
   return "splitil[" . join(',',@_) . "]";
 }
@@ -19,9 +24,12 @@ my $k = int($ENV{'MAX_INTERLEAVE'});
 my $v = int($ENV{'VECTOR_SIZE'});
 my $p = log2($v) + 1; # Min size for vectorization by v
 my $r = max(log2($k), log2(2*$v)); # Min size for max interleave
+my $q = $p - 1;
 
 
 print "\nVectorization Tests\n\n";
+
+expect_correct    smallv($v,$q);
 
 for (my $i = $p; $i <= $n; $i++) {
   expect_correct    smallv($v,1,$i);
@@ -32,7 +40,29 @@ for (my $i = $p; $i <= $n; $i++) {
   expect_correct    splitd(smalld(1), smallv($v,0,$i));
   expect_reject     splitd(smalld(1), smallv($v,1,$i), smalld(1));
   expect_reject     splitd(smalld(1), smallv($v,0,$i), smalld(1));
-  expect_correct    splitd(splitil(smalld(1),smallv($v,0,$i)), smallv($v,1,$p))
+  expect_correct    splitd(splitil(smalld(1),smallv($v,0,$i)), smallv($v,1,$p));
+
+  # Reject L^V^2_V unless $i == $v
+  expect_reject     smallv($v,$i);
+
+  # Vector split is binary
+  expect_reject     splitv($v, smallv($v,$q), smalld($i), smalld($i));
+
+  expect_correct    splitv($v, smallv($v,$q), smallv($v,$v,1,$i));
+  expect_correct    splitv($v, smalld($q), smallv($v,$v,1,$i));
+  expect_reject     splitv($v, smallv($v,$q), smalld($i));
+
+  expect_correct    splitv($v, smalld($q), 
+    splitd(smallv($v,$v,1,$p), smallv($v,$v,1,$i)));
+
+  expect_reject    splitv($v, smalld($q), 
+    splitd(smalld($p), smalld($i)));
+
+  expect_correct    splitv($v, smalld($q), 
+    splitd(smallv($v,$v,1,$p), smallv($v,$v,1,$p), smallv($v,$v,1,$i)));
+
+  expect_reject    splitv($v, smalld($q), 
+    splitv($v,smallv($v,$v,1,$p), smallv($v,$v,1,$i)));
 }
 
 # Vary interleave factor fix size

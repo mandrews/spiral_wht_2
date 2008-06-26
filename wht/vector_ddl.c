@@ -30,7 +30,7 @@
 #include "registry.h"
 
 void 
-split_vector_ddl_apply(Wht *W, long S, size_t D, wht_value *x)
+split_vector_apply(Wht *W, long S, size_t D, wht_value *x)
 {
   Wht *Wi;
   long N, Ni, j, R, T;
@@ -63,7 +63,7 @@ split_vector_ddl_apply(Wht *W, long S, size_t D, wht_value *x)
  * \param   W   WHT Plan
  */
 void
-split_vector_ddl_rule(Wht *W)
+split_vector_rule(Wht *W)
 {
   Wht *Wl, *Wr;
 
@@ -76,6 +76,8 @@ split_vector_ddl_rule(Wht *W)
 
   W->attr[VECTOR_SIZE] = W->rule->params[0];
 
+  W->provides[VECTOR_STRIDE] = true;
+
 #if 0
   if (! i_power_of_2(v))
     return error_msg_set(W, "vector length must be a power of 2");
@@ -83,19 +85,51 @@ split_vector_ddl_rule(Wht *W)
   W->attr[VECTOR_SIZE] = v;
 #endif
 
-#if 0
   Wr = W->children->Ws[0]; /* Rightmost in Binary split */
   Wl = W->children->Ws[1]; /* Leftmost in Binary split */
 
-  if (Wr->children == NULL) {
+  if (! children_require(Wr, VECTOR_STRIDE))
+    return error_msg_set(W, "all rightmost codelets must be applied at vector stride");
 
-  } else {
-
-  }
+#if 0
+  if (children_provide(Wr, VECTOR_STRIDE))
+    return error_msg_set(W, "all rightmost codelets cannot change stride");
 #endif
 
+  if (parent_provides(W, VECTOR_STRIDE)) 
+    return error_msg_set(W, "parent codelet cannot change stride");
 
-  W->apply = split_vector_ddl_apply;
+  W->apply = split_vector_apply;
+}
+
+void apply_small1_v2(Wht *W, long S, long U, wht_value *x);
+
+void
+small_vector_rule_3(Wht *W)
+{
+  size_t v;
+
+  v = W->rule->params[0];
+
+  W->attr[VECTOR_SIZE]    = v;
+
+  switch (v) {
+    case 2:
+      if (W->N != 2)
+        return error_msg_set(W, "codelet must be size 2^1 for v = 2");
+
+      W->apply = &apply_small1_v2;
+      break;
+    case 4:
+      if (W->N != 4)
+        return error_msg_set(W, "codelet must be size 2^2 for v = 4");
+
+      // W->apply = &apply_small2_v4;
+      break;
+    default:
+      return error_msg_set(W, "no codelets for vector size %zd", v);
+      break;
+  }
 }
 
 #include "simd.h"
@@ -123,29 +157,5 @@ void apply_small1_v2(Wht *W, long S, long U, wht_value *x)
 #else
   wht_exit("initialization guards should prevent this message");
 #endif
-}
-
-void
-small_vector_ddl_rule(Wht *W)
-{
-  W->attr[VECTOR_SIZE] = W->rule->params[0];
-
-  switch (W->attr[VECTOR_SIZE]) {
-    case 2:
-      if (W->N != 2)
-        return error_msg_set(W, "codelet must be size 2^1 for v = 2");
-
-      W->apply = &apply_small1_v2;
-      break;
-    case 4:
-      if (W->N != 4)
-        return error_msg_set(W, "codelet must be size 2^2 for v = 4");
-
-      // W->apply = &apply_small2_v4;
-      break;
-    default:
-      return error_msg_set(W, "not codelets for vector size");
-      break;
-  }
 }
 

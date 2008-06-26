@@ -75,7 +75,7 @@ rightmost_tree(Wht *W)
  * attach:
  */
 void
-small_right_vector_rule(Wht *W)
+small_vector_rule_2(Wht *W)
 {
   size_t v, a;
 
@@ -111,14 +111,14 @@ small_right_vector_rule(Wht *W)
 
 /**
  * \brief Replace small node with a vectorized small node if possible.
- *
+ 
  * \param   W   WHT Plan
  *
  * The node within the plan must meet the following criteria for the %rule to
  * attach:
  */
 void
-small_vector_rule(Wht *W)
+small_vector_rule_1(Wht *W)
 {
   size_t v, k, a;
 
@@ -138,25 +138,23 @@ small_vector_rule(Wht *W)
     return error_msg_set(W, "must be in rightmost tree of plan");
 
   /**  The node must be right of at least one node in plan */
-#if 0
-  if (W->right == 1)
+  if (! parent_provides(W, VECTOR_STRIDE) && W->right == 1)
     return error_msg_set(W, "cannot be rightmost codelet in plan");
-#endif
 
-  W->rule->params[0] = k;
-  W->rule->params[1] = UNSET_PARAMETER;
-  W->rule->params[2] = UNSET_PARAMETER;
-  W->rule->n = 1;
-  strcpy(W->rule->name, "smallil");
+  if (! parent_provides(W, VECTOR_STRIDE)) {
+    W->rule->params[0] = k;
+    W->rule->params[1] = UNSET_PARAMETER;
+    W->rule->params[2] = UNSET_PARAMETER;
+    W->rule->n = 1;
+    strcpy(W->rule->name, "smallil");
 
-  /**  
-   * All rules regarding the interleaving of this node must be satisfied 
-   * \see small_interleave_rule
-   */
+    /**  
+     * All rules regarding the interleaving of this node must be satisfied 
+     * \see small_interleave_rule
+     */
 
-#if 0
-  small_interleave_rule(W);
-#endif
+    small_interleave_rule(W);
+  }
 
   W->rule->params[0] = v;
   W->rule->params[1] = k;
@@ -170,6 +168,9 @@ small_vector_rule(Wht *W)
     return error_msg_set(W, "could not find codelet");
 
   W->attr[VECTOR_SIZE] = v;
+
+  if ((a == 1) && (v == k))
+    W->requires[VECTOR_STRIDE] = true;
 
   /** 
    * \todo Check and test (size * interleave_by) > VECTOR_SIZE.

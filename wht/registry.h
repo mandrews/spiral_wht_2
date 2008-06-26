@@ -80,12 +80,15 @@ enum attribute_names
   INTERLEAVE_BY = 0,
 	INTERLEAVING,
   VECTOR_SIZE, 
+  VECTOR_STRIDE, 
 	BLOCK_SIZE
 };
 
 
 
 /* Transform extensions to core package */
+
+void split_vector_rule(Wht *W);
 
 void split_interleave_rule(Wht *W);
 
@@ -95,15 +98,13 @@ void split_ddl_parallel_rule(Wht *W);
 
 void split_ddl_rule(Wht *W);
 
-void split_vector_ddl_rule(Wht *W);
+
 
 void small_interleave_rule(Wht *W);
 
-void small_vector_rule(Wht *W);
-
-void small_right_vector_rule(Wht *W);
-
-void small_vector_ddl_rule(Wht *W);
+void small_vector_rule_1(Wht *W);
+void small_vector_rule_2(Wht *W);
+void small_vector_rule_3(Wht *W);
 
 void small_external_rule(Wht *W);
 
@@ -126,24 +127,15 @@ rule_registry[] = {
   SPLIT_RULE_ENTRY("splitddl", 1, split_ddl_rule),
 #endif
 
-#if ((WHT_VECTOR_SIZE > 0))
-  SPLIT_RULE_ENTRY("splitvd", 1, split_vector_ddl_rule),
-#endif
-
 #if ((WHT_MAX_INTERLEAVE > 0)) 
   SMALL_RULE_ENTRY("smallil", 1, small_interleave_rule),
 #endif
 
-#if ((WHT_MAX_INTERLEAVE > 0) && (WHT_VECTOR_SIZE > 0))
-  SMALL_RULE_ENTRY("smallv",  3, small_vector_rule),
-#endif
-
 #if ((WHT_VECTOR_SIZE > 0))
-  SMALL_RULE_ENTRY("smallv",  2, small_right_vector_rule),
-#endif
-
-#if ((WHT_VECTOR_SIZE > 0))
-  SMALL_RULE_ENTRY("smallvd",  1, small_vector_ddl_rule),
+  SPLIT_RULE_ENTRY("splitv",  1, split_vector_rule),
+  SMALL_RULE_ENTRY("smallv",  3, small_vector_rule_1),
+  SMALL_RULE_ENTRY("smallv",  2, small_vector_rule_2),
+  SMALL_RULE_ENTRY("smallv",  1, small_vector_rule_3),
 #endif
 
 #ifdef HAVE_SPIRAL

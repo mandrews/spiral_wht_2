@@ -79,19 +79,40 @@ rule_eval(Wht *W)
 {
   size_t i, nn;
 
+  /* Evaluate the rule on the root node */
   if (W->rule->call != NULL)
     W->rule->call(W);
 
+
+  /* Recursively evaluate ? */
+  if (W->children != NULL) {
+
+    /* Remove previous error message since this could be due to circular
+     * dependancies
+     */
+    if (W->error_msg != NULL)
+      i_free(W->error_msg);
+
+    W->error_msg = NULL;
+
+
+    /* Recursively evaluate child rules */
+    nn = W->children->nn;
+    for (i = 0; i < nn; i++) 
+      rule_eval(W->children->Ws[i]);
+
+    /* Again, evaluate the rule on the root node to resolve circular
+     * dependancies */
+    if (W->rule->call != NULL)
+      W->rule->call(W);
+  }
+
+  /* Rewrite the string member associated with node */
   if (W->to_string != NULL)
     i_free(W->to_string);
 
   W->to_string = node_to_string(W);
 
-  if (W->children != NULL) {
-    nn = W->children->nn;
-    for (i = 0; i < nn; i++) 
-      rule_eval(W->children->Ws[i]);
-  }
 }
 
 rule *

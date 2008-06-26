@@ -27,6 +27,7 @@
  */
 
 #include "wht.h"
+#include "registry.h"
 
 /**
  * \note This symbol cannot be inlined since it needs an address to be referenced
@@ -199,5 +200,37 @@ node_to_string(Wht *W)
   strncat(buf,"]",1);
 
   return buf;
+}
+
+bool
+children_require(Wht *W, enum attribute_names A)
+{
+  int i;
+
+  if (W->children == NULL)
+    return W->requires[A];
+
+  for (i = 0; i < W->children->nn; i++)
+    if (! children_require(W->children->Ws[i], A))
+      return false;
+
+  return true;
+}
+
+bool
+parent_provides(Wht *W, enum attribute_names A) 
+{
+  Wht *Wp;
+
+  Wp = W->parent;
+
+  while (Wp != NULL) {
+    if (Wp->provides[A])
+      return true;
+
+    Wp = Wp->parent;
+  }
+
+  return false;
 }
 
