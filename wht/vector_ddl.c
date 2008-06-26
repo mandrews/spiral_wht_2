@@ -33,7 +33,7 @@ void
 split_vector_ddl_apply(Wht *W, long S, size_t D, wht_value *x)
 {
   Wht *Wi;
-  long N, Ni, j, k, R, T;
+  long N, Ni, j, R, T;
   size_t v;
 
   v   = W->attr[VECTOR_SIZE];
@@ -42,18 +42,19 @@ split_vector_ddl_apply(Wht *W, long S, size_t D, wht_value *x)
 
   Wi  = W->children->Ws[0];
   Ni  = W->children->ns[0];
+  R   = 1;
+  T   = v;
+
+  (Wi->apply)(Wi, S*v, S, x);
+
+  Wi  = W->children->Ws[1];
+  Ni  = W->children->ns[1];
   R   = N / v;
   T   = 1;
 
   for (j = 0; j < R; j++)
     (Wi->apply)(Wi, S, S, x+j*Ni);
 
-  Wi  = W->children->Ws[1];
-  Ni  = W->children->ns[1];
-  R   = 1;
-  T   = v;
-
-  (Wi->apply)(Wi, S*v, S, x);
 }
 
 /**
@@ -64,6 +65,8 @@ split_vector_ddl_apply(Wht *W, long S, size_t D, wht_value *x)
 void
 split_vector_ddl_rule(Wht *W)
 {
+  Wht *Wl, *Wr;
+
   /* Check that codelet is split */
   if (W->children == NULL)
     return error_msg_set(W, "codelet must be split for ddl");
@@ -80,19 +83,69 @@ split_vector_ddl_rule(Wht *W)
   W->attr[VECTOR_SIZE] = v;
 #endif
 
-  /* W->provides[INTERLEAVING] = true; */
+#if 0
+  Wr = W->children->Ws[0]; /* Rightmost in Binary split */
+  Wl = W->children->Ws[1]; /* Leftmost in Binary split */
+
+  if (Wr->children == NULL) {
+
+  } else {
+
+  }
+#endif
+
 
   W->apply = split_vector_ddl_apply;
+}
+
+#include "simd.h"
+
+void apply_small1_v2(Wht *W, long S, long U, wht_value *x)
+{
+#if (2 == WHT_VECTOR_SIZE)
+  wht_vector2 ta1;
+  wht_vector2 ta2;
+  wht_vector2 ta3;
+  wht_vector2 ta4;
+  wht_vector2 ta5;
+
+  vload2(ta1,x[0]);
+
+  vshuf2(ta2,ta1,ta1,0,1);
+
+  vadd2(ta3,ta1,ta2);
+  vsub2(ta4,ta2,ta1);
+
+  vshuf2(ta5,ta3,ta4,1,1);
+
+  vstore2(ta5,x[0]);
+
+#else
+  wht_exit("initialization guards should prevent this message");
+#endif
 }
 
 void
 small_vector_ddl_rule(Wht *W)
 {
-  W->apply = codelet_apply_lookup(W);
-
   W->attr[VECTOR_SIZE] = W->rule->params[0];
 
-  if (W->apply == NULL) 
-    return error_msg_set(W, "could not find codelet");
+  switch (W->attr[VECTOR_SIZE]) {
+    case 2:
+      if (W->N != 2)
+        return error_msg_set(W, "codelet must be size 2^1 for v = 2");
+
+      W->apply = &apply_small1_v2;
+      break;
+    case 4:
+      if (W->N != 4)
+        return error_msg_set(W, "codelet must be size 2^2 for v = 4");
+
+      // W->apply = &apply_small2_v4;
+      break;
+    default:
+      return error_msg_set(W, "not codelets for vector size");
+      break;
+  }
 }
 

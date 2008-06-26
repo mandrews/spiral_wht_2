@@ -138,8 +138,10 @@ small_vector_rule(Wht *W)
     return error_msg_set(W, "must be in rightmost tree of plan");
 
   /**  The node must be right of at least one node in plan */
+#if 0
   if (W->right == 1)
     return error_msg_set(W, "cannot be rightmost codelet in plan");
+#endif
 
   W->rule->params[0] = k;
   W->rule->params[1] = UNSET_PARAMETER;
@@ -151,7 +153,10 @@ small_vector_rule(Wht *W)
    * All rules regarding the interleaving of this node must be satisfied 
    * \see small_interleave_rule
    */
+
+#if 0
   small_interleave_rule(W);
+#endif
 
   W->rule->params[0] = v;
   W->rule->params[1] = k;
