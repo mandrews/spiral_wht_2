@@ -79,7 +79,7 @@ main(int argc, char **argv)
   p = INFINITY;
   t = INFINITY;
   n = 1;
-  k = 1;
+  k = 100;
 
   while ((c = getopt (argc, argv, "hvlw:sa:p:m:t:n:k:c")) != -1)
     switch (c) {

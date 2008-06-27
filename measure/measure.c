@@ -32,6 +32,10 @@
 
 extern double invnorm(double p);
 
+#define CPUID()                        \
+  __asm__ __volatile__ ("cpuid" :      \
+  : "a" (0) : "bx", "cx", "dx" );      
+
 #ifdef HAVE_USEC
 #include <sys/types.h>
 #include <sys/resource.h>
@@ -92,7 +96,9 @@ double
 rdtsc()
 {
   tsc_counter t0;
+
   RDTSC(t0);
+
   return ((double) t0.int64);
 }
 #endif
@@ -162,8 +168,10 @@ test_helper(Wht *W, wht_value *x, measure_call_fp call)
   apply = W->apply;
   W->apply = null_apply;
  
-  call(); /* Warm up */
-  call(); /* Warm up */
+  /* Warm up */
+  call(); 
+  /* Serialize */
+  CPUID(); CPUID(); CPUID(); 
 
   #pragma omp single
   {
@@ -189,7 +197,8 @@ call_helper(Wht *W, wht_value *x, measure_call_fp call)
   volatile double t0, t1;
 
   call(); /* Warm up */
-  call(); /* Warm up */
+  /* Serialize */
+  CPUID(); CPUID(); CPUID(); 
 
   #pragma omp single
   {
@@ -296,12 +305,23 @@ measure_helper(Wht *W, struct stat *stat, bool calib, size_t run, measure_call_f
   volatile stat_unit value, overhead;
   wht_value *x;
   int i;
+  tsc_counter a;
 
   x = wht_random_vector(W->N);
+
+  /* Warm up */
+  call_helper(W, x, call);
+  /* Serialize */
+  CPUID(); CPUID(); CPUID(); 
 
   value = 0.0;
   for (i = 0; i <= run; i++)
     value += call_helper(W, x, call);
+
+  /* Warm up */
+  call_helper(W, x, call);
+  /* Serialize */
+  CPUID(); CPUID(); CPUID(); 
 
   overhead = 0.0;
   if (calib)
