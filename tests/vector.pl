@@ -29,7 +29,7 @@ my $q = $p - 1;
 
 print "\nVectorization Tests\n\n";
 
-expect_correct    smallv($v,$q);
+expect_reject      smallv($v,$q);
 
 for (my $i = $p; $i <= $n; $i++) {
   expect_correct    smallv($v,1,$i);

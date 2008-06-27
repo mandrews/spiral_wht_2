@@ -86,7 +86,7 @@
  */
 #ifdef WHT_FLOAT
 typedef float wht_value;
-#define WHT_STABILITY_THRESHOLD (   1e-2)
+#define WHT_STABILITY_THRESHOLD (   1e-1)
 #define WHT_TYPE_STRING         ("float") 
 #endif/*WHT_FLOAT*/
 

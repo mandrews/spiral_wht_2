@@ -111,6 +111,9 @@ small_vector_rule_3(Wht *W)
 
   W->attr[VECTOR_SIZE] = v;
 
+  if ((W->parent == NULL) || (! W->parent->provides[VECTOR_S_STRIDE]))  
+    return error_msg_set(W, "parent codelet must apply at stride v");
+
   W->requires[VECTOR_S_STRIDE] = true;
 
   switch (v) {
