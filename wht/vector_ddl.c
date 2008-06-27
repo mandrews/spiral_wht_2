@@ -54,7 +54,6 @@ split_vector_apply(Wht *W, long S, size_t D, wht_value *x)
 
   for (j = 0; j < R; j++)
     (Wi->apply)(Wi, S*v, S, x+j*Ni*v);
-
 }
 
 /**
@@ -66,6 +65,9 @@ void
 split_vector_rule(Wht *W)
 {
   Wht *Wl, *Wr;
+  size_t v;
+
+  v = W->rule->params[0];
 
   /* Check that codelet is split */
   if (W->children == NULL)
@@ -74,16 +76,13 @@ split_vector_rule(Wht *W)
   if (W->children->nn != 2)
     return error_msg_set(W, "codelet must be binary split for ddl");
 
-  W->attr[VECTOR_SIZE] = W->rule->params[0];
+  W->attr[VECTOR_SIZE] = v;
 
-  W->provides[VECTOR_STRIDE] = true;
+  W->provides[VECTOR_STRIDE]    = true;
+  W->provides[VECTOR_S_STRIDE]  = true;
 
-#if 0
   if (! i_power_of_2(v))
     return error_msg_set(W, "vector length must be a power of 2");
-
-  W->attr[VECTOR_SIZE] = v;
-#endif
 
   Wr = W->children->Ws[0]; /* Rightmost in Binary split */
   Wl = W->children->Ws[1]; /* Leftmost in Binary split */
@@ -93,11 +92,6 @@ split_vector_rule(Wht *W)
 
   if (! children_require(Wl, VECTOR_S_STRIDE))
     return error_msg_set(W, "all leftmost codelets must be applied at stride N/v^2");
-
-#if 0
-  if (children_provide(Wr, VECTOR_STRIDE))
-    return error_msg_set(W, "all rightmost codelets cannot change stride");
-#endif
 
   if (parent_provides(W, VECTOR_STRIDE)) 
     return error_msg_set(W, "parent codelet cannot change stride");
@@ -189,38 +183,53 @@ apply_small2_v4(Wht *W, long S, long U, wht_value *x)
   wht_vector4 ta10;
   wht_vector4 ta11;
   wht_vector4 ta12;
+  wht_vector4 ta13;
+  wht_vector4 ta14;
+  wht_vector4 ta15;
+  wht_vector4 ta16;
 
   vload4(ta1,x[0]);
+  vload4(ta2,x[S]);
+  vload4(ta3,x[2 * S]);
+  vload4(ta4,x[3 * S]);
 
-  vadd4(ta5,ta1,ta2);
-  vsub4(ta6,ta1,ta2);
-  vadd4(ta7,ta3,ta4);
-  vsub4(ta8,ta3,ta4);
-  vadd4(ta9,ta5,ta7);
-  vsub4(ta10,ta5,ta7);
-  vadd4(ta11,ta6,ta8);
-  vsub4(ta12,ta6,ta8);
+  /* L_V^2_V */
+  vunpacklo4(ta5, ta1, ta2);
+  vunpackhi4(ta6, ta1, ta2)
 
-#if 0
-r0  = [ 0,  1,  2,  3]
-r1  = [ 4,  5,  6,  7]
-r2  = [ 8,  9, 10, 11]
-r3  = [12, 13, 14, 15]
+  vunpacklo4(ta7, ta3, ta4);
+  vunpackhi4(ta8, ta3, ta4);
 
-# L^16_4
-r5  = unpackhi4(r0, r1)
-r6  = unpacklo4(r0, r1)
+  vshuf4(ta9,  ta5, ta7, 1, 0, 1, 0);
+  vshuf4(ta10, ta5, ta7, 3, 2, 3, 2);
+  vshuf4(ta11, ta6, ta8, 1, 0, 1, 0);
+  vshuf4(ta12, ta6, ta8, 3, 2, 3, 2);
 
-r7  = unpackhi4(r2, r3)
-r8  = unpacklo4(r2, r3)
+  vadd4(ta13,ta9,ta10);
+  vsub4(ta14,ta9,ta10);
+  vadd4(ta15,ta11,ta12);
+  vsub4(ta16,ta11,ta12);
 
-r9  = shuffle4(r5, r7, [1, 0, 1, 0])
-r10 = shuffle4(r5, r7, [3, 2, 3, 2])
-r11 = shuffle4(r6, r8, [1, 0, 1, 0])
-r12 = shuffle4(r6, r8, [3, 2, 3, 2])
-#endif
+  vadd4(ta9, ta13,ta15);
+  vsub4(ta10,ta13,ta15);
+  vadd4(ta11,ta14,ta16);
+  vsub4(ta12,ta14,ta16);
 
-  vstore4(ta5,x[0]);
+  vunpacklo4(ta5, ta9, ta11);
+  vunpackhi4(ta6, ta9, ta11);
+
+  vunpacklo4(ta7, ta10, ta12);
+  vunpackhi4(ta8, ta10, ta12);
+
+  vshuf4(ta9,  ta5, ta7, 1, 0, 1, 0);
+  vshuf4(ta10, ta5, ta7, 3, 2, 3, 2);
+  vshuf4(ta11, ta6, ta8, 1, 0, 1, 0);
+  vshuf4(ta12, ta6, ta8, 3, 2, 3, 2);
+
+  vstore4(ta9,x[0]);
+  vstore4(ta10,x[S]);
+  vstore4(ta11,x[2 * S]);
+  vstore4(ta12,x[3 * S]);
 
 #else
   wht_exit("initialization guards should prevent this message");

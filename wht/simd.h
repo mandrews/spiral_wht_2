@@ -124,6 +124,12 @@ typedef __m128 wht_vector4;
 #define vsub4(R0,R1,R2) \
   R0 = _mm_sub_ps(R1,R2);
 
+#define vunpackhi4(R0,R1,R2) \
+  R0 = _mm_unpackhi_ps(R1,R2);
+
+#define vunpacklo4(R0,R1,R2) \
+  R0 = _mm_unpacklo_ps(R1,R2);
+
 
 
 #define __vload4(R0,M0) \
