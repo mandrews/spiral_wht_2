@@ -1,4 +1,3 @@
-#ifdef __ICC
 /****************************/
 /* THIS IS OPEN SOURCE CODE */
 /****************************/
@@ -722,4 +721,3 @@ read the documentation carefully.  */
 }
 #endif
 #endif
-#endif/*__ICC*/
