@@ -24,10 +24,6 @@
  *
  * \brief Interface to random tree generation
  */
-extern "C" {
-#include "wht.h"
-}
-
 #include "combin.h"
 
 #include <assert.h>
@@ -56,15 +52,14 @@ usage()
 int
 main(int argc, char **argv)
 {
-  size_t wht_size, min_child, max_child, min_leaf, max_leaf;
+  size_t size, min_child, max_child, min_leaf, max_leaf;
   bool strict;
 
   int c;
 
-  wht_size = 0;
-
   opterr = 0;
 
+  size      = 0;
   min_child = 1;
   max_child = MAX_SPLIT_NODES;
   min_leaf  = 1;
@@ -74,7 +69,7 @@ main(int argc, char **argv)
   while ((c = getopt (argc, argv, "hvn:a:b:p:q:u")) != -1)
     switch (c) {
       case 'n':
-        wht_size = atoi(optarg);
+        size = atoi(optarg);
         break;
       case 'a':
         min_child = atoi(optarg);
@@ -100,7 +95,7 @@ main(int argc, char **argv)
         usage();
     }
 
-  if (wht_size == 0)
+  if (size == 0)
     usage();
 
   if (min_leaf < 1) {
@@ -119,20 +114,17 @@ main(int argc, char **argv)
   }
 
   compos_node *root;
-  Wht *W;
 
   srandom((unsigned int) (getpid() * M_PI));
 
   root = NULL;
 
-  root = compos_tree_rand(wht_size, min_child, max_child, max_leaf);
+  /* root = compos_tree_rand_bin(size, min_child, max_child, max_leaf); */  
+  root = compos_tree_rand(size, min_child, max_child, max_leaf); 
 
-  W = compos_tree_to_wht(root);
-  assert(W->n == ((long) wht_size));
-  printf("%s\n", W->to_string);
+  compos_tree_print(root);
 
   compos_tree_free(root);
-  wht_free(W);
 
   return 0;
 }

@@ -129,6 +129,8 @@ main(int argc, char **argv)
 
   compos_tree_rotate(root, min_leaf, max_leaf);
 
+  /* compos_tree_print(W2); */
+
   W2 = compos_tree_to_wht(root);
 
   //assert(W1->n == W2->n);

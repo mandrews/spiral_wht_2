@@ -183,6 +183,18 @@ combin * combin_enum_next();
  */
 compos_node * compos_tree_rand(uint n, uint a, uint b, uint max);
 
+/**
+ * \brief Generate a random binary composition tree of size n.  
+ * Only the first level of the tree must contain a binary split.
+ *
+ * \param n     Total size
+ * \param a     Minimum number of elements
+ * \param b     Maximum number of elements
+ * \param max   Maximum element
+ * \return      Composition tree
+ */
+compos_node * compos_tree_rand_bin(uint n, uint a, uint b, uint max);
+
 void compos_tree_free(compos_node *node);
 
 /**
@@ -194,15 +206,15 @@ void compos_tree_free(compos_node *node);
  * \param cpn   Composition tree
  * \return      WHT plan
  */
-Wht *
-compos_tree_to_wht(compos_node *cpn);
+Wht * compos_tree_to_wht(compos_node *cpn);
 
-compos_node *
-wht_to_compos_tree(Wht *W);
+compos_node * wht_to_compos_tree(Wht *W);
 
 void compos_tree_rotate(compos_node *r, uint min, uint max);
 void compos_tree_fix(compos_node *r, uint min, uint max);
 
 void compos_tree_traverse(compos_node *r, compos_tree_op_fp f, uint min, uint max);
+
+void compos_tree_print(compos_node *root);
 
 #endif/*COMBIN_H*/

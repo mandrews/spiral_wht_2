@@ -31,6 +31,11 @@
 
 #include <assert.h>
 
+#ifdef   __INTEL_COMPILER
+/* Turn off annoying forward declaration warnings */
+#pragma warning (disable: 1419) 
+#endif/* __INTEL_COMPILER */
+
 /**
  * \struct qn
  *
@@ -43,9 +48,15 @@ struct qn {
 
 typedef map<uint, double> combin_pdf;
 
+/* Forward Declarations */
+ulong gcd(ulong u, ulong v);
+
+struct qn qn_n_choose_k(ulong n, ulong k);
+
 combin::iterator combin_elem_rand(combin * c, uint n);
 
-/* Forward Declarations */
+combin * combin_enum(uint n_init, uint k_init, bool init);
+
 void compos_tree_base(compos_node *r, uint min, uint max);
 
 
@@ -244,7 +255,7 @@ combin_rand(uint n, uint a, uint b)
   accum = 0.0;
 
   for (k = a; k <= b; k++) {
-    pdf[k] = n_choose_k(n,k);
+    pdf[k] = (double) n_choose_k(n,k);
     sum += pdf[k];
   }
 
@@ -371,7 +382,6 @@ combin_enum_next()
   exit(1);
 #endif
 
-
 compos *
 combin_to_compos(uint n, combin *cmb)
 {
@@ -471,6 +481,42 @@ compos_tree_rand(uint n, uint min_f, uint max_f, uint max_n)
   return cpn;
 }
 
+compos_node *
+compos_tree_rand_bin(uint n, uint min_f, uint max_f, uint max_n)
+{
+  compos *cmp;
+  compos::iterator cmp_i;
+
+  compos_node *cpn;
+  compos_nodes::iterator cpn_i;
+  double r;
+
+  cpn = new compos_node();
+  cpn->value = n;
+  cpn->children = new compos_nodes();
+
+  r = ((double) random() / (double) RAND_MAX);
+
+  if (n <= max_n && (r >= 0.5))
+    return cpn;
+
+  cmp = compos_rand(n, 2, 2);
+
+  if (cmp->size() == 1) { /* One element in composition => no children */
+    delete cmp;
+    return cpn;
+  }
+
+  cpn->children->resize(cmp->size());
+
+  for (cmp_i = cmp->begin(), cpn_i = cpn->children->begin(); cmp_i != cmp->end(); ++cmp_i, ++cpn_i) 
+    *cpn_i = compos_tree_rand(*cmp_i, min_f, max_f, max_n);
+
+  delete cmp;
+
+  return cpn;
+}
+
 void
 compos_tree_free(compos_node *cpn)
 {
@@ -510,7 +556,7 @@ compos_node *
 wht_to_compos_tree(Wht *W)
 {
   int i, nn;
-  compos_node *cpn;
+  compos_node *cpn, *cpni;
   Wht *Wi;
 
   cpn = new compos_node();
@@ -525,8 +571,9 @@ wht_to_compos_tree(Wht *W)
 
   /* NOTE: Antilexigraphic ordering, i.e. WHT nodes are stored right to left */
   for (i = 0; i < nn; i++) {
-    Wi = W->children->Ws[i];
-    cpn->children->push_front(wht_to_compos_tree(Wi));
+    Wi    = W->children->Ws[i];
+    cpni  = wht_to_compos_tree(Wi);
+    cpn->children->push_front(cpni);
   }
 
   return cpn;
@@ -541,7 +588,6 @@ compos_tree_print(compos_node *root)
   fprintf(stderr, "%s\n", W->to_string);
   wht_free(W);
 }
-
 
 void
 compos_tree_rotate(compos_node *r, uint min, uint max)
