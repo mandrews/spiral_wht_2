@@ -183,21 +183,6 @@ combin * combin_enum_next();
  */
 compos_node * compos_tree_rand(uint n, uint a, uint b, uint max);
 
-/**
- * \brief Generate a random rightmost composition tree of size n.
- *
- * \param n     Total size
- * \param a     Minimum number of elements
- * \param b     Maximum number of elements
- * \param min   Minimum element
- * \param max   Maximum element
- * \return      Composition tree
- *
- * \bug This computation is non deterministic and some times does not halt!
- * \bug Minimum element parameter is not working
- */
-compos_node * compos_tree_rand_right(uint n, uint a, uint b, uint min, uint max);
-
 void compos_tree_free(compos_node *node);
 
 /**

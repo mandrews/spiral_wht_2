@@ -50,9 +50,6 @@ usage()
   printf("    -p MIN_E      Minimum element in composition.\n");
   printf("    -q MAX_E      Maximum element in composition.\n");
   printf("    -u UNSTRICT   Generate WHT trees that cannot be executed in current configuration.\n");
-#if 0
-  printf("    -t TYPE       Type of WHT to generate (DEFAULT \"general\").\n");
-#endif
   exit(1);
 }
 
@@ -60,7 +57,6 @@ int
 main(int argc, char **argv)
 {
   size_t wht_size, min_child, max_child, min_leaf, max_leaf;
-  char *wht_type;
   bool strict;
 
   int c;
@@ -73,10 +69,9 @@ main(int argc, char **argv)
   max_child = MAX_SPLIT_NODES;
   min_leaf  = 1;
   max_leaf  = WHT_MAX_UNROLL;
-  wht_type  = NULL;
   strict    = true;
 
-  while ((c = getopt (argc, argv, "hvn:a:b:p:q:t:u")) != -1)
+  while ((c = getopt (argc, argv, "hvn:a:b:p:q:u")) != -1)
     switch (c) {
       case 'n':
         wht_size = atoi(optarg);
@@ -92,9 +87,6 @@ main(int argc, char **argv)
         break;
       case 'q':
         max_leaf = atoi(optarg);
-        break;
-      case 't':
-        wht_type = optarg;
         break;
       case 'u':
         strict = false;
@@ -123,12 +115,6 @@ main(int argc, char **argv)
 
   if ((max_leaf > WHT_MAX_UNROLL) && strict) {
     printf("-b MAX_E cannot be larger than %d.\n", WHT_MAX_UNROLL);
-    exit(1);
-  }
-
-  if (wht_type != NULL && (strcmp(wht_type, "general" ) != 0) 
-                       && (strcmp(wht_type, "right"   ) != 0)) {
-    printf("-t TYPE must be \"general\" or \"right\".\n");
     exit(1);
   }
 
