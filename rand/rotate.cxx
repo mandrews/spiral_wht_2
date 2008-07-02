@@ -110,39 +110,30 @@ main(int argc, char **argv)
     exit(1);
   }
 
-  Wht *W1, *W2;
+  Wht *W;
   compos_node *root;
 
+  W = NULL;
 
-  W1 = NULL;
+  W = wht_parse(plan);
 
-  W1 = wht_parse(plan);
-
-  if (wht_error_msg(W1) != NULL) {
-    printf("rejected, %s\n", wht_error_msg(W1));
+  if (wht_error_msg(W) != NULL) {
+    printf("rejected, %s\n", wht_error_msg(W));
     free(plan);
-    wht_free(W1);
+    wht_free(W);
     exit(1);
   }
 
-  root = wht_to_compos_tree(W1);
+  root = wht_to_compos_tree(W);
 
-  compos_tree_rotate(root, min_leaf, max_leaf);
-
-  /* compos_tree_print(W2); */
-
-  W2 = compos_tree_to_wht(root);
-
-  //assert(W1->n == W2->n);
-
-  printf("%s\n", W2->to_string);
+  compos_tree_traverse(root, min_leaf, max_leaf);
+  compos_tree_print(root);
 
   compos_tree_free(root);
 
-  free(plan);
+  wht_free(W);
 
-  wht_free(W1);
-  wht_free(W2);
+  free(plan);
 
   return 0;
 }

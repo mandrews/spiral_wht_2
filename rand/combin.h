@@ -84,8 +84,6 @@ typedef struct compos_node compos_node;
 
 typedef list<struct compos_node *> compos_nodes;
 
-typedef void (*compos_tree_op_fp)(compos_node *r, uint min, uint max);
-
 /**
  * \brief A composition tree node.  
  *
@@ -210,11 +208,8 @@ Wht * compos_tree_to_wht(compos_node *cpn);
 
 compos_node * wht_to_compos_tree(Wht *W);
 
-void compos_tree_rotate(compos_node *r, uint min, uint max);
-void compos_tree_fix(compos_node *r, uint min, uint max);
-
-void compos_tree_traverse(compos_node *r, compos_tree_op_fp f, uint min, uint max);
-
 void compos_tree_print(compos_node *root);
+
+compos_node * compos_tree_traverse(compos_node *r, uint min, uint max);
 
 #endif/*COMBIN_H*/

@@ -71,7 +71,7 @@ expect_rotate
   splitd(
     splitd(smalld(1),smalld(1)),
     splitd(smalld(1),smalld(1)) ),
-  splitd(smalld(1),smalld(3));
+  smalld(4);
 
 expect_rotate
   2,
@@ -86,7 +86,7 @@ expect_rotate
   splitd(
     splitd(smalld(1),smalld(2)),
     splitd(smalld(1),smalld(1))),
-  splitd(smalld(1), smalld(4));
+  splitd(smalld(2), smalld(3));
 
 expect_rotate
   2,
@@ -105,7 +105,7 @@ expect_rotate
     splitd(smalld(1),smalld(2)),
     splitd(smalld(1),smalld(1))),
   splitd(
-    smalld(3), smalld(1), smalld(4));
+    smalld(3), smalld(2), smalld(3));
 
 expect_rotate
   4,
@@ -114,7 +114,7 @@ expect_rotate
     splitd(smalld(1),smalld(2)),
     splitd(smalld(1),smalld(1))),
   splitd(
-    smalld(3), smalld(1), smalld(4));
+    smalld(3), smalld(5));
 
 expect_rotate
   2,
@@ -155,13 +155,24 @@ expect_rotate
     splitd(
       splitd(smalld(1),smalld(1),smalld(1)),
       splitd(smalld(1),smalld(1),smalld(1)))),
-  splitd(
-    splitd(smalld(1),smalld(1), smalld(4)),
-    splitd(smalld(1),smalld(1), smalld(4)));
+  splitd(smalld(6),smalld(6));
 
 expect_rotate
   4,
   splitd(
-    splitd(smalld(1),smalld(1)), smalld(4)),
+    splitd(smalld(1),smalld(1)),smalld(4)),
+  splitd(smalld(2),smalld(4));
+
+expect_rotate
+  2,
   splitd(
-    smalld(1),smalld(1), smalld(4));
+    splitd(smalld(1),smalld(1)),
+    splitd(smalld(1),smalld(1)),
+    splitd(smalld(1),smalld(1)),
+    smalld(2)),
+  splitd(
+    smalld(2),
+    smalld(2),
+    smalld(2),
+    smalld(2));
+
