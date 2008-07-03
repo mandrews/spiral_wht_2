@@ -114,6 +114,10 @@ if [ ! -e $tmp ]; then
   echo "splitil_beta_1 : 0" >> ${tmp}
   echo "splitil_beta_2 : 0" >> ${tmp}
   echo "splitil_beta_3 : 0" >> ${tmp}
+  echo "splitv_alpha : 0" >> ${tmp}
+  echo "splitv_beta_1 : 0" >> ${tmp}
+  echo "splitv_beta_2 : 0" >> ${tmp}
+  echo "splitv_beta_3 : 0" >> ${tmp}
 
   sort ${tmp} > ${tmp}~
   mv ${tmp}~ ${tmp}

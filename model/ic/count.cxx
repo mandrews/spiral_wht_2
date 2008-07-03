@@ -51,7 +51,7 @@ alpha_k(Wht *W, size_t k)
 {
   Wht *Wi;
   size_t n, ni, nn;
-  int i;
+  int i, stride;
   counts *x, *t;
   string key;
 
@@ -79,12 +79,15 @@ alpha_k(Wht *W, size_t k)
 
     t = alpha_k(Wi,k);
 
-    int il = 1;
+    stride = 1;
     if (Wi->attr[INTERLEAVE_BY] != UNSET_PARAMETER)
-      il = Wi->attr[INTERLEAVE_BY];
+      stride = Wi->attr[INTERLEAVE_BY];
 
-    for (j = t->begin(); j != t->end(); j++) 
-      (*x)[j->first] += (((1 << (n - ni)) * j->second) / il);
+    if (Wi->requires[VECTOR_SQUARE_STRIDE]) 
+      stride = Wi->attr[VECTOR_SIZE];
+
+    for (j = t->begin(); j != t->end(); j++)  
+      (*x)[j->first] += (((1 << (n - ni)) * j->second) / stride);
 
     delete t;
   }

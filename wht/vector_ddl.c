@@ -59,7 +59,7 @@ split_vector_apply(Wht *W, long S, size_t D, wht_value *x)
   R   = N / (v*v);
   T   = 1;
 
-  if (Wi->requires[VECTOR_STRIDE]) {
+  if (Wi->requires[VECTOR_SQUARE_STRIDE]) {
     for (j = 0; j < R; j++)
       (Wi->apply)(Wi, S*v, S, x+j*Ni*v);
   } else {
@@ -121,8 +121,7 @@ small_vector_rule_3(Wht *W)
     return error_msg_set(W, "codelet must be size v");
 
   W->attr[VECTOR_SIZE] = v;
-  W->attr[INTERLEAVE_BY] = v;
-  W->requires[VECTOR_STRIDE] = true;
+  W->requires[VECTOR_SQUARE_STRIDE] = true;
 
   W->apply = codelet_apply_lookup(W);
 
