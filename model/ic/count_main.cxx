@@ -58,6 +58,12 @@ main(int argc, char **argv)
 
   W = wht_parse(plan);
 
+  if (wht_error_msg(W) != NULL) {
+    printf("rejected, %s\n", wht_error_msg(W));
+    wht_free(W);
+    exit(1);
+  }
+
   if (basis_file != NULL) {
     fd = fopen(basis_file, "r");
     x.load_basis(fd);
