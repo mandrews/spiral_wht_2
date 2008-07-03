@@ -464,7 +464,7 @@ if $0 == __FILE__ # Main Entry Point
   opts.parse(ARGV)
 
   unless File.exists?(opts.params[:measure].split.first)
-    opts.die("Could find measure #{opts.params[:measure]}")
+    opts.die("Could not find measure #{opts.params[:measure]}")
   end
 
   unless File.exists?(opts.params[:best_plans])
