@@ -168,6 +168,7 @@ small_vector_rule_1(Wht *W)
     return error_msg_set(W, "could not find codelet");
 
   W->attr[VECTOR_SIZE] = v;
+  W->attr[INTERLEAVE_BY] = k;
 
   if ((a == 1) && (v == k))
     W->requires[VECTOR_STRIDE] = true;

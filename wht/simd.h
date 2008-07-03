@@ -32,6 +32,17 @@
 #ifndef SIMD_H
 #define SIMD_H
 
+#ifdef   __INTEL_COMPILER
+/* Turn off annoying external declaration warnings */
+#pragma warning (disable: 1418) 
+#endif/* __INTEL_COMPILER */
+
+#ifdef   __INTEL_COMPILER
+/* Turn off annoying parameter not used warnings */
+#pragma warning (disable: 869) 
+#endif/* __INTEL_COMPILER */
+
+
 #if (WHT_DOUBLE == 1) && (WHT_HAVE_SSE2 == 1) && (WHT_VECTOR_SIZE == 2)
 #include <emmintrin.h>
 

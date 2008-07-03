@@ -31,6 +31,8 @@ A list of non code related \b TODO items
 \todo count_sse.sh should be able to reset it's instruction cache(s) with a
 command line flag
 
+\todo count_sse.sh is brittle and should be reimplemented with GNU BFD
+
 \todo Create a script which uses interpolates to determine split_alpha,
 split_beta_1, etc ... (should be able to use objdump or PAPI for instruction
 counts)
