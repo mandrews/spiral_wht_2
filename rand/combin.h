@@ -189,9 +189,10 @@ compos_node * compos_tree_rand(uint n, uint a, uint b, uint max);
  * \param a     Minimum number of elements
  * \param b     Maximum number of elements
  * \param max   Maximum element
+ * \param v     Vector size
  * \return      Composition tree
  */
-compos_node * compos_tree_rand_bin(uint n, uint a, uint b, uint max);
+compos_node * compos_tree_rand_bin(uint n, uint min_f, uint max_f, uint max_n, uint v);
 
 void compos_tree_free(compos_node *node);
 

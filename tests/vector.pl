@@ -24,8 +24,7 @@ my $k = int($ENV{'MAX_INTERLEAVE'});
 my $v = int($ENV{'VECTOR_SIZE'});
 my $p = log2($v) + 1; # Min size for vectorization by v
 my $r = max(log2($k), log2(2*$v)); # Min size for max interleave
-my $q = $p - 1;
-
+my $q = log2($v);
 
 print "\nVectorization Tests\n\n";
 
@@ -49,13 +48,14 @@ for (my $i = $p; $i <= $n; $i++) {
   expect_reject     splitv($v, smallv($v,$q), smalld($i), smalld($i));
 
   expect_correct    splitv($v, smallv($v,$q), smallv($v,$v,1,$i));
-  expect_reject     splitv($v, smalld($q), smallv($v,$v,1,$i));
-  expect_reject     splitv($v, smallv($v,$q), smalld($i));
+  expect_correct    splitv($v, smalld($q), smallv($v,$v,1,$i));
+  expect_correct    splitv($v, smallv($v,$q), smalld($i));
+  expect_correct    splitv($v, smalld($q), smalld($i));
 
-  expect_reject     splitv($v, smalld($q), 
+  expect_correct    splitv($v, smalld($q), 
     splitd(smallv($v,$v,1,$p), smallv($v,$v,1,$i)));
 
-  expect_reject    splitv($v, smalld($q), 
+  expect_correct    splitv($v, smalld($q), 
     splitd(smalld($p), smalld($i)));
 
   expect_reject    splitv($v, smallv($v,$q), 
@@ -64,6 +64,11 @@ for (my $i = $p; $i <= $n; $i++) {
 
 expect_correct    splitv($v, smallv($v,$q), 
   splitd(smallv($v,$v,1,$p), smallv($v,$v,1,$p), smallv($v,$v,1,$p)));
+
+for (my $i = 1; $i < $q; $i++) {
+  expect_reject     splitv($v, smallv($v,$q), smalld($i));
+  expect_reject     splitv($v, smallv($v,$q), smallv($v,$v,1,$i));
+}
 
 # Vary interleave factor fix size
 for (my $i = $p; $i <= $n; $i++) {

@@ -29,6 +29,8 @@
 #include "codelets.h"
 #include "registry.h"
 
+void split_vector_apply(Wht *W, long S, size_t U, wht_value *x);
+
 void 
 split_vector_apply(Wht *W, long S, size_t D, wht_value *x)
 {
@@ -45,15 +47,25 @@ split_vector_apply(Wht *W, long S, size_t D, wht_value *x)
   R   = 1;
   T   = v;
 
-  (Wi->apply)(Wi, S*v, S, x);
+  if (Wi->requires[VECTOR_STRIDE]) {
+    (Wi->apply)(Wi, S*v, S, x);
+  } else {
+    for (j = 0; j < S*v; j++)
+      (Wi->apply)(Wi, S*v, S, x + j*S);
+  }
 
   Wi  = W->children->Ws[1];
   Ni  = W->children->ns[1];
   R   = N / (v*v);
   T   = 1;
 
-  for (j = 0; j < R; j++)
-    (Wi->apply)(Wi, S*v, S, x+j*Ni*v);
+  if (Wi->requires[VECTOR_STRIDE]) {
+    for (j = 0; j < R; j++)
+      (Wi->apply)(Wi, S*v, S, x+j*Ni*v);
+  } else {
+    for (j = 0; j < R*v; j++)
+      (Wi->apply)(Wi, S, S, x+j*Ni);
+  }
 }
 
 /**
@@ -78,8 +90,7 @@ split_vector_rule(Wht *W)
 
   W->attr[VECTOR_SIZE] = v;
 
-  W->provides[VECTOR_STRIDE]    = true;
-  W->provides[VECTOR_S_STRIDE]  = true;
+  W->provides[VECTOR_STRIDE] = true;
 
   if (! i_power_of_2(v))
     return error_msg_set(W, "vector length must be a power of 2");
@@ -87,11 +98,8 @@ split_vector_rule(Wht *W)
   Wr = W->children->Ws[0]; /* Rightmost in Binary split */
   Wl = W->children->Ws[1]; /* Leftmost in Binary split */
 
-  if (! children_require(Wr, VECTOR_STRIDE))
-    return error_msg_set(W, "all rightmost codelets must be applied at stride v ");
-
-  if (! children_require(Wl, VECTOR_S_STRIDE))
-    return error_msg_set(W, "all leftmost codelets must be applied at stride N/v^2");
+  if (Wr->N < Wl->N)
+    return error_msg_set(W, "Rightmost tree must be larger than v");
 
   if (parent_provides(W, VECTOR_STRIDE)) 
     return error_msg_set(W, "parent codelet cannot change stride");
@@ -106,7 +114,7 @@ small_vector_rule_3(Wht *W)
 
   v = W->rule->params[0];
 
-  if ((W->parent == NULL) || (! W->parent->provides[VECTOR_S_STRIDE]))  
+  if ((W->parent == NULL) || (! W->parent->provides[VECTOR_STRIDE]))  
     return error_msg_set(W, "parent codelet must apply at stride v");
 
   if (W->N != v)
@@ -114,7 +122,7 @@ small_vector_rule_3(Wht *W)
 
   W->attr[VECTOR_SIZE] = v;
   W->attr[INTERLEAVE_BY] = v;
-  W->requires[VECTOR_S_STRIDE] = true;
+  W->requires[VECTOR_STRIDE] = true;
 
   W->apply = codelet_apply_lookup(W);
 

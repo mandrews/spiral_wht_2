@@ -479,37 +479,24 @@ compos_tree_rand(uint n, uint min_f, uint max_f, uint max_n)
 }
 
 compos_node *
-compos_tree_rand_bin(uint n, uint min_f, uint max_f, uint max_n)
+compos_tree_rand_bin(uint n, uint min_f, uint max_f, uint max_n, uint v)
 {
-  compos *cmp;
-  compos::iterator cmp_i;
-
-  compos_node *cpn;
+  compos_node *cpn, *a;
   compos_nodes::iterator cpn_i;
-  double r;
+  uint vp;
 
   cpn = new compos_node();
   cpn->value = n;
   cpn->children = new compos_nodes();
 
-  r = ((double) random() / (double) RAND_MAX);
+  vp = (v >> 1);
 
-  if (n <= max_n && (r >= 0.5))
-    return cpn;
+  a = new compos_node();
+  a->value = vp;
+  a->children = new compos_nodes();
 
-  cmp = compos_rand(n, 2, 2);
-
-  if (cmp->size() == 1) { /* One element in composition => no children */
-    delete cmp;
-    return cpn;
-  }
-
-  cpn->children->resize(cmp->size());
-
-  for (cmp_i = cmp->begin(), cpn_i = cpn->children->begin(); cmp_i != cmp->end(); ++cmp_i, ++cpn_i) 
-    *cpn_i = compos_tree_rand(*cmp_i, min_f, max_f, max_n);
-
-  delete cmp;
+  cpn->children->push_back(a);
+  cpn->children->push_back(compos_tree_rand(n - vp, min_f, max_f, max_n));
 
   return cpn;
 }

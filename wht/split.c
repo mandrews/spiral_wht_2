@@ -51,7 +51,6 @@ split_apply(Wht *W, long S, size_t U, wht_value *x)
   R  = N;
   S1 = 1;
 
-
   /* Iterate over children WHTs, stored anti lexigraphically  */
   for (i = 0; i < nn; i++) {
     Ni = W->children->ns[i];

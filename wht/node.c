@@ -234,3 +234,17 @@ parent_provides(Wht *W, enum attribute_names A)
   return false;
 }
 
+void
+set_parent_requires(Wht *W, enum attribute_names A) 
+{
+  Wht *Wp;
+
+  Wp = W->parent;
+
+  while (Wp != NULL) {
+    if (! Wp->provides[A])
+      Wp->requires[A] = true;
+    Wp = Wp->parent;
+  }
+}
+

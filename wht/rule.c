@@ -86,7 +86,6 @@ rule_eval(Wht *W)
 
   /* Recursively evaluate ? */
   if (W->children != NULL) {
-
     /* Remove previous error message since this could be due to circular
      * dependancies
      */
@@ -94,7 +93,6 @@ rule_eval(Wht *W)
       i_free(W->error_msg);
 
     W->error_msg = NULL;
-
 
     /* Recursively evaluate child rules */
     nn = W->children->nn;
@@ -202,7 +200,6 @@ rule_attach_undo(Wht *W)
     W->rule       = rule_init("split");
     W->apply      = split_apply;
   }
-
 }
 
 void

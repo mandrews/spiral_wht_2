@@ -134,12 +134,14 @@ small_vector_rule_1(Wht *W)
    * If thie node loads aligned memory (e.g. at unit stride) the node must
    * be in a rightmost plan
    */
-  if ((a == 1) && (! rightmost_tree(W)))
-    return error_msg_set(W, "must be in rightmost tree of plan");
+  if (! parent_provides(W,VECTOR_STRIDE))
+    if ((a == 1) && (! rightmost_tree(W)))
+      return error_msg_set(W, "must be in rightmost tree of plan");
 
   /**  The node must be right of at least one node in plan */
-  if (! parent_provides(W, VECTOR_STRIDE) && W->right == 1)
-    return error_msg_set(W, "cannot be rightmost codelet in plan");
+  if (! parent_provides(W,VECTOR_STRIDE))
+    if (W->right == 1)
+      return error_msg_set(W, "cannot be rightmost codelet in plan");
 
   if (! parent_provides(W, VECTOR_STRIDE)) {
     W->rule->params[0] = k;
@@ -170,8 +172,10 @@ small_vector_rule_1(Wht *W)
   W->attr[VECTOR_SIZE] = v;
   W->attr[INTERLEAVE_BY] = k;
 
-  if ((a == 1) && (v == k))
+  if (parent_provides(W, VECTOR_STRIDE)) {
     W->requires[VECTOR_STRIDE] = true;
+    set_parent_requires(W, VECTOR_STRIDE);
+  }
 
   /** 
    * \todo Check and test (size * interleave_by) > VECTOR_SIZE.

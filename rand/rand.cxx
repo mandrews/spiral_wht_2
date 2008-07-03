@@ -39,20 +39,21 @@ usage()
 {
   printf("Usage: wht_rand -n SIZE [OPTIONS]\n");
   printf("    -h            Show this help message.\n");
-  printf("    -v            Show build information.\n");
+  printf("    -V            Show build information.\n");
   printf("    -n SIZE       Total size of random composition.\n");
   printf("    -a MIN_F      Minimum number of factors in composition.\n");
   printf("    -b MAX_F      Maximum number of factors in composition.\n");
   printf("    -p MIN_E      Minimum element in composition.\n");
   printf("    -q MAX_E      Maximum element in composition.\n");
   printf("    -u UNSTRICT   Generate WHT trees that cannot be executed in current configuration.\n");
+  printf("    -v VECTOR     Generate random binary split WHT trees with right size VECTOR.\n");
   exit(1);
 }
 
 int
 main(int argc, char **argv)
 {
-  size_t size, min_child, max_child, min_leaf, max_leaf;
+  uint size, min_child, max_child, min_leaf, max_leaf, vector;
   bool strict;
 
   int c;
@@ -65,8 +66,9 @@ main(int argc, char **argv)
   min_leaf  = 1;
   max_leaf  = WHT_MAX_UNROLL;
   strict    = true;
+  vector    = 0;
 
-  while ((c = getopt (argc, argv, "hvn:a:b:p:q:u")) != -1)
+  while ((c = getopt (argc, argv, "hVn:a:b:p:q:u:v:")) != -1)
     switch (c) {
       case 'n':
         size = atoi(optarg);
@@ -86,9 +88,12 @@ main(int argc, char **argv)
       case 'u':
         strict = false;
         break;
+      case 'v':
+        vector = atoi(optarg);
+        break;
       case 'h':
         usage();
-      case 'v':
+      case 'V':
         wht_info();
         exit(0);
       default:
@@ -119,8 +124,10 @@ main(int argc, char **argv)
 
   root = NULL;
 
-  /* root = compos_tree_rand_bin(size, min_child, max_child, max_leaf); */  
-  root = compos_tree_rand(size, min_child, max_child, max_leaf); 
+  if (vector)
+    root = compos_tree_rand_bin(size, min_child, max_child, max_leaf, vector); 
+  else
+    root = compos_tree_rand(size, min_child, max_child, max_leaf); 
 
   compos_tree_print(root);
 
