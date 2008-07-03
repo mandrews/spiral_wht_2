@@ -53,35 +53,18 @@ if [ "$clr" == 1 ]; then
   rm ${path}/../share/*
 fi
 
-if [ -f "$path/../../wht/.libs/libwht.a" ]; then
-# Location of library in development environment
-  lib="$path/../../wht/.libs/libwht.a"
-elif [ -f "$path/../lib/libwht.a" ]; then
-# Location of library in installed environment
-  lib="$path/../lib/libwht.a"
-else
-  echo "Cannot find libwht.a"
-  exit 1
-fi
-
 function count() 
 {
-  fn=$1
-  id=$2
+  file=$1
+  name=$2
 
-  # This hack grabs function calls that match $fn, e.g. apply_small1>: ... ASM
-  export FN=$fn
-  call=`objdump -d $lib | \
-  perl -e '
-    $s = 0; 
-    while (<>) { 
-      # Start grabbing lines after this one matches
-      if ($_ =~ /$ENV{'FN'}>/) { $s = 1; } 
-      # Stop when you reach a single newline
-      if ($_ =~ /^\n$/) { $s = 0; } 
-      if ($s == 1) { print $_; } 
-    }'`
-  unset FN
+  f="${path}/../../wht/codelets/${file}.o"
+
+  if [ ! -f $f ]; then
+    return;
+  fi
+
+  call=`objdump -d $f`
 
   if [ "$mem" == 1 ]; then
     x=`echo "${call}" | grep -E ${ins} | grep -E "\(|\)" | wc -l`;
@@ -91,7 +74,7 @@ function count()
     x=`echo "${call}" | grep -E ${ins} | wc -l`;
   fi
 
-  echo "$id : $x" >> ${tmp}
+  echo "$name : $x" >> ${tmp}
 }
 
 mkdir -p "${path}/../share"
@@ -102,24 +85,24 @@ if [ ! -e $tmp ]; then
   echo "Generating cache for instruction '$ins'" 1>&2
 
   for ((n=1;n<=unroll;n+=1)); do
-    count "apply_small${n}" "small[${n}]"
+    count "s_${n}" "small[${n}]"
   done
 
   v=$vsize
   p=$(($v >> 1)) # Log 2 of v, for v,v codelets
 
-  count "apply_small${p}_v${v}" "smallv($v)[$p]"
+  count "s_${p}_v_${v}" "smallv($v)[$p]"
 
   for ((n=1;n<=unroll;n+=1)); do
-    count "apply_small${n}_v${v}" "smallv($v,0)[$n]"
-    count "apply_small${n}_v${v}_a" "smallv($v,1)[$n]"
+    count "s_${n}_v_${v}" "smallv($v,0)[$n]"
+    count "s_${n}_v_${v}_a" "smallv($v,1)[$n]"
   done
 
   for ((n=1;n<=unroll;n+=1)); do
     for ((k=2;k<=ifactor;k*=2)); do
-      count "apply_small${n}_v_${v}_il_${k}" "smallv($v,$k,0)[$n]"
-      count "apply_small${n}_v_${v}_il_${k}_a" "smallv($v,$k,1)[$n]"
-      count "apply_small${n}_il${k}" "smallil($k)[$n]"
+      count "s_${n}_il_${k}_v_${v}" "smallv($v,$k,0)[$n]"
+      count "s_${n}_il_${k}_v_${v}_a" "smallv($v,$k,1)[$n]"
+      count "s_${n}_il_${k}" "smallil($k)[$n]"
     done
   done
   
