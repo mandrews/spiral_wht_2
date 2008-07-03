@@ -84,13 +84,13 @@
  * \def WHT_TYPE_STRING
  * \brief Data type of transform in English.
  */
-#ifdef WHT_FLOAT
+#if ((WHT_FLOAT==1))
 typedef float wht_value;
 #define WHT_STABILITY_THRESHOLD (   1e-1)
 #define WHT_TYPE_STRING         ("float") 
 #endif/*WHT_FLOAT*/
 
-#ifdef WHT_DOUBLE
+#if ((WHT_DOUBLE==1))
 typedef double wht_value;
 #define WHT_STABILITY_THRESHOLD (    1e-9)
 #define WHT_TYPE_STRING         ("double") 

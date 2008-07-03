@@ -40,7 +40,7 @@ fi
 
 case "${ax_cv_c_compiler_vendor}" in
   intel)
-    CFLAGS="$CFLAGS -no-gcc"
+    CFLAGS="$CFLAGS -no-gcc -std=c99"
     ;;
 esac
 
@@ -56,11 +56,15 @@ AC_ARG_ENABLE([float],
 if test "$ok" = "yes"; then
 	AC_DEFINE(WHT_FLOAT,1,
     [define to compile with single precision floating point])
+	AC_DEFINE(WHT_DOUBLE,0,
+    [define to compile with double precision floating point])
   WHT_PRECISION=f
   WHT_SUFFIX=f
 else
 	AC_DEFINE(WHT_DOUBLE,1,
     [define to compile with double precision floating point])
+	AC_DEFINE(WHT_FLOAT,0,
+    [define to compile with single precision floating point])
   WHT_PRECISION=
   WHT_SUFFIX=
 fi
