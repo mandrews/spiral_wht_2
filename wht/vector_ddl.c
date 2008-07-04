@@ -73,6 +73,7 @@ split_vector_apply(Wht *W, long S, size_t D, wht_value *x)
  *
  * \param   W   WHT Plan
  */
+/** \todo Review these messsages some of them don't make sense */
 void
 split_vector_rule(Wht *W)
 {
@@ -103,6 +104,9 @@ split_vector_rule(Wht *W)
 
   if (Wl->requires[VECTOR_STRIDE])
     return error_msg_set(W, "Leftmost tree cannot be applied at stride v");
+
+  if (Wr->requires[VECTOR_SQUARE_STRIDE])
+    return error_msg_set(W, "Rightmost tree cannot be applied at stride N/v^2");
 
   if (Wl->N != v)
     return error_msg_set(W, "Leftmost tree must have size v");
