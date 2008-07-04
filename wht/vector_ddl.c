@@ -101,6 +101,12 @@ split_vector_rule(Wht *W)
   if (Wr->N < Wl->N)
     return error_msg_set(W, "Rightmost tree must be larger than v");
 
+  if (Wl->requires[VECTOR_STRIDE])
+    return error_msg_set(W, "Leftmost tree cannot be applied at stride v");
+
+  if (Wl->N != v)
+    return error_msg_set(W, "Leftmost tree must have size v");
+
   if (parent_provides(W, VECTOR_STRIDE)) 
     return error_msg_set(W, "parent codelet cannot change stride");
 

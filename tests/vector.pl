@@ -60,12 +60,17 @@ for (my $i = $p; $i <= $n; $i++) {
 
   expect_reject    splitv($v, smallv($v,$q), 
     splitv($v,smallv($v,$v,1,$p), smallv($v,$v,1,$i)));
+
+  expect_reject    splitv($v, smallv($v,$v,1,$q), 
+    splitd(smallv($v,$v,1,$p), smallv($v,$v,1,$i)));
 }
 
 expect_correct    splitv($v, smallv($v,$q), 
   splitd(smallv($v,$v,1,$p), smallv($v,$v,1,$p), smallv($v,$v,1,$p)));
 
 for (my $i = 1; $i < $q; $i++) {
+  expect_reject     splitv($v, smalld($i), smalld($i));
+  expect_reject     splitv($v, smallv($v,$i), smalld($i));
   expect_reject     splitv($v, smallv($v,$q), smalld($i));
   expect_reject     splitv($v, smallv($v,$q), smallv($v,$v,1,$i));
 }
