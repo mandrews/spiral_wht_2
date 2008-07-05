@@ -86,6 +86,9 @@ split_vector_rule(Wht *W)
   if (W->children == NULL)
     return error_msg_set(W, "codelet must be split for ddl");
 
+  if (! rightmost_tree(W))
+    return error_msg_set(W, "must be in rightmost tree of plan");
+
   if (W->right != 1)
     return error_msg_set(W, "codelet must rightmost");
 

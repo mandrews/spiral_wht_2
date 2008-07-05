@@ -67,6 +67,9 @@ for (my $i = $p; $i <= $n; $i++) {
 
   expect_correct     splitd(smalld(1), splitv($v, smallv($v,$q), smallv($v,$v,1,$i)));
   expect_reject      splitd(splitv($v, smallv($v,$q), smallv($v,$v,1,$i)),smalld(1));
+  expect_reject      splitd(
+    splitd(smalld(1), splitv($v, smallv($v,$q), smallv($v,$v,1,$i))),
+    smalld(1));
 }
 
 expect_correct    splitv($v, smallv($v,$q), 
