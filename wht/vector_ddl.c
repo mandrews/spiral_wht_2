@@ -86,8 +86,8 @@ split_vector_rule(Wht *W)
   if (W->children == NULL)
     return error_msg_set(W, "codelet must be split for ddl");
 
-  if (W->parent != NULL)
-    return error_msg_set(W, "codelet must topmost");
+  if (W->right != 1)
+    return error_msg_set(W, "codelet must rightmost");
 
   if (W->children->nn != 2)
     return error_msg_set(W, "codelet must be binary split for ddl");
