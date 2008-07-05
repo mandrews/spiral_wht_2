@@ -86,12 +86,11 @@ split_vector_rule(Wht *W)
   if (W->children == NULL)
     return error_msg_set(W, "codelet must be split for ddl");
 
+  if (W->parent != NULL)
+    return error_msg_set(W, "codelet must topmost");
+
   if (W->children->nn != 2)
     return error_msg_set(W, "codelet must be binary split for ddl");
-
-  W->attr[VECTOR_SIZE] = v;
-
-  W->provides[VECTOR_STRIDE] = true;
 
   if (! i_power_of_2(v))
     return error_msg_set(W, "vector length must be a power of 2");
@@ -113,6 +112,9 @@ split_vector_rule(Wht *W)
 
   if (parent_provides(W, VECTOR_STRIDE)) 
     return error_msg_set(W, "parent codelet cannot change stride");
+
+  W->attr[VECTOR_SIZE] = v;
+  W->provides[VECTOR_STRIDE] = true;
 
   W->apply = split_vector_apply;
 }

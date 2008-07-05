@@ -30,6 +30,7 @@ print "\nVectorization Tests\n\n";
 
 expect_reject      smallv($v,$q);
 expect_reject      splitv($v, smallv($v,$q), smallv($v,$q));
+expect_reject      splitd(smalld(1), splitv($v, smallv($v,$q), smallv($v,$q)));
 
 for (my $i = $p; $i <= $n; $i++) {
   expect_correct    smallv($v,1,$i);
