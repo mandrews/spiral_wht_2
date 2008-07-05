@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# All in bytes
+L1_SIZE=$((32*1024)) 
+L2_SIZE=$((128*1024))
+L1_BLOCK=64
+L2_BLOCK=64
+L1_ASSOC=8
+L2_ASSOC=4
+
+SINGLE_SIZE=4
+DOUBLE_SIZE=8
+
