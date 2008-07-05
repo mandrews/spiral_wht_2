@@ -32,26 +32,32 @@ v1_seq_best_table="${prefix}_v1_seq_best_table.txt"
 v2_seq_best="${prefix}_v2_seq_best.txt"
 v2_seq_best_table="${prefix}_v2_seq_best_table.txt"
 
+time (
 echo "Default L0" > ${seq_log}
 $wht_dp -k 4 -p -m "${rdtsc} ${params_0}" -x 4 -a $L0_A -b $L0_B -f ${seq_store} -d ${seq_log}
 echo "Default L1" >> ${seq_log}
 $wht_dp -k 4 -m "${rdtsc} ${params_1}" -x 3 -a $L1_A -b $L1_B -f ${seq_store} -d ${seq_log}
 echo "Default L2" >> ${seq_log}
 $wht_dp -k 2 -m "${rdtsc} ${params_2}" -x 2 -a $L2_A -b $L2_B -f ${seq_store} -d ${seq_log}
+) 2>> ${seq_log}
 
+time (
 echo "Vectorize 1 L0" > ${vec1_log}
 $wht_dp -k 4 -p -m "${rdtsc} ${params_0}" -x 4 -a $L0_A -b $L0_B -f ${vec1_store} -d ${vec1_log} -r "${wht_vec1}"
 echo "Vectorize 1 L1" >> ${vec1_log}
 $wht_dp -k 4 -m "${rdtsc} ${params_1}" -x 3 -a $L1_A -b $L1_B -f ${vec1_store} -d ${vec1_log} -r "${wht_vec1}"
 echo "Vectorize 1 L2" >> ${vec1_log}
 $wht_dp -k 2 -m "${rdtsc} ${params_2}" -x 2 -a $L2_A -b $L2_B -f ${vec1_store} -d ${vec1_log} -r "${wht_vec1}"
+) 2>> ${vec1_log}
 
+time (
 echo "Vectorize 2 L0" > ${vec2_log}
 $wht_dp -k 4 -p -m "${rdtsc} ${params_0}" -x 4 -a $L0_A -b $L0_B -f ${vec2_store} -d ${vec2_log} -r "${wht_vec2}"
 echo "Vectorize 2 L1" >> ${vec2_log}
 $wht_dp -k 4 -m "${rdtsc} ${params_1}" -x 3 -a $L1_A -b $L1_B -f ${vec2_store} -d ${vec2_log} -r "${wht_vec2}"
 echo "Vectorize 2 L2" >> ${vec2_log}
 $wht_dp -k 2 -m "${rdtsc} ${params_2}" -x 2 -a $L2_A -b $L2_B -f ${vec2_store} -d ${vec2_log} -r "${wht_vec2}"
+) 2>> ${vec2_log}
 
 $wht_strip < ${seq_store} > ${seq_best}
 $wht_strip < ${seq_store} | $wht_wrap "${wht_vec1}" 'plan' > ${v1_seq_best}
