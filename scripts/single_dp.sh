@@ -83,5 +83,4 @@ report_single $vec2_best $vec2_best_table
 report_single $s_vec2_best $s_vec2_best_table
 report_single $v2_seq_best $v2_seq_best_table
 
-echo 'Done!' | nail -s 'Single DP Finished!' $EMAIL
 

@@ -18,6 +18,7 @@ install-exec-local:
 	mkdir -p $(prefix)/share
 	mkdir -p $(top_srcdir)/model/share
 	mkdir -p $(prefix)/extra
+	mkdir -p $(prefix)/scripts
 	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'unpckhpd'
 	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'unpcklpd'
 	$(BASH) $(top_srcdir)/model/ic/count_sse.sh -w 'small[1]' -i 'addsd|subsd'
@@ -54,4 +55,5 @@ install-exec-local:
 	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_interleave $(prefix)/extra
 	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_vectorize $(prefix)/extra
 	$(top_srcdir)/install-sh $(top_srcdir)/extra/utils.rb $(prefix)/extra
+	$(top_srcdir)/install-sh $(top_srcdir)/scripts/* $(prefix)/scripts
 	rm -rf $(top_srcdir)/model/share

@@ -3,7 +3,7 @@
 EMAIL=ma53@drexel.edu
 
 # Installed
-PATH="$PATH:${root}/bin:${root}/extra" 
+PATH="$PATH:${root}/extra:${root}/bin" 
 # Development
 PATH="$PATH:${root}/measure:${root}/model/ic:${root}/model/cm:${root}/rand" 
 
@@ -17,16 +17,16 @@ L1_B=$(($L2 - 1))
 L2_A=$L2
 L2_B=24
 
-params_0=" -c -n 50 -k 50 -a 0.5 -p 0.1"
-params_1=" -c -n 10 -k 10 -a 0.5 -p 0.1"
-params_2=" -c -n 5  -k 5  -a 5   -p 1"
-
 wht_dp=`which wht_dp`
 wht_strip=`which wht_strip`
 wht_wrap=`which wht_wrap`
 wht_measure=`which wht_measure`
 wht_cm_count=`which wht_cm_count`
 wht_classify=`which wht_classify`
+wht_rand=`which wht_rand`
+wht_rotate=`which wht_rotate`
+wht_vectorize=`which wht_vectorize`
+wht_vectorize_2=`which wht_vectorize_2`
 wht_count_ins=`which count_sse.sh`
 
 rdtsc="$wht_measure -m rdtsc"
@@ -131,5 +131,50 @@ function report_single()
   right, \
   base"
   ${root}/extra/wht_query $file "$fields" > $data
+}
+
+function random_sample()
+{
+  a=$1
+  b=$2
+  n=$3
+  file=$4
+  random=$5
+
+  # Generate JSON format of plans with ids
+  echo '[' > $file
+  for i in `seq $a $b`; do
+    for ((j=1;j<=n;j+=1)); do
+      echo '{' >> $file
+      plan=`$random -n $i`
+      echo "\"plan\" : \"$plan\"," >> $file
+      echo "\"id\" : $i" >> $file
+      echo '}' >> $file
+      if [ $j -lt $n ]; then
+        echo ',' >> $file
+      fi
+    done
+    if [ $i -lt $b ]; then
+      echo ',' >> $file
+    fi
+  done
+  echo ']' >> $file
+}
+
+function wht_vec1()
+{
+  i=$1
+  o=$2
+  V=$3
+  K=$4
+  cat ${i} | $wht_wrap "${wht_rotate} -p ${V}" 'plan' | $wht_wrap "${wht_vectorize} -v ${V} -k ${K} -c" 'plan' > ${o}
+}
+
+function wht_vec2()
+{
+  i=$1
+  o=$2
+  V=$3
+  cat ${i} | $wht_wrap "${wht_vectorize_2} -v ${V}" 'plan' > ${o}
 }
 
