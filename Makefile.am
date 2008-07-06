@@ -54,6 +54,7 @@ install-exec-local:
 	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_strip $(prefix)/extra
 	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_interleave $(prefix)/extra
 	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_vectorize $(prefix)/extra
+	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_vectorize_2 $(prefix)/extra
 	$(top_srcdir)/install-sh $(top_srcdir)/extra/utils.rb $(prefix)/extra
 	$(top_srcdir)/install-sh $(top_srcdir)/scripts/* $(prefix)/scripts
 	rm -rf $(top_srcdir)/model/share

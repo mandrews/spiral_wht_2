@@ -44,6 +44,7 @@ base="$wht_classify | grep right_node | sed -e 's/.*:\s*//g'"
 
 unpckhps="$wht_count_ins -i 'unpckhps'"
 unpcklps="$wht_count_ins -i 'unpcklps'"
+shufps="$wht_count_ins -i 'shufps'"
 addsubss="$wht_count_ins -i 'addss|subss'"
 addsubps="$wht_count_ins -i 'addps|subps'"
 movssm="$wht_count_ins -i 'movss' -m"
@@ -87,6 +88,7 @@ function metrics_single()
 
   run $file "$unpckhps" 'unpckhps' 
   run $file "$unpcklps" 'unpcklps' 
+  run $file "$shufps" 'shufps' 
   run $file "$addsubss" 'addsubss' 
   run $file "$addsubps" 'addsubps' 
   run $file "$movssm" 'movssm' 
@@ -115,6 +117,7 @@ function report_single()
   L2_DCM, \
   unpckhps, \
   unpcklps, \
+  shufps, \
   addsubss, \
   addsubps, \
   movssm, \
