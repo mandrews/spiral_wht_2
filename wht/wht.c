@@ -97,6 +97,7 @@ error_msg_set(Wht *W, char *format, ...)
 { 
   va_list ap; 
   char *tmp;
+  size_t max;
 
   /* Policy to keep first encountered error message */
   if (W->error_msg != NULL)
@@ -111,7 +112,10 @@ error_msg_set(Wht *W, char *format, ...)
   va_end(ap); 
 
   strcat(W->error_msg, " @ ");
-  strcat(W->error_msg, tmp);
+
+  max = MAX_MSG_LEN - strlen(W->error_msg) - 1;
+
+  strncat(W->error_msg, tmp, max);
 
   free(tmp);
 }
