@@ -53,8 +53,6 @@ movhpsm="$wht_count_ins -i 'movhps' -m"
 movlpsm="$wht_count_ins -i 'movlps' -m"
 movssr="$wht_count_ins -i 'movss' -r"
 movapsr="$wht_count_ins -i 'movaps' -r"
-movhpsr="$wht_count_ins -i 'movhps' -r"
-movlpsr="$wht_count_ins -i 'movlps' -r"
 
 function run() 
 {
@@ -97,8 +95,6 @@ function metrics_single()
   run $file "$movlpsm" 'movlpsm' 
   run $file "$movssr" 'movssr' 
   run $file "$movapsr" 'movapsr' 
-  run $file "$movhpsr" 'movhpsr' 
-  run $file "$movlpsr" 'movlpsr' 
   run $file "$cmc1" 'cmc1' 
   run $file "$cmc1" 'cmc2' 
   run $file "$left" 'left' 
@@ -126,10 +122,8 @@ function report_single()
   movlpsm, \
   movssr, \
   movapsr, \
-  movhpsr, \
-  movlpsr, \
   cmc1, \
-  cmc1, \
+  cmc2, \
   left, \
   right, \
   base"
