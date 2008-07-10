@@ -1,0 +1,196 @@
+#!/usr/bin/env ruby
+
+# TODO 
+# Clean this up and back port path idea to wht_dp
+# Add support for counting instructions from disessembled library
+#
+# Try to count mov and mul in split
+
+SCRIPT_PATH       = File.dirname(__FILE__) 
+SCRIPT_NAME       = 'wht_foo'
+
+$LOAD_PATH << File.dirname(__FILE__) 
+
+require "utils"
+require "narray"
+require 'tempfile'
+
+require 'facets/dictionary' # Ordered Hash
+
+def which(exec)
+  dev_path = [ 'measure', 'wht', 'model/ic' ]
+  dev_path.map! { |x| "./#{SCRIPT_PATH}/../#{x}" }
+
+  $PATH = (["$PATH"] + dev_path).join(':')
+
+  `PATH=#{$PATH} which #{exec}`.chomp
+end
+
+WHT_COUNT     = which("wht_count")
+WHT_MEASURE   = which("wht_measure")
+
+def exec_to_float(cmd, args, *flags)
+  args.each do |k,v|
+    cmd << " #{k} #{v} "
+  end
+
+  flags.each do |f|
+    cmd << " #{f}"
+  end
+
+  out = 0
+  IO.popen(cmd) do |fd|
+    out = fd.gets
+  end
+
+  if out.nil? or out.to_f.zero?
+    raise Exception.new("Could not read exec")
+  else 
+    return out.to_f
+  end
+end
+
+def exec_to_hash(delim, cmd, args, *flags)
+  args.each do |k,v|
+    cmd << " #{k} #{v} "
+  end
+
+  flags.each do |f|
+    cmd << " #{f}"
+  end
+
+  h = Dictionary.new
+  IO.popen(cmd) do |fd|
+    while out = fd.gets
+      out.chomp!
+      k,v = out.split(delim)
+      h[k] = v
+    end
+  end
+
+  if h.nil? or h.keys.empty?
+    raise Exception.new("Could not read exec")
+  else 
+    return h
+  end
+end
+
+def wht_measure(args, *flags)
+  exec_to_float("#{WHT_MEASURE}", args, flags)
+end
+
+def wht_count(args, *flags)
+  exec_to_hash(':', "#{WHT_COUNT}", args, flags)
+end
+
+
+if $0 == __FILE__ # Main Entry Point
+
+  input = ARGV[0]
+
+  if input.nil?
+    puts "need wht plan"
+    exit
+  end
+
+  env = load_runtime_env(WHT_MEASURE)
+
+  n = env['max_unroll']
+  k = env['max_interleave']
+  v = env['vector_size']
+  p = (Math.log(v) / Math.log(2)).ceil + 1
+  q = (Math.log(k) / Math.log(2)).ceil 
+
+  basis, plans = [], []
+
+  for i in (1..n) 
+    basis << "small[#{i}]"
+  end
+
+  if v > 0
+    for i in (p..n) 
+      basis << "smallv(#{v},0)[#{i}]"
+      basis << "smallv(#{v},1)[#{i}]"
+    end
+  end
+
+  plans = basis.dup
+
+  if v > 0
+    for i in (1..n)
+      for j in (p..q)
+        je = (1 << j)
+        basis << "smallv(#{v},#{je},0)[#{i}]"
+        basis << "smallv(#{v},#{je},1)[#{i}]"
+        plans << "splitil[smallv(#{v},#{je},0)[#{i}],small[#{p}]]"
+        plans << "splitil[smallv(#{v},#{je},1)[#{i}],small[#{p}]]"
+      end
+    end
+  end
+
+  basis << "split_alpha"
+  basis << "split_beta_1"
+  basis << "split_beta_2"
+  basis << "split_beta_3"
+
+  if v > 0 or k > 0
+    basis << "splitil_alpha"
+    basis << "splitil_beta_1"
+    basis << "splitil_beta_2"
+    basis << "splitil_beta_3"
+  end
+
+  plans << "split[small[2],small[2],small[2],small[2]]"
+  plans << "split[split[small[2],small[2],small[2]],small[2]]"
+  plans << "split[small[2],split[small[2],small[2],small[2]]]"
+  plans << "split[split[small[2],small[2]],split[small[2],small[2]]]"
+
+  if v > 0
+    plans << "splitil[small[2],small[2],small[2],small[2]]"
+    plans << "splitil[splitil[small[2],small[2],small[2]],small[2]]"
+    plans << "splitil[small[2],splitil[small[2],small[2],small[2]]]"
+    plans << "splitil[splitil[small[2],small[2]],splitil[small[2],small[2]]]"
+  end
+
+  basis_file = Tempfile.new("wht")
+  fd = basis_file.open
+  basis.each { |x| fd.puts(x) }
+  fd.close
+
+  a = NMatrix.float(plans.length,plans.length)
+  b = NVector.float(plans.length)
+  d = NVector.float(plans.length)
+
+  i = 0
+  for plan in plans
+
+    x = wht_count({
+      '-w' => "'#{plan}'", 
+      '-b' => basis_file.path })
+
+    y = wht_measure({ 
+      '-w' => "'#{plan}'", 
+      '-m' => 'PAPI_TOT_INS', 
+      '-n' => 1,
+    }, '-c')
+
+    a[0,i] = x.values.map { |z| z.to_f }
+    b[i] = y
+
+    i += 1
+  end
+
+  # TODO Cache this somewhere
+  x = a.lu.solve(b.transpose) 
+
+  t = wht_count({
+    '-w' => "'#{input}'", 
+    '-b' => basis_file.path })
+
+  d[0] = t.values.map { |z| z.to_f }
+
+  # NOTE This is basically what predict does
+  puts (d .* x.transpose).floor
+
+end
+
