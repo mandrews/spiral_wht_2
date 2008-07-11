@@ -1,196 +1,335 @@
 #!/usr/bin/env ruby
 
 # TODO 
-# Clean this up and back port path idea to wht_dp
-# Add support for counting instructions from disessembled library
-#
-# Try to count mov and mul in split
-
-SCRIPT_PATH       = File.dirname(__FILE__) 
-SCRIPT_NAME       = 'wht_foo'
+# Back port path idea to wht_dp
+# Refactor calc_coeff
+# Add back "vector extensions"
 
 $LOAD_PATH << File.dirname(__FILE__) 
 
 require "utils"
+
 require "narray"
 require 'tempfile'
+require 'digest/md5'
 
-require 'facets/dictionary' # Ordered Hash
+SCRIPT_PATH       = File.dirname(__FILE__) 
+SCRIPT_NAME       = 'wht_ic'
 
-def which(exec)
-  dev_path = [ 'measure', 'wht', 'model/ic' ]
-  dev_path.map! { |x| "./#{SCRIPT_PATH}/../#{x}" }
+DEFAULT_PARAMS    = {
+  :wht            => nil,
+  :op             => 'papi',
+  :type           => 'all',
+  :refresh        => false,
+  :lib            => find_file('libwht.a'),
+  :count          => find_file('wht_count'),
+  :measure        => find_file('wht_measure'),
+}
 
-  $PATH = (["$PATH"] + dev_path).join(':')
+OPS = [
+  'addsd',
+  'subsd',
+  'addpd',
+  'subpd',
+  'addss',
+  'subss',
+  'addps',
+  'subps',
+  'shufpd',
+  'shufps',
+  'unpckhpd',
+  'unpcklpd',
+  'unpckhps',
+  'unpcklps',
+  'movsd' ,
+  'movapd' ,
+  'movss' ,
+  'movaps' ,
+  'movhpd',
+  'movlpd',
+  'movhps',
+  'movlps',
+# Extra
+  'lea',
+  'shl',
+  'xor',
+  'push',
+  'pop',
+  'nop',
+  'retq',
+  'mov',
+  'add',
+  'sub',
+  'imul'
+]
 
-  `PATH=#{$PATH} which #{exec}`.chomp
+class Opts < Options
+  def initialize
+    @params  = DEFAULT_PARAMS
+    @options = OptionParser.new do |o|
+      o.banner = "Usage: #{SCRIPT_NAME} [OPTIONS]"
+      o.separator ""
+
+      o.on("-h", "--help", 
+        "Show this help message.") { 
+        die }
+
+      o.on("-w", "--plan=WHT", String,
+        "Generate counts for WHT plan.") { |x|
+         @params[:wht] = x }
+
+      o.on("-o", "--op=OP", String,
+        "Count OP codes.") { |x|
+         @params[:op] = x }
+
+      o.on("-v", "--verbose", 
+        "Show non-essential information.") {
+        @params[:verbose] = true }
+
+      o.on("-t", "--type=TYPE", ['all', 'reg', 'mem'],
+        "Select op type to count (all, reg, mem)") { |x|
+         @params[:type] = x }
+
+      o.on("-X", "--refresh", 
+        "Refresh cached data.") { |x|
+         @params[:refresh] = true }
+    end
+  end
 end
 
-WHT_COUNT     = which("wht_count")
-WHT_MEASURE   = which("wht_measure")
+class VectorSpace
+  attr_accessor :basis, :span
+  attr_accessor :n, :k, :v
 
-def exec_to_float(cmd, args, *flags)
-  args.each do |k,v|
-    cmd << " #{k} #{v} "
-  end
+  class Basis < Array
+    attr_accessor :file
+    def initialize
+      @file  = nil
+    end
 
-  flags.each do |f|
-    cmd << " #{f}"
-  end
-
-  out = 0
-  IO.popen(cmd) do |fd|
-    out = fd.gets
-  end
-
-  if out.nil? or out.to_f.zero?
-    raise Exception.new("Could not read exec")
-  else 
-    return out.to_f
-  end
-end
-
-def exec_to_hash(delim, cmd, args, *flags)
-  args.each do |k,v|
-    cmd << " #{k} #{v} "
-  end
-
-  flags.each do |f|
-    cmd << " #{f}"
-  end
-
-  h = Dictionary.new
-  IO.popen(cmd) do |fd|
-    while out = fd.gets
-      out.chomp!
-      k,v = out.split(delim)
-      h[k] = v
+    def path
+      @file.path
     end
   end
 
-  if h.nil? or h.keys.empty?
-    raise Exception.new("Could not read exec")
-  else 
-    return h
-  end
-end
+  class Span < Array; end
 
-def wht_measure(args, *flags)
-  exec_to_float("#{WHT_MEASURE}", args, flags)
-end
-
-def wht_count(args, *flags)
-  exec_to_hash(':', "#{WHT_COUNT}", args, flags)
-end
-
-
-if $0 == __FILE__ # Main Entry Point
-
-  input = ARGV[0]
-
-  if input.nil?
-    puts "need wht plan"
-    exit
+  def initialize(n,k,v)
+    @n,@k,@v = n,k,v
+    @basis = Basis.new
+    @span  = Span.new
+    construct!
   end
 
-  env = load_runtime_env(WHT_MEASURE)
+  def construct!
+    p = (Math.log(v) / Math.log(2)).ceil + 1
+    q = (Math.log(k) / Math.log(2)).ceil 
 
-  n = env['max_unroll']
-  k = env['max_interleave']
-  v = env['vector_size']
-  p = (Math.log(v) / Math.log(2)).ceil + 1
-  q = (Math.log(k) / Math.log(2)).ceil 
+    for i in (1..n) 
+    @basis << "small[#{i}]"
+    end
 
-  basis, plans = [], []
+    @span  = @basis.dup
 
-  for i in (1..n) 
-    basis << "small[#{i}]"
-  end
+    @basis << "split_alpha"
+    @basis << "split_beta_1"
+    @basis << "split_beta_2"
+    @basis << "split_beta_3"
 
-  if v > 0
-    for i in (p..n) 
-      basis << "smallv(#{v},0)[#{i}]"
-      basis << "smallv(#{v},1)[#{i}]"
+    @span  << "split[small[2],small[2],small[2],small[2]]"
+    @span  << "split[split[small[2],small[2],small[2]],small[2]]"
+    @span  << "split[small[2],split[small[2],small[2],small[2]]]"
+    @span  << "split[split[small[2],small[2]],split[small[2],small[2]]]"
+
+    @basis.file = Tempfile.new("wht")
+
+    @basis.file.open do |fd|
+      @basis.each { |x| fd.puts(x) }
     end
   end
+end
 
-  plans = basis.dup
+def calc_papi(space)
+  basis = space.basis
+  span =  space.span 
 
-  if v > 0
-    for i in (1..n)
-      for j in (p..q)
-        je = (1 << j)
-        basis << "smallv(#{v},#{je},0)[#{i}]"
-        basis << "smallv(#{v},#{je},1)[#{i}]"
-        plans << "splitil[smallv(#{v},#{je},0)[#{i}],small[#{p}]]"
-        plans << "splitil[smallv(#{v},#{je},1)[#{i}],small[#{p}]]"
-      end
-    end
-  end
-
-  basis << "split_alpha"
-  basis << "split_beta_1"
-  basis << "split_beta_2"
-  basis << "split_beta_3"
-
-  if v > 0 or k > 0
-    basis << "splitil_alpha"
-    basis << "splitil_beta_1"
-    basis << "splitil_beta_2"
-    basis << "splitil_beta_3"
-  end
-
-  plans << "split[small[2],small[2],small[2],small[2]]"
-  plans << "split[split[small[2],small[2],small[2]],small[2]]"
-  plans << "split[small[2],split[small[2],small[2],small[2]]]"
-  plans << "split[split[small[2],small[2]],split[small[2],small[2]]]"
-
-  if v > 0
-    plans << "splitil[small[2],small[2],small[2],small[2]]"
-    plans << "splitil[splitil[small[2],small[2],small[2]],small[2]]"
-    plans << "splitil[small[2],splitil[small[2],small[2],small[2]]]"
-    plans << "splitil[splitil[small[2],small[2]],splitil[small[2],small[2]]]"
-  end
-
-  basis_file = Tempfile.new("wht")
-  fd = basis_file.open
-  basis.each { |x| fd.puts(x) }
-  fd.close
-
-  a = NMatrix.float(plans.length,plans.length)
-  b = NVector.float(plans.length)
-  d = NVector.float(plans.length)
+  a = NMatrix.float(span.length,span.length)
+  b = NVector.float(span.length)
 
   i = 0
-  for plan in plans
+  for vector in span
+    ai = count({
+      '-w' => "'#{vector}'", 
+      '-b' => basis.path })
 
-    x = wht_count({
-      '-w' => "'#{plan}'", 
-      '-b' => basis_file.path })
-
-    y = wht_measure({ 
-      '-w' => "'#{plan}'", 
+    bi = measure({ 
+      '-w' => "'#{vector}'", 
       '-m' => 'PAPI_TOT_INS', 
       '-n' => 1,
     }, '-c')
 
-    a[0,i] = x.values.map { |z| z.to_f }
-    b[i] = y
+    a[0,i] = ai.values
+    b[i] = bi
 
     i += 1
   end
 
-  # TODO Cache this somewhere
-  x = a.lu.solve(b.transpose) 
+  x = a.lu.solve(b.transpose)
 
-  t = wht_count({
-    '-w' => "'#{input}'", 
-    '-b' => basis_file.path })
+  hash = {}
+  basis.each_with_index do |b,i|
+    hash[b] = x[i]
+  end
+  hash
+end
 
-  d[0] = t.values.map { |z| z.to_f }
+def disassemble(lib)
+  procs = {}
 
-  # NOTE This is basically what predict does
-  puts (d .* x.transpose).floor
+  cmd = "objdump -d #{lib}"
+  IO.popen(cmd) do |fd|
+    grab = false
+    while line = fd.gets
+      line.chomp!
 
+      if line =~ /<(apply.*?)>:/
+        grab = true
+        name = $1
+        procs[name] = []
+      end
+
+      procs[name] << line if grab
+
+      grab = false if line =~ /^\n$/
+    end
+  end
+
+  procs
+end
+
+def calc_coeffs(lib, space, refresh=false)
+  md5 = Digest::MD5.hexdigest(IO::readlines(lib, nil).first)
+  tmp = "/tmp/#{md5}"
+
+  if File.exists?(tmp) and not refresh
+    return File.open(tmp) do |fd|
+      load_data(fd)
+    end
+  end
+
+  table = { 'reg' => {}, 'mem' => {}, 'all' => {} }
+
+  procs = disassemble(lib)
+  procs.each do |decl,body|
+
+    name = case decl
+      when /small(\d+)$/                    then "small[#{$1}]"
+      when /small(\d+)_v(\d+)_v$/           then "smallv(#{$2})[#{$1}]"
+      when /small(\d+)_v(\d+)$/             then "smallv(#{$2},0)[#{$1}]"
+      when /small(\d+)_v(\d+)_a$/           then "smallv(#{$2},1)[#{$1}]"
+      when /small(\d+)_v(\d+)_il(\d+)$/     then "smallv(#{$2},#{$3},0)[#{$1}]"
+      when /small(\d+)_v(\d+)_il(\d+)_a$/   then "smallv(#{$2},#{$3},1)[#{$1}]"
+      when /small(\d+)_il(\d+)$/            then "smallil(#{$2})[#{$1}]"
+      else nil
+    end
+
+    next if name.nil?
+
+    body.each do |line|
+      cols = line.split(/\s+/)
+
+      if OPS.include?(cols.last)
+        op = cols.last
+        va = ""
+      else
+        va = cols.pop
+        op = cols.pop
+      end
+
+      next unless OPS.include?(op)
+
+      table['reg'][op] ||= {}
+      table['mem'][op] ||= {}
+      table['all'][op] ||= {}
+
+      if va =~ /\(.*\)/
+        table['mem'][op][name] ||= 0
+        table['mem'][op][name] += 1 
+      else
+        table['reg'][op][name] ||= 0
+        table['reg'][op][name] += 1 
+      end
+
+      table['all'][op][name] ||= 0
+      table['all'][op][name] += 1 
+
+      table['all']['all'] ||= {}
+      table['all']['all'][name] ||= 0
+      table['all']['all'][name] += 1 
+    end
+  end
+
+  table['all']['papi'] = calc_papi(space)
+
+  table['mem'].delete_if { |k,v| v.empty? }
+  table['reg'].delete_if { |k,v| v.empty? }
+  table['all'].delete_if { |k,v| v.empty? }
+
+  File.open(tmp,'w+') do |fd|
+    save_data(fd, table)
+  end
+
+  table
+end
+
+def coeff_to_nvector(space, coeff)
+  x = NVector.float(space.basis.length)
+  i = 0
+  space.basis.each do |elem|
+    x[i] = coeff[elem] || 0
+    i += 1
+  end
+  x
+end
+
+alias :count_to_nvector :coeff_to_nvector 
+
+if $0 == __FILE__ # Main Entry Point
+
+  opts = Opts.new
+  opts.parse(ARGV)
+
+  if opts.params[:wht].nil?
+    opts.die("Need to specify WHT plan")
+  end
+
+  if opts.params[:op].nil?
+    opts.die("Need to specify OP Code")
+  end
+
+  env = load_runtime_env
+
+  n = env['max_unroll']
+  k = env['max_interleave']
+  v = env['vector_size']
+
+  space = VectorSpace.new(n,k,v)
+
+  coeff_table = calc_coeffs(opts.params[:lib], space, opts.params[:refresh])
+
+  type, op = opts.params[:type], opts.params[:op]
+
+  op_coeff = coeff_table[type][op] 
+
+  opts.die("No counts for #{op} with type #{type}") if op_coeff.nil?
+
+  codelet_count = count({
+    '-w' => "'#{opts.params[:wht]}'", 
+    '-b' => space.basis.path })
+
+  x = coeff_to_nvector(space, op_coeff)
+  y = count_to_nvector(space, codelet_count)
+
+  puts (x .* y).floor
 end
 

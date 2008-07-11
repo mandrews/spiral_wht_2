@@ -6,11 +6,32 @@
 # $Id$
 
 require 'json'
+require 'facets/dictionary' # Ordered Hash
 
-INF = 1.0 / 0
+INF       = 1.0 / 0
 
-def load_runtime_env(measure)
-  cmd = "#{measure} -v"
+BASENAME  = File.dirname(__FILE__) 
+
+PATH      = [ 'extra', 'bin', 'lib' ]  +                    # Install Path
+            [ 'wht', 'measure', 'model/ic', 'wht/.libs' ]   # Development Path
+
+def find_file(file)
+  PATH.each do |path|
+    full_path = "./#{BASENAME}/../#{path}/#{file}"
+
+    return full_path if File.exists?(full_path)
+  end
+
+  raise Exeception.new("Could not find #{file}")
+end
+
+
+COUNT     = find_file("wht_count")
+MEASURE   = find_file("wht_measure")
+
+
+def load_runtime_env
+  cmd = "#{MEASURE} -v"
   env = {}
   IO.popen(cmd) do |fd|
     while (line = fd.gets) do
@@ -53,5 +74,83 @@ def time(&blk)
   yield
   t1 = Time.now
   $stderr.puts t1 - t0
+end
+
+class Options
+  require 'optparse'
+
+  attr_reader :params
+
+  def initialize
+    @params  = {} 
+    @options = OptionParser.new 
+  end
+
+  def die(msg = nil)
+    puts @options.to_s 
+    puts "\n#{msg}" unless msg.nil?
+    exit
+  end
+
+  def parse(args)
+    begin
+      @options.parse!(args)
+    rescue => e
+      die(e.message)
+    end
+  end
+end
+
+def ruby2unix(cmd, args, *flags)
+  args.each do |k,v|
+    cmd << " #{k} #{v} "
+  end
+
+  flags.each do |f|
+    cmd << " #{f}"
+  end
+
+  cmd
+end
+
+def unix2float(cmd, args, *flags)
+  cmd = ruby2unix(cmd, args, flags)
+
+  out = 0
+  IO.popen(cmd) do |fd|
+    out = fd.gets
+  end
+
+  raise Exception.new("Could not read exec") if out.nil? or out.to_f.zero?
+
+  out.to_f
+end
+
+def unix2hash(delim, cmd, args, *flags)
+  cmd = ruby2unix(cmd, args, flags)
+
+  hash = Dictionary.new
+  IO.popen(cmd) do |fd|
+    while out = fd.gets
+      out.chomp!
+      k,v = out.split(delim)
+      hash[k] = v
+    end
+  end
+
+  raise Exception.new("Could not read exec") if hash.nil? or hash.keys.empty?
+  hash
+end
+
+def measure(args, *flags)
+  unix2float("#{MEASURE}", args, flags)
+end
+
+def count(args, *flags)
+  hash = unix2hash(/\s*:\s*/, "#{COUNT}", args, flags)
+  hash.each do |k,v|
+    hash[k] = v.to_f
+  end
+  hash
 end
 
