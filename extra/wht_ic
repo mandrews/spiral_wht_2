@@ -3,7 +3,7 @@
 # TODO 
 # Back port path idea to wht_dp
 # Refactor calc_coeff
-# Add back "vector extensions"
+# Look into discrepancy between all and papi
 
 $LOAD_PATH << File.dirname(__FILE__) 
 
@@ -118,18 +118,18 @@ class VectorSpace
     @n,@k,@v = n,k,v
     @basis = Basis.new
     @span  = Span.new
+
     construct!
+    save
   end
 
   def construct!
-    p = (Math.log(v) / Math.log(2)).ceil + 1
-    q = (Math.log(k) / Math.log(2)).ceil 
-
     for i in (1..n) 
-    @basis << "small[#{i}]"
+      @basis << "small[#{i}]"
+      @span  << "small[#{i}]"
     end
 
-    @span  = @basis.dup
+    simd_extensions_small
 
     @basis << "split_alpha"
     @basis << "split_beta_1"
@@ -141,11 +141,76 @@ class VectorSpace
     @span  << "split[small[2],split[small[2],small[2],small[2]]]"
     @span  << "split[split[small[2],small[2]],split[small[2],small[2]]]"
 
+    simd_extensions_split
+  end
+
+  def save
     @basis.file = Tempfile.new("wht")
 
-    @basis.file.open do |fd|
-      @basis.each { |x| fd.puts(x) }
+    fd = @basis.file.open 
+    @basis.each { |x| fd.puts(x) }
+    fd.close
+  end
+
+  def simd_extensions_small
+    return if @v < 1
+
+    p = (Math.log(v) / Math.log(2)).ceil 
+    q = (Math.log(k) / Math.log(2)).ceil 
+
+    for i in (p+1..n) 
+      @basis << "smallv(#{v},0)[#{i}]"
+      @basis << "smallv(#{v},1)[#{i}]"
+      @span  << "smallv(#{v},0)[#{i}]"
+      @span  << "smallv(#{v},1)[#{i}]"
     end
+
+    for i in (1..n)
+    for j in (p..q)
+      je = (1 << j)
+      @basis << "smallv(#{v},#{je},0)[#{i}]"
+      @basis << "smallv(#{v},#{je},1)[#{i}]"
+      @span  << "splitil[smallv(#{v},#{je},0)[#{i}],small[#{p+1}]]"
+      @span  << "splitil[smallv(#{v},#{je},1)[#{i}],small[#{p+1}]]"
+    end
+    end
+  end
+
+  def simd_extensions_split
+    return if @v < 1
+
+    p = (Math.log(v) / Math.log(2)).ceil 
+    q = (Math.log(k) / Math.log(2)).ceil 
+
+    @basis << "splitil_alpha"
+    @basis << "splitil_beta_1"
+    @basis << "splitil_beta_2"
+    @basis << "splitil_beta_3"
+
+    @span  << ( "splitil[" +
+      "smallv(#{v},#{v},1)[2]," +
+      "smallv(#{v},#{v},1)[2]," +
+      "smallv(#{v},#{v},1)[2]," +
+      "smallv(#{v},1)[#{p+1}]]" )
+    @span  << ( "splitil[" +
+      "splitil[" +
+        "smallv(#{v},#{v},0)[2]," +
+        "smallv(#{v},#{v},0)[2]," +
+        "smallv(#{v},0)[#{p+1}]]" +
+      ",smallv(#{v},1)[#{p+1}]]" )
+    @span  << ( "splitil[" +
+      "smallv(#{v},#{v},1)[2]," +
+      "splitil[" +
+        "smallv(#{v},#{v},1)[2]," +
+        "smallv(#{v},#{v},1)[#{p+1}]," +
+        "smallv(#{v},1)[#{p+1}]]]" )
+    @span  << ( "splitil[" +
+      "splitil[" +
+        "smallv(#{v},#{v},0)[2]," +
+        "smallv(#{v},0)[#{p+1}]]," +
+      "splitil[" +
+        "smallv(#{v},#{v},1)[2]," +
+        "smallv(#{v},1)[#{p+1}]]]" )
   end
 end
 
@@ -323,9 +388,16 @@ if $0 == __FILE__ # Main Entry Point
 
   opts.die("No counts for #{op} with type #{type}") if op_coeff.nil?
 
-  codelet_count = count({
-    '-w' => "'#{opts.params[:wht]}'", 
-    '-b' => space.basis.path })
+
+
+  begin
+    codelet_count = count({
+      '-w' => "'#{opts.params[:wht]}'", 
+      '-b' => space.basis.path })
+  rescue Exception => e
+    puts e
+    exit
+  end
 
   x = coeff_to_nvector(space, op_coeff)
   y = count_to_nvector(space, codelet_count)

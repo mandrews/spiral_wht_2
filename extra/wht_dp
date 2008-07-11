@@ -5,6 +5,7 @@
 # Author: Michael Andrews <mjand@drexel.edu>
 # $Id$
 #
+# TODO get rid of static path
 
 SCRIPT_PATH       = File.dirname(__FILE__) 
 SCRIPT_NAME       = 'wht_dp'

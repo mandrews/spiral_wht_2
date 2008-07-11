@@ -28,6 +28,7 @@ end
 
 COUNT     = find_file("wht_count")
 MEASURE   = find_file("wht_measure")
+ATTACH    = find_file("wht_attach")
 
 
 def load_runtime_env
@@ -113,6 +114,20 @@ def ruby2unix(cmd, args, *flags)
   cmd
 end
 
+def unix2string(cmd, args, *flags)
+  cmd = ruby2unix(cmd, args, flags)
+
+  out = 0
+  IO.popen(cmd) do |fd|
+    out = fd.gets
+  end
+
+  raise Exception.new("Could not read exec") if out.nil? 
+
+  out.to_s.chomp
+end
+
+
 def unix2float(cmd, args, *flags)
   cmd = ruby2unix(cmd, args, flags)
 
@@ -142,11 +157,21 @@ def unix2hash(delim, cmd, args, *flags)
   hash
 end
 
+def vet(wht)
+  new = unix2string("#{ATTACH}", { "-w" => wht })
+
+  raise Exception.new("Could not parse #{wht}.") unless "'#{new}'" == wht
+end
+
 def measure(args, *flags)
+  vet(args["-w"])
+
   unix2float("#{MEASURE}", args, flags)
 end
 
 def count(args, *flags)
+  vet(args["-w"])
+
   hash = unix2hash(/\s*:\s*/, "#{COUNT}", args, flags)
   hash.each do |k,v|
     hash[k] = v.to_f
