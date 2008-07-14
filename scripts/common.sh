@@ -5,7 +5,7 @@ EMAIL=ma53@drexel.edu
 # Installed
 PATH="$PATH:${root}/extra:${root}/bin" 
 # Development
-PATH="$PATH:${root}/measure:${root}/model/ic:${root}/model/cm:${root}/rand" 
+PATH="$PATH:${root}/wht:${root}/measure:${root}/model/ic:${root}/model/cm:${root}/rand" 
 
 L1=`perl -e "print (log(${L1_SIZE} / ${SINGLE_SIZE}) / log(2)); print \"\n\""`
 L2=`perl -e "print (log(${L2_SIZE} / ${SINGLE_SIZE}) / log(2)); print \"\n\""`
@@ -21,6 +21,7 @@ wht_dp=`which wht_dp`
 wht_strip=`which wht_strip`
 wht_wrap=`which wht_wrap`
 wht_measure=`which wht_measure`
+wht_attach=`which wht_attach`
 wht_cm_count=`which wht_cm_count`
 wht_classify=`which wht_classify`
 wht_rand=`which wht_rand`
@@ -156,6 +157,20 @@ function random_sample()
     fi
   done
   echo ']' >> $file
+}
+
+function find_best()
+{
+  i=$1
+  o=$2
+  $wht_strip < ${i} > ${o}
+}
+
+function wht_seq()
+{
+  i=$1
+  o=$2
+  cat ${i} | $wht_wrap "${wht_attach} -s" 'plan' > ${o}
 }
 
 function wht_vec1()

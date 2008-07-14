@@ -9,9 +9,15 @@ data="${path}/../data"
 
 prefix="${data}/xeonmp_single_dp"
 
-params_0=" -c -n 50 -k 50 -a 0.5 -p 0.1"
-params_1=" -c -n 10 -k 10 -a 0.5 -p 0.1"
-params_2=" -c -n 5  -k 5  -a 5   -p 1"
+#params_0=" -c -n 50 -k 50 -a 0.5 -p 0.1"
+#params_1=" -c -n 10 -k 10 -a 0.5 -p 0.1"
+#params_2=" -c -n 5  -k 5  -a 5   -p 1"
+
+params_0=" -c -k 50 -t 0.01"
+params_1=" -c -k 25 -t 0.01"
+params_2=" -c -k 5  -t 0.01"
+
+X_A=15
 
 source "${path}/xeonmp53xx.sh"
 source "${path}/common.sh"
