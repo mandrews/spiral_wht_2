@@ -176,3 +176,9 @@ expect_rotate
     smalld(2),
     smalld(2));
 
+# TODO Fix these cases when rotate fails with -p = 4
+# 'split[small[1],small[1],small[2],small[1],small[1],small[1],split[split[small[1],small[1],small[1]],small[3]],small[3]]'
+# 'split[small[1],small[1],small[2],small[1],small[1],small[1],split[split[small[1],small[1],small[1]],small[3]],small[3]]'
+# 'split[small[1],small[3],small[2],small[2],small[1],split[split[small[1],small[1]],small[2]],small[3]]'
+# 'split[small[1],small[1],small[1],small[1],small[1],small[1],small[1],small[1],small[3],split[split[small[1],small[1],small[1]],small[2]],small[2]]'
+# 'split[small[2],small[1],small[1],small[1],split[small[1],small[1]],small[1],split[small[2],small[1],split[split[small[1],small[1]],small[2]],split[small[1],small[1]]],small[3]]''
