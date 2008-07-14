@@ -32,16 +32,16 @@ function usage()
 
 path=`dirname $0`
 
-echo "Generate: $path/s_1_v_2.c"
-cat > s_1_v_2.c <<TEXT
+echo "Generate: $path/s_1_v_2_v.c"
+cat > s_1_v_2_v.c <<TEXT
 /*
 EXTERNS: {
-  extern apply_fp apply_small1_v2;
+  extern apply_fp apply_small1_v2_v;
 }
 
 STRUCTS: {
 #if ((1 <= WHT_MAX_UNROLL) && (2 == WHT_VECTOR_SIZE))
-  CODELET_APPLY_ENTRY("smallv(2)[1]", apply_small1_v2),
+  CODELET_APPLY_ENTRY("smallv(2)[1]", apply_small1_v2_v),
 #endif
  }
 */
@@ -49,7 +49,7 @@ STRUCTS: {
 #include "wht.h"
 #include "simd.h"
 
-void apply_small1_v2(Wht *W, long S, long U, wht_value *x)
+void apply_small1_v2_v(Wht *W, long S, long U, wht_value *x)
 {
 #if ((1 <= WHT_MAX_UNROLL) && (2 == WHT_VECTOR_SIZE))
   wht_vector2 ta1;
@@ -82,16 +82,16 @@ void apply_small1_v2(Wht *W, long S, long U, wht_value *x)
 
 TEXT
 
-echo "Generate: $path/s_2_v_4.c"
-cat > s_2_v_4.c <<TEXT
+echo "Generate: $path/s_2_v_4_v.c"
+cat > s_2_v_4_v.c <<TEXT
 /*
 EXTERNS: {
-  extern apply_fp apply_small2_v4;
+  extern apply_fp apply_small2_v4_v;
 }
 
 STRUCTS: {
 #if ((2 <= WHT_MAX_UNROLL) && (4 == WHT_VECTOR_SIZE))
-  CODELET_APPLY_ENTRY("smallv(4)[2]", apply_small2_v4),
+  CODELET_APPLY_ENTRY("smallv(4)[2]", apply_small2_v4_v),
 #endif
  }
 */
@@ -99,7 +99,7 @@ STRUCTS: {
 #include "wht.h"
 #include "simd.h"
 
-void apply_small2_v4(Wht *W, long S, long U, wht_value *x)
+void apply_small2_v4_v(Wht *W, long S, long U, wht_value *x)
 {
 #if ((2 <= WHT_MAX_UNROLL) && (4 == WHT_VECTOR_SIZE))
   wht_vector4 ta1;

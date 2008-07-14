@@ -61,6 +61,7 @@ if [ "$v" -lt 2 ] ; then
 fi
 
 for ((x=2;x<=v;x*=2)); do
+# FIXME i = log2(v) + 1
 for ((i=1;i<=n;i+=1)); do
   echo "Generate: $whtgen -n $i -v $x > $path/s_${i}_v_${x}.c"
   $whtgen -n $i -v $x > $path/s_${i}_v_${x}.c

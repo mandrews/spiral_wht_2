@@ -53,10 +53,10 @@ if [ "$k" -lt 2 ] ; then
   usage;
 fi
 
-
 for ((i=1;i<=n;i+=1)); do
 	for ((j=2;j<=k;j*=2)); do
 		echo "Generate: $whtgen -n $i -k $j > $path/s_${i}_il_${j}.c"
 		$whtgen -n $i -k $j > $path/s_${i}_il_${j}.c
 	done
 done
+
