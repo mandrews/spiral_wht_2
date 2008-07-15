@@ -176,6 +176,9 @@ def count(args, *flags)
   hash.each do |k,v|
     hash[k] = v.to_f
   end
+  hash.delete_if do |k,v|
+    k =~ /splitv_/
+  end
   hash
 end
 

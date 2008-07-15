@@ -28,7 +28,7 @@ wht_rand=`which wht_rand`
 wht_rotate=`which wht_rotate`
 wht_vectorize=`which wht_vectorize`
 wht_vectorize_2=`which wht_vectorize_2`
-wht_count_ins=`which count_sse.sh`
+wht_count_ins=`which wht_ic`
 
 rdtsc="$wht_measure -m rdtsc"
 
@@ -43,17 +43,48 @@ left="$wht_classify | grep left_tree | sed -e 's/.*:\s*//g'"
 right="$wht_classify | grep right_tree | sed -e 's/.*:\s*//g'"
 base="$wht_classify | grep right_node | sed -e 's/.*:\s*//g'"
 
-unpckhps="$wht_count_ins -i 'unpckhps'"
-unpcklps="$wht_count_ins -i 'unpcklps'"
-shufps="$wht_count_ins -i 'shufps'"
-addsubss="$wht_count_ins -i 'addss|subss'"
-addsubps="$wht_count_ins -i 'addps|subps'"
-movssm="$wht_count_ins -i 'movss' -m"
-movapsm="$wht_count_ins -i 'movaps' -m"
-movhpsm="$wht_count_ins -i 'movhps' -m"
-movlpsm="$wht_count_ins -i 'movlps' -m"
-movssr="$wht_count_ins -i 'movss' -r"
-movapsr="$wht_count_ins -i 'movaps' -r"
+# reg
+addsd="$wht_count_ins -o 'addsd' -r"
+subsd="$wht_count_ins -o 'subsd' -r"
+addpd="$wht_count_ins -o 'addpd' -r"
+subpd="$wht_count_ins -o 'subpd' -r"
+addss="$wht_count_ins -o 'addss' -r"
+subss="$wht_count_ins -o 'subss' -r"
+addps="$wht_count_ins -o 'addps' -r"
+subps="$wht_count_ins -o 'subps' -r"
+shufpd="$wht_count_ins -o 'shufpd' -r"
+shufps="$wht_count_ins -o 'shufps' -r"
+unpckhpd="$wht_count_ins -o 'unpckhpd' -r"
+unpcklpd="$wht_count_ins -o 'unpcklpd' -r"
+unpckhps="$wht_count_ins -o 'unpckhps' -r"
+unpcklps="$wht_count_ins -o 'unpcklps' -r"
+movapd="$wht_count_ins -o 'movapd ' -r"
+movaps="$wht_count_ins -o 'movaps ' -r"
+shl="$wht_count_ins -o 'shl' -r"
+xor="$wht_count_ins -o 'xor' -r"
+mov="$wht_count_ins -o 'mov' -r"
+push="$wht_count_ins -o 'push' -r"
+pop="$wht_count_ins -o 'pop' -r"
+nop="$wht_count_ins -o 'nop' -r"
+retq="$wht_count_ins -o 'retq' -r"
+add="$wht_count_ins -o 'add' -r"
+sub="$wht_count_ins -o 'sub' -r"
+imul="$wht_count_ins -o 'imul' -r"
+# mem
+movsdm="$wht_count_ins -o 'movsdm' -m"
+movapdm="$wht_count_ins -o 'movapdm' -m"
+movssm="$wht_count_ins -o 'movssm' -m"
+movapsm="$wht_count_ins -o 'movapsm' -m"
+movhpdm="$wht_count_ins -o 'movhpdm' -m"
+movlpdm="$wht_count_ins -o 'movlpdm' -m"
+movhpsm="$wht_count_ins -o 'movhpsm' -m"
+movlpsm="$wht_count_ins -o 'movlpsm' -m"
+leam="$wht_count_ins -o 'leam' -m"
+movm="$wht_count_ins -o 'movm' -m"
+# special
+ic_papi="$wht_count_ins -o 'all'"
+ic_all="$wht_count_ins -o 'papi'"
+
 
 function run() 
 {
@@ -85,23 +116,43 @@ function metrics_single()
   run $file "$L1_DCM $params_2" 'L2_DCM' "$L2_A..$L2_B"
   run $file "$L2_DCM $params_2" 'L2_DCM' "$L2_A..$L2_B"
 
-  run $file "$unpckhps" 'unpckhps' 
-  run $file "$unpcklps" 'unpcklps' 
-  run $file "$shufps" 'shufps' 
-  run $file "$addsubss" 'addsubss' 
-  run $file "$addsubps" 'addsubps' 
-  run $file "$movssm" 'movssm' 
-  run $file "$movapsm" 'movapsm' 
-  run $file "$movhpsm" 'movhpsm' 
-  run $file "$movlpsm" 'movlpsm' 
-  run $file "$movssr" 'movssr' 
-  run $file "$movapsr" 'movapsr' 
+  run $file "$addss" 'addss'
+  run $file "$subss" 'subss'
+  run $file "$addps" 'addps'
+  run $file "$subps" 'subps'
+  run $file "$shufps" 'shufps'
+  run $file "$unpckhps" 'unpckhps'
+  run $file "$unpcklps" 'unpcklps'
+  run $file "$movaps" 'movaps'
+  run $file "$shl" 'shl'
+  run $file "$xor" 'xor'
+  run $file "$mov" 'mov'
+  run $file "$push" 'push'
+  run $file "$pop" 'pop'
+  run $file "$nop" 'nop'
+  run $file "$retq" 'retq'
+  run $file "$add" 'add'
+  run $file "$sub" 'sub'
+  run $file "$imul" 'imul'
+  run $file "$movssm" 'movssm'
+  run $file "$movapsm" 'movapsm'
+  run $file "$movhpsm" 'movhpsm'
+  run $file "$movlpsm" 'movlpsm'
+  run $file "$leam" 'leam'
+  run $file "$movm" 'movm'
+
+  run $file "$ic_papi" 'ic_papi'
+  run $file "$ic_all" 'ic_all'
+
   run $file "$cmc1" 'cmc1' 
-  run $file "$cmc1" 'cmc2' 
+  run $file "$cmc2" 'cmc2' 
+
   run $file "$left" 'left' 
   run $file "$right" 'right' 
   run $file "$base" 'base' 
-  }
+
+
+}
 
 function report_single()
 {
@@ -112,17 +163,32 @@ function report_single()
   TOT_INS, \
   L1_DCM, \
   L2_DCM, \
+  addss, \
+  subss, \
+  addps, \
+  subps, \
+  shufps, \
   unpckhps, \
   unpcklps, \
-  shufps, \
-  addsubss, \
-  addsubps, \
+  movaps, \
+  shl, \
+  xor, \
+  mov, \
+  push, \
+  pop, \
+  nop, \
+  retq, \
+  add, \
+  sub, \
+  imul, \
   movssm, \
   movapsm, \
   movhpsm, \
   movlpsm, \
-  movssr, \
-  movapsr, \
+  leam, \
+  movm, \
+  ic_papi, \
+  ic_all, \
   cmc1, \
   cmc2, \
   left, \
