@@ -18,13 +18,6 @@ install-exec-local:
 	mkdir -p $(prefix)/extra
 	mkdir -p $(prefix)/scripts
 	mkdir -p $(prefix)/data
-	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_dp $(prefix)/extra
-	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_query $(prefix)/extra
-	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_update $(prefix)/extra
-	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_wrap $(prefix)/extra
-	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_strip $(prefix)/extra
-	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_interleave $(prefix)/extra
-	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_vectorize $(prefix)/extra
-	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_vectorize_2 $(prefix)/extra
-	$(top_srcdir)/install-sh $(top_srcdir)/extra/utils.rb $(prefix)/extra
+	$(top_srcdir)/install-sh $(top_srcdir)/extra/* $(prefix)/extra
 	$(top_srcdir)/install-sh $(top_srcdir)/scripts/* $(prefix)/scripts
+
