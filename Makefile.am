@@ -15,11 +15,9 @@ dist-hook:
 	rm $(top_distdir)/whtgen/whtgen
 
 install-exec-local:
-	mkdir -p $(prefix)/share
-	mkdir -p $(top_srcdir)/model/share
 	mkdir -p $(prefix)/extra
 	mkdir -p $(prefix)/scripts
-	$(top_srcdir)/install-sh $(top_srcdir)/model/share/* $(datadir)
+	mkdir -p $(prefix)/data
 	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_dp $(prefix)/extra
 	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_query $(prefix)/extra
 	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_update $(prefix)/extra
@@ -30,4 +28,3 @@ install-exec-local:
 	$(top_srcdir)/install-sh $(top_srcdir)/extra/wht_vectorize_2 $(prefix)/extra
 	$(top_srcdir)/install-sh $(top_srcdir)/extra/utils.rb $(prefix)/extra
 	$(top_srcdir)/install-sh $(top_srcdir)/scripts/* $(prefix)/scripts
-	rm -rf $(top_srcdir)/model/share
