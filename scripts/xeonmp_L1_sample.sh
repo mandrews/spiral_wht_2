@@ -25,6 +25,8 @@ vec2="${prefix}_vec2.txt"
 random_sample $L1_A $L1_B $N "$seq1" "$wht_rand"
 random_sample $L1_A $L1_B $N "$seq2" "$wht_rand -v ${V}"
 
+$wht_ic -o 'mov' -w 'small[1]' -X # Refresh Cache
+
 wht_vec1 $seq1 $vec1 $V $K
 wht_vec2 $seq2 $vec2 $V 
 

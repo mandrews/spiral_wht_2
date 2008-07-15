@@ -49,6 +49,8 @@ OPS = [
   'movlpd',
   'movhps',
   'movlps',
+  'movhlps',
+  'movlhps',
 # Extra
   'lea',
   'shl',

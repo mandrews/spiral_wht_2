@@ -28,7 +28,7 @@ wht_rand=`which wht_rand`
 wht_rotate=`which wht_rotate`
 wht_vectorize=`which wht_vectorize`
 wht_vectorize_2=`which wht_vectorize_2`
-wht_count_ins=`which wht_ic`
+wht_ic=`which wht_ic`
 
 rdtsc="$wht_measure -m rdtsc"
 
@@ -44,46 +44,48 @@ right="$wht_classify | grep right_tree | sed -e 's/.*:\s*//g'"
 base="$wht_classify | grep right_node | sed -e 's/.*:\s*//g'"
 
 # reg
-addsd="$wht_count_ins -o 'addsd' -r"
-subsd="$wht_count_ins -o 'subsd' -r"
-addpd="$wht_count_ins -o 'addpd' -r"
-subpd="$wht_count_ins -o 'subpd' -r"
-addss="$wht_count_ins -o 'addss' -r"
-subss="$wht_count_ins -o 'subss' -r"
-addps="$wht_count_ins -o 'addps' -r"
-subps="$wht_count_ins -o 'subps' -r"
-shufpd="$wht_count_ins -o 'shufpd' -r"
-shufps="$wht_count_ins -o 'shufps' -r"
-unpckhpd="$wht_count_ins -o 'unpckhpd' -r"
-unpcklpd="$wht_count_ins -o 'unpcklpd' -r"
-unpckhps="$wht_count_ins -o 'unpckhps' -r"
-unpcklps="$wht_count_ins -o 'unpcklps' -r"
-movapd="$wht_count_ins -o 'movapd ' -r"
-movaps="$wht_count_ins -o 'movaps ' -r"
-shl="$wht_count_ins -o 'shl' -r"
-xor="$wht_count_ins -o 'xor' -r"
-mov="$wht_count_ins -o 'mov' -r"
-push="$wht_count_ins -o 'push' -r"
-pop="$wht_count_ins -o 'pop' -r"
-nop="$wht_count_ins -o 'nop' -r"
-retq="$wht_count_ins -o 'retq' -r"
-add="$wht_count_ins -o 'add' -r"
-sub="$wht_count_ins -o 'sub' -r"
-imul="$wht_count_ins -o 'imul' -r"
+addsd="$wht_ic -o 'addsd' -t reg"
+subsd="$wht_ic -o 'subsd' -t reg"
+addpd="$wht_ic -o 'addpd' -t reg"
+subpd="$wht_ic -o 'subpd' -t reg"
+addss="$wht_ic -o 'addss' -t reg"
+subss="$wht_ic -o 'subss' -t reg"
+addps="$wht_ic -o 'addps' -t reg"
+subps="$wht_ic -o 'subps' -t reg"
+shufpd="$wht_ic -o 'shufpd' -t reg"
+shufps="$wht_ic -o 'shufps' -t reg"
+unpckhpd="$wht_ic -o 'unpckhpd' -t reg"
+unpcklpd="$wht_ic -o 'unpcklpd' -t reg"
+unpckhps="$wht_ic -o 'unpckhps' -t reg"
+unpcklps="$wht_ic -o 'unpcklps' -t reg"
+movapd="$wht_ic -o 'movapd' -t reg"
+movaps="$wht_ic -o 'movaps' -t reg"
+shl="$wht_ic -o 'shl' -t reg"
+xor="$wht_ic -o 'xor' -t reg"
+mov="$wht_ic -o 'mov' -t reg"
+push="$wht_ic -o 'push' -t reg"
+pop="$wht_ic -o 'pop' -t reg"
+nop="$wht_ic -o 'nop' -t reg"
+retq="$wht_ic -o 'retq' -t reg"
+add="$wht_ic -o 'add' -t reg"
+sub="$wht_ic -o 'sub' -t reg"
+imul="$wht_ic -o 'imul' -t reg"
+movhlps="$wht_ic -o 'movhlps' -t reg"
+movlhps="$wht_ic -o 'movlhps' -t reg"
 # mem
-movsdm="$wht_count_ins -o 'movsdm' -m"
-movapdm="$wht_count_ins -o 'movapdm' -m"
-movssm="$wht_count_ins -o 'movssm' -m"
-movapsm="$wht_count_ins -o 'movapsm' -m"
-movhpdm="$wht_count_ins -o 'movhpdm' -m"
-movlpdm="$wht_count_ins -o 'movlpdm' -m"
-movhpsm="$wht_count_ins -o 'movhpsm' -m"
-movlpsm="$wht_count_ins -o 'movlpsm' -m"
-leam="$wht_count_ins -o 'leam' -m"
-movm="$wht_count_ins -o 'movm' -m"
+movsdm="$wht_ic -o 'movsd' -t mem"
+movapdm="$wht_ic -o 'movapd' -t mem"
+movssm="$wht_ic -o 'movss' -t mem"
+movapsm="$wht_ic -o 'movaps' -t mem"
+movhpdm="$wht_ic -o 'movhpd' -t mem"
+movlpdm="$wht_ic -o 'movlpd' -t mem"
+movhpsm="$wht_ic -o 'movhps' -t mem"
+movlpsm="$wht_ic -o 'movlps' -t mem"
+leam="$wht_ic -o 'lea' -t mem"
+movm="$wht_ic -o 'mov' -t mem"
 # special
-ic_papi="$wht_count_ins -o 'all'"
-ic_all="$wht_count_ins -o 'papi'"
+ic_papi="$wht_ic -o 'all'"
+ic_all="$wht_ic -o 'papi'"
 
 
 function run() 
@@ -124,6 +126,8 @@ function metrics_single()
   run $file "$unpckhps" 'unpckhps'
   run $file "$unpcklps" 'unpcklps'
   run $file "$movaps" 'movaps'
+  run $file "$movhlps" 'movhlps'
+  run $file "$movlhps" 'movlhps'
   run $file "$shl" 'shl'
   run $file "$xor" 'xor'
   run $file "$mov" 'mov'
@@ -150,8 +154,6 @@ function metrics_single()
   run $file "$left" 'left' 
   run $file "$right" 'right' 
   run $file "$base" 'base' 
-
-
 }
 
 function report_single()
@@ -171,6 +173,8 @@ function report_single()
   unpckhps, \
   unpcklps, \
   movaps, \
+  movhlps, \
+  movlhps, \
   shl, \
   xor, \
   mov, \
