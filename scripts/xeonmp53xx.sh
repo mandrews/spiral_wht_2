@@ -7,6 +7,7 @@
 # glued together so both figures are essentially correct
 # papi_meminfo is wrong
 
+# This Xeon is built on Core Micro-Architecture
 
 # All in bytes
 L1_SIZE=$((32*1024)) 
@@ -19,3 +20,6 @@ L2_ASSOC=4
 SINGLE_SIZE=4
 DOUBLE_SIZE=8
 
+# Reorder Buffer Size = 96
+# 14 Stage Pipeline
+# 3 ALU
