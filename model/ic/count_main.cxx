@@ -26,6 +26,7 @@ main(int argc, char **argv)
   char *plan;
   char *basis_file;
   int c;
+  size_t len;
 
   plan = NULL;
   basis_file = NULL;
@@ -48,6 +49,9 @@ main(int argc, char **argv)
       default:
         usage();
     }
+
+  if (plan == NULL)
+    getline(&plan, &len, stdin);
 
   if (plan == NULL)
     usage();
