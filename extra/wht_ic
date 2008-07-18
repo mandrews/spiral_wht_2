@@ -112,6 +112,10 @@ class VectorSpace
     def path
       @file.path
     end
+
+    def remove
+      @file.unlink
+    end
   end
 
   class Span < Array; end
@@ -411,6 +415,8 @@ if $0 == __FILE__ # Main Entry Point
     puts e
     exit
   end
+
+  space.basis.remove
 
   x = coeff_to_nvector(space, op_coeff)
   y = count_to_nvector(space, codelet_count)
