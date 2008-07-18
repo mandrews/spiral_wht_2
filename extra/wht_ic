@@ -347,6 +347,15 @@ def calc_coeffs(lib, space, refresh=false)
 
   table['all']['papi'] = calc_papi(space)
 
+
+
+  for x in [ 'split', 'splitil', 'splitv' ] do
+    for y in [ 'alpha', 'beta_1', 'beta_2', 'beta_3' ] do
+      s = "#{x}_#{y}"
+      table['all'][s] = { s => 1 }
+    end
+  end
+
   table['mem'].delete_if { |k,v| v.empty? }
   table['reg'].delete_if { |k,v| v.empty? }
   table['all'].delete_if { |k,v| v.empty? }

@@ -84,9 +84,21 @@ movlpsm="$wht_ic -o 'movlps' -t mem"
 leam="$wht_ic -o 'lea' -t mem"
 movm="$wht_ic -o 'mov' -t mem"
 # special
-ic_papi="$wht_ic -o 'all'"
-ic_all="$wht_ic -o 'papi'"
+ic_papi="$wht_ic -o 'papi'"
+ic_all="$wht_ic -o 'all'"
 
+split_alpha="$wht_ic -o 'split_alpha'"
+split_beta_1="$wht_ic -o 'split_beta_1'"
+split_beta_2="$wht_ic -o 'split_beta_2'"
+split_beta_3="$wht_ic -o 'split_beta_3'"
+splitil_alpha="$wht_ic -o 'splitil_alpha'"
+splitil_beta_1="$wht_ic -o 'splitil_beta_1'"
+splitil_beta_2="$wht_ic -o 'splitil_beta_2'"
+splitil_beta_3="$wht_ic -o 'splitil_beta_3'"
+splitv_alpha="$wht_ic -o 'splitv_alpha'"
+splitv_beta_1="$wht_ic -o 'splitv_beta_1'"
+splitv_beta_2="$wht_ic -o 'splitv_beta_2'"
+splitv_beta_3="$wht_ic -o 'splitv_beta_3'"
 
 function run() 
 {
@@ -154,6 +166,19 @@ function metrics_single()
   run $file "$left" 'left' 
   run $file "$right" 'right' 
   run $file "$base" 'base' 
+
+  run $file "$split_alpha" 'split_alpha'
+  run $file "$split_beta_1" 'split_beta_1'
+  run $file "$split_beta_2" 'split_beta_2'
+  run $file "$split_beta_3" 'split_beta_3'
+  run $file "$splitil_alpha" 'splitil_alpha'
+  run $file "$splitil_beta_1" 'splitil_beta_1'
+  run $file "$splitil_beta_2" 'splitil_beta_2'
+  run $file "$splitil_beta_3" 'splitil_beta_3'
+  run $file "$splitv_alpha" 'splitv_alpha'
+  run $file "$splitv_beta_1" 'splitv_beta_1'
+  run $file "$splitv_beta_2" 'splitv_beta_2'
+  run $file "$splitv_beta_3" 'splitv_beta_3'
 }
 
 function report_single()
@@ -197,7 +222,11 @@ function report_single()
   cmc2, \
   left, \
   right, \
-  base"
+  base, \
+  split_alpha, \
+  split_beta_1, \
+  split_beta_2, \
+  split_beta_3"
   ${root}/extra/wht_query $file "$fields" > $data
 }
 
