@@ -5,8 +5,6 @@ function [out] = normalize(in, start, stop)
     for i = [ 1:length(in) ]
       t{i}  = partition(in{i}, 1, start, stop);
 
-      %t{i}(:,TOT_INS) = t{i}(:,TOT_INS) - t{i}(:,IC_ALL);
-
       base = t{i}(:,ID).*(2.^t{i}(:,ID));
 
       for j = [ 2:size(t{i},2) ]
