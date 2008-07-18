@@ -8,7 +8,7 @@ path=`dirname $0`
 root="${path}/.."
 data="${path}/../data"
 
-prefix="${data}/operton_L1_sample_${N}"
+prefix="${data}/opteron_L1_sample_${N}"
 
 params_0=" -c -n 50 -k 50 -t 0.01"
 params_1=" -c -n 10 -k 10 -t 0.01"
