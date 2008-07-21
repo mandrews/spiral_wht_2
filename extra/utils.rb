@@ -22,7 +22,7 @@ def find_file(file)
     return full_path if File.exists?(full_path)
   end
 
-  raise Exeception.new("Could not find #{file}")
+  raise RuntimeExeception.new("Could not find #{file}")
 end
 
 
@@ -122,7 +122,7 @@ def unix2string(cmd, args, *flags)
     out = fd.gets
   end
 
-  raise Exception.new("Could not read exec") if out.nil? 
+  raise RuntimeException.new("Could not read exec") if out.nil? 
 
   out.to_s.chomp
 end
@@ -136,7 +136,7 @@ def unix2float(cmd, args, *flags)
     out = fd.gets
   end
 
-  raise Exception.new("Could not read exec") if out.nil? or out.to_f.zero?
+  raise RuntimeException.new("Could not read exec") if out.nil? or out.to_f.zero?
 
   out.to_f
 end
@@ -153,14 +153,14 @@ def unix2hash(delim, cmd, args, *flags)
     end
   end
 
-  raise Exception.new("Could not read exec") if hash.nil? or hash.keys.empty?
+  raise RuntimeException.new("Could not read exec") if hash.nil? or hash.keys.empty?
   hash
 end
 
 def vet(wht)
   new = unix2string("#{ATTACH}", { "-w" => wht })
 
-  raise Exception.new("Could not parse #{wht}.") unless "'#{new}'" == wht
+  raise RuntimeException.new("Could not parse #{wht}.") unless "'#{new}'" == wht
 end
 
 def measure(args, *flags)

@@ -176,8 +176,8 @@ class VectorSpace
       je = (1 << j)
       @basis << "smallv(#{v},#{je},0)[#{i}]"
       @basis << "smallv(#{v},#{je},1)[#{i}]"
-      @span  << "splitil[smallv(#{v},#{je},0)[#{i}],small[#{p+1}]]"
-      @span  << "splitil[smallv(#{v},#{je},1)[#{i}],small[#{p+1}]]"
+      @span  << "splitil[smallv(#{v},#{je},0)[#{i}],small[#{q+1}]]"
+      @span  << "splitil[smallv(#{v},#{je},1)[#{i}],small[#{q+1}]]"
     end
     end
 
@@ -233,7 +233,7 @@ def calc_papi(space)
 
   i = 0
   for vector in span
-    beta = (vector =~ /splitv/) ? '-n' : ''
+    begin
     ai = count({
       '-w' => "'#{vector}'", 
       '-b' => basis.path })
@@ -243,6 +243,10 @@ def calc_papi(space)
       '-m' => 'PAPI_TOT_INS', 
       '-n' => 1,
     }, '-c')
+    rescue 
+      puts "Skipping #{vector}"
+      next
+    end
 
     a[0,i] = ai.values
     b[i] = bi
@@ -346,8 +350,6 @@ def calc_coeffs(lib, space, refresh=false)
   end
 
   table['all']['papi'] = calc_papi(space)
-
-
 
   for x in [ 'split', 'splitil', 'splitv' ] do
     for y in [ 'alpha', 'beta_1', 'beta_2', 'beta_3' ] do
