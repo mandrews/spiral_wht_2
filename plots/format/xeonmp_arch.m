@@ -1,4 +1,3 @@
-% NOTE: This should be moved to a xeonmp.m definition file
 % NOTE: MOVSS R,R is an instruction but ICC did not use them on this code
 
 global LAT THP NUM;
@@ -25,6 +24,8 @@ LAT{MOVAPS} = 1.01;
 LAT{MOVAPSM} = (2.54 + 2.53) ./ 2; % Combine load and store
 LAT{MOVHPSM} = (4.00 + 4.00) ./ 2;
 LAT{MOVLPSM} = (3.00 + 3.01) ./ 2;
+LAT{MOVHLPS} = 1.0;
+LAT{MOVLHPS} = 1.0;
 LAT{ADD} = 1.0;
 LAT{SUB} = 1.0;
 LAT{MOV} = 1.0;
@@ -45,6 +46,8 @@ THP{MOVAPS} = 0.51;
 THP{MOVAPSM} = 1.0;
 THP{MOVHPSM} = (1.00 + 1.01) ./ 2;
 THP{MOVLPSM} = (1.00 + 1.01) ./ 2;
+THP{MOVHLPS} = 1.0;
+THP{MOVLHPS} = 1.0;
 THP{ADD} = 1.0;
 THP{SUB} = 1.0;
 THP{MOV} = 1.0;
@@ -53,7 +56,7 @@ THP{XOR} = 1.0;
 THP{SHL} = 0.50;
 THP{MOVM} = (1.01 + 1.00) ./ 2; % Combine load and store
 
-% NOTE: This should be moved to a xeonmp_icc_10_15.m definition file
+% "14 stage efficient pipeline" in manual
 
 NUM{ADDSS} = 14.0;
 NUM{SUBSS} = 14.0;
@@ -67,13 +70,15 @@ NUM{MOVAPS} = 14.0;
 NUM{MOVAPSM} = 14.0;
 NUM{MOVHPSM} = 14.0;
 NUM{MOVLPSM} = 14.0;
-NUM{ADD} = 1.0;
-NUM{SUB} = 1.0;
-NUM{MOV} = 1.0;
-NUM{IMUL} = 1.0;
-NUM{XOR} = 1.0;
-NUM{SHL} = 1.0;
-NUM{MOVM} = 1.0; 
+NUM{MOVHLPS} = 14.0;
+NUM{MOVLHPS} = 14.0;
+NUM{ADD} = 14.0;
+NUM{SUB} = 14.0;
+NUM{MOV} = 14.0;
+NUM{IMUL} = 14.0;
+NUM{XOR} = 14.0;
+NUM{SHL} = 14.0;
+NUM{MOVM} = 14.0; 
 
 BETA = [ 3.0 14.0 ]; % Got these from the manual
 

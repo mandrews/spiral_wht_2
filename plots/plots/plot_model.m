@@ -18,7 +18,7 @@ function [skew] = plot_model(in, alpha, a, b, c, d, SUFFIX)
     axis([a b a b]);
   end
 
-  output  = [ PREFIX, 'model_scatter', SUFFIX ];
+  output  = [ PREFIX, 'model_scatter_', SUFFIX ];
   saveas(h,['./eps/', output, '.eps'], 'epsc');
   saveas(h,['./png/', output, '.png'], 'png');
 
@@ -35,7 +35,7 @@ function [skew] = plot_model(in, alpha, a, b, c, d, SUFFIX)
 
   %kstest((y - x)./y, [])
 
-  output  = [ PREFIX, 'model_error', SUFFIX ];
+  output  = [ PREFIX, 'model_error_', SUFFIX ];
   saveas(h,['./eps/', output, '.eps'], 'epsc');
   saveas(h,['./png/', output, '.png'], 'png');
 

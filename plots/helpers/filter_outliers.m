@@ -24,5 +24,3 @@ function [y] = filter_outliers(x)
     end
   end
 
-  size(y)
-

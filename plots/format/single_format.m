@@ -44,13 +44,25 @@ MOVLPSM = 29;
 LEAM = 30;
 MOVM = 31;
 
-% NOTE: These are reversed and should be fixed in script/common.sh
-IC_ALL = 32;
-IC_PAPI = 33;
+IC_PAPI = 32;
+IC_ALL = 33;
 CMC1 = 34;
 CMC2 = 35;
 LEFT = 36;
 RIGHT = 37;
 BASE = 38;
 
-IC_OVR = 39; % Loop overhead as opposed to codelet instructions
+SPLIT_ALPHA = 39;
+SPLIT_BETA_1 = 40;
+SPLIT_BETA_2 = 41;
+SPLIT_BETA_3 = 42;
+SPLITIL_ALPHA = 43;
+SPLITIL_BETA_1 = 44;
+SPLITIL_BETA_2 = 45;
+SPLITIL_BETA_3 = 46;
+SPLITV_ALPHA = 47;
+SPLITV_BETA_1 = 48;
+SPLITV_BETA_2 = 49;
+SPLITV_BETA_3 = 50;
+
+IC_OVR = 51; % Loop overhead as opposed to codelet instructions
