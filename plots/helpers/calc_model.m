@@ -1,17 +1,28 @@
-% TODO Plot using cache miss counts and papi interpolated instruction count
-
-function [x,y,e,r] = calc_model_papi(in, alpha, beta)
+function [x,y,e,r,z,w] = calc_model_papi(in, alpha, beta, flag)
   global RDTSC TOT_INS IC_ALL L1_DCM L2_DCM;
-  %global IC_PAPI CMC1 CMC2;
+  global SPLIT_ALPHA SPLIT_BETA_1 SPLIT_BETA_2 SPLIT_BETA_3
+  global SPLITIL_ALPHA SPLITIL_BETA_1 SPLITIL_BETA_2 SPLITIL_BETA_3
 
-  [x,w] = calc_p_ins_and_omega(in);
+  [z,w] = calc_p_ins_and_omega(in);
 
-  n = (x*w') + beta(1) .* in(:,L1_DCM) + beta(2) .* in(:,L2_DCM) ;
-  %n = (x*w') + beta(1) .* in(:,CMC1) + beta(2) .* in(:,CMC2) ;
+  n = beta(1) .* in(:,L1_DCM) + beta(2) .* in(:,L2_DCM) ;
+
+  if (flag > 0)
+    n = n + (z*w');
+  end
+
+  m = [ ...
+        in(:,SPLIT_ALPHA)  + in(:,SPLITIL_ALPHA)   ...
+        in(:,SPLIT_BETA_1) + in(:,SPLITIL_BETA_1) ...
+        in(:,SPLIT_BETA_2) + in(:,SPLITIL_BETA_2) ...
+        in(:,SPLIT_BETA_3) + in(:,SPLITIL_BETA_3) ...
+      ];
+
+  k = regress(in(:,TOT_INS), m);
 
   y = in(:,RDTSC) ;
-  i = alpha * (in(:,TOT_INS) - in(:,IC_ALL));
-  %i = alpha * (in(:,IC_PAPI) - in(:,IC_ALL));
+
+  i = alpha * (m * k);
 
   x = i + n;
 
@@ -22,5 +33,5 @@ function [x,y,e,r] = calc_model_papi(in, alpha, beta)
   x = xy(:,1) - e;
   y = xy(:,2);
 
-  r = corr(x,y);
+  r = corr(x,y)
 

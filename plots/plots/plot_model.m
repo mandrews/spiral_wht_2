@@ -1,7 +1,8 @@
-function [skew] = plot_model(in, alpha, a, b, c, d, SUFFIX)
+function [z,w,y] = plot_model(in, alpha, flag, a, b, c, d, SUFFIX)
   global BETA PREFIX;
   k = 1;
-  [x,y,e,r] = calc_model(in, alpha, BETA);
+
+  [x,y,e,r,z,w] = calc_model(in, alpha, BETA, flag);
 
   skew = skewness((y-x)./y);
 
@@ -14,11 +15,11 @@ function [skew] = plot_model(in, alpha, a, b, c, d, SUFFIX)
   scatter(x, y, 'b.');
 
   if (b ~= 0)
-    z = line([a b], [a b]);
+    line([a b], [a b]);
     axis([a b a b]);
   end
 
-  output  = [ PREFIX, 'model_scatter_', SUFFIX ];
+  output  = [ PREFIX, '_model_scatter_', SUFFIX ];
   saveas(h,['./eps/', output, '.eps'], 'epsc');
   saveas(h,['./png/', output, '.png'], 'png');
 
@@ -35,7 +36,7 @@ function [skew] = plot_model(in, alpha, a, b, c, d, SUFFIX)
 
   %kstest((y - x)./y, [])
 
-  output  = [ PREFIX, 'model_error_', SUFFIX ];
+  output  = [ PREFIX, '_model_error_', SUFFIX ];
   saveas(h,['./eps/', output, '.eps'], 'epsc');
   saveas(h,['./png/', output, '.png'], 'png');
 

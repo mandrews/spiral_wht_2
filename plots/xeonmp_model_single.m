@@ -16,9 +16,15 @@ tables = {
 
 n_tables = normalize(tables, L1_A, L1_B);
 
-%plot_model(n_tables{1}, 1.0, 0, 18, 0.5, 450, 'seq1');
-%plot_model(n_tables{2}, 1.0, 0, 18, 0.5,  500, 'seq2');
-%plot_model(n_tables{3}, 0.55, 0, 5.5, 0.5, 700, 'seq3');
-%plot_model(n_tables{4}, 0.70, 0, 1.8, 0.5, 400, 'vec1');
-%plot_model(n_tables{5}, 0.95, 0, 4.5, 0.5, 400, 'vec2');
+%plot_model(n_tables{1}, 0.80, 0, 0, 18.00, 0.8 , 400, 'seq1_a');
+%plot_model(n_tables{2}, 0.80, 0, 0, 18.00, 0.8,  400, 'seq2_a');
+%plot_model(n_tables{2}, 1.00, 1, 0, 18.00, 0.8,  500, 'seq2_b');
+%
+%plot_model(n_tables{3}, 0.25, 0, 0,  5.5, 0.8, 400, 'seq3_a');
+%plot_model(n_tables{3}, 0.25, 1, 0,  5.5, 0.8, 800, 'seq3_b');
 
+%plot_model(n_tables{4}, 0.25, 0, 0, 1.8, 0.5, 400, 'vec1_a');
+%plot_model(n_tables{4}, 0.25, 1, 0, 1.8, 0.5, 500, 'vec1_b');
+
+%plot_model(n_tables{5}, 0.75, 0, 0, 4.5, 0.8, 400, 'vec2_a');
+%plot_model(n_tables{5}, 0.75, 1, 0, 4.5, 0.8, 400, 'vec2_b');
