@@ -1,24 +1,33 @@
-function [x,y,e,a,r] = calc_model_1(in, alpha, beta)
-  global RDTSC IC_OVR L1_DCM L2_DCM;
-  global CMC1 CMC2;
+function [x,y,b,e,r] = calc_empir(in, varargin)
+  global RDTSC TOT_INS IC_ALL L1_DCM L2_DCM;
+  global SPLIT_ALPHA SPLIT_BETA_1 SPLIT_BETA_2 SPLIT_BETA_3
+  global SPLITIL_ALPHA SPLITIL_BETA_1 SPLITIL_BETA_2 SPLITIL_BETA_3
 
-  [x,w] = calc_p_ins_and_omega(in);
-
-  n = (x*w') + beta(1) .* in(:,CMC1) + beta(2) .* in(:,CMC2) ;
+  [z,w] = calc_p_ins_and_omega(in);
 
   y = in(:,RDTSC) ;
-  i = alpha * in(:,IC_OVR);
 
-  x = i + n;
+  x = [ z ...
+    in(:,SPLIT_ALPHA) ...
+    in(:,SPLIT_BETA_1) ...
+    in(:,SPLIT_BETA_2) ...
+    in(:,SPLIT_BETA_3)  ...
+    in(:,SPLITIL_ALPHA) ...
+    in(:,SPLITIL_BETA_1) ...
+    in(:,SPLITIL_BETA_2) ...
+    in(:,SPLITIL_BETA_3)  ...
+    in(:,L1_DCM) in(:,L2_DCM) ...
+  ];
 
-  epsilon = mean(x - y);
+  [b,xxx,r] = lsqnonneg(x,y);
+  e = mean(r);
+
+  x = x*b + e;
 
   xy = filter_outliers([x y]);
 
-  x = xy(:,1) - epsilon;
+  x = xy(:,1);
   y = xy(:,2);
-
-  e = (y - x) ./ x;
 
   r = corr(x,y);
 

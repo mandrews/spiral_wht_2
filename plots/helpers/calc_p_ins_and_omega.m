@@ -36,7 +36,7 @@ function [x,w] = calc_p_ins_and_omega(in)
       t = [ t THP{op}  ];
       n = [ n NUM{op}  ];
     end
-
   end
 
-  w =  n ./ (l + ((n - 1) .* t)) ;
+  w =  (l + ((n - 1) .* t)) ./ n;
+
