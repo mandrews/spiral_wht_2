@@ -29,17 +29,17 @@ m = [
   all(:,SPLITIL_BETA_3)  ];
 k = lsqnonneg(m, all(:,TOT_INS) - all(:,IC_ALL));
 
-[x1,y1,b1,e1,r1] = calc_empir(n_tables{1});
+[x1,y1,b1,e1,r1] = calc_empir(n_tables{1},k);
 plot_scatter(x1, y1,'suffix', 'empir_seq1');
 
-[x2,y2,b2,e2] = calc_empir(n_tables{2});
+[x2,y2,b2,e2] = calc_empir(n_tables{2},k);
 plot_scatter(x2, y2, 'suffix', 'empir_seq2');
 
-[x3,y3,b3,e3] = calc_empir(n_tables{3});
+[x3,y3,b3,e3] = calc_empir(n_tables{3},k);
 plot_scatter(x3, y3, 'suffix', 'empir_seq3');
 
-[x4,y4,b4,e4] = calc_empir(n_tables{4});
+[x4,y4,b4,e4] = calc_empir(n_tables{4},k);
 plot_scatter(x4, y4, 'suffix', 'empir_vec1');
 
-[x5,y5,b5,e5] = calc_empir(n_tables{5});
+[x5,y5,b5,e5] = calc_empir(n_tables{5},k);
 plot_scatter(x5, y5, 'suffix', 'empir_vec2');

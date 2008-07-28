@@ -29,24 +29,19 @@ m = [
   all(:,SPLITIL_BETA_3)  ];
 k = lsqnonneg(m, all(:,TOT_INS) - all(:,IC_ALL));
 
-[x1,y1,e1,r1,z1,w1] = calc_model(n_tables{1}, 1.25, BETA, k, 1);
-plot_scatter(x1, y1, 'suffix', 'model_seq1_a');
+[x1,y1,e1,r1,z1,w1] = calc_model(n_tables{1}, k);
+plot_scatter(x1, y1, 'suffix', 'model_seq1');
 
-[x2,y2,e2,r2,z2,w2] = calc_model(n_tables{2}, 1.25, BETA, k, 1);
-plot_scatter(x2, y2, 'suffix', 'model_seq2_a');
+[x2,y2,e2,r2,z2,w2] = calc_model(n_tables{2}, k);
+plot_scatter(x2, y2, 'suffix', 'model_seq2');
 
-[x3,y3,e3,r3,z3,w3] = calc_model(n_tables{3}, 0.50, BETA, k, 1);
-plot_scatter(x3, y3, 'suffix', 'model_seq3_a');
+[x3,y3,e3,r3,z3,w3] = calc_model(n_tables{3}, k);
+plot_scatter(x3, y3, 'suffix', 'model_seq3');
 
-[x4a,y4a,e4a,r4a,z4a,w4a] = calc_model(n_tables{4}, 0.60, BETA, k, 1);
-plot_scatter(x4a, y4a, 'suffix', 'model_vec1_a');
+[x4,y4,e4,r4,z4,w4] = calc_model(n_tables{4}, k);
+plot_scatter(x4, y4, 'suffix', 'model_vec1');
 
-[x4b,y4b,e4b,r4b,z4b,w4b] = calc_model(n_tables{4}, 0.55, BETA, k, 0);
-plot_scatter(x4b, y4b, 'suffix', 'model_vec1_b');
+[x5,y5,e5,r5,z5,w5] = calc_model(n_tables{5}, k);
+plot_scatter(x5, y5, 'suffix', 'model_vec2');
 
-[x5a,y5a,e5a,r5a,z5a,w5a] = calc_model(n_tables{5}, 0.35, BETA, k, 1);
-plot_scatter(x5a, y5a, 'suffix', 'model_vec2_a');
-
-[x5b,y5b,e5b,r5b,z5b,w5b] = calc_model(n_tables{5}, 0.35, BETA, k, 0);
-plot_scatter(x5b, y5b, 'suffix', 'model_vec2_b');
 
