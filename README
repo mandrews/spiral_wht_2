@@ -1,78 +1,79 @@
 
 
-RREEAADDMMEE
---------------------------------------------------------------------------------------------------------------------------------------------------------------
+README
+-------------------------------------------------------------------------------
 
 
-DDEESSCCRRIIPPTTIIOONN
---------------------------------------------------------------------------------------------------------------------------------------------------------------
+DESCRIPTION
+-------------------------------------------------------------------------------
 
-The WHT package exists for mostly for pedagogical purposes and serves as a
-reference model for exploring and experimenting with architecture specific
-optimizations.
-This package is a modified version of the Spiral WHT 1.8 package:
+The  WHT  package  exists for mostly for pedagogical purposes and
+serves as a reference model for exploring and experimenting  with
+architecture  specific optimizations.  This package is a modified
+version of the Spiral WHT 1.8 package:
 
-      _h_t_t_p_:_/_/_w_w_w_._s_p_i_r_a_l_._n_e_t_/_s_o_f_t_w_a_r_e_/_w_h_t_._h_t_m_l
+      http://www.spiral.net/software/wht.html
 
 
 
-  AAtttteennttiioonn::
-      It is presently a prelease, and some features and data structures will
+  Attention:
+      It is presently a prelease,  and	some  features	and  data
+structures will
       change before the next release.
 
 
-BBaacckkggrroouunndd
---------------------------------------------------------------------------------------------------------------------------------------------------------------
+Background
+-------------------------------------------------------------------------------
 
 This package has been created as part of the SPIRAL project:
 
-      _h_t_t_p_:_/_/_w_w_w_._s_p_i_r_a_l_._n_e_t
+      http://www.spiral.net
 
-The SPIRAL project pursues the goal of automating the implementation,
-optimization, and platform adaptation of digital signal processing (DSP)
-algorithms.
-The original design of this package was based on an FFT package by Sebastian
-Egner:
+The SPIRAL project pursues the goal of automating the implementa-
+tion, optimization, and platform  adaptation  of  digital  signal
+processing (DSP) algorithms.  The original design of this package
+was based on an FFT package by Sebastian Egner:
 
-      _h_t_t_p_:_/_/_a_v_a_l_o_n_._i_r_a_._u_k_a_._d_e_/_h_o_m_e_/_e_g_n_e_r
+      http://avalon.ira.uka.de/home/egner
 
-The latest version incorporates a more modular design based on the FFTW package
-by Matteo Frigo, and Steven G. Johnson:
+The latest version incorporates a more modular	design	based  on
+the FFTW package by Matteo Frigo, and Steven G. Johnson:
 
-      _h_t_t_p_:_/_/_w_w_w_._f_f_t_w_._o_r_g
+      http://www.fftw.org
 
-It is possible to use native hardware performance counters using the PAPI
-library:
+It  is possible to use native hardware performance counters using
+the PAPI library:
 
-      _h_t_t_p_:_/_/_i_c_l_._c_s_._u_t_k_._e_d_u_/_p_a_p_i
+      http://icl.cs.utk.edu/papi
 
 
-AAuutthhoorrss
---------------------------------------------------------------------------------------------------------------------------------------------------------------
+Authors
+-------------------------------------------------------------------------------
 
-See the _A_U_T_H_O_R_S file which is distributed with this package.
+See the AUTHORS file which is distributed with this package.
 
-CCooppyyrriigghhtt
---------------------------------------------------------------------------------------------------------------------------------------------------------------
+Copyright
+-------------------------------------------------------------------------------
 
-See the _C_O_P_Y_I_N_G and _C_O_P_Y_R_I_G_H_T files which are distributed with this package.
+See the COPYING and COPYRIGHT files which  are	distributed  with
+this package.
 
-IInnssttaallllaattiioonn
---------------------------------------------------------------------------------------------------------------------------------------------------------------
+Installation
+-------------------------------------------------------------------------------
 
-See the _I_N_S_T_A_L_L file which is distributed with this package.
+See the INSTALL file which is distributed with this package.
 
-GGeettttiinngg SSttaarrtteedd
---------------------------------------------------------------------------------------------------------------------------------------------------------------
+Getting 						  Started
+-------------------------------------------------------------------------------
 
-Once you have configured and compiled the package, several programs will be
-available to you.
+Once  you  have configured and compiled the package, several pro-
+grams will be available to you.
 
-VVeerriiffyy
---------------------------------------------------------------------------------------------------------------------------------------------------------------
+Verify
+-------------------------------------------------------------------------------
 
-This program accepts as input a WHT plan and empyrically determines, through
-direct calculation, whether or not the plan is:
+This program accepts as input a WHT plan and  empyrically  deter-
+mines, through direct calculation, whether or not the plan is:
 
   1. In the langauge accepted by the library.
   2. Numerically correct
@@ -83,68 +84,73 @@ To execute this program try:
     $ wht_verify -w 'split[small[2],small[3]]'
     $ wht_verify -w 'split[]'
 
-The last invocation should fail since it is not a string accepted by the
-grammar.
+The last invocation should fail since it is not a string accepted
+by the grammar.
 
-MMeeaassuurree
---------------------------------------------------------------------------------------------------------------------------------------------------------------
+Measure
+-------------------------------------------------------------------------------
 
-This program measures some metric against the execution of a WHT plan. By
-default this utility can measure running time in microseconds. If configured to
-use the PAPI library, all performance counters available on your architecture
-can be measured.
+This program measures some metric against the execution of a  WHT
+plan.  By  default  this  utility can measure running time in mi-
+croseconds. If configured to use the PAPI  library,  all  perfor-
+mance  counters  available  on your architecture can be measured.
 To execute this program try:
 
     $ wht_measure -w 'split[small[4],small[4]]' -t 2.0
 
-This will run execute the plan until it has spent a total of 2 seconds
-executing and print the average computation time in microseconds.
-If you have PAPI, try these parameters:
+This will run execute the plan until it has spent a  total  of	2
+seconds  executing  and print the average computation time in mi-
+croseconds.  If you have PAPI, try these parameters:
 
-    $ wht_measure -w 'split[small[4],small[4]]' -e PAPI -m TOT_CYC -a 99.5 -p 1
+    $  wht_measure  -w	'split[small[4],small[4]]'  -e	PAPI   -m
+TOT_CYC -a 99.5 -p 1
   -k 10
 
-This will count the average number of cycles it takes the plan to execute. The
-alpha parameter (-a) and rho parameter (-p) specify that the number of samples
-should be such that the measured mean is within 1 % of the true mean with 99.5
-% confidence. The run parameter (-k) specifies that 10 runs are average and
-considered a single sample.
+This will count the average number of cycles it takes the plan to
+execute. The alpha parameter (-a) and rho parameter (-p)  specify
+that  the number of samples should be such that the measured mean
+is within 1 % of the true mean with 99.5 %  confidence.  The  run
+parameter  (-k) specifies that 10 runs are average and considered
+a single sample.
 
-RRaannddoomm PPllaannss
---------------------------------------------------------------------------------------------------------------------------------------------------------------
+Random							    Plans
+-------------------------------------------------------------------------------
 
-This program generates random WHT plans given a set of constraints. To be
-specific, all trees generated by this program are Uniform Level, Bernoulli
-Recursive. That is, for each integer composition within the constraints, we
-assume that each is equally likely to occur. If the integer composition can be
-factored into another integer composition, we recursively apply the algorithm.
-If the integer could be factor but could also remain as a leaf node, we flip a
-coin to determine if the algorithm should be recursively applied.
-To execute this program try:
+This program generates random WHT  plans  given  a  set  of  con-
+straints. To be specific, all trees generated by this program are
+Uniform Level, Bernoulli Recursive. That  is,  for  each  integer
+composition within the constraints, we assume that each is equal-
+ly likely to occur. If the integer composition	can  be  factored
+into  another integer composition, we recursively apply the algo-
+rithm.	If the integer could be factor but could also remain as a
+leaf node, we flip a coin to determine if the algorithm should be
+recursively applied.  To execute this program try:
 
     $ wht_randtree -n 8 -a 2 -b 4
 
-This generates a random WHT trees of order 8, with 2 to 4 children at level.
+This generates a random WHT trees of order 8, with 2 to  4  chil-
+dren at level.
 
-CCoonnvveerrtt
---------------------------------------------------------------------------------------------------------------------------------------------------------------
+Convert
+-------------------------------------------------------------------------------
 
-This program applies code transformations to a given WHT plan to produce a new
-plan.
-If you have enabled interleaveding try:
+This  program applies code transformations to a given WHT plan to
+produce a new plan.  If you have enabled interleaveding try:
 
-    $ wht_convert -w 'split[small[2],small[2]]' -t 'splitil[small[0]]' |
+    $  wht_convert  -w	 'split[small[2],small[2]]'   -t   'spli-
+til[small[0]]' |
   wht_convert -t 'smallil(2)[0]'
 
-This first transforms the split codelet into a split interleaved codelet, and
-then interleaves all codelets by 2 if this operation is allowed.
+This  first transforms the split codelet into a split interleaved
+codelet, and then interleaves all codelets by 2 if this operation
+is allowed.
 
-MMaaiinnttaaiinneerrss
---------------------------------------------------------------------------------------------------------------------------------------------------------------
+Maintainers
+-------------------------------------------------------------------------------
 
-A set of tools hidden from normal users is available for those who wish to
-further develop the package.
-To rebuild the autotools build system type:
+A  set	of  tools hidden from normal users is available for those
+who wish to further develop the package.  To  rebuild  the  auto-
+tools build system type:
 
     ./autogen.sh
 
@@ -152,76 +158,107 @@ To rebuild the documentation including this (README file) type:
 
     ./autodoc.sh
 
-Various developer related features are enabled by configuring with the
-maintainer mode flag:
+Various  developer  related  features  are enabled by configuring
+with the maintainer mode flag:
 
     ./configure --enable-maintainer-mode ...
 
 Adding new codelets to the system:
 
 
-  SSeeee aallssoo::
-      _w_h_t_/_r_e_g_i_s_t_r_y_._h
-      _w_h_t_/_M_a_k_e_f_i_l_e_._a_m
+  See also:
+      wht/registry.h
+      wht/Makefile.am
 
 Adding new code generators to the system:
 
 
-  SSeeee aallssoo::
-      _w_h_t_g_e_n_/_w_h_t_g_e_n_._c
-      _w_h_t_/_M_a_k_e_f_i_l_e_._a_m
+  See also:
+      whtgen/whtgen.c
+      wht/Makefile.am
       whtgen/whtgen-simd
 
 Adding generated code to the system:
 
 
-  SSeeee aallssoo::
+  See also:
       wht/codelets/register_codelets.pl
       wht/codelets/make_small_codelets.sh
       wht/codelets/make_interleave_codelets.sh
       wht/codelets/make_simd_codelets.sh
-      _w_h_t_/_M_a_k_e_f_i_l_e_._a_m
+      wht/Makefile.am
 
 When submiting a patch please use:
 
-    diff -Naur spiral_wht-2.0 my_source_tree | gzip > my_patch.txt.gz
+    diff   -Naur   spiral_wht-2.0   my_source_tree   |	 gzip	>
+my_patch.txt.gz
 
 
-PPuubblliiccaattiioonnss
---------------------------------------------------------------------------------------------------------------------------------------------------------------
+Publications
+-------------------------------------------------------------------------------
 
 
 * About the original WHT package:
 
-  o Jeremy Johnson and Markus Pueschel. In Search of the Optimal Walsh-Hadamard
+  o  Jeremy Johnson and Markus Pueschel. In Search of the Optimal
+Walsh-Hadamard
     Transform. Proc. ICASSP 2000, pp. 3347-3350.
 
 
 
 * About DDL:
 
-  o Neungsoo Park and Viktor Prasanna. Cache Conscious Walsh-Hadamard
+  o Neungsoo Park and Viktor  Prasanna.  Cache	Conscious  Walsh-
+Hadamard
     Transform. Proc. ICASSP 2001, Vol. II.
 
 
 
 * About Loop Interleaving:
 
-  o K. S. Gatlin and L. Carter. Faster FFTs via Architecture-Cognizance. Proc.
+  o K. S. Gatlin and L. Carter. Faster FFTs via Architecture-Cog-
+nizance. Proc.
     PACT, 2000.
 
 
 
 * About Parallelization with openMP:
 
-  o Kang Chen and Jeremy Johnson. A Prototypical Self-Optimization Package for
-    Parallel Implementation of Fast. Signal Transforms. IPDPS 2002.
+  o Kang Chen and Jeremy Johnson. A  Prototypical  Self-Optimiza-
+tion Package for
+    Parallel  Implementation  of  Fast.  Signal Transforms. IPDPS
+2002.
 
 
 
 * About Performance Analysis:
 
-  o Michael Andrews and Jeremy Johnson. Performance Analysis of a Family of WHT
+  o Michael Andrews and Jeremy Johnson. Performance Analysis of a
+Family of WHT
     Algorithms. IPDPS 2007.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
