@@ -245,6 +245,7 @@ def calc_papi(space)
     }, '-c')
     rescue 
       puts "Skipping #{vector}"
+      i += 1
       next
     end
 

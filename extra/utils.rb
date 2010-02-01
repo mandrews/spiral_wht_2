@@ -6,7 +6,6 @@
 # $Id$
 
 require 'json'
-require 'facets/dictionary' # Ordered Hash
 
 INF       = 1.0 / 0
 
@@ -102,6 +101,46 @@ class Options
   end
 end
 
+# From http://www.ruby-forum.com/topic/166075#728792
+class OrderedHash
+  def initialize
+    @h, @a = {}, []
+  end
+
+  def [](k)
+    @h[k]
+  end
+
+  def []=(k,v)
+    @a << k unless @h.has_key?(k)
+    @h[k] = v
+  end
+
+  def each
+    @a.each { |k| yield k,@h[k] }
+  end
+
+  def keys
+    @a  
+  end 
+
+  def values
+    a = []
+    @a.each { |k| a.push @h[k] }
+    a   
+  end 
+
+  def delete(k)
+    @a.delete(k)
+    @h.delete(k)
+  end 
+
+  def delete_if(&block)
+    @a.clone.each { |k| delete k if yield(k,@h[k]) }
+    self
+  end 
+end
+
 def ruby2unix(cmd, args, *flags)
   args.each do |k,v|
     cmd << " #{k} #{v} "
@@ -144,7 +183,7 @@ end
 def unix2hash(delim, cmd, args, *flags)
   cmd = ruby2unix(cmd, args, flags)
 
-  hash = Dictionary.new
+  hash = OrderedHash.new
   IO.popen(cmd) do |fd|
     while out = fd.gets
       out.chomp!
