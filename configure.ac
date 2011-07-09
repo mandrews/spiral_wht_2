@@ -172,7 +172,7 @@ AC_DEFINE_UNQUOTED(WHT_MAX_INTERLEAVE,$interleave,
 # Checks for library functions.
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
-AC_CHECK_FUNCS([memset strdup])
+AC_CHECK_FUNCS([memset strdup getline fgetln])
 AC_SEARCH_LIBS([sqrtl],[m],[], AC_MSG_ERROR([required sqrtl symbol not found]))
 AC_SEARCH_LIBS([ceil],[m],[], AC_MSG_ERROR([required ceil symbol not found]))
 

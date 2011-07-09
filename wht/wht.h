@@ -8,6 +8,7 @@
 #define WHT_H
 
 #include "config.h"
+#include "compat.h"
 
 #include <stdlib.h>
 #include <stdio.h>
