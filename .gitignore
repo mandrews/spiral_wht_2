@@ -23,10 +23,16 @@ ltmain.sh
 missing
 stamp-h1
 ylwrap
-whtgen/whtgen
 wht/parser.c
 wht/parser.h
 wht/scanner.c
 wht/scanner.h
 wht/codelets/*.c
 wht/codelets/codelet_registry.h
+wht/wht_attach
+wht/wht_classify
+wht/wht_verify
+whtgen/whtgen
+rand/wht_rand
+measure/wht_measure
+
