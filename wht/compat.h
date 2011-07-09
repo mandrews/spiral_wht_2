@@ -13,3 +13,7 @@ getline(char **lineptr, size_t *n, FILE *stream)
 #error "Must have either getline or fgetln"
 #endif /* HAVE_FGETLN */
 #endif /* HAVE_GETLINE */
+
+#ifndef ulong 
+#define ulong unsigned long 
+#endif /* ulong */
