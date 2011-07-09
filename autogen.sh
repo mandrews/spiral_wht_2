@@ -6,7 +6,7 @@
 echo "Rebuilding autotools build system:"
 autoheader
 aclocal
-libtoolize --force
+libtoolize --force || glibtoolize --force
 autoconf
 automake -Wall --add-missing
 echo
